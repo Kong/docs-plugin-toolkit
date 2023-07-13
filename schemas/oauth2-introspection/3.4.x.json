@@ -2,106 +2,126 @@
   "fields": [
     {
       "consumer": {
-        "eq": null,
         "reference": "consumers",
-        "type": "foreign"
+        "description": "Custom type for representing a foreign key with a null value allowed.",
+        "type": "foreign",
+        "eq": null
       }
     },
     {
       "protocols": {
+        "required": true,
         "default": [
           "grpc",
           "grpcs",
           "http",
           "https"
         ],
+        "description": "A set of strings representing HTTP protocols.",
+        "type": "set",
         "elements": {
+          "type": "string",
           "one_of": [
             "grpc",
             "grpcs",
             "http",
             "https"
-          ],
-          "type": "string"
-        },
-        "required": true,
-        "type": "set"
+          ]
+        }
+      }
+    },
+    {
+      "consumer_group": {
+        "reference": "consumer_groups",
+        "description": "Custom type for representing a foreign key with a null value allowed.",
+        "type": "foreign",
+        "eq": null
       }
     },
     {
       "config": {
-        "required": true,
         "fields": [
           {
             "introspection_url": {
+              "description": "A string representing a URL, such as https://example.com/path/to/resource?q=search.",
               "type": "string",
               "required": true
             }
           },
           {
             "ttl": {
-              "type": "number",
-              "default": 30
+              "default": 30,
+              "description": "The TTL in seconds for the introspection response. Set to 0 to disable the expiration.",
+              "type": "number"
             }
           },
           {
             "token_type_hint": {
-              "type": "string"
+              "type": "string",
+              "description": "The `token_type_hint` value to associate to introspection requests."
             }
           },
           {
             "authorization_value": {
+              "description": "The value to set as the `Authorization` header when querying the introspection endpoint. This depends on the OAuth 2.0 server, but usually is the `client_id` and `client_secret` as a Base64-encoded Basic Auth string (`Basic MG9hNWl...`).",
               "type": "string",
               "required": true
             }
           },
           {
             "timeout": {
-              "type": "integer",
-              "default": 10000
+              "default": 10000,
+              "description": "An optional timeout in milliseconds when sending data to the upstream server.",
+              "type": "integer"
             }
           },
           {
             "keepalive": {
-              "type": "integer",
-              "default": 60000
+              "default": 60000,
+              "description": "An optional value in milliseconds that defines how long an idle connection lives before being closed.",
+              "type": "integer"
             }
           },
           {
             "introspect_request": {
-              "required": true,
               "default": false,
-              "type": "boolean"
+              "description": "A boolean indicating whether to forward information about the current downstream request to the introspect endpoint. If true, headers `X-Request-Path` and `X-Request-Http-Method` will be inserted into the introspect request.",
+              "type": "boolean",
+              "required": true
             }
           },
           {
             "hide_credentials": {
-              "type": "boolean",
-              "default": false
+              "default": false,
+              "description": "An optional boolean value telling the plugin to hide the credential to the upstream API server. It will be removed by Kong before proxying the request.",
+              "type": "boolean"
             }
           },
           {
             "run_on_preflight": {
-              "type": "boolean",
-              "default": true
+              "default": true,
+              "description": "A boolean value that indicates whether the plugin should run (and try to authenticate) on `OPTIONS` preflight requests. If set to `false`, then `OPTIONS` requests will always be allowed.",
+              "type": "boolean"
             }
           },
           {
             "anonymous": {
               "len_min": 0,
+              "description": "An optional string (consumer UUID or username) value to use as an “anonymous” consumer if authentication fails. If empty (default null), the request fails with an authentication failure `4xx`. Note that this value must refer to the consumer `id` or `username` attribute, and **not** its `custom_id`.",
               "type": "string",
               "default": ""
             }
           },
           {
             "consumer_by": {
+              "required": true,
               "default": "username",
+              "description": "A string indicating whether to associate OAuth2 `username` or `client_id` with the consumer's username. OAuth2 `username` is mapped to a consumer's `username` field, while an OAuth2 `client_id` maps to a consumer's `custom_id`.",
+              "type": "string",
               "one_of": [
                 "username",
                 "client_id"
-              ],
-              "type": "string",
-              "required": true
+              ]
             }
           },
           {
@@ -109,31 +129,37 @@
               "values": {
                 "type": "string"
               },
+              "required": true,
               "default": [
 
               ],
+              "description": "A list of custom headers to be added in the introspection request.",
+              "type": "map",
               "keys": {
                 "type": "string"
-              },
-              "required": true,
-              "type": "map"
+              }
             }
           },
           {
             "custom_claims_forward": {
-              "elements": {
-                "type": "string"
-              },
+              "required": true,
               "default": [
 
               ],
+              "description": "A list of custom claims to be forwarded from the introspection response to the upstream request. Claims are forwarded in headers with prefix `X-Credential-{claim-name}`.",
               "type": "set",
-              "required": true
+              "elements": {
+                "type": "string"
+              }
             }
           }
         ],
-        "type": "record"
+        "type": "record",
+        "required": true
       }
     }
+  ],
+  "entity_checks": [
+
   ]
 }

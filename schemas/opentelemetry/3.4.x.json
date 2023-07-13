@@ -2,41 +2,40 @@
   "fields": [
     {
       "protocols": {
+        "required": true,
         "default": [
           "grpc",
           "grpcs",
           "http",
           "https"
         ],
+        "description": "A set of strings representing HTTP protocols.",
+        "type": "set",
         "elements": {
+          "type": "string",
           "one_of": [
             "grpc",
             "grpcs",
             "http",
             "https"
-          ],
-          "type": "string"
-        },
-        "required": true,
-        "type": "set"
+          ]
+        }
+      }
+    },
+    {
+      "consumer_group": {
+        "reference": "consumer_groups",
+        "description": "Custom type for representing a foreign key with a null value allowed.",
+        "type": "foreign",
+        "eq": null
       }
     },
     {
       "config": {
-        "required": true,
-        "entity_checks": [
-          {
-            "custom_entity_check": {
-              "field_sources": [
-                "batch_span_count",
-                "batch_flush_delay"
-              ]
-            }
-          }
-        ],
         "fields": [
           {
             "endpoint": {
+              "description": "A string representing a URL, such as https://example.com/path/to/resource?q=search.",
               "type": "string",
               "required": true
             }
@@ -44,17 +43,20 @@
           {
             "headers": {
               "type": "map",
-              "keys": {
-                "type": "string"
-              },
+              "description": "The custom headers to be added in the HTTP request sent to the OTLP server. This setting is useful for adding the authentication headers (token) for the APM backend.",
               "values": {
                 "type": "string",
                 "referenceable": true
+              },
+              "keys": {
+                "type": "string",
+                "description": "A string representing an HTTP header name."
               }
             }
           },
           {
             "resource_attributes": {
+              "type": "map",
               "values": {
                 "type": "string",
                 "required": true
@@ -62,109 +64,128 @@
               "keys": {
                 "type": "string",
                 "required": true
-              },
-              "type": "map"
-            }
-          },
-          {
-            "batch_span_count": {
-              "type": "integer"
-            }
-          },
-          {
-            "batch_flush_delay": {
-              "type": "integer"
+              }
             }
           },
           {
             "queue": {
-              "required": true,
               "fields": [
                 {
                   "max_batch_size": {
+                    "default": 1,
+                    "description": "Maximum number of entries that can be processed at a time.",
+                    "type": "integer",
                     "between": [
                       1,
                       1000000
-                    ],
-                    "type": "number",
-                    "default": 1
+                    ]
                   }
                 },
                 {
                   "max_coalescing_delay": {
+                    "default": 1,
+                    "description": "Maximum number of (fractional) seconds to elapse after the first entry was queued before the queue starts calling the handler.",
+                    "type": "number",
                     "between": [
                       0,
                       3600
-                    ],
-                    "type": "number",
-                    "default": 1
+                    ]
                   }
                 },
                 {
                   "max_entries": {
+                    "default": 10000,
+                    "description": "Maximum number of entries that can be waiting on the queue.",
+                    "type": "integer",
                     "between": [
                       1,
                       1000000
-                    ],
-                    "type": "number",
-                    "default": 10000
+                    ]
                   }
                 },
                 {
                   "max_bytes": {
-                    "type": "number"
+                    "type": "integer",
+                    "description": "Maximum number of bytes that can be waiting on a queue, requires string content."
                   }
                 },
                 {
                   "max_retry_time": {
                     "default": 60,
+                    "description": "Time in seconds before the queue gives up calling a failed handler for a batch.",
                     "type": "number"
                   }
                 },
                 {
                   "initial_retry_delay": {
                     "default": 0.01,
-                    "type": "number"
+                    "description": "Time in seconds before the initial retry is made for a failing batch.",
+                    "type": "number",
+                    "between": [
+                      0.001,
+                      1000000
+                    ]
                   }
                 },
                 {
                   "max_retry_delay": {
                     "default": 60,
-                    "type": "number"
+                    "description": "Maximum time in seconds between retries, caps exponential backoff.",
+                    "type": "number",
+                    "between": [
+                      0.001,
+                      1000000
+                    ]
                   }
                 }
               ],
-              "type": "record"
+              "type": "record",
+              "required": true
+            }
+          },
+          {
+            "batch_span_count": {
+              "type": "integer",
+              "description": "The number of spans to be sent in a single batch."
+            }
+          },
+          {
+            "batch_flush_delay": {
+              "type": "integer",
+              "description": "The delay, in seconds, between two consecutive batches."
             }
           },
           {
             "connect_timeout": {
+              "default": 1000,
+              "description": "An integer representing a timeout in milliseconds. Must be between 0 and 2^31-2.",
+              "type": "integer",
               "between": [
                 0,
                 2147483646
-              ],
-              "type": "integer",
-              "default": 1000
+              ]
             }
           },
           {
             "send_timeout": {
+              "default": 5000,
+              "description": "An integer representing a timeout in milliseconds. Must be between 0 and 2^31-2.",
+              "type": "integer",
               "between": [
                 0,
                 2147483646
-              ],
-              "type": "integer",
-              "default": 5000
+              ]
             }
           },
           {
             "read_timeout": {
+              "default": 5000,
+              "description": "An integer representing a timeout in milliseconds. Must be between 0 and 2^31-2.",
+              "type": "integer",
               "between": [
                 0,
                 2147483646
-              ],
-              "type": "integer",
-              "default": 5000
+              ]
             }
           },
           {
@@ -174,6 +195,7 @@
           },
           {
             "header_type": {
+              "default": "preserve",
               "type": "string",
               "one_of": [
                 "preserve",
@@ -182,15 +204,29 @@
                 "b3-single",
                 "w3c",
                 "jaeger",
-                "ot"
+                "ot",
+                "aws"
               ],
-              "required": false,
-              "default": "preserve"
+              "required": false
             }
           }
         ],
-        "type": "record"
+        "required": true,
+        "type": "record",
+        "entity_checks": [
+          {
+            "custom_entity_check": {
+              "field_sources": [
+                "batch_span_count",
+                "batch_flush_delay"
+              ]
+            }
+          }
+        ]
       }
     }
+  ],
+  "entity_checks": [
+
   ]
 }
