@@ -2,31 +2,34 @@
   "fields": [
     {
       "protocols": {
+        "required": true,
         "default": [
           "grpc",
           "grpcs",
           "http",
           "https"
         ],
+        "description": "A set of strings representing HTTP protocols.",
+        "type": "set",
         "elements": {
+          "type": "string",
           "one_of": [
             "grpc",
             "grpcs",
             "http",
             "https"
-          ],
-          "type": "string"
-        },
-        "required": true,
-        "type": "set"
+          ]
+        }
       }
     },
     {
       "config": {
-        "required": true,
         "fields": [
           {
             "identifier": {
+              "required": true,
+              "default": "consumer",
+              "description": "The type of identifier used to generate the rate limit key. Defines the scope used to increment the rate limiting counters. Can be `ip`, `credential`, `consumer`, `service`, `header`, or `path`.",
               "type": "string",
               "one_of": [
                 "ip",
@@ -35,14 +38,13 @@
                 "service",
                 "header",
                 "path"
-              ],
-              "default": "consumer",
-              "required": true
+              ]
             }
           },
           {
             "window_size": {
               "required": true,
+              "description": "One or more window sizes to apply a limit to (defined in seconds). There must be a matching number of window limits and sizes specified.",
               "type": "array",
               "elements": {
                 "type": "number"
@@ -52,6 +54,7 @@
           {
             "window_type": {
               "default": "sliding",
+              "description": "Sets the time window type to either `sliding` (default) or `fixed`. Sliding windows apply the rate limiting logic while taking into account previous hit rates (from the window that immediately precedes the current) using a dynamic weight. Fixed windows consist of buckets that are statically assigned to a definitive time range, each request is mapped to only one fixed window based on its timestamp and will affect only that window's counters.",
               "type": "string",
               "one_of": [
                 "fixed",
@@ -62,6 +65,7 @@
           {
             "limit": {
               "required": true,
+              "description": "One or more requests-per-window limits to apply. There must be a matching number of window limits and sizes specified.",
               "type": "array",
               "elements": {
                 "type": "number"
@@ -70,67 +74,240 @@
           },
           {
             "sync_rate": {
-              "type": "number"
+              "type": "number",
+              "description": "How often to sync counter data to the central data store. A value of 0 results in synchronous behavior; a value of -1 ignores sync behavior entirely and only stores counters in node memory. A value greater than 0 will sync the counters in the specified number of seconds. The minimum allowed interval is 0.02 seconds (20ms)."
             }
           },
           {
             "namespace": {
-              "required": true,
               "auto": true,
-              "type": "string"
+              "description": "The rate limiting library namespace to use for this plugin instance. Counter data and sync configuration is isolated in each namespace.",
+              "type": "string",
+              "required": true
             }
           },
           {
             "strategy": {
+              "required": true,
+              "default": "local",
+              "description": "The rate-limiting strategy to use for retrieving and incrementing the limits. Available values are: `local` and `cluster`.",
               "type": "string",
               "one_of": [
                 "cluster",
                 "redis",
                 "local"
-              ],
-              "default": "local",
-              "required": true
+              ]
             }
           },
           {
             "dictionary_name": {
-              "required": true,
               "default": "kong_rate_limiting_counters",
-              "type": "string"
+              "description": "The shared dictionary where counters are stored. When the plugin is configured to synchronize counter data externally (that is `config.strategy` is `cluster` or `redis` and `config.sync_rate` isn't `-1`), this dictionary serves as a buffer to populate counters in the data store on each synchronization cycle.",
+              "type": "string",
+              "required": true
             }
           },
           {
             "hide_client_headers": {
-              "type": "boolean",
-              "default": false
+              "default": false,
+              "description": "Optionally hide informative response headers that would otherwise provide information about the current status of limits and counters.",
+              "type": "boolean"
             }
           },
           {
             "retry_after_jitter_max": {
-              "type": "number",
-              "default": 0
+              "default": 0,
+              "description": "The upper bound of a jitter (random delay) in seconds to be added to the `Retry-After` header of denied requests (status = `429`) in order to prevent all the clients from coming back at the same time. The lower bound of the jitter is `0`; in this case, the `Retry-After` header is equal to the `RateLimit-Reset` header.",
+              "type": "number"
             }
           },
           {
             "header_name": {
-              "type": "string"
+              "type": "string",
+              "description": "A string representing an HTTP header name."
             }
           },
           {
             "path": {
+              "starts_with": "/",
+              "description": "A string representing a URL path, such as /path/to/resource. Must start with a forward slash (/) and must not contain empty segments (i.e., two consecutive forward slashes).",
+              "type": "string",
               "match_none": [
                 {
-                  "err": "must not have empty segments",
-                  "pattern": "//"
+                  "pattern": "//",
+                  "err": "must not have empty segments"
                 }
-              ],
-              "starts_with": "/",
-              "type": "string"
+              ]
             }
           },
           {
             "redis": {
+              "fields": [
+                {
+                  "host": {
+                    "type": "string",
+                    "description": "A string representing a host name, such as example.com."
+                  }
+                },
+                {
+                  "port": {
+                    "between": [
+                      0,
+                      65535
+                    ],
+                    "description": "An integer representing a port number between 0 and 65535, inclusive.",
+                    "type": "integer"
+                  }
+                },
+                {
+                  "timeout": {
+                    "default": 2000,
+                    "description": "An integer representing a timeout in milliseconds. Must be between 0 and 2^31-2.",
+                    "type": "integer",
+                    "between": [
+                      0,
+                      2147483646
+                    ]
+                  }
+                },
+                {
+                  "connect_timeout": {
+                    "between": [
+                      0,
+                      2147483646
+                    ],
+                    "description": "An integer representing a timeout in milliseconds. Must be between 0 and 2^31-2.",
+                    "type": "integer"
+                  }
+                },
+                {
+                  "send_timeout": {
+                    "between": [
+                      0,
+                      2147483646
+                    ],
+                    "description": "An integer representing a timeout in milliseconds. Must be between 0 and 2^31-2.",
+                    "type": "integer"
+                  }
+                },
+                {
+                  "read_timeout": {
+                    "between": [
+                      0,
+                      2147483646
+                    ],
+                    "description": "An integer representing a timeout in milliseconds. Must be between 0 and 2^31-2.",
+                    "type": "integer"
+                  }
+                },
+                {
+                  "username": {
+                    "type": "string",
+                    "referenceable": true
+                  }
+                },
+                {
+                  "password": {
+                    "encrypted": true,
+                    "type": "string",
+                    "referenceable": true
+                  }
+                },
+                {
+                  "sentinel_username": {
+                    "type": "string",
+                    "referenceable": true
+                  }
+                },
+                {
+                  "sentinel_password": {
+                    "encrypted": true,
+                    "type": "string",
+                    "referenceable": true
+                  }
+                },
+                {
+                  "database": {
+                    "type": "integer",
+                    "default": 0
+                  }
+                },
+                {
+                  "keepalive_pool_size": {
+                    "default": 30,
+                    "type": "integer",
+                    "between": [
+                      1,
+                      2147483646
+                    ]
+                  }
+                },
+                {
+                  "keepalive_backlog": {
+                    "type": "integer",
+                    "between": [
+                      0,
+                      2147483646
+                    ]
+                  }
+                },
+                {
+                  "sentinel_master": {
+                    "type": "string"
+                  }
+                },
+                {
+                  "sentinel_role": {
+                    "type": "string",
+                    "one_of": [
+                      "master",
+                      "slave",
+                      "any"
+                    ]
+                  }
+                },
+                {
+                  "sentinel_addresses": {
+                    "len_min": 1,
+                    "type": "array",
+                    "elements": {
+                      "type": "string"
+                    }
+                  }
+                },
+                {
+                  "cluster_addresses": {
+                    "len_min": 1,
+                    "type": "array",
+                    "elements": {
+                      "type": "string"
+                    }
+                  }
+                },
+                {
+                  "ssl": {
+                    "default": false,
+                    "type": "boolean",
+                    "required": false
+                  }
+                },
+                {
+                  "ssl_verify": {
+                    "default": false,
+                    "type": "boolean",
+                    "required": false
+                  }
+                },
+                {
+                  "server_name": {
+                    "description": "A string representing an SNI (server name indication) value for TLS.",
+                    "type": "string",
+                    "required": false
+                  }
+                }
+              ],
               "required": true,
+              "type": "record",
               "entity_checks": [
                 {
                   "mutually_exclusive_sets": {
@@ -188,202 +365,59 @@
                     "read_timeout"
                   ]
                 }
-              ],
-              "fields": [
-                {
-                  "host": {
-                    "type": "string"
-                  }
-                },
-                {
-                  "port": {
-                    "between": [
-                      0,
-                      65535
-                    ],
-                    "type": "integer"
-                  }
-                },
-                {
-                  "timeout": {
-                    "between": [
-                      0,
-                      2147483646
-                    ],
-                    "type": "integer",
-                    "default": 2000
-                  }
-                },
-                {
-                  "connect_timeout": {
-                    "between": [
-                      0,
-                      2147483646
-                    ],
-                    "type": "integer"
-                  }
-                },
-                {
-                  "send_timeout": {
-                    "between": [
-                      0,
-                      2147483646
-                    ],
-                    "type": "integer"
-                  }
-                },
-                {
-                  "read_timeout": {
-                    "between": [
-                      0,
-                      2147483646
-                    ],
-                    "type": "integer"
-                  }
-                },
-                {
-                  "username": {
-                    "type": "string",
-                    "referenceable": true
-                  }
-                },
-                {
-                  "password": {
-                    "referenceable": true,
-                    "encrypted": true,
-                    "type": "string"
-                  }
-                },
-                {
-                  "sentinel_username": {
-                    "type": "string",
-                    "referenceable": true
-                  }
-                },
-                {
-                  "sentinel_password": {
-                    "referenceable": true,
-                    "encrypted": true,
-                    "type": "string"
-                  }
-                },
-                {
-                  "database": {
-                    "type": "integer",
-                    "default": 0
-                  }
-                },
-                {
-                  "keepalive_pool_size": {
-                    "between": [
-                      1,
-                      2147483646
-                    ],
-                    "default": 30,
-                    "type": "integer"
-                  }
-                },
-                {
-                  "keepalive_backlog": {
-                    "between": [
-                      0,
-                      2147483646
-                    ],
-                    "type": "integer"
-                  }
-                },
-                {
-                  "sentinel_master": {
-                    "type": "string"
-                  }
-                },
-                {
-                  "sentinel_role": {
-                    "one_of": [
-                      "master",
-                      "slave",
-                      "any"
-                    ],
-                    "type": "string"
-                  }
-                },
-                {
-                  "sentinel_addresses": {
-                    "len_min": 1,
-                    "elements": {
-                      "type": "string"
-                    },
-                    "type": "array"
-                  }
-                },
-                {
-                  "cluster_addresses": {
-                    "len_min": 1,
-                    "elements": {
-                      "type": "string"
-                    },
-                    "type": "array"
-                  }
-                },
-                {
-                  "ssl": {
-                    "default": false,
-                    "required": false,
-                    "type": "boolean"
-                  }
-                },
-                {
-                  "ssl_verify": {
-                    "default": false,
-                    "required": false,
-                    "type": "boolean"
-                  }
-                },
-                {
-                  "server_name": {
-                    "type": "string",
-                    "required": false
-                  }
-                }
-              ],
-              "type": "record"
+              ]
             }
           },
           {
             "enforce_consumer_groups": {
-              "type": "boolean",
-              "default": false
+              "default": false,
+              "description": "List of consumer groups allowed to override the rate limiting settings for the given Route or Service. Required if `enforce_consumer_groups` is set to `true`. Flipping `enforce_consumer_groups` from `true` to `false` disables the group override, but does not clear the list of consumer groups. You can then flip `enforce_consumer_groups` to `true` to re-enforce the groups.",
+              "type": "boolean"
             }
           },
           {
             "consumer_groups": {
+              "description": "List of consumer groups allowed to override the rate limiting settings for the given Route or Service. Required if `enforce_consumer_groups` is set to `true`. Flipping `enforce_consumer_groups` from `true` to `false` disables the group override, but does not clear the list of consumer groups. You can then flip `enforce_consumer_groups` to `true` to re-enforce the groups.",
+              "type": "array",
               "elements": {
                 "type": "string"
-              },
-              "type": "array"
+              }
             }
           },
           {
             "disable_penalty": {
-              "type": "boolean",
-              "default": false
+              "default": false,
+              "description": "If set to `true`, this doesn't count denied requests (status = `429`). If set to `false`, all requests, including denied ones, are counted. This parameter only affects the `sliding` window_type.",
+              "type": "boolean"
             }
           },
           {
             "error_code": {
+              "default": 429,
+              "description": "Set a custom error code to return when the rate limit is exceeded.",
               "type": "number",
-              "gt": 0,
-              "default": 429
+              "gt": 0
             }
           },
           {
             "error_message": {
-              "type": "string",
-              "default": "API rate limit exceeded"
+              "default": "API rate limit exceeded",
+              "description": "Set a custom error message to return when the rate limit is exceeded.",
+              "type": "string"
             }
           }
         ],
-        "type": "record"
+        "type": "record",
+        "required": true
+      }
+    }
+  ],
+  "entity_checks": [
+    {
+      "custom_entity_check": {
+        "field_sources": [
+          "config"
+        ]
       }
     }
   ]

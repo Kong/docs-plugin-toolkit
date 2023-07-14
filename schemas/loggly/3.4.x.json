@@ -2,13 +2,18 @@
   "fields": [
     {
       "protocols": {
+        "required": true,
         "default": [
           "grpc",
           "grpcs",
           "http",
           "https"
         ],
+        "description": "A set of strings representing protocols.",
+        "type": "set",
         "elements": {
+          "description": "A string representing a protocol, such as HTTP or HTTPS.",
+          "type": "string",
           "one_of": [
             "grpc",
             "grpcs",
@@ -20,47 +25,53 @@
             "udp",
             "ws",
             "wss"
-          ],
-          "type": "string"
-        },
-        "required": true,
-        "type": "set"
+          ]
+        }
+      }
+    },
+    {
+      "consumer_group": {
+        "reference": "consumer_groups",
+        "description": "Custom type for representing a foreign key with a null value allowed.",
+        "type": "foreign",
+        "eq": null
       }
     },
     {
       "config": {
-        "required": true,
         "fields": [
           {
             "host": {
-              "type": "string",
-              "default": "logs-01.loggly.com"
+              "default": "logs-01.loggly.com",
+              "description": "A string representing a host name, such as example.com.",
+              "type": "string"
             }
           },
           {
             "port": {
+              "default": 514,
+              "description": "An integer representing a port number between 0 and 65535, inclusive.",
+              "type": "integer",
               "between": [
                 0,
                 65535
-              ],
-              "type": "integer",
-              "default": 514
+              ]
             }
           },
           {
             "key": {
-              "type": "string",
               "required": true,
               "encrypted": true,
+              "type": "string",
               "referenceable": true
             }
           },
           {
             "tags": {
-              "type": "set",
               "default": [
                 "kong"
               ],
+              "type": "set",
               "elements": {
                 "type": "string"
               }
@@ -68,8 +79,8 @@
           },
           {
             "log_level": {
-              "type": "string",
               "default": "info",
+              "type": "string",
               "one_of": [
                 "debug",
                 "info",
@@ -84,8 +95,8 @@
           },
           {
             "successful_severity": {
-              "type": "string",
               "default": "info",
+              "type": "string",
               "one_of": [
                 "debug",
                 "info",
@@ -100,8 +111,8 @@
           },
           {
             "client_errors_severity": {
-              "type": "string",
               "default": "info",
+              "type": "string",
               "one_of": [
                 "debug",
                 "info",
@@ -116,8 +127,8 @@
           },
           {
             "server_errors_severity": {
-              "type": "string",
               "default": "info",
+              "type": "string",
               "one_of": [
                 "debug",
                 "info",
@@ -139,19 +150,24 @@
           {
             "custom_fields_by_lua": {
               "type": "map",
-              "keys": {
+              "description": "Lua code as a key-value map",
+              "values": {
                 "len_min": 1,
                 "type": "string"
               },
-              "values": {
+              "keys": {
                 "type": "string",
                 "len_min": 1
               }
             }
           }
         ],
-        "type": "record"
+        "type": "record",
+        "required": true
       }
     }
+  ],
+  "entity_checks": [
+
   ]
 }
