@@ -8,6 +8,81 @@ gem install thor
 
 ## Usage
 
+This toolkit requires an instance of [Kong Gateway Admin API](https://docs.konghq.com/gateway/latest/admin-api/) to be up and running. Most of the commands generate requests under the hood against the API.
+
+### Running different versions of Kong Gateway Admin API locally
+The easiest way to run a specific version of the Admin API is with [Gojira](https://github.com/Kong/gojira/tree/master). It provides several [options](https://github.com/Kong/gojira/blob/master/docs/manual.md), but using [kong images](https://github.com/Kong/gojira/blob/master/docs/manual.md#using-kong-release-images-with-gojira) is probably the safest one.
+
+Note: By default, `Gojira` binds ports to random available ones on the host, so you probably want to [bind them to specific ports](https://github.com/Kong/gojira/blob/master/docs/manual.md#bind-ports-on-the-host). By default, the `toolkit` expects `host` to be `localhost` and `port` `8001`.
+
+### Demo
 
 https://user-images.githubusercontent.com/715229/220340450-5006aefe-e7e4-4b45-9272-d0e8b4543878.mov
 
+## Commands
+
+Before running any of the commands, make sure you have the right version of Kong Gateway Admin API running.
+
+### Download Schemas
+
+Downloads the schemas in json format for the specified list of plugins and writes them into disk. Each schema will be stored under `<destination>/<plugin-name>/<version>.json`
+
+| Options | Descriptions  |
+|--------------------------- |-----|
+| `version` | **Required**. Kong Gateway release version, e.g. `3.3.x`. |
+| `plugins` | **Required**. Space separated list of plugins for which the schemas will be downloaded, .e.g. `acme acl`. |
+| `host` | Name of the host in which the API is running. Default: `localhost`.  |
+| `port` | Port in which the API is listening. Default: `8001`. |
+| `destination` | Path to the root folder in which the schemas will be stored. Default: `./schemas`  |
+
+
+### Validate Examples
+
+Validates plugin examples config against the plugin schema using the [Admin API](https://docs.konghq.com/gateway/latest/admin-api/#validate-a-plugin-configuration-against-the-schema). It will iterate over the specified list of plugins and check whether the example for the specified version is valid.
+
+For example, running:
+
+```
+./plugins validate_examples --version _3.4.x --plugins acme --verbose
+```
+
+reads the file `./examples/acme/_3.4.x.yaml` and validate it against the schema using the API.
+
+
+| Options | Descriptions  |
+|--------------------------- |-----|
+| `version` | **Required**. Kong Gateway release version, e.g. `_3.3.x`. |
+| `plugins` | **Required**. Space separated list of plugins to use, .e.g. `acme acl`. |
+| `host` | Name of the host in which the API is running. Default: `localhost`.  |
+| `port` | Port in which the API is listening. Default: `8001`. |
+| `source` | Path to the root folder containing the examples. Default: `./examples`.  |
+
+
+### Copy Examples
+
+Copies the last  (ordered by version) example file stored in `<source>/<plugin-name>/` and writes it to `<source>/<plugin-name>/<version>`.
+
+| Options | Descriptions  |
+|--------------------------- |-----|
+| `version` |  **Required**. Kong Gateway release version, e.g. `_3.3.x`. The new example file is named after it.  |
+| `plugins` | **Required**. Space separated list of plugins to use, .e.g. `acme acl`.  |
+| `source` | Path to the root folder containing the exisitng examples. Default: `./examples`. |
+
+
+### Generate Referenceable Fileds List
+
+| Options | Descriptions  |
+|--------------------------- |-----|
+| `version` | **Required**. Kong Gateway release version, e.g. `3.3.x`. |
+| `plugins` | **Required**. Space separated list of plugins to use, .e.g. `acme acl`. |
+| `source` | Path to the folder containing the plugin schemas. Default: `./schemas`.  |
+| `destination` | Path to the root folder in which the schemas will be stored. Default: `./data`  |
+
+## Updating the repo after a new release
+
+Whenever a new version of Kong Gateway is released, we need run the following commands in order. For all of them, specify all the plugins `--plugins $(ls ./schemas)`
+
+1. Download Schemas - specify the new version `x.x.x`
+1. Copy Examples - specify the previous version `_x.x.y` of the example that gets copied
+1. Validate Examples  - specify the new version `_x.x.x`
+1. Generate Referenceable Fields List - specify the new version `x.x.x`
