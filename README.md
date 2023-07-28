@@ -30,24 +30,24 @@ Downloads the schemas in json format for the specified list of plugins and write
 | Options | Descriptions  |
 |--------------------------- |-----|
 | `version` | **Required**. Kong Gateway release version, e.g. `3.3.x`. |
-| `plugins` | **Required**. Space separated list of plugins for which the schemas will be downloaded, .e.g. `acme acl`. |
+| `plugins` | **Required**. Space separated list of plugins for which the schemas will be downloaded, .e.g. `acme acl`.  Setting it to `$(ls ./schemas)` will download the schemas for all the plugins. |
 | `host` | Name of the host in which the API is running. Default: `localhost`.  |
 | `port` | Port in which the API is listening. Default: `8001`. |
 | `destination` | Path to the root folder in which the schemas will be stored. Default: `./schemas`  |
 
+Downloading the schema for `acme`:
+```bash
+./plugins download_schemas --version=3.3.x --plugins acme
+```
+
+Downloading schemas for all the plugins:
+```bash
+./plugins download_schemas --version=3.3.x --plugins $(ls ./schemas)
+```
 
 ### Validate Examples
 
 Validates plugin examples config against the plugin schema using the [Admin API](https://docs.konghq.com/gateway/latest/admin-api/#validate-a-plugin-configuration-against-the-schema). It will iterate over the specified list of plugins and check whether the example for the specified version is valid.
-
-For example, running:
-
-```
-./plugins validate_examples --version _3.4.x --plugins acme --verbose
-```
-
-reads the file `./examples/acme/_3.4.x.yaml` and validates it against the schema using the API.
-
 
 | Options | Descriptions  |
 |--------------------------- |-----|
@@ -57,6 +57,12 @@ reads the file `./examples/acme/_3.4.x.yaml` and validates it against the schema
 | `port` | Port in which the API is listening. Default: `8001`. |
 | `source` | Path to the root folder containing the examples. Default: `./examples`.  |
 
+For example, running:
+```
+./plugins validate_examples --version _3.4.x --plugins acme --verbose
+```
+reads the file `./examples/acme/_3.4.x.yaml` and validates it against the schema using the API.
+
 
 ### Copy Examples
 
@@ -64,10 +70,15 @@ Copies the last  (ordered by version) example file stored in `<source>/<plugin-n
 
 | Options | Descriptions  |
 |--------------------------- |-----|
-| `version` |  **Required**. Kong Gateway release version, e.g. `_3.3.x`. The new example file is named after it.  |
+| `version` |  **Required**. Kong Gateway release version, e.g. `3.3.x`. The new example file is named after it.  |
 | `plugins` | **Required**. Space separated list of plugins to use, .e.g. `acme acl`.  |
 | `source` | Path to the root folder containing the exisitng examples. Default: `./examples`. |
 
+For example, running:
+```bash
+./plugins copy_examples --version 3.5.x --plugins acme
+```
+copies the previous example (assuming the previous version is `3.4.x`,  it copies `./examples/acme/_3.4.x.yaml`) and generates a new file `./examples/acme/_3.5.x.yaml`
 
 ### Generate Referenceable Fields List
 
@@ -76,7 +87,13 @@ Copies the last  (ordered by version) example file stored in `<source>/<plugin-n
 | `version` | **Required**. Kong Gateway release version, e.g. `3.3.x`. |
 | `plugins` | **Required**. Space separated list of plugins to use, .e.g. `acme acl`. |
 | `source` | Path to the folder containing the plugin schemas. Default: `./schemas`.  |
-| `destination` | Path to the root folder in which the schemas will be stored. Default: `./data`  |
+| `destination` | Path to the root folder in which the file will be stored. Default: `./data`  |
+
+For example, running:
+```bash
+./plugins generate_referenceable_fields_list --version 3.4.x --plugins $(ls ./schemas)
+```
+generates a file `./data/referenceable_fields/3.4.x.json` containing a list of plugins that have referenceable fields, and their corresponding referenceable fields.
 
 ## Updating the repo after a new release
 
