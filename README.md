@@ -69,7 +69,7 @@ Copies the last  (ordered by version) example file stored in `<source>/<plugin-n
 | `source` | Path to the root folder containing the exisitng examples. Default: `./examples`. |
 
 
-### Generate Referenceable Fileds List
+### Generate Referenceable Fields List
 
 | Options | Descriptions  |
 |--------------------------- |-----|
