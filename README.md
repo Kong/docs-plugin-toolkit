@@ -8,7 +8,7 @@ gem install thor
 
 ## Usage
 
-This toolkit requires an instance of [Kong Gateway Admin API](https://docs.konghq.com/gateway/latest/admin-api/) to be up and running. Most of the commands generate requests under the hood against the API.
+This toolkit requires an instance of [Kong Gateway Admin API](https://docs.konghq.com/gateway/latest/admin-api/) to be up and running (make sure you are running the Enterprise version). Most of the commands generate requests under the hood against the API.
 
 ### Running different versions of Kong Gateway Admin API locally
 The easiest way to run a specific version of the Admin API is with [Gojira](https://github.com/Kong/gojira/tree/master). It provides several [options](https://github.com/Kong/gojira/blob/master/docs/manual.md), but using [kong images](https://github.com/Kong/gojira/blob/master/docs/manual.md#using-kong-release-images-with-gojira) is probably the safest one.
