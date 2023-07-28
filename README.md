@@ -46,7 +46,7 @@ For example, running:
 ./plugins validate_examples --version _3.4.x --plugins acme --verbose
 ```
 
-reads the file `./examples/acme/_3.4.x.yaml` and validate it against the schema using the API.
+reads the file `./examples/acme/_3.4.x.yaml` and validates it against the schema using the API.
 
 
 | Options | Descriptions  |
