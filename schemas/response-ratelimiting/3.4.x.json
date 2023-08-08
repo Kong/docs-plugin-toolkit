@@ -9,7 +9,6 @@
           "http",
           "https"
         ],
-        "description": "A set of strings representing HTTP protocols.",
         "type": "set",
         "elements": {
           "type": "string",
@@ -19,70 +18,72 @@
             "http",
             "https"
           ]
-        }
+        },
+        "description": "A set of strings representing HTTP protocols."
       }
     },
     {
       "consumer_group": {
         "reference": "consumer_groups",
-        "description": "Custom type for representing a foreign key with a null value allowed.",
+        "eq": null,
         "type": "foreign",
-        "eq": null
+        "description": "Custom type for representing a foreign key with a null value allowed."
       }
     },
     {
       "config": {
+        "type": "record",
         "fields": [
           {
             "header_name": {
               "default": "x-kong-limit",
-              "description": "The name of the response header used to increment the counters.",
-              "type": "string"
+              "type": "string",
+              "description": "The name of the response header used to increment the counters."
             }
           },
           {
             "limit_by": {
               "default": "consumer",
-              "description": "The entity that will be used when aggregating the limits: `consumer`, `credential`, `ip`. If the `consumer` or the `credential` cannot be determined, the system will always fallback to `ip`.",
               "type": "string",
               "one_of": [
                 "consumer",
                 "credential",
                 "ip"
-              ]
+              ],
+              "description": "The entity that will be used when aggregating the limits: `consumer`, `credential`, `ip`. If the `consumer` or the `credential` cannot be determined, the system will always fallback to `ip`."
             }
           },
           {
             "policy": {
               "default": "local",
-              "description": "The rate-limiting policies to use for retrieving and incrementing the limits.",
               "type": "string",
               "one_of": [
                 "local",
                 "cluster",
                 "redis"
-              ]
+              ],
+              "description": "The rate-limiting policies to use for retrieving and incrementing the limits."
             }
           },
           {
             "fault_tolerant": {
               "default": true,
-              "description": "A boolean value that determines if the requests should be proxied even if Kong has troubles connecting a third-party datastore. If `true`, requests will be proxied anyway, effectively disabling the rate-limiting function until the datastore is working again. If `false`, then the clients will see `500` errors.",
               "type": "boolean",
-              "required": true
+              "required": true,
+              "description": "A boolean value that determines if the requests should be proxied even if Kong has troubles connecting a third-party datastore. If `true`, requests will be proxied anyway, effectively disabling the rate-limiting function until the datastore is working again. If `false`, then the clients will see `500` errors."
             }
           },
           {
             "redis_host": {
-              "type": "string",
-              "description": "When using the `redis` policy, this property specifies the address to the Redis server."
+              "description": "When using the `redis` policy, this property specifies the address to the Redis server.",
+              "type": "string"
             }
           },
           {
             "redis_port": {
               "default": 6379,
-              "description": "When using the `redis` policy, this property specifies the port of the Redis server.",
               "type": "integer",
+              "description": "When using the `redis` policy, this property specifies the port of the Redis server.",
               "between": [
                 0,
                 65535
@@ -92,113 +93,119 @@
           {
             "redis_password": {
               "len_min": 0,
-              "description": "When using the `redis` policy, this property specifies the password to connect to the Redis server.",
               "type": "string",
+              "description": "When using the `redis` policy, this property specifies the password to connect to the Redis server.",
               "referenceable": true
             }
           },
           {
             "redis_username": {
-              "description": "When using the `redis` policy, this property specifies the username to connect to the Redis server when ACL authentication is desired.\nThis requires Redis v6.0.0+. The username **cannot** be set to `default`.",
               "type": "string",
+              "description": "When using the `redis` policy, this property specifies the username to connect to the Redis server when ACL authentication is desired.\nThis requires Redis v6.0.0+. The username **cannot** be set to `default`.",
               "referenceable": true
             }
           },
           {
             "redis_ssl": {
               "default": false,
-              "description": "When using the `redis` policy, this property specifies if SSL is used to connect to the Redis server.",
               "type": "boolean",
-              "required": true
+              "required": true,
+              "description": "When using the `redis` policy, this property specifies if SSL is used to connect to the Redis server."
             }
           },
           {
             "redis_ssl_verify": {
               "default": false,
-              "description": "When using the `redis` policy with `redis_ssl` set to `true`, this property specifies if the server SSL certificate is validated. Note that you need to configure the `lua_ssl_trusted_certificate` to specify the CA (or server) certificate used by your Redis server. You may also need to configure `lua_ssl_verify_depth` accordingly.",
               "type": "boolean",
-              "required": true
+              "required": true,
+              "description": "When using the `redis` policy with `redis_ssl` set to `true`, this property specifies if the server SSL certificate is validated. Note that you need to configure the `lua_ssl_trusted_certificate` to specify the CA (or server) certificate used by your Redis server. You may also need to configure `lua_ssl_verify_depth` accordingly."
             }
           },
           {
             "redis_server_name": {
-              "type": "string",
-              "description": "When using the `redis` policy with `redis_ssl` set to `true`, this property specifies the server name for the TLS extension Server Name Indication (SNI)."
+              "description": "When using the `redis` policy with `redis_ssl` set to `true`, this property specifies the server name for the TLS extension Server Name Indication (SNI).",
+              "type": "string"
             }
           },
           {
             "redis_timeout": {
               "default": 2000,
-              "description": "When using the `redis` policy, this property specifies the timeout in milliseconds of any command submitted to the Redis server.",
-              "type": "number"
+              "type": "number",
+              "description": "When using the `redis` policy, this property specifies the timeout in milliseconds of any command submitted to the Redis server."
             }
           },
           {
             "redis_database": {
               "default": 0,
-              "description": "When using the `redis` policy, this property specifies Redis database to use.",
-              "type": "number"
+              "type": "number",
+              "description": "When using the `redis` policy, this property specifies Redis database to use."
             }
           },
           {
             "block_on_first_violation": {
               "default": false,
-              "description": "A boolean value that determines if the requests should be blocked as soon as one limit is being exceeded. This will block requests that are supposed to consume other limits too.",
               "type": "boolean",
-              "required": true
+              "required": true,
+              "description": "A boolean value that determines if the requests should be blocked as soon as one limit is being exceeded. This will block requests that are supposed to consume other limits too."
             }
           },
           {
             "hide_client_headers": {
               "default": false,
-              "description": "Optionally hide informative response headers.",
               "type": "boolean",
-              "required": true
+              "required": true,
+              "description": "Optionally hide informative response headers."
             }
           },
           {
             "limits": {
+              "keys": {
+                "type": "string"
+              },
+              "required": true,
+              "len_min": 1,
+              "type": "map",
               "values": {
-                "required": true,
                 "fields": [
                   {
                     "second": {
-                      "type": "number",
-                      "gt": 0
+                      "gt": 0,
+                      "type": "number"
                     }
                   },
                   {
                     "minute": {
-                      "type": "number",
-                      "gt": 0
+                      "gt": 0,
+                      "type": "number"
                     }
                   },
                   {
                     "hour": {
-                      "type": "number",
-                      "gt": 0
+                      "gt": 0,
+                      "type": "number"
                     }
                   },
                   {
                     "day": {
-                      "type": "number",
-                      "gt": 0
+                      "gt": 0,
+                      "type": "number"
                     }
                   },
                   {
                     "month": {
-                      "type": "number",
-                      "gt": 0
+                      "gt": 0,
+                      "type": "number"
                     }
                   },
                   {
                     "year": {
-                      "type": "number",
-                      "gt": 0
+                      "gt": 0,
+                      "type": "number"
                     }
                   }
                 ],
                 "type": "record",
+                "required": true,
                 "entity_checks": [
                   {
                     "at_least_one_of": [
@@ -212,17 +219,10 @@
                   }
                 ]
               },
-              "required": true,
-              "len_min": 1,
-              "description": "A map that defines rate limits for the plugin.",
-              "type": "map",
-              "keys": {
-                "type": "string"
-              }
+              "description": "A map that defines rate limits for the plugin."
             }
           }
         ],
-        "type": "record",
         "required": true
       }
     }
@@ -230,11 +230,11 @@
   "entity_checks": [
     {
       "conditional": {
-        "if_field": "config.policy",
+        "if_match": {
+          "eq": "redis"
+        },
         "then_field": "config.redis_host",
-        "if_match": {
-          "eq": "redis"
-        },
+        "if_field": "config.policy",
         "then_match": {
           "required": true
         }
@@ -242,11 +242,11 @@
     },
     {
       "conditional": {
-        "if_field": "config.policy",
+        "if_match": {
+          "eq": "redis"
+        },
         "then_field": "config.redis_port",
-        "if_match": {
-          "eq": "redis"
-        },
+        "if_field": "config.policy",
         "then_match": {
           "required": true
         }
@@ -254,11 +254,11 @@
     },
     {
       "conditional": {
-        "if_field": "config.policy",
-        "then_field": "config.redis_timeout",
         "if_match": {
           "eq": "redis"
         },
+        "then_field": "config.redis_timeout",
+        "if_field": "config.policy",
         "then_match": {
           "required": true
         }
