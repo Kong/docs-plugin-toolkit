@@ -9,7 +9,6 @@
           "http",
           "https"
         ],
-        "description": "A set of strings representing HTTP protocols.",
         "type": "set",
         "elements": {
           "type": "string",
@@ -19,15 +18,16 @@
             "http",
             "https"
           ]
-        }
+        },
+        "description": "A set of strings representing HTTP protocols."
       }
     },
     {
       "consumer_group": {
         "reference": "consumer_groups",
-        "description": "Custom type for representing a foreign key with a null value allowed.",
+        "eq": null,
         "type": "foreign",
-        "eq": null
+        "description": "Custom type for representing a foreign key with a null value allowed."
       }
     },
     {
@@ -35,72 +35,74 @@
         "fields": [
           {
             "endpoint": {
-              "description": "A string representing a URL, such as https://example.com/path/to/resource?q=search.",
+              "referenceable": true,
               "type": "string",
-              "required": true
+              "required": true,
+              "description": "A string representing a URL, such as https://example.com/path/to/resource?q=search."
             }
           },
           {
             "headers": {
-              "type": "map",
               "description": "The custom headers to be added in the HTTP request sent to the OTLP server. This setting is useful for adding the authentication headers (token) for the APM backend.",
-              "values": {
-                "type": "string",
-                "referenceable": true
-              },
+              "type": "map",
               "keys": {
-                "type": "string",
-                "description": "A string representing an HTTP header name."
+                "description": "A string representing an HTTP header name.",
+                "type": "string"
+              },
+              "values": {
+                "referenceable": true,
+                "type": "string"
               }
             }
           },
           {
             "resource_attributes": {
+              "keys": {
+                "required": true,
+                "type": "string"
+              },
               "type": "map",
               "values": {
-                "type": "string",
-                "required": true
-              },
-              "keys": {
-                "type": "string",
-                "required": true
+                "required": true,
+                "type": "string"
               }
             }
           },
           {
             "queue": {
+              "type": "record",
               "fields": [
                 {
                   "max_batch_size": {
                     "default": 1,
-                    "description": "Maximum number of entries that can be processed at a time.",
                     "type": "integer",
                     "between": [
                       1,
                       1000000
-                    ]
+                    ],
+                    "description": "Maximum number of entries that can be processed at a time."
                   }
                 },
                 {
                   "max_coalescing_delay": {
                     "default": 1,
-                    "description": "Maximum number of (fractional) seconds to elapse after the first entry was queued before the queue starts calling the handler.",
                     "type": "number",
                     "between": [
                       0,
                       3600
-                    ]
+                    ],
+                    "description": "Maximum number of (fractional) seconds to elapse after the first entry was queued before the queue starts calling the handler."
                   }
                 },
                 {
                   "max_entries": {
                     "default": 10000,
-                    "description": "Maximum number of entries that can be waiting on the queue.",
                     "type": "integer",
                     "between": [
                       1,
                       1000000
-                    ]
+                    ],
+                    "description": "Maximum number of entries that can be waiting on the queue."
                   }
                 },
                 {
@@ -112,26 +114,26 @@
                 {
                   "max_retry_time": {
                     "default": 60,
-                    "description": "Time in seconds before the queue gives up calling a failed handler for a batch.",
-                    "type": "number"
+                    "type": "number",
+                    "description": "Time in seconds before the queue gives up calling a failed handler for a batch."
                   }
                 },
                 {
                   "initial_retry_delay": {
                     "default": 0.01,
-                    "description": "Time in seconds before the initial retry is made for a failing batch.",
                     "type": "number",
                     "between": [
                       0.001,
                       1000000
-                    ]
+                    ],
+                    "description": "Time in seconds before the initial retry is made for a failing batch."
                   }
                 },
                 {
                   "max_retry_delay": {
                     "default": 60,
-                    "description": "Maximum time in seconds between retries, caps exponential backoff.",
                     "type": "number",
+                    "description": "Maximum time in seconds between retries, caps exponential backoff.",
                     "between": [
                       0.001,
                       1000000
@@ -139,7 +141,6 @@
                   }
                 }
               ],
-              "type": "record",
               "required": true
             }
           },
@@ -158,8 +159,8 @@
           {
             "connect_timeout": {
               "default": 1000,
-              "description": "An integer representing a timeout in milliseconds. Must be between 0 and 2^31-2.",
               "type": "integer",
+              "description": "An integer representing a timeout in milliseconds. Must be between 0 and 2^31-2.",
               "between": [
                 0,
                 2147483646
@@ -169,8 +170,8 @@
           {
             "send_timeout": {
               "default": 5000,
-              "description": "An integer representing a timeout in milliseconds. Must be between 0 and 2^31-2.",
               "type": "integer",
+              "description": "An integer representing a timeout in milliseconds. Must be between 0 and 2^31-2.",
               "between": [
                 0,
                 2147483646
@@ -180,8 +181,8 @@
           {
             "read_timeout": {
               "default": 5000,
-              "description": "An integer representing a timeout in milliseconds. Must be between 0 and 2^31-2.",
               "type": "integer",
+              "description": "An integer representing a timeout in milliseconds. Must be between 0 and 2^31-2.",
               "between": [
                 0,
                 2147483646
@@ -197,6 +198,7 @@
             "header_type": {
               "default": "preserve",
               "type": "string",
+              "required": false,
               "one_of": [
                 "preserve",
                 "ignore",
@@ -206,13 +208,12 @@
                 "jaeger",
                 "ot",
                 "aws"
-              ],
-              "required": false
+              ]
             }
           }
         ],
-        "required": true,
         "type": "record",
+        "required": true,
         "entity_checks": [
           {
             "custom_entity_check": {
