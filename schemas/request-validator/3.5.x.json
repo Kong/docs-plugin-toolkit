@@ -1,0 +1,175 @@
+{
+  "entity_checks": [
+    {
+      "custom_entity_check": {
+        "field_sources": [
+          "config"
+        ]
+      }
+    }
+  ],
+  "fields": [
+    {
+      "protocols": {
+        "type": "set",
+        "elements": {
+          "type": "string",
+          "one_of": [
+            "grpc",
+            "grpcs",
+            "http",
+            "https"
+          ]
+        },
+        "default": [
+          "grpc",
+          "grpcs",
+          "http",
+          "https"
+        ],
+        "description": "A set of strings representing HTTP protocols.",
+        "required": true
+      }
+    },
+    {
+      "consumer_group": {
+        "type": "foreign",
+        "description": "Custom type for representing a foreign key with a null value allowed.",
+        "eq": null,
+        "reference": "consumer_groups"
+      }
+    },
+    {
+      "config": {
+        "type": "record",
+        "entity_checks": [
+          {
+            "at_least_one_of": [
+              "body_schema",
+              "parameter_schema"
+            ]
+          }
+        ],
+        "required": true,
+        "fields": [
+          {
+            "body_schema": {
+              "description": "The request body schema specification. One of `body_schema` or `parameter_schema` must be specified.",
+              "required": false,
+              "type": "string"
+            }
+          },
+          {
+            "allowed_content_types": {
+              "description": "List of allowed content types. The value can be configured with the `charset` parameter. For example, `application/json; charset=UTF-8`.",
+              "type": "set",
+              "elements": {
+                "type": "string",
+                "required": true
+              },
+              "default": [
+                "application/json"
+              ]
+            }
+          },
+          {
+            "version": {
+              "one_of": [
+                "kong",
+                "draft4"
+              ],
+              "default": "kong",
+              "description": "Which validator to use. Supported values are `kong` (default) for using Kong's own schema validator, or `draft4` for using a JSON Schema Draft 4-compliant validator.",
+              "required": true,
+              "type": "string"
+            }
+          },
+          {
+            "parameter_schema": {
+              "description": "Array of parameter validator specification. One of `body_schema` or `parameter_schema` must be specified.",
+              "type": "array",
+              "elements": {
+                "type": "record",
+                "fields": [
+                  {
+                    "in": {
+                      "type": "string",
+                      "required": true,
+                      "one_of": [
+                        "query",
+                        "header",
+                        "path"
+                      ]
+                    }
+                  },
+                  {
+                    "name": {
+                      "type": "string",
+                      "required": true
+                    }
+                  },
+                  {
+                    "required": {
+                      "type": "boolean",
+                      "required": true
+                    }
+                  },
+                  {
+                    "style": {
+                      "type": "string",
+                      "one_of": [
+                        "label",
+                        "form",
+                        "matrix",
+                        "simple",
+                        "spaceDelimited",
+                        "pipeDelimited",
+                        "deepObject"
+                      ]
+                    }
+                  },
+                  {
+                    "explode": {
+                      "type": "boolean"
+                    }
+                  },
+                  {
+                    "schema": {
+                      "type": "string"
+                    }
+                  }
+                ],
+                "entity_checks": [
+                  {
+                    "mutually_required": [
+                      "style",
+                      "explode",
+                      "schema"
+                    ]
+                  },
+                  {
+                    "custom_entity_check": {
+                      "field_sources": [
+                        "style",
+                        "in"
+                      ]
+                    }
+                  }
+                ]
+              },
+              "required": false
+            }
+          },
+          {
+            "verbose_response": {
+              "description": "If enabled, the plugin returns more verbose and detailed validation errors.",
+              "type": "boolean",
+              "required": true,
+              "default": false
+            }
+          }
+        ]
+      }
+    }
+  ]
+}
