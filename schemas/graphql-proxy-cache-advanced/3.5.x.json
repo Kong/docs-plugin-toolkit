@@ -1,0 +1,89 @@
+{
+  "entity_checks": [
+
+  ],
+  "fields": [
+    {
+      "protocols": {
+        "type": "set",
+        "elements": {
+          "type": "string",
+          "one_of": [
+            "grpc",
+            "grpcs",
+            "http",
+            "https"
+          ]
+        },
+        "default": [
+          "grpc",
+          "grpcs",
+          "http",
+          "https"
+        ],
+        "description": "A set of strings representing HTTP protocols.",
+        "required": true
+      }
+    },
+    {
+      "consumer_group": {
+        "type": "foreign",
+        "description": "Custom type for representing a foreign key with a null value allowed.",
+        "eq": null,
+        "reference": "consumer_groups"
+      }
+    },
+    {
+      "config": {
+        "type": "record",
+        "fields": [
+          {
+            "strategy": {
+              "type": "string",
+              "default": "memory",
+              "description": "The backing data store in which to hold cached entities. Accepted value is `memory`.",
+              "required": true,
+              "one_of": [
+                "memory"
+              ]
+            }
+          },
+          {
+            "cache_ttl": {
+              "gt": 0,
+              "type": "integer",
+              "description": "TTL in seconds of cache entities. Must be a value greater than 0.",
+              "default": 300
+            }
+          },
+          {
+            "memory": {
+              "type": "record",
+              "fields": [
+                {
+                  "dictionary_name": {
+                    "type": "string",
+                    "description": "The name of the shared dictionary in which to hold cache entities when the memory strategy is selected. This dictionary currently must be defined manually in the Kong Nginx template.",
+                    "required": true,
+                    "default": "kong_db_cache"
+                  }
+                }
+              ],
+              "required": true
+            }
+          },
+          {
+            "vary_headers": {
+              "type": "array",
+              "elements": {
+                "type": "string"
+              },
+              "description": "Relevant headers considered for the cache key. If undefined, none of the headers are taken into consideration."
+            }
+          }
+        ],
+        "required": true
+      }
+    }
+  ]
+}

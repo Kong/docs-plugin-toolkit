@@ -1,0 +1,300 @@
+{
+  "entity_checks": [
+
+  ],
+  "fields": [
+    {
+      "protocols": {
+        "type": "set",
+        "elements": {
+          "type": "string",
+          "one_of": [
+            "grpc",
+            "grpcs",
+            "http",
+            "https"
+          ]
+        },
+        "default": [
+          "grpc",
+          "grpcs",
+          "http",
+          "https"
+        ],
+        "description": "A set of strings representing HTTP protocols.",
+        "required": true
+      }
+    },
+    {
+      "consumer_group": {
+        "type": "foreign",
+        "description": "Custom type for representing a foreign key with a null value allowed.",
+        "eq": null,
+        "reference": "consumer_groups"
+      }
+    },
+    {
+      "config": {
+        "type": "record",
+        "entity_checks": [
+          {
+            "conditional": {
+              "then_field": "max_namespaces",
+              "if_field": "namespace_aware",
+              "then_match": {
+                "required": true
+              },
+              "if_match": {
+                "eq": true
+              }
+            }
+          },
+          {
+            "conditional": {
+              "then_field": "prefix",
+              "if_field": "namespace_aware",
+              "then_match": {
+                "required": true
+              },
+              "if_match": {
+                "eq": true
+              }
+            }
+          },
+          {
+            "conditional": {
+              "then_field": "namespaceuri",
+              "if_field": "namespace_aware",
+              "then_match": {
+                "required": true
+              },
+              "if_match": {
+                "eq": true
+              }
+            }
+          }
+        ],
+        "required": true,
+        "fields": [
+          {
+            "checked_content_types": {
+              "type": "set",
+              "elements": {
+                "match": "^[^%s]+%/[^ ;]+$",
+                "required": true,
+                "type": "string"
+              },
+              "default": [
+                "application/xml"
+              ],
+              "description": "A list of Content-Type values with payloads that must be validated.",
+              "required": true
+            }
+          },
+          {
+            "allowed_content_types": {
+              "type": "set",
+              "elements": {
+                "match": "^[^%s]+%/[^ ;]+$",
+                "required": true,
+                "type": "string"
+              },
+              "default": [
+
+              ],
+              "description": "A list of Content-Type values with payloads that are allowed, but aren't validated.",
+              "required": true
+            }
+          },
+          {
+            "allow_dtd": {
+              "description": "Indicates whether an XML Document Type Definition (DTD) section is allowed.",
+              "type": "boolean",
+              "required": true,
+              "default": false
+            }
+          },
+          {
+            "namespace_aware": {
+              "description": "If not parsing namespace aware, all prefixes and namespace attributes will be counted as regular attributes and element names, and validated as such.",
+              "type": "boolean",
+              "required": true,
+              "default": true
+            }
+          },
+          {
+            "max_depth": {
+              "type": "integer",
+              "default": 50,
+              "description": "Maximum depth of tags. Child elements such as Text or Comments are not counted as another level.",
+              "required": true,
+              "gt": 0
+            }
+          },
+          {
+            "max_children": {
+              "type": "integer",
+              "default": 100,
+              "description": "Maximum number of children allowed (Element, Text, Comment, ProcessingInstruction, CDATASection). Note: Adjacent text and CDATA sections are counted as one. For example, text-cdata-text-cdata is one child.",
+              "required": true,
+              "gt": 0
+            }
+          },
+          {
+            "max_attributes": {
+              "type": "integer",
+              "default": 100,
+              "description": "Maximum number of attributes allowed on a tag, including default ones. Note: If namespace-aware parsing is disabled, then the namespaces definitions are counted as attributes.",
+              "required": true,
+              "gt": 0
+            }
+          },
+          {
+            "max_namespaces": {
+              "type": "integer",
+              "default": 20,
+              "description": "Maximum number of namespaces defined on a tag. This value is required if parsing is namespace-aware.",
+              "required": false,
+              "gt": 0
+            }
+          },
+          {
+            "document": {
+              "type": "integer",
+              "default": 10485760,
+              "description": "Maximum size of the entire document.",
+              "required": true,
+              "gt": 0
+            }
+          },
+          {
+            "buffer": {
+              "type": "integer",
+              "default": 1048576,
+              "description": "Maximum size of the unparsed buffer (see below).",
+              "required": true,
+              "gt": 0
+            }
+          },
+          {
+            "comment": {
+              "type": "integer",
+              "default": 1024,
+              "description": "Maximum size of comments.",
+              "required": true,
+              "gt": 0
+            }
+          },
+          {
+            "localname": {
+              "type": "integer",
+              "default": 1024,
+              "description": "Maximum size of the localname. This applies to tags and attributes.",
+              "required": true,
+              "gt": 0
+            }
+          },
+          {
+            "prefix": {
+              "type": "integer",
+              "default": 1024,
+              "description": "Maximum size of the prefix. This applies to tags and attributes. This value is required if parsing is namespace-aware.",
+              "required": false,
+              "gt": 0
+            }
+          },
+          {
+            "namespaceuri": {
+              "type": "integer",
+              "default": 1024,
+              "description": "Maximum size of the namespace URI. This value is required if parsing is namespace-aware.",
+              "required": false,
+              "gt": 0
+            }
+          },
+          {
+            "attribute": {
+              "type": "integer",
+              "default": 1048576,
+              "description": "Maximum size of the attribute value.",
+              "required": true,
+              "gt": 0
+            }
+          },
+          {
+            "text": {
+              "type": "integer",
+              "default": 1048576,
+              "description": "Maximum text inside tags (counted over all adjacent text/CDATA elements combined).",
+              "required": true,
+              "gt": 0
+            }
+          },
+          {
+            "pitarget": {
+              "type": "integer",
+              "default": 1024,
+              "description": "Maximum size of processing instruction targets.",
+              "required": true,
+              "gt": 0
+            }
+          },
+          {
+            "pidata": {
+              "type": "integer",
+              "default": 1024,
+              "description": "Maximum size of processing instruction data.",
+              "required": true,
+              "gt": 0
+            }
+          },
+          {
+            "entityname": {
+              "type": "integer",
+              "default": 1024,
+              "description": "Maximum size of entity names in EntityDecl.",
+              "required": true,
+              "gt": 0
+            }
+          },
+          {
+            "entity": {
+              "type": "integer",
+              "default": 1024,
+              "description": "Maximum size of entity values in EntityDecl.",
+              "required": true,
+              "gt": 0
+            }
+          },
+          {
+            "entityproperty": {
+              "type": "integer",
+              "default": 1024,
+              "description": "Maximum size of systemId, publicId, or notationName in EntityDecl.",
+              "required": true,
+              "gt": 0
+            }
+          },
+          {
+            "bla_max_amplification": {
+              "type": "number",
+              "default": 100,
+              "description": "Sets the maximum allowed amplification. This protects against the Billion Laughs Attack.",
+              "required": true,
+              "gt": 1
+            }
+          },
+          {
+            "bla_threshold": {
+              "type": "integer",
+              "default": 8388608,
+              "description": "Sets the threshold after which the protection starts. This protects against the Billion Laughs Attack.",
+              "required": true,
+              "gt": 1024
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

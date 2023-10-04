@@ -1,0 +1,310 @@
+{
+  "entity_checks": [
+    {
+      "at_least_one_of": [
+        "config.second",
+        "config.minute",
+        "config.hour",
+        "config.day",
+        "config.month",
+        "config.year"
+      ]
+    },
+    {
+      "conditional": {
+        "then_field": "config.redis_host",
+        "if_field": "config.policy",
+        "then_match": {
+          "required": true
+        },
+        "if_match": {
+          "eq": "redis"
+        }
+      }
+    },
+    {
+      "conditional": {
+        "then_field": "config.redis_port",
+        "if_field": "config.policy",
+        "then_match": {
+          "required": true
+        },
+        "if_match": {
+          "eq": "redis"
+        }
+      }
+    },
+    {
+      "conditional": {
+        "then_field": "config.header_name",
+        "if_field": "config.limit_by",
+        "then_match": {
+          "required": true
+        },
+        "if_match": {
+          "eq": "header"
+        }
+      }
+    },
+    {
+      "conditional": {
+        "then_field": "config.path",
+        "if_field": "config.limit_by",
+        "then_match": {
+          "required": true
+        },
+        "if_match": {
+          "eq": "path"
+        }
+      }
+    },
+    {
+      "conditional": {
+        "then_field": "config.redis_timeout",
+        "if_field": "config.policy",
+        "then_match": {
+          "required": true
+        },
+        "if_match": {
+          "eq": "redis"
+        }
+      }
+    }
+  ],
+  "fields": [
+    {
+      "protocols": {
+        "type": "set",
+        "elements": {
+          "type": "string",
+          "one_of": [
+            "grpc",
+            "grpcs",
+            "http",
+            "https"
+          ]
+        },
+        "default": [
+          "grpc",
+          "grpcs",
+          "http",
+          "https"
+        ],
+        "description": "A set of strings representing HTTP protocols.",
+        "required": true
+      }
+    },
+    {
+      "consumer_group": {
+        "type": "foreign",
+        "description": "Custom type for representing a foreign key with a null value allowed.",
+        "eq": null,
+        "reference": "consumer_groups"
+      }
+    },
+    {
+      "config": {
+        "type": "record",
+        "fields": [
+          {
+            "second": {
+              "type": "number",
+              "description": "The number of HTTP requests that can be made per second.",
+              "gt": 0
+            }
+          },
+          {
+            "minute": {
+              "type": "number",
+              "description": "The number of HTTP requests that can be made per minute.",
+              "gt": 0
+            }
+          },
+          {
+            "hour": {
+              "type": "number",
+              "description": "The number of HTTP requests that can be made per hour.",
+              "gt": 0
+            }
+          },
+          {
+            "day": {
+              "type": "number",
+              "description": "The number of HTTP requests that can be made per day.",
+              "gt": 0
+            }
+          },
+          {
+            "month": {
+              "type": "number",
+              "description": "The number of HTTP requests that can be made per month.",
+              "gt": 0
+            }
+          },
+          {
+            "year": {
+              "type": "number",
+              "description": "The number of HTTP requests that can be made per year.",
+              "gt": 0
+            }
+          },
+          {
+            "limit_by": {
+              "type": "string",
+              "one_of": [
+                "consumer",
+                "credential",
+                "ip",
+                "service",
+                "header",
+                "path"
+              ],
+              "description": "The entity that is used when aggregating the limits.",
+              "default": "consumer"
+            }
+          },
+          {
+            "header_name": {
+              "type": "string",
+              "description": "A string representing an HTTP header name."
+            }
+          },
+          {
+            "path": {
+              "type": "string",
+              "match_none": [
+                {
+                  "pattern": "//",
+                  "err": "must not have empty segments"
+                }
+              ],
+              "description": "A string representing a URL path, such as /path/to/resource. Must start with a forward slash (/) and must not contain empty segments (i.e., two consecutive forward slashes).",
+              "starts_with": "/"
+            }
+          },
+          {
+            "policy": {
+              "type": "string",
+              "default": "local",
+              "description": "The rate-limiting policies to use for retrieving and incrementing the limits.",
+              "len_min": 0,
+              "one_of": [
+                "local",
+                "cluster",
+                "redis"
+              ]
+            }
+          },
+          {
+            "fault_tolerant": {
+              "type": "boolean",
+              "description": "A boolean value that determines if the requests should be proxied even if Kong has troubles connecting a third-party data store. If `true`, requests will be proxied anyway, effectively disabling the rate-limiting function until the data store is working again. If `false`, then the clients will see `500` errors.",
+              "required": true,
+              "default": true
+            }
+          },
+          {
+            "redis_host": {
+              "type": "string",
+              "description": "A string representing a host name, such as example.com."
+            }
+          },
+          {
+            "redis_port": {
+              "type": "integer",
+              "default": 6379,
+              "description": "An integer representing a port number between 0 and 65535, inclusive.",
+              "between": [
+                0,
+                65535
+              ]
+            }
+          },
+          {
+            "redis_password": {
+              "type": "string",
+              "description": "When using the `redis` policy, this property specifies the password to connect to the Redis server.",
+              "referenceable": true,
+              "len_min": 0
+            }
+          },
+          {
+            "redis_username": {
+              "type": "string",
+              "referenceable": true,
+              "description": "When using the `redis` policy, this property specifies the username to connect to the Redis server when ACL authentication is desired."
+            }
+          },
+          {
+            "redis_ssl": {
+              "type": "boolean",
+              "description": "When using the `redis` policy, this property specifies if SSL is used to connect to the Redis server.",
+              "required": true,
+              "default": false
+            }
+          },
+          {
+            "redis_ssl_verify": {
+              "type": "boolean",
+              "description": "When using the `redis` policy with `redis_ssl` set to `true`, this property specifies it server SSL certificate is validated. Note that you need to configure the lua_ssl_trusted_certificate to specify the CA (or server) certificate used by your Redis server. You may also need to configure lua_ssl_verify_depth accordingly.",
+              "required": true,
+              "default": false
+            }
+          },
+          {
+            "redis_server_name": {
+              "type": "string",
+              "description": "A string representing an SNI (server name indication) value for TLS."
+            }
+          },
+          {
+            "redis_timeout": {
+              "type": "number",
+              "description": "When using the `redis` policy, this property specifies the timeout in milliseconds of any command submitted to the Redis server.",
+              "default": 2000
+            }
+          },
+          {
+            "redis_database": {
+              "type": "integer",
+              "description": "When using the `redis` policy, this property specifies the Redis database to use.",
+              "default": 0
+            }
+          },
+          {
+            "hide_client_headers": {
+              "type": "boolean",
+              "description": "Optionally hide informative response headers.",
+              "required": true,
+              "default": false
+            }
+          },
+          {
+            "error_code": {
+              "type": "number",
+              "gt": 0,
+              "description": "Set a custom error code to return when the rate limit is exceeded.",
+              "default": 429
+            }
+          },
+          {
+            "error_message": {
+              "type": "string",
+              "description": "Set a custom error message to return when the rate limit is exceeded.",
+              "default": "API rate limit exceeded"
+            }
+          },
+          {
+            "sync_rate": {
+              "type": "number",
+              "description": "How often to sync counter data to the central data store. A value of -1 results in synchronous behavior.",
+              "required": true,
+              "default": -1
+            }
+          }
+        ],
+        "required": true
+      }
+    }
+  ]
+}
