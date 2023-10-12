@@ -1,18 +1,9 @@
 {
-  "entity_checks": [
-    {
-      "at_least_one_of": [
-        "config.allow",
-        "config.deny"
-      ]
-    }
-  ],
   "fields": [
     {
       "protocols": {
-        "type": "set",
+        "required": true,
         "elements": {
-          "type": "string",
           "one_of": [
             "grpc",
             "grpcs",
@@ -25,8 +16,10 @@
             "ws",
             "wss"
           ],
+          "type": "string",
           "description": "A string representing a protocol, such as HTTP or HTTPS."
         },
+        "description": "A set of strings representing protocols.",
         "default": [
           "http",
           "https",
@@ -35,59 +28,66 @@
           "grpc",
           "grpcs"
         ],
-        "description": "A set of strings representing protocols.",
-        "required": true
+        "type": "set"
       }
     },
     {
       "consumer_group": {
-        "type": "foreign",
+        "reference": "consumer_groups",
         "description": "Custom type for representing a foreign key with a null value allowed.",
         "eq": null,
-        "reference": "consumer_groups"
+        "type": "foreign"
       }
     },
     {
       "config": {
-        "type": "record",
+        "required": true,
         "fields": [
           {
             "allow": {
-              "description": "List of IPs or CIDR ranges to allow. One of `config.allow` or `config.deny` must be specified.",
               "elements": {
                 "type": "string",
                 "description": "A string representing an IP address or CIDR block, such as 192.168.1.1 or 192.168.0.0/16."
               },
-              "type": "array"
+              "type": "array",
+              "description": "List of IPs or CIDR ranges to allow. One of `config.allow` or `config.deny` must be specified."
             }
           },
           {
             "deny": {
-              "description": "List of IPs or CIDR ranges to deny. One of `config.allow` or `config.deny` must be specified.",
               "elements": {
                 "type": "string",
                 "description": "A string representing an IP address or CIDR block, such as 192.168.1.1 or 192.168.0.0/16."
               },
-              "type": "array"
+              "type": "array",
+              "description": "List of IPs or CIDR ranges to deny. One of `config.allow` or `config.deny` must be specified."
             }
           },
           {
             "status": {
-              "description": "The HTTP status of the requests that will be rejected by the plugin.",
               "required": false,
+              "description": "The HTTP status of the requests that will be rejected by the plugin.",
               "type": "number"
             }
           },
           {
             "message": {
-              "description": "The message to send as a response body to rejected requests.",
               "required": false,
+              "description": "The message to send as a response body to rejected requests.",
               "type": "string"
             }
           }
         ],
-        "required": true
+        "type": "record"
       }
+    }
+  ],
+  "entity_checks": [
+    {
+      "at_least_one_of": [
+        "config.allow",
+        "config.deny"
+      ]
     }
   ]
 }

@@ -1,185 +1,164 @@
 {
-  "entity_checks": [
-    {
-      "conditional": {
-        "then_field": "config.tos_accepted",
-        "if_field": "config.api_uri",
-        "then_match": {
-          "eq": true
-        },
-        "then_err": "terms of service must be accepted, see https://letsencrypt.org/repository/",
-        "if_match": {
-          "one_of": [
-            "https://acme-v02.api.letsencrypt.org",
-            "https://acme-staging-v02.api.letsencrypt.org"
-          ]
-        }
-      }
-    },
-    {
-      "custom_entity_check": {
-        "field_sources": [
-          "config.storage"
-        ]
-      }
-    }
-  ],
   "fields": [
     {
       "consumer": {
-        "type": "foreign",
+        "reference": "consumers",
         "description": "Custom type for representing a foreign key with a null value allowed.",
         "eq": null,
-        "reference": "consumers"
+        "type": "foreign"
       }
     },
     {
       "service": {
-        "type": "foreign",
+        "reference": "services",
         "description": "A reference to the 'services' table with a null value allowed.",
         "eq": null,
-        "reference": "services"
+        "type": "foreign"
       }
     },
     {
       "route": {
-        "type": "foreign",
+        "reference": "routes",
         "description": "A reference to the 'routes' table with a null value allowed.",
         "eq": null,
-        "reference": "routes"
+        "type": "foreign"
       }
     },
     {
       "consumer_group": {
-        "type": "foreign",
+        "reference": "consumer_groups",
         "description": "Custom type for representing a foreign key with a null value allowed.",
         "eq": null,
-        "reference": "consumer_groups"
+        "type": "foreign"
       }
     },
     {
       "protocols": {
-        "type": "set",
+        "required": true,
         "elements": {
-          "type": "string",
           "one_of": [
             "grpc",
             "grpcs",
             "http",
             "https"
-          ]
+          ],
+          "type": "string"
         },
+        "type": "set",
         "default": [
           "grpc",
           "grpcs",
           "http",
           "https"
         ],
-        "description": "A set of strings representing HTTP protocols.",
-        "required": true
+        "description": "A set of strings representing HTTP protocols."
       }
     },
     {
       "config": {
-        "type": "record",
+        "required": true,
         "fields": [
           {
             "account_email": {
-              "match": "%w*%p*@+%w*%.?%w*",
-              "referenceable": true,
-              "description": "The account identifier. Can be reused in a different plugin instance.",
-              "encrypted": true,
               "required": true,
+              "description": "The account identifier. Can be reused in a different plugin instance.",
+              "referenceable": true,
+              "match": "%w*%p*@+%w*%.?%w*",
+              "encrypted": true,
               "type": "string"
             }
           },
           {
             "account_key": {
-              "description": "The private key associated with the account.",
+              "required": false,
               "type": "record",
               "fields": [
                 {
                   "key_id": {
-                    "description": "The Key ID.",
                     "required": true,
-                    "type": "string"
+                    "type": "string",
+                    "description": "The Key ID."
                   }
                 },
                 {
                   "key_set": {
-                    "description": "The ID of the key set to associate the Key ID with.",
-                    "type": "string"
+                    "type": "string",
+                    "description": "The ID of the key set to associate the Key ID with."
                   }
                 }
               ],
-              "required": false
+              "description": "The private key associated with the account."
             }
           },
           {
             "api_uri": {
-              "type": "string",
               "description": "A string representing a URL, such as https://example.com/path/to/resource?q=search.",
-              "default": "https://acme-v02.api.letsencrypt.org/directory"
+              "default": "https://acme-v02.api.letsencrypt.org/directory",
+              "type": "string"
             }
           },
           {
             "tos_accepted": {
-              "description": "If you are using Let's Encrypt, you must set this to `true` to agree the terms of service.",
               "type": "boolean",
-              "default": false
+              "default": false,
+              "description": "If you are using Let's Encrypt, you must set this to `true` to agree the terms of service."
             }
           },
           {
             "eab_kid": {
-              "description": "External account binding (EAB) key id. You usually don't need to set this unless it is explicitly required by the CA.",
-              "encrypted": true,
               "referenceable": true,
-              "type": "string"
+              "type": "string",
+              "encrypted": true,
+              "description": "External account binding (EAB) key id. You usually don't need to set this unless it is explicitly required by the CA."
             }
           },
           {
             "eab_hmac_key": {
-              "description": "External account binding (EAB) base64-encoded URL string of the HMAC key. You usually don't need to set this unless it is explicitly required by the CA.",
-              "encrypted": true,
               "referenceable": true,
-              "type": "string"
+              "type": "string",
+              "encrypted": true,
+              "description": "External account binding (EAB) base64-encoded URL string of the HMAC key. You usually don't need to set this unless it is explicitly required by the CA."
             }
           },
           {
             "cert_type": {
-              "description": "The certificate type to create. The possible values are `'rsa'` for RSA certificate or `'ecc'` for EC certificate.",
               "one_of": [
                 "rsa",
                 "ecc"
               ],
               "type": "string",
-              "default": "rsa"
+              "default": "rsa",
+              "description": "The certificate type to create. The possible values are `'rsa'` for RSA certificate or `'ecc'` for EC certificate."
             }
           },
           {
             "rsa_key_size": {
-              "description": "RSA private key size for the certificate. The possible values are 2048, 3072, or 4096.",
               "one_of": [
                 2048,
                 3072,
                 4096
               ],
               "type": "number",
-              "default": 4096
+              "default": 4096,
+              "description": "RSA private key size for the certificate. The possible values are 2048, 3072, or 4096."
             }
           },
           {
             "renew_threshold_days": {
-              "description": "Days remaining to renew the certificate before it expires.",
               "type": "number",
-              "default": 14
+              "default": 14,
+              "description": "Days remaining to renew the certificate before it expires."
             }
           },
           {
             "domains": {
-              "type": "array",
               "elements": {
-                "type": "string",
+                "match_all": [
+                  {
+                    "pattern": "^[^*]*%*?[^*]*$",
+                    "err": "invalid wildcard: must have at most one wildcard"
+                  }
+                ],
                 "match_any": {
                   "patterns": [
                     "^%*%.",
@@ -188,33 +167,28 @@
                   ],
                   "err": "invalid wildcard: must be placed at leftmost or rightmost label"
                 },
-                "match_all": [
-                  {
-                    "pattern": "^[^*]*%*?[^*]*$",
-                    "err": "invalid wildcard: must have at most one wildcard"
-                  }
-                ]
+                "type": "string"
               },
+              "type": "array",
               "description": "An array of strings representing hosts. A valid host is a string containing one or more labels separated by periods, with at most one wildcard label ('*')"
             }
           },
           {
             "allow_any_domain": {
-              "description": "If set to `true`, the plugin allows all domains and ignores any values in the `domains` list.",
               "type": "boolean",
-              "default": false
+              "default": false,
+              "description": "If set to `true`, the plugin allows all domains and ignores any values in the `domains` list."
             }
           },
           {
             "fail_backoff_minutes": {
-              "description": "Minutes to wait for each domain that fails to create a certificate. This applies to both a\nnew certificate and a renewal certificate.",
               "type": "number",
-              "default": 5
+              "default": 5,
+              "description": "Minutes to wait for each domain that fails to create a certificate. This applies to both a\nnew certificate and a renewal certificate."
             }
           },
           {
             "storage": {
-              "description": "The backend storage type to use. The possible values are `'kong'`, `'shm'`, `'redis'`, `'consul'`, or `'vault'`. In DB-less mode, `'kong'` storage is unavailable. Note that `'shm'` storage does not persist during Kong restarts and does not work for Kong running on different machines, so consider using one of `'kong'`, `'redis'`, `'consul'`, or `'vault'` in production. Please refer to the Hybrid Mode sections below as well.",
               "one_of": [
                 "kong",
                 "shm",
@@ -223,40 +197,41 @@
                 "vault"
               ],
               "type": "string",
-              "default": "shm"
+              "default": "shm",
+              "description": "The backend storage type to use. The possible values are `'kong'`, `'shm'`, `'redis'`, `'consul'`, or `'vault'`. In DB-less mode, `'kong'` storage is unavailable. Note that `'shm'` storage does not persist during Kong restarts and does not work for Kong running on different machines, so consider using one of `'kong'`, `'redis'`, `'consul'`, or `'vault'` in production. Please refer to the Hybrid Mode sections below as well."
             }
           },
           {
             "storage_config": {
-              "type": "record",
+              "required": true,
               "fields": [
                 {
                   "shm": {
-                    "type": "record",
+                    "required": true,
                     "fields": [
                       {
                         "shm_name": {
-                          "description": "Name of shared memory zone used for Kong API gateway storage",
                           "type": "string",
-                          "default": "kong"
+                          "default": "kong",
+                          "description": "Name of shared memory zone used for Kong API gateway storage"
                         }
                       }
                     ],
-                    "required": true
+                    "type": "record"
                   }
                 },
                 {
                   "kong": {
-                    "type": "record",
+                    "required": true,
                     "fields": [
 
                     ],
-                    "required": true
+                    "type": "record"
                   }
                 },
                 {
                   "redis": {
-                    "type": "record",
+                    "required": true,
                     "fields": [
                       {
                         "host": {
@@ -266,72 +241,80 @@
                       },
                       {
                         "port": {
-                          "type": "integer",
-                          "description": "An integer representing a port number between 0 and 65535, inclusive.",
                           "between": [
                             0,
                             65535
-                          ]
+                          ],
+                          "description": "An integer representing a port number between 0 and 65535, inclusive.",
+                          "type": "integer"
                         }
                       },
                       {
                         "database": {
-                          "description": "The index of the Redis database to use.",
-                          "type": "number"
+                          "type": "number",
+                          "description": "The index of the Redis database to use."
                         }
                       },
                       {
                         "auth": {
-                          "description": "The Redis password to use for authentication. ",
                           "referenceable": true,
-                          "type": "string"
+                          "type": "string",
+                          "description": "The Redis password to use for authentication. "
                         }
                       },
                       {
                         "ssl": {
-                          "description": "Whether to use SSL/TLS encryption when connecting to the Redis server.",
-                          "type": "boolean",
                           "required": true,
-                          "default": false
+                          "type": "boolean",
+                          "default": false,
+                          "description": "Whether to use SSL/TLS encryption when connecting to the Redis server."
                         }
                       },
                       {
                         "ssl_verify": {
-                          "description": "Whether to verify the SSL/TLS certificate presented by the Redis server. This should be a boolean value.",
-                          "type": "boolean",
                           "required": true,
-                          "default": false
+                          "type": "boolean",
+                          "default": false,
+                          "description": "Whether to verify the SSL/TLS certificate presented by the Redis server. This should be a boolean value."
                         }
                       },
                       {
                         "ssl_server_name": {
-                          "description": "The expected server name for the SSL/TLS certificate presented by the Redis server.",
                           "required": false,
+                          "description": "The expected server name for the SSL/TLS certificate presented by the Redis server.",
                           "type": "string"
                         }
                       },
                       {
                         "namespace": {
-                          "type": "string",
+                          "required": true,
                           "len_min": 0,
                           "description": "A namespace to prepend to all keys stored in Redis.",
-                          "required": true,
-                          "default": ""
+                          "default": "",
+                          "type": "string"
+                        }
+                      },
+                      {
+                        "scan_count": {
+                          "required": false,
+                          "type": "number",
+                          "default": 10,
+                          "description": "The number of keys to return in Redis SCAN calls."
                         }
                       }
                     ],
-                    "required": true
+                    "type": "record"
                   }
                 },
                 {
                   "consul": {
-                    "type": "record",
+                    "required": true,
                     "fields": [
                       {
                         "https": {
-                          "description": "Boolean representation of https.",
                           "type": "boolean",
-                          "default": false
+                          "default": false,
+                          "description": "Boolean representation of https."
                         }
                       },
                       {
@@ -342,46 +325,46 @@
                       },
                       {
                         "port": {
-                          "type": "integer",
-                          "description": "An integer representing a port number between 0 and 65535, inclusive.",
                           "between": [
                             0,
                             65535
-                          ]
+                          ],
+                          "description": "An integer representing a port number between 0 and 65535, inclusive.",
+                          "type": "integer"
                         }
                       },
                       {
                         "kv_path": {
-                          "description": "KV prefix path.",
-                          "type": "string"
+                          "type": "string",
+                          "description": "KV prefix path."
                         }
                       },
                       {
                         "timeout": {
-                          "description": "Timeout in milliseconds.",
-                          "type": "number"
+                          "type": "number",
+                          "description": "Timeout in milliseconds."
                         }
                       },
                       {
                         "token": {
-                          "description": "Consul ACL token.",
                           "referenceable": true,
-                          "type": "string"
+                          "type": "string",
+                          "description": "Consul ACL token."
                         }
                       }
                     ],
-                    "required": true
+                    "type": "record"
                   }
                 },
                 {
                   "vault": {
-                    "type": "record",
+                    "required": true,
                     "fields": [
                       {
                         "https": {
-                          "description": "Boolean representation of https.",
                           "type": "boolean",
-                          "default": false
+                          "default": false,
+                          "description": "Boolean representation of https."
                         }
                       },
                       {
@@ -392,98 +375,123 @@
                       },
                       {
                         "port": {
-                          "type": "integer",
-                          "description": "An integer representing a port number between 0 and 65535, inclusive.",
                           "between": [
                             0,
                             65535
-                          ]
+                          ],
+                          "description": "An integer representing a port number between 0 and 65535, inclusive.",
+                          "type": "integer"
                         }
                       },
                       {
                         "kv_path": {
-                          "description": "KV prefix path.",
-                          "type": "string"
+                          "type": "string",
+                          "description": "KV prefix path."
                         }
                       },
                       {
                         "timeout": {
-                          "description": "Timeout in milliseconds.",
-                          "type": "number"
+                          "type": "number",
+                          "description": "Timeout in milliseconds."
                         }
                       },
                       {
                         "token": {
-                          "description": "Consul ACL token.",
                           "referenceable": true,
-                          "type": "string"
+                          "type": "string",
+                          "description": "Consul ACL token."
                         }
                       },
                       {
                         "tls_verify": {
-                          "description": "Turn on TLS verification.",
                           "type": "boolean",
-                          "default": true
+                          "default": true,
+                          "description": "Turn on TLS verification."
                         }
                       },
                       {
                         "tls_server_name": {
-                          "description": "SNI used in request, default to host if omitted.",
-                          "type": "string"
+                          "type": "string",
+                          "description": "SNI used in request, default to host if omitted."
                         }
                       },
                       {
                         "auth_method": {
-                          "description": "Auth Method, default to token, can be 'token' or 'kubernetes'.",
                           "one_of": [
                             "token",
                             "kubernetes"
                           ],
-                          "type": "string",
-                          "default": "token"
+                          "description": "Auth Method, default to token, can be 'token' or 'kubernetes'.",
+                          "default": "token",
+                          "type": "string"
                         }
                       },
                       {
                         "auth_path": {
-                          "description": "Vault's authentication path to use.",
-                          "type": "string"
+                          "type": "string",
+                          "description": "Vault's authentication path to use."
                         }
                       },
                       {
                         "auth_role": {
-                          "description": "The role to try and assign.",
-                          "type": "string"
+                          "type": "string",
+                          "description": "The role to try and assign."
                         }
                       },
                       {
                         "jwt_path": {
-                          "description": "The path to the JWT.",
-                          "type": "string"
+                          "type": "string",
+                          "description": "The path to the JWT."
                         }
                       }
                     ],
-                    "required": true
+                    "type": "record"
                   }
                 }
               ],
-              "required": true
+              "type": "record"
             }
           },
           {
             "preferred_chain": {
-              "type": "string",
-              "description": "A string value that specifies the preferred certificate chain to use when generating certificates."
+              "description": "A string value that specifies the preferred certificate chain to use when generating certificates.",
+              "type": "string"
             }
           },
           {
             "enable_ipv4_common_name": {
-              "description": "A boolean value that controls whether to include the IPv4 address in the common name field of generated certificates.",
               "type": "boolean",
-              "default": true
+              "default": true,
+              "description": "A boolean value that controls whether to include the IPv4 address in the common name field of generated certificates."
             }
           }
         ],
-        "required": true
+        "type": "record"
+      }
+    }
+  ],
+  "entity_checks": [
+    {
+      "conditional": {
+        "if_match": {
+          "one_of": [
+            "https://acme-v02.api.letsencrypt.org",
+            "https://acme-staging-v02.api.letsencrypt.org"
+          ]
+        },
+        "then_field": "config.tos_accepted",
+        "if_field": "config.api_uri",
+        "then_err": "terms of service must be accepted, see https://letsencrypt.org/repository/",
+        "then_match": {
+          "eq": true
+        }
+      }
+    },
+    {
+      "custom_entity_check": {
+        "field_sources": [
+          "config.storage"
+        ]
       }
     }
   ]
