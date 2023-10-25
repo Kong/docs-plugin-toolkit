@@ -2,26 +2,16 @@
   "fields": [
     {
       "consumer": {
-        "reference": "consumers",
+        "type": "foreign",
         "description": "Custom type for representing a foreign key with a null value allowed.",
         "eq": null,
-        "type": "foreign"
+        "reference": "consumers"
       }
     },
     {
       "protocols": {
         "required": true,
-        "elements": {
-          "one_of": [
-            "grpc",
-            "grpcs",
-            "http",
-            "https",
-            "ws",
-            "wss"
-          ],
-          "type": "string"
-        },
+        "type": "set",
         "default": [
           "grpc",
           "grpcs",
@@ -30,35 +20,46 @@
           "ws",
           "wss"
         ],
-        "type": "set"
+        "elements": {
+          "type": "string",
+          "one_of": [
+            "grpc",
+            "grpcs",
+            "http",
+            "https",
+            "ws",
+            "wss"
+          ]
+        }
       }
     },
     {
       "consumer_group": {
-        "reference": "consumer_groups",
-        "description": "Custom type for representing a foreign key with a null value allowed.",
+        "type": "foreign",
         "eq": null,
-        "type": "foreign"
+        "description": "Custom type for representing a foreign key with a null value allowed.",
+        "reference": "consumer_groups"
       }
     },
     {
       "config": {
         "required": true,
+        "type": "record",
         "fields": [
           {
             "hide_credentials": {
-              "required": true,
-              "type": "boolean",
               "default": false,
-              "description": "An optional boolean value telling the plugin to show or hide the credential from the upstream service."
+              "type": "boolean",
+              "description": "An optional boolean value telling the plugin to show or hide the credential from the upstream service.",
+              "required": true
             }
           },
           {
             "clock_skew": {
-              "gt": 0,
-              "type": "number",
               "default": 300,
-              "description": "Clock skew in seconds to prevent replay attacks."
+              "gt": 0,
+              "description": "Clock skew in seconds to prevent replay attacks.",
+              "type": "number"
             }
           },
           {
@@ -69,10 +70,10 @@
           },
           {
             "validate_request_body": {
-              "required": true,
-              "type": "boolean",
               "default": false,
-              "description": "A boolean value telling the plugin to enable body validation."
+              "type": "boolean",
+              "description": "A boolean value telling the plugin to enable body validation.",
+              "required": true
             }
           },
           {
@@ -80,36 +81,35 @@
               "elements": {
                 "type": "string"
               },
+              "type": "array",
               "description": "A list of headers that the client should at least use for HTTP signature creation.",
               "default": [
 
-              ],
-              "type": "array"
+              ]
             }
           },
           {
             "algorithms": {
               "elements": {
+                "type": "string",
                 "one_of": [
                   "hmac-sha1",
                   "hmac-sha256",
                   "hmac-sha384",
                   "hmac-sha512"
-                ],
-                "type": "string"
+                ]
               },
+              "type": "array",
               "description": "A list of HMAC digest algorithms that the user wants to support. Allowed values are `hmac-sha1`, `hmac-sha256`, `hmac-sha384`, and `hmac-sha512`",
               "default": [
                 "hmac-sha1",
                 "hmac-sha256",
                 "hmac-sha384",
                 "hmac-sha512"
-              ],
-              "type": "array"
+              ]
             }
           }
-        ],
-        "type": "record"
+        ]
       }
     }
   ],

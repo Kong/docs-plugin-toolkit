@@ -3,32 +3,40 @@
     {
       "protocols": {
         "required": true,
-        "elements": {
-          "one_of": [
-            "ws",
-            "wss"
-          ],
-          "type": "string"
-        },
+        "type": "set",
         "default": [
           "ws",
           "wss"
         ],
-        "type": "set"
+        "elements": {
+          "type": "string",
+          "one_of": [
+            "ws",
+            "wss"
+          ]
+        }
       }
     },
     {
       "consumer_group": {
-        "reference": "consumer_groups",
-        "description": "Custom type for representing a foreign key with a null value allowed.",
+        "type": "foreign",
         "eq": null,
-        "type": "foreign"
+        "description": "Custom type for representing a foreign key with a null value allowed.",
+        "reference": "consumer_groups"
       }
     },
     {
       "config": {
         "required": true,
         "type": "record",
+        "entity_checks": [
+          {
+            "at_least_one_of": [
+              "client_max_payload",
+              "upstream_max_payload"
+            ]
+          }
+        ],
         "fields": [
           {
             "client_max_payload": {
@@ -49,14 +57,6 @@
                 33554432
               ]
             }
-          }
-        ],
-        "entity_checks": [
-          {
-            "at_least_one_of": [
-              "client_max_payload",
-              "upstream_max_payload"
-            ]
           }
         ]
       }

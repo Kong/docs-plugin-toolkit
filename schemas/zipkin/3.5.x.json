@@ -2,7 +2,6 @@
   "fields": [
     {
       "protocols": {
-        "required": true,
         "elements": {
           "one_of": [
             "grpc",
@@ -16,85 +15,90 @@
             "ws",
             "wss"
           ],
-          "type": "string",
-          "description": "A string representing a protocol, such as HTTP or HTTPS."
+          "description": "A string representing a protocol, such as HTTP or HTTPS.",
+          "type": "string"
         },
         "type": "set",
+        "description": "A set of strings representing protocols.",
+        "required": true,
         "default": [
           "grpc",
           "grpcs",
           "http",
           "https"
-        ],
-        "description": "A set of strings representing protocols."
+        ]
       }
     },
     {
       "consumer_group": {
-        "reference": "consumer_groups",
-        "description": "Custom type for representing a foreign key with a null value allowed.",
+        "type": "foreign",
         "eq": null,
-        "type": "foreign"
+        "description": "Custom type for representing a foreign key with a null value allowed.",
+        "reference": "consumer_groups"
       }
     },
     {
       "config": {
         "required": true,
+        "type": "record",
         "fields": [
           {
             "local_service_name": {
               "required": true,
               "type": "string",
-              "default": "kong",
-              "description": "The name of the service as displayed in Zipkin."
+              "description": "The name of the service as displayed in Zipkin.",
+              "default": "kong"
             }
           },
           {
             "http_endpoint": {
-              "type": "string",
-              "description": "A string representing a URL, such as https://example.com/path/to/resource?q=search."
+              "description": "A string representing a URL, such as https://example.com/path/to/resource?q=search.",
+              "type": "string"
             }
           },
           {
             "sample_ratio": {
+              "default": 0.001,
               "type": "number",
+              "description": "How often to sample requests that do not contain trace IDs. Set to `0` to turn sampling off, or to `1` to sample **all** requests. ",
               "between": [
                 0,
                 1
-              ],
-              "default": 0.001,
-              "description": "How often to sample requests that do not contain trace IDs. Set to `0` to turn sampling off, or to `1` to sample **all** requests. "
+              ]
             }
           },
           {
             "default_service_name": {
-              "type": "string",
-              "description": "Set a default service name to override `unknown-service-name` in the Zipkin spans."
+              "description": "Set a default service name to override `unknown-service-name` in the Zipkin spans.",
+              "type": "string"
             }
           },
           {
             "include_credential": {
               "required": true,
               "type": "boolean",
-              "default": true,
-              "description": "Specify whether the credential of the currently authenticated consumer should be included in metadata sent to the Zipkin server."
+              "description": "Specify whether the credential of the currently authenticated consumer should be included in metadata sent to the Zipkin server.",
+              "default": true
             }
           },
           {
             "traceid_byte_count": {
+              "type": "integer",
+              "description": "The length in bytes of each request's Trace ID.",
               "required": true,
+              "default": 16,
               "one_of": [
                 8,
                 16
-              ],
-              "description": "The length in bytes of each request's Trace ID.",
-              "default": 16,
-              "type": "integer"
+              ]
             }
           },
           {
             "header_type": {
+              "type": "string",
+              "description": "All HTTP requests going through the plugin are tagged with a tracing HTTP request. This property codifies what kind of tracing header the plugin expects on incoming requests",
               "required": true,
+              "default": "preserve",
               "one_of": [
                 "preserve",
                 "ignore",
@@ -106,15 +110,15 @@
                 "aws",
                 "datadog",
                 "gcp"
-              ],
-              "description": "All HTTP requests going through the plugin are tagged with a tracing HTTP request. This property codifies what kind of tracing header the plugin expects on incoming requests",
-              "default": "preserve",
-              "type": "string"
+              ]
             }
           },
           {
             "default_header_type": {
+              "type": "string",
+              "description": "Allows specifying the type of header to be added to requests with no pre-existing tracing headers and when `config.header_type` is set to `\"preserve\"`. When `header_type` is set to any other value, `default_header_type` is ignored.",
               "required": true,
+              "default": "b3",
               "one_of": [
                 "b3",
                 "b3-single",
@@ -124,27 +128,26 @@
                 "aws",
                 "datadog",
                 "gcp"
-              ],
-              "description": "Allows specifying the type of header to be added to requests with no pre-existing tracing headers and when `config.header_type` is set to `\"preserve\"`. When `header_type` is set to any other value, `default_header_type` is ignored.",
-              "default": "b3",
-              "type": "string"
+              ]
             }
           },
           {
             "tags_header": {
               "required": true,
               "type": "string",
-              "default": "Zipkin-Tags",
-              "description": "The Zipkin plugin will add extra headers to the tags associated with any HTTP requests that come with a header named as configured by this property."
+              "description": "The Zipkin plugin will add extra headers to the tags associated with any HTTP requests that come with a header named as configured by this property.",
+              "default": "Zipkin-Tags"
             }
           },
           {
             "static_tags": {
               "elements": {
+                "type": "record",
                 "fields": [
                   {
                     "name": {
                       "required": true,
+                      "type": "string",
                       "not_one_of": [
                         "error",
                         "http.method",
@@ -159,8 +162,7 @@
                         "kong.service",
                         "lc",
                         "peer.hostname"
-                      ],
-                      "type": "string"
+                      ]
                     }
                   },
                   {
@@ -169,56 +171,55 @@
                       "type": "string"
                     }
                   }
-                ],
-                "type": "record"
+                ]
               },
-              "description": "The tags specified on this property will be added to the generated request traces.",
-              "type": "array"
+              "type": "array",
+              "description": "The tags specified on this property will be added to the generated request traces."
             }
           },
           {
             "http_span_name": {
+              "type": "string",
+              "description": "Specify whether to include the HTTP path in the span name.",
               "required": true,
+              "default": "method",
               "one_of": [
                 "method",
                 "method_path"
-              ],
-              "description": "Specify whether to include the HTTP path in the span name.",
-              "default": "method",
-              "type": "string"
+              ]
             }
           },
           {
             "connect_timeout": {
+              "default": 2000,
+              "type": "integer",
               "description": "An integer representing a timeout in milliseconds. Must be between 0 and 2^31-2.",
               "between": [
                 0,
                 2147483646
-              ],
-              "default": 2000,
-              "type": "integer"
+              ]
             }
           },
           {
             "send_timeout": {
+              "default": 5000,
+              "type": "integer",
               "description": "An integer representing a timeout in milliseconds. Must be between 0 and 2^31-2.",
               "between": [
                 0,
                 2147483646
-              ],
-              "default": 5000,
-              "type": "integer"
+              ]
             }
           },
           {
             "read_timeout": {
+              "default": 5000,
+              "type": "integer",
               "description": "An integer representing a timeout in milliseconds. Must be between 0 and 2^31-2.",
               "between": [
                 0,
                 2147483646
-              ],
-              "default": 5000,
-              "type": "integer"
+              ]
             }
           },
           {
@@ -228,25 +229,26 @@
           },
           {
             "phase_duration_flavor": {
+              "type": "string",
+              "description": "Specify whether to include the duration of each phase as an annotation or a tag.",
               "required": true,
+              "default": "annotations",
               "one_of": [
                 "annotations",
                 "tags"
-              ],
-              "description": "Specify whether to include the duration of each phase as an annotation or a tag.",
-              "default": "annotations",
-              "type": "string"
+              ]
             }
           },
           {
             "queue": {
               "required": true,
+              "type": "record",
               "fields": [
                 {
                   "max_batch_size": {
+                    "default": 1,
                     "type": "integer",
                     "description": "Maximum number of entries that can be processed at a time.",
-                    "default": 1,
                     "between": [
                       1,
                       1000000
@@ -255,9 +257,9 @@
                 },
                 {
                   "max_coalescing_delay": {
+                    "default": 1,
                     "type": "number",
                     "description": "Maximum number of (fractional) seconds to elapse after the first entry was queued before the queue starts calling the handler.",
-                    "default": 1,
                     "between": [
                       0,
                       3600
@@ -266,9 +268,9 @@
                 },
                 {
                   "max_entries": {
+                    "default": 10000,
                     "type": "integer",
                     "description": "Maximum number of entries that can be waiting on the queue.",
-                    "default": 10000,
                     "between": [
                       1,
                       1000000
@@ -277,22 +279,22 @@
                 },
                 {
                   "max_bytes": {
-                    "type": "integer",
-                    "description": "Maximum number of bytes that can be waiting on a queue, requires string content."
+                    "description": "Maximum number of bytes that can be waiting on a queue, requires string content.",
+                    "type": "integer"
                   }
                 },
                 {
                   "max_retry_time": {
-                    "type": "number",
                     "default": 60,
+                    "type": "number",
                     "description": "Time in seconds before the queue gives up calling a failed handler for a batch."
                   }
                 },
                 {
                   "initial_retry_delay": {
+                    "default": 0.01,
                     "type": "number",
                     "description": "Time in seconds before the initial retry is made for a failing batch.",
-                    "default": 0.01,
                     "between": [
                       0.001,
                       1000000
@@ -301,21 +303,19 @@
                 },
                 {
                   "max_retry_delay": {
+                    "default": 60,
                     "type": "number",
+                    "description": "Maximum time in seconds between retries, caps exponential backoff.",
                     "between": [
                       0.001,
                       1000000
-                    ],
-                    "default": 60,
-                    "description": "Maximum time in seconds between retries, caps exponential backoff."
+                    ]
                   }
                 }
-              ],
-              "type": "record"
+              ]
             }
           }
-        ],
-        "type": "record"
+        ]
       }
     }
   ],
