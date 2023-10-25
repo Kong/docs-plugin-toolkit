@@ -2,14 +2,6 @@
   "fields": [
     {
       "protocols": {
-        "required": true,
-        "default": [
-          "grpc",
-          "grpcs",
-          "http",
-          "https"
-        ],
-        "type": "set",
         "elements": {
           "type": "string",
           "one_of": [
@@ -19,67 +11,75 @@
             "https"
           ]
         },
-        "description": "A set of strings representing HTTP protocols."
+        "type": "set",
+        "description": "A set of strings representing HTTP protocols.",
+        "required": true,
+        "default": [
+          "grpc",
+          "grpcs",
+          "http",
+          "https"
+        ]
       }
     },
     {
       "consumer_group": {
-        "reference": "consumer_groups",
-        "eq": null,
         "type": "foreign",
-        "description": "Custom type for representing a foreign key with a null value allowed."
+        "eq": null,
+        "description": "Custom type for representing a foreign key with a null value allowed.",
+        "reference": "consumer_groups"
       }
     },
     {
       "config": {
+        "required": true,
         "type": "record",
         "fields": [
           {
             "strategy": {
+              "type": "string",
+              "description": "The backing data store in which to hold cached entities. Accepted value is `memory`.",
               "required": true,
               "default": "memory",
-              "type": "string",
               "one_of": [
                 "memory"
-              ],
-              "description": "The backing data store in which to hold cached entities. Accepted value is `memory`."
+              ]
             }
           },
           {
             "cache_ttl": {
-              "gt": 0,
-              "type": "integer",
               "default": 300,
-              "description": "TTL in seconds of cache entities. Must be a value greater than 0."
+              "type": "integer",
+              "description": "TTL in seconds of cache entities. Must be a value greater than 0.",
+              "gt": 0
             }
           },
           {
             "memory": {
+              "required": true,
               "type": "record",
               "fields": [
                 {
                   "dictionary_name": {
-                    "default": "kong_db_cache",
-                    "type": "string",
                     "required": true,
-                    "description": "The name of the shared dictionary in which to hold cache entities when the memory strategy is selected. This dictionary currently must be defined manually in the Kong Nginx template."
+                    "type": "string",
+                    "description": "The name of the shared dictionary in which to hold cache entities when the memory strategy is selected. This dictionary currently must be defined manually in the Kong Nginx template.",
+                    "default": "kong_db_cache"
                   }
                 }
-              ],
-              "required": true
+              ]
             }
           },
           {
             "vary_headers": {
-              "type": "array",
               "elements": {
                 "type": "string"
               },
+              "type": "array",
               "description": "Relevant headers considered for the cache key. If undefined, none of the headers are taken into consideration."
             }
           }
-        ],
-        "required": true
+        ]
       }
     }
   ],

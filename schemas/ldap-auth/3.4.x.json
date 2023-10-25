@@ -2,14 +2,16 @@
   "fields": [
     {
       "consumer": {
-        "reference": "consumers",
-        "eq": null,
         "type": "foreign",
-        "description": "Custom type for representing a foreign key with a null value allowed."
+        "description": "Custom type for representing a foreign key with a null value allowed.",
+        "eq": null,
+        "reference": "consumers"
       }
     },
     {
       "protocols": {
+        "required": true,
+        "type": "set",
         "default": [
           "grpc",
           "grpcs",
@@ -18,8 +20,6 @@
           "ws",
           "wss"
         ],
-        "type": "set",
-        "required": true,
         "elements": {
           "type": "string",
           "one_of": [
@@ -35,69 +35,86 @@
     },
     {
       "consumer_group": {
-        "reference": "consumer_groups",
-        "eq": null,
         "type": "foreign",
-        "description": "Custom type for representing a foreign key with a null value allowed."
+        "eq": null,
+        "description": "Custom type for representing a foreign key with a null value allowed.",
+        "reference": "consumer_groups"
       }
     },
     {
       "config": {
+        "required": true,
+        "type": "record",
+        "entity_checks": [
+          {
+            "conditional": {
+              "then_field": "start_tls",
+              "then_match": {
+                "eq": false
+              },
+              "then_err": "'ldaps' and 'start_tls' cannot be enabled simultaneously",
+              "if_match": {
+                "eq": true
+              },
+              "if_field": "ldaps"
+            }
+          }
+        ],
         "fields": [
           {
             "ldap_host": {
-              "type": "string",
               "required": true,
+              "type": "string",
               "description": "A string representing a host name, such as example.com."
             }
           },
           {
             "ldap_port": {
-              "required": true,
               "between": [
                 0,
                 65535
               ],
-              "default": 389,
               "type": "integer",
-              "description": "An integer representing a port number between 0 and 65535, inclusive."
+              "description": "An integer representing a port number between 0 and 65535, inclusive.",
+              "default": 389,
+              "required": true
             }
           },
           {
             "ldaps": {
               "default": false,
               "type": "boolean",
-              "required": true,
-              "description": "Set to `true` to connect using the LDAPS protocol (LDAP over TLS).  When `ldaps` is configured, you must use port 636. If the `ldap` setting is enabled, ensure the `start_tls` setting is disabled."
+              "description": "Set to `true` to connect using the LDAPS protocol (LDAP over TLS).  When `ldaps` is configured, you must use port 636. If the `ldap` setting is enabled, ensure the `start_tls` setting is disabled.",
+              "required": true
             }
           },
           {
             "start_tls": {
               "default": false,
               "type": "boolean",
-              "required": true,
-              "description": "Set it to `true` to issue StartTLS (Transport Layer Security) extended operation over `ldap` connection. If the `start_tls` setting is enabled, ensure the `ldaps` setting is disabled."
+              "description": "Set it to `true` to issue StartTLS (Transport Layer Security) extended operation over `ldap` connection. If the `start_tls` setting is enabled, ensure the `ldaps` setting is disabled.",
+              "required": true
             }
           },
           {
             "verify_ldap_host": {
               "default": false,
               "type": "boolean",
-              "required": true,
-              "description": "Set to `true` to authenticate LDAP server. The server certificate will be verified according to the CA certificates specified by the `lua_ssl_trusted_certificate` directive."
+              "description": "Set to `true` to authenticate LDAP server. The server certificate will be verified according to the CA certificates specified by the `lua_ssl_trusted_certificate` directive.",
+              "required": true
             }
           },
           {
             "base_dn": {
-              "type": "string",
               "required": true,
+              "type": "string",
               "description": "Base DN as the starting point for the search; e.g., dc=example,dc=com"
             }
           },
           {
             "attribute": {
-              "type": "string",
               "required": true,
+              "type": "string",
               "description": "Attribute to be used to search the user; e.g. cn"
             }
           },
@@ -105,16 +122,16 @@
             "cache_ttl": {
               "default": 60,
               "type": "number",
-              "required": true,
-              "description": "Cache expiry time in seconds."
+              "description": "Cache expiry time in seconds.",
+              "required": true
             }
           },
           {
             "hide_credentials": {
               "default": false,
               "type": "boolean",
-              "required": true,
-              "description": "An optional boolean value telling the plugin to hide the credential to the upstream server. It will be removed by Kong before proxying the request."
+              "description": "An optional boolean value telling the plugin to hide the credential to the upstream server. It will be removed by Kong before proxying the request.",
+              "required": true
             }
           },
           {
@@ -142,23 +159,6 @@
               "default": "ldap",
               "type": "string",
               "description": "An optional string to use as part of the Authorization header"
-            }
-          }
-        ],
-        "type": "record",
-        "required": true,
-        "entity_checks": [
-          {
-            "conditional": {
-              "then_err": "'ldaps' and 'start_tls' cannot be enabled simultaneously",
-              "if_match": {
-                "eq": true
-              },
-              "then_field": "start_tls",
-              "if_field": "ldaps",
-              "then_match": {
-                "eq": false
-              }
             }
           }
         ]

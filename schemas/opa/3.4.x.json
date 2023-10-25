@@ -2,22 +2,14 @@
   "fields": [
     {
       "consumer": {
-        "reference": "consumers",
-        "eq": null,
         "type": "foreign",
-        "description": "Custom type for representing a foreign key with a null value allowed."
+        "description": "Custom type for representing a foreign key with a null value allowed.",
+        "eq": null,
+        "reference": "consumers"
       }
     },
     {
       "protocols": {
-        "required": true,
-        "default": [
-          "grpc",
-          "grpcs",
-          "http",
-          "https"
-        ],
-        "type": "set",
         "elements": {
           "type": "string",
           "one_of": [
@@ -27,64 +19,73 @@
             "https"
           ]
         },
-        "description": "A set of strings representing HTTP protocols."
+        "type": "set",
+        "description": "A set of strings representing HTTP protocols.",
+        "required": true,
+        "default": [
+          "grpc",
+          "grpcs",
+          "http",
+          "https"
+        ]
       }
     },
     {
       "consumer_group": {
-        "reference": "consumer_groups",
-        "eq": null,
         "type": "foreign",
-        "description": "Custom type for representing a foreign key with a null value allowed."
+        "eq": null,
+        "description": "Custom type for representing a foreign key with a null value allowed.",
+        "reference": "consumer_groups"
       }
     },
     {
       "config": {
+        "required": true,
         "type": "record",
         "fields": [
           {
             "opa_protocol": {
               "default": "http",
               "type": "string",
+              "description": "The protocol to use when talking to Open Policy Agent (OPA) server. Allowed protocols are `http` and `https`.",
               "one_of": [
                 "http",
                 "https"
-              ],
-              "description": "The protocol to use when talking to Open Policy Agent (OPA) server. Allowed protocols are `http` and `https`."
+              ]
             }
           },
           {
             "opa_host": {
               "default": "localhost",
               "type": "string",
-              "required": true,
-              "description": "A string representing a host name, such as example.com."
+              "description": "A string representing a host name, such as example.com.",
+              "required": true
             }
           },
           {
             "opa_port": {
-              "required": true,
               "between": [
                 0,
                 65535
               ],
-              "default": 8181,
               "type": "integer",
-              "description": "An integer representing a port number between 0 and 65535, inclusive."
+              "description": "An integer representing a port number between 0 and 65535, inclusive.",
+              "default": 8181,
+              "required": true
             }
           },
           {
             "opa_path": {
-              "required": true,
               "starts_with": "/",
               "type": "string",
+              "description": "A string representing a URL path, such as /path/to/resource. Must start with a forward slash (/) and must not contain empty segments (i.e., two consecutive forward slashes).",
+              "required": true,
               "match_none": [
                 {
                   "pattern": "//",
                   "err": "must not have empty segments"
                 }
-              ],
-              "description": "A string representing a URL path, such as /path/to/resource. Must start with a forward slash (/) and must not contain empty segments (i.e., two consecutive forward slashes)."
+              ]
             }
           },
           {
@@ -130,14 +131,13 @@
           },
           {
             "ssl_verify": {
-              "default": true,
-              "type": "boolean",
               "required": true,
-              "description": "If set to true, the OPA certificate will be verified according to the CA certificates specified in lua_ssl_trusted_certificate."
+              "type": "boolean",
+              "description": "If set to true, the OPA certificate will be verified according to the CA certificates specified in lua_ssl_trusted_certificate.",
+              "default": true
             }
           }
-        ],
-        "required": true
+        ]
       }
     }
   ],

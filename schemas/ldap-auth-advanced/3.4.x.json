@@ -2,6 +2,8 @@
   "fields": [
     {
       "protocols": {
+        "required": true,
+        "type": "set",
         "default": [
           "grpc",
           "grpcs",
@@ -10,8 +12,6 @@
           "ws",
           "wss"
         ],
-        "type": "set",
-        "required": true,
         "elements": {
           "type": "string",
           "one_of": [
@@ -27,37 +27,38 @@
     },
     {
       "consumer_group": {
-        "reference": "consumer_groups",
-        "eq": null,
         "type": "foreign",
-        "description": "Custom type for representing a foreign key with a null value allowed."
+        "eq": null,
+        "description": "Custom type for representing a foreign key with a null value allowed.",
+        "reference": "consumer_groups"
       }
     },
     {
       "consumer": {
-        "reference": "consumers",
-        "eq": null,
         "type": "foreign",
-        "description": "Custom type for representing a foreign key with a null value allowed."
+        "description": "Custom type for representing a foreign key with a null value allowed.",
+        "eq": null,
+        "reference": "consumers"
       }
     },
     {
       "config": {
+        "required": true,
         "type": "record",
         "fields": [
           {
             "ldap_host": {
-              "type": "string",
               "required": true,
+              "type": "string",
               "description": "Host on which the LDAP server is running."
             }
           },
           {
             "ldap_password": {
-              "description": "The password to the LDAP server.",
-              "type": "string",
               "encrypted": true,
-              "referenceable": true
+              "referenceable": true,
+              "description": "The password to the LDAP server.",
+              "type": "string"
             }
           },
           {
@@ -69,46 +70,46 @@
           },
           {
             "bind_dn": {
-              "type": "string",
+              "referenceable": true,
               "description": "The DN to bind to. Used to perform LDAP search of user. This `bind_dn` should have permissions to search for the user being authenticated.",
-              "referenceable": true
+              "type": "string"
             }
           },
           {
             "ldaps": {
               "default": false,
               "type": "boolean",
-              "required": true,
-              "description": "Set it to `true` to use `ldaps`, a secure protocol (that can be configured to TLS) to connect to the LDAP server. When `ldaps` is configured, you must use port 636. If the `ldap` setting is enabled, ensure the `start_tls` setting is disabled."
+              "description": "Set it to `true` to use `ldaps`, a secure protocol (that can be configured to TLS) to connect to the LDAP server. When `ldaps` is configured, you must use port 636. If the `ldap` setting is enabled, ensure the `start_tls` setting is disabled.",
+              "required": true
             }
           },
           {
             "start_tls": {
               "default": false,
               "type": "boolean",
-              "required": true,
-              "description": "Set it to `true` to issue StartTLS (Transport Layer Security) extended operation over `ldap` connection. If the `start_tls` setting is enabled, ensure the `ldaps` setting is disabled."
+              "description": "Set it to `true` to issue StartTLS (Transport Layer Security) extended operation over `ldap` connection. If the `start_tls` setting is enabled, ensure the `ldaps` setting is disabled.",
+              "required": true
             }
           },
           {
             "verify_ldap_host": {
               "default": false,
               "type": "boolean",
-              "required": true,
-              "description": "Set to `true` to authenticate LDAP server. The server certificate will be verified according to the CA certificates specified by the `lua_ssl_trusted_certificate` directive."
+              "description": "Set to `true` to authenticate LDAP server. The server certificate will be verified according to the CA certificates specified by the `lua_ssl_trusted_certificate` directive.",
+              "required": true
             }
           },
           {
             "base_dn": {
-              "type": "string",
               "required": true,
+              "type": "string",
               "description": "Base DN as the starting point for the search; e.g., 'dc=example,dc=com'."
             }
           },
           {
             "attribute": {
-              "type": "string",
               "required": true,
+              "type": "string",
               "description": "Attribute to be used to search the user; e.g., \"cn\"."
             }
           },
@@ -116,8 +117,8 @@
             "cache_ttl": {
               "default": 60,
               "type": "number",
-              "required": true,
-              "description": "Cache expiry time in seconds."
+              "description": "Cache expiry time in seconds.",
+              "required": true
             }
           },
           {
@@ -160,18 +161,12 @@
             "consumer_optional": {
               "default": false,
               "type": "boolean",
-              "required": false,
-              "description": "Whether consumer mapping is optional. If `consumer_optional=true`, the plugin will not attempt to associate a consumer with the LDAP authenticated user."
+              "description": "Whether consumer mapping is optional. If `consumer_optional=true`, the plugin will not attempt to associate a consumer with the LDAP authenticated user.",
+              "required": false
             }
           },
           {
             "consumer_by": {
-              "required": false,
-              "default": [
-                "username",
-                "custom_id"
-              ],
-              "type": "array",
               "elements": {
                 "type": "string",
                 "one_of": [
@@ -179,7 +174,13 @@
                   "custom_id"
                 ]
               },
-              "description": "Whether to authenticate consumers based on `username`, `custom_id`, or both."
+              "type": "array",
+              "description": "Whether to authenticate consumers based on `username`, `custom_id`, or both.",
+              "required": false,
+              "default": [
+                "username",
+                "custom_id"
+              ]
             }
           },
           {
@@ -205,22 +206,21 @@
             "log_search_results": {
               "default": false,
               "type": "boolean",
-              "required": false,
-              "description": "Displays all the LDAP search results received from the LDAP server for debugging purposes. Not recommended to be enabled in a production environment."
+              "description": "Displays all the LDAP search results received from the LDAP server for debugging purposes. Not recommended to be enabled in a production environment.",
+              "required": false
             }
           },
           {
             "groups_required": {
               "required": false,
               "type": "array",
+              "description": "The groups required to be present in the LDAP search result for successful authorization. This config parameter works in both **AND** / **OR** cases. - When `[\"group1 group2\"]` are in the same array indices, both `group1` AND `group2` need to be present in the LDAP search result. - When `[\"group1\", \"group2\"]` are in different array indices, either `group1` OR `group2` need to be present in the LDAP search result.",
               "elements": {
                 "type": "string"
-              },
-              "description": "The groups required to be present in the LDAP search result for successful authorization. This config parameter works in both **AND** / **OR** cases. - When `[\"group1 group2\"]` are in the same array indices, both `group1` AND `group2` need to be present in the LDAP search result. - When `[\"group1\", \"group2\"]` are in different array indices, either `group1` OR `group2` need to be present in the LDAP search result."
+              }
             }
           }
-        ],
-        "required": true
+        ]
       }
     }
   ],

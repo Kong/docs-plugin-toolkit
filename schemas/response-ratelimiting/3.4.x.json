@@ -2,14 +2,6 @@
   "fields": [
     {
       "protocols": {
-        "required": true,
-        "default": [
-          "grpc",
-          "grpcs",
-          "http",
-          "https"
-        ],
-        "type": "set",
         "elements": {
           "type": "string",
           "one_of": [
@@ -19,19 +11,28 @@
             "https"
           ]
         },
-        "description": "A set of strings representing HTTP protocols."
+        "type": "set",
+        "description": "A set of strings representing HTTP protocols.",
+        "required": true,
+        "default": [
+          "grpc",
+          "grpcs",
+          "http",
+          "https"
+        ]
       }
     },
     {
       "consumer_group": {
-        "reference": "consumer_groups",
-        "eq": null,
         "type": "foreign",
-        "description": "Custom type for representing a foreign key with a null value allowed."
+        "eq": null,
+        "description": "Custom type for representing a foreign key with a null value allowed.",
+        "reference": "consumer_groups"
       }
     },
     {
       "config": {
+        "required": true,
         "type": "record",
         "fields": [
           {
@@ -45,32 +46,32 @@
             "limit_by": {
               "default": "consumer",
               "type": "string",
+              "description": "The entity that will be used when aggregating the limits: `consumer`, `credential`, `ip`. If the `consumer` or the `credential` cannot be determined, the system will always fallback to `ip`.",
               "one_of": [
                 "consumer",
                 "credential",
                 "ip"
-              ],
-              "description": "The entity that will be used when aggregating the limits: `consumer`, `credential`, `ip`. If the `consumer` or the `credential` cannot be determined, the system will always fallback to `ip`."
+              ]
             }
           },
           {
             "policy": {
               "default": "local",
               "type": "string",
+              "description": "The rate-limiting policies to use for retrieving and incrementing the limits.",
               "one_of": [
                 "local",
                 "cluster",
                 "redis"
-              ],
-              "description": "The rate-limiting policies to use for retrieving and incrementing the limits."
+              ]
             }
           },
           {
             "fault_tolerant": {
               "default": true,
               "type": "boolean",
-              "required": true,
-              "description": "A boolean value that determines if the requests should be proxied even if Kong has troubles connecting a third-party datastore. If `true`, requests will be proxied anyway, effectively disabling the rate-limiting function until the datastore is working again. If `false`, then the clients will see `500` errors."
+              "description": "A boolean value that determines if the requests should be proxied even if Kong has troubles connecting a third-party datastore. If `true`, requests will be proxied anyway, effectively disabling the rate-limiting function until the datastore is working again. If `false`, then the clients will see `500` errors.",
+              "required": true
             }
           },
           {
@@ -109,16 +110,16 @@
             "redis_ssl": {
               "default": false,
               "type": "boolean",
-              "required": true,
-              "description": "When using the `redis` policy, this property specifies if SSL is used to connect to the Redis server."
+              "description": "When using the `redis` policy, this property specifies if SSL is used to connect to the Redis server.",
+              "required": true
             }
           },
           {
             "redis_ssl_verify": {
               "default": false,
               "type": "boolean",
-              "required": true,
-              "description": "When using the `redis` policy with `redis_ssl` set to `true`, this property specifies if the server SSL certificate is validated. Note that you need to configure the `lua_ssl_trusted_certificate` to specify the CA (or server) certificate used by your Redis server. You may also need to configure `lua_ssl_verify_depth` accordingly."
+              "description": "When using the `redis` policy with `redis_ssl` set to `true`, this property specifies if the server SSL certificate is validated. Note that you need to configure the `lua_ssl_trusted_certificate` to specify the CA (or server) certificate used by your Redis server. You may also need to configure `lua_ssl_verify_depth` accordingly.",
+              "required": true
             }
           },
           {
@@ -145,67 +146,30 @@
             "block_on_first_violation": {
               "default": false,
               "type": "boolean",
-              "required": true,
-              "description": "A boolean value that determines if the requests should be blocked as soon as one limit is being exceeded. This will block requests that are supposed to consume other limits too."
+              "description": "A boolean value that determines if the requests should be blocked as soon as one limit is being exceeded. This will block requests that are supposed to consume other limits too.",
+              "required": true
             }
           },
           {
             "hide_client_headers": {
               "default": false,
               "type": "boolean",
-              "required": true,
-              "description": "Optionally hide informative response headers."
+              "description": "Optionally hide informative response headers.",
+              "required": true
             }
           },
           {
             "limits": {
+              "len_min": 1,
+              "type": "map",
+              "description": "A map that defines rate limits for the plugin.",
               "keys": {
                 "type": "string"
               },
               "required": true,
-              "len_min": 1,
-              "type": "map",
               "values": {
-                "fields": [
-                  {
-                    "second": {
-                      "gt": 0,
-                      "type": "number"
-                    }
-                  },
-                  {
-                    "minute": {
-                      "gt": 0,
-                      "type": "number"
-                    }
-                  },
-                  {
-                    "hour": {
-                      "gt": 0,
-                      "type": "number"
-                    }
-                  },
-                  {
-                    "day": {
-                      "gt": 0,
-                      "type": "number"
-                    }
-                  },
-                  {
-                    "month": {
-                      "gt": 0,
-                      "type": "number"
-                    }
-                  },
-                  {
-                    "year": {
-                      "gt": 0,
-                      "type": "number"
-                    }
-                  }
-                ],
-                "type": "record",
                 "required": true,
+                "type": "record",
                 "entity_checks": [
                   {
                     "at_least_one_of": [
@@ -217,51 +181,87 @@
                       "year"
                     ]
                   }
+                ],
+                "fields": [
+                  {
+                    "second": {
+                      "type": "number",
+                      "gt": 0
+                    }
+                  },
+                  {
+                    "minute": {
+                      "type": "number",
+                      "gt": 0
+                    }
+                  },
+                  {
+                    "hour": {
+                      "type": "number",
+                      "gt": 0
+                    }
+                  },
+                  {
+                    "day": {
+                      "type": "number",
+                      "gt": 0
+                    }
+                  },
+                  {
+                    "month": {
+                      "type": "number",
+                      "gt": 0
+                    }
+                  },
+                  {
+                    "year": {
+                      "type": "number",
+                      "gt": 0
+                    }
+                  }
                 ]
-              },
-              "description": "A map that defines rate limits for the plugin."
+              }
             }
           }
-        ],
-        "required": true
+        ]
       }
     }
   ],
   "entity_checks": [
     {
       "conditional": {
-        "if_match": {
-          "eq": "redis"
-        },
         "then_field": "config.redis_host",
-        "if_field": "config.policy",
+        "if_match": {
+          "eq": "redis"
+        },
         "then_match": {
           "required": true
-        }
+        },
+        "if_field": "config.policy"
       }
     },
     {
       "conditional": {
-        "if_match": {
-          "eq": "redis"
-        },
         "then_field": "config.redis_port",
-        "if_field": "config.policy",
+        "if_match": {
+          "eq": "redis"
+        },
         "then_match": {
           "required": true
-        }
+        },
+        "if_field": "config.policy"
       }
     },
     {
       "conditional": {
+        "then_field": "config.redis_timeout",
         "if_match": {
           "eq": "redis"
         },
-        "then_field": "config.redis_timeout",
-        "if_field": "config.policy",
         "then_match": {
           "required": true
-        }
+        },
+        "if_field": "config.policy"
       }
     }
   ]

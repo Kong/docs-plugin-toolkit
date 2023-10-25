@@ -2,14 +2,6 @@
   "fields": [
     {
       "protocols": {
-        "required": true,
-        "default": [
-          "grpc",
-          "grpcs",
-          "http",
-          "https"
-        ],
-        "type": "set",
         "elements": {
           "type": "string",
           "one_of": [
@@ -19,50 +11,70 @@
             "https"
           ]
         },
-        "description": "A set of strings representing HTTP protocols."
+        "type": "set",
+        "description": "A set of strings representing HTTP protocols.",
+        "required": true,
+        "default": [
+          "grpc",
+          "grpcs",
+          "http",
+          "https"
+        ]
       }
     },
     {
       "consumer_group": {
-        "reference": "consumer_groups",
-        "eq": null,
         "type": "foreign",
-        "description": "Custom type for representing a foreign key with a null value allowed."
+        "eq": null,
+        "description": "Custom type for representing a foreign key with a null value allowed.",
+        "reference": "consumer_groups"
       }
     },
     {
       "config": {
+        "required": true,
+        "type": "record",
+        "entity_checks": [
+          {
+            "custom_entity_check": {
+              "field_sources": [
+                "batch_span_count",
+                "batch_flush_delay"
+              ]
+            }
+          }
+        ],
         "fields": [
           {
             "endpoint": {
-              "referenceable": true,
-              "type": "string",
               "required": true,
-              "description": "A string representing a URL, such as https://example.com/path/to/resource?q=search."
+              "referenceable": true,
+              "description": "A string representing a URL, such as https://example.com/path/to/resource?q=search.",
+              "type": "string"
             }
           },
           {
             "headers": {
-              "description": "The custom headers to be added in the HTTP request sent to the OTLP server. This setting is useful for adding the authentication headers (token) for the APM backend.",
+              "values": {
+                "type": "string",
+                "referenceable": true
+              },
               "type": "map",
+              "description": "The custom headers to be added in the HTTP request sent to the OTLP server. This setting is useful for adding the authentication headers (token) for the APM backend.",
               "keys": {
                 "description": "A string representing an HTTP header name.",
-                "type": "string"
-              },
-              "values": {
-                "referenceable": true,
                 "type": "string"
               }
             }
           },
           {
             "resource_attributes": {
-              "keys": {
+              "values": {
                 "required": true,
                 "type": "string"
               },
               "type": "map",
-              "values": {
+              "keys": {
                 "required": true,
                 "type": "string"
               }
@@ -70,45 +82,46 @@
           },
           {
             "queue": {
+              "required": true,
               "type": "record",
               "fields": [
                 {
                   "max_batch_size": {
                     "default": 1,
                     "type": "integer",
+                    "description": "Maximum number of entries that can be processed at a time.",
                     "between": [
                       1,
                       1000000
-                    ],
-                    "description": "Maximum number of entries that can be processed at a time."
+                    ]
                   }
                 },
                 {
                   "max_coalescing_delay": {
                     "default": 1,
                     "type": "number",
+                    "description": "Maximum number of (fractional) seconds to elapse after the first entry was queued before the queue starts calling the handler.",
                     "between": [
                       0,
                       3600
-                    ],
-                    "description": "Maximum number of (fractional) seconds to elapse after the first entry was queued before the queue starts calling the handler."
+                    ]
                   }
                 },
                 {
                   "max_entries": {
                     "default": 10000,
                     "type": "integer",
+                    "description": "Maximum number of entries that can be waiting on the queue.",
                     "between": [
                       1,
                       1000000
-                    ],
-                    "description": "Maximum number of entries that can be waiting on the queue."
+                    ]
                   }
                 },
                 {
                   "max_bytes": {
-                    "type": "integer",
-                    "description": "Maximum number of bytes that can be waiting on a queue, requires string content."
+                    "description": "Maximum number of bytes that can be waiting on a queue, requires string content.",
+                    "type": "integer"
                   }
                 },
                 {
@@ -122,11 +135,11 @@
                   "initial_retry_delay": {
                     "default": 0.01,
                     "type": "number",
+                    "description": "Time in seconds before the initial retry is made for a failing batch.",
                     "between": [
                       0.001,
                       1000000
-                    ],
-                    "description": "Time in seconds before the initial retry is made for a failing batch."
+                    ]
                   }
                 },
                 {
@@ -140,20 +153,19 @@
                     ]
                   }
                 }
-              ],
-              "required": true
+              ]
             }
           },
           {
             "batch_span_count": {
-              "type": "integer",
-              "description": "The number of spans to be sent in a single batch."
+              "description": "The number of spans to be sent in a single batch.",
+              "type": "integer"
             }
           },
           {
             "batch_flush_delay": {
-              "type": "integer",
-              "description": "The delay, in seconds, between two consecutive batches."
+              "description": "The delay, in seconds, between two consecutive batches.",
+              "type": "integer"
             }
           },
           {
@@ -196,9 +208,9 @@
           },
           {
             "header_type": {
-              "default": "preserve",
-              "type": "string",
               "required": false,
+              "type": "string",
+              "default": "preserve",
               "one_of": [
                 "preserve",
                 "ignore",
@@ -207,19 +219,9 @@
                 "w3c",
                 "jaeger",
                 "ot",
-                "aws"
-              ]
-            }
-          }
-        ],
-        "type": "record",
-        "required": true,
-        "entity_checks": [
-          {
-            "custom_entity_check": {
-              "field_sources": [
-                "batch_span_count",
-                "batch_flush_delay"
+                "aws",
+                "gcp",
+                "datadog"
               ]
             }
           }
