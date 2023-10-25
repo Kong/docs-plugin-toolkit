@@ -2,110 +2,111 @@
   "fields": [
     {
       "consumer": {
-        "reference": "consumers",
+        "type": "foreign",
         "description": "Custom type for representing a foreign key with a null value allowed.",
         "eq": null,
-        "type": "foreign"
+        "reference": "consumers"
       }
     },
     {
       "protocols": {
-        "required": true,
         "elements": {
+          "type": "string",
           "one_of": [
             "grpc",
             "grpcs",
             "http",
             "https"
-          ],
-          "type": "string"
+          ]
         },
         "type": "set",
+        "description": "A set of strings representing HTTP protocols.",
+        "required": true,
         "default": [
           "grpc",
           "grpcs",
           "http",
           "https"
-        ],
-        "description": "A set of strings representing HTTP protocols."
+        ]
       }
     },
     {
       "consumer_group": {
-        "reference": "consumer_groups",
-        "description": "Custom type for representing a foreign key with a null value allowed.",
+        "type": "foreign",
         "eq": null,
-        "type": "foreign"
+        "description": "Custom type for representing a foreign key with a null value allowed.",
+        "reference": "consumer_groups"
       }
     },
     {
       "config": {
         "required": true,
+        "type": "record",
         "fields": [
           {
             "opa_protocol": {
+              "default": "http",
+              "type": "string",
+              "description": "The protocol to use when talking to Open Policy Agent (OPA) server. Allowed protocols are `http` and `https`.",
               "one_of": [
                 "http",
                 "https"
-              ],
-              "description": "The protocol to use when talking to Open Policy Agent (OPA) server. Allowed protocols are `http` and `https`.",
-              "default": "http",
-              "type": "string"
+              ]
             }
           },
           {
             "opa_host": {
-              "required": true,
-              "description": "A string representing a host name, such as example.com.",
               "default": "localhost",
-              "type": "string"
+              "type": "string",
+              "description": "A string representing a host name, such as example.com.",
+              "required": true
             }
           },
           {
             "opa_port": {
-              "required": true,
               "between": [
                 0,
                 65535
               ],
               "type": "integer",
+              "description": "An integer representing a port number between 0 and 65535, inclusive.",
               "default": 8181,
-              "description": "An integer representing a port number between 0 and 65535, inclusive."
+              "required": true
             }
           },
           {
             "opa_path": {
+              "starts_with": "/",
+              "type": "string",
+              "description": "A string representing a URL path, such as /path/to/resource. Must start with a forward slash (/) and must not contain empty segments (i.e., two consecutive forward slashes).",
               "required": true,
               "match_none": [
                 {
                   "pattern": "//",
                   "err": "must not have empty segments"
                 }
-              ],
-              "starts_with": "/",
-              "description": "A string representing a URL path, such as /path/to/resource. Must start with a forward slash (/) and must not contain empty segments (i.e., two consecutive forward slashes).",
-              "type": "string"
+              ]
             }
           },
           {
             "include_service_in_opa_input": {
-              "description": "If set to true, the Kong Gateway Service object in use for the current request is included as input to OPA.",
               "default": false,
-              "type": "boolean"
+              "type": "boolean",
+              "description": "If set to true, the Kong Gateway Service object in use for the current request is included as input to OPA."
             }
           },
           {
             "include_route_in_opa_input": {
-              "description": "If set to true, the Kong Gateway Route object in use for the current request is included as input to OPA.",
               "default": false,
-              "type": "boolean"
+              "type": "boolean",
+              "description": "If set to true, the Kong Gateway Route object in use for the current request is included as input to OPA."
             }
           },
           {
             "include_consumer_in_opa_input": {
-              "description": "If set to true, the Kong Gateway Consumer object in use for the current request (if any) is included as input to OPA.",
               "default": false,
-              "type": "boolean"
+              "type": "boolean",
+              "description": "If set to true, the Kong Gateway Consumer object in use for the current request (if any) is included as input to OPA."
             }
           },
           {
@@ -116,28 +117,27 @@
           },
           {
             "include_parsed_json_body_in_opa_input": {
-              "description": "If set to true and the `Content-Type` header of the current request is `application/json`, the request body will be JSON decoded and the decoded struct is included as input to OPA.",
               "default": false,
-              "type": "boolean"
+              "type": "boolean",
+              "description": "If set to true and the `Content-Type` header of the current request is `application/json`, the request body will be JSON decoded and the decoded struct is included as input to OPA."
             }
           },
           {
             "include_uri_captures_in_opa_input": {
-              "description": "If set to true, the regex capture groups captured on the Kong Gateway Route's path field in the current request (if any) are included as input to OPA.",
               "default": false,
-              "type": "boolean"
+              "type": "boolean",
+              "description": "If set to true, the regex capture groups captured on the Kong Gateway Route's path field in the current request (if any) are included as input to OPA."
             }
           },
           {
             "ssl_verify": {
               "required": true,
+              "type": "boolean",
               "description": "If set to true, the OPA certificate will be verified according to the CA certificates specified in lua_ssl_trusted_certificate.",
-              "default": true,
-              "type": "boolean"
+              "default": true
             }
           }
-        ],
-        "type": "record"
+        ]
       }
     }
   ],
