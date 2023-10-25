@@ -1,25 +1,15 @@
 {
-  "entity_checks": [
-    {
-      "custom_entity_check": {
-        "field_sources": [
-          "config.algorithms"
-        ]
-      }
-    }
-  ],
   "fields": [
     {
       "consumer": {
-        "type": "foreign",
+        "reference": "consumers",
         "description": "Custom type for representing a foreign key with a null value allowed.",
         "eq": null,
-        "reference": "consumers"
+        "type": "foreign"
       }
     },
     {
       "protocols": {
-        "required": true,
         "default": [
           "grpc",
           "grpcs",
@@ -28,7 +18,10 @@
           "ws",
           "wss"
         ],
+        "required": true,
+        "type": "set",
         "elements": {
+          "type": "string",
           "one_of": [
             "grpc",
             "grpcs",
@@ -36,18 +29,16 @@
             "https",
             "ws",
             "wss"
-          ],
-          "type": "string"
-        },
-        "type": "set"
+          ]
+        }
       }
     },
     {
       "consumer_group": {
-        "type": "foreign",
+        "reference": "consumer_groups",
         "description": "Custom type for representing a foreign key with a null value allowed.",
         "eq": null,
-        "reference": "consumer_groups"
+        "type": "foreign"
       }
     },
     {
@@ -56,17 +47,17 @@
           {
             "hide_credentials": {
               "default": false,
-              "description": "An optional boolean value telling the plugin to show or hide the credential from the upstream service.",
               "required": true,
-              "type": "boolean"
+              "type": "boolean",
+              "description": "An optional boolean value telling the plugin to show or hide the credential from the upstream service."
             }
           },
           {
             "clock_skew": {
-              "gt": 0,
-              "description": "Clock skew in seconds to prevent replay attacks.",
               "default": 300,
-              "type": "number"
+              "gt": 0,
+              "type": "number",
+              "description": "Clock skew in seconds to prevent replay attacks."
             }
           },
           {
@@ -78,9 +69,9 @@
           {
             "validate_request_body": {
               "default": false,
-              "description": "A boolean value telling the plugin to enable body validation.",
               "required": true,
-              "type": "boolean"
+              "type": "boolean",
+              "description": "A boolean value telling the plugin to enable body validation."
             }
           },
           {
@@ -89,10 +80,10 @@
 
               ],
               "description": "A list of headers that the client should at least use for HTTP signature creation.",
+              "type": "array",
               "elements": {
                 "type": "string"
-              },
-              "type": "array"
+              }
             }
           },
           {
@@ -104,21 +95,30 @@
                 "hmac-sha512"
               ],
               "description": "A list of HMAC digest algorithms that the user wants to support. Allowed values are `hmac-sha1`, `hmac-sha256`, `hmac-sha384`, and `hmac-sha512`",
+              "type": "array",
               "elements": {
+                "type": "string",
                 "one_of": [
                   "hmac-sha1",
                   "hmac-sha256",
                   "hmac-sha384",
                   "hmac-sha512"
-                ],
-                "type": "string"
-              },
-              "type": "array"
+                ]
+              }
             }
           }
         ],
-        "required": true,
-        "type": "record"
+        "type": "record",
+        "required": true
+      }
+    }
+  ],
+  "entity_checks": [
+    {
+      "custom_entity_check": {
+        "field_sources": [
+          "config.algorithms"
+        ]
       }
     }
   ]

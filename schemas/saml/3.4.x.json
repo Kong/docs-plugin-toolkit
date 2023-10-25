@@ -1,14 +1,11 @@
 {
-  "entity_checks": [
-
-  ],
   "fields": [
     {
       "consumer": {
-        "type": "foreign",
+        "reference": "consumers",
         "description": "Custom type for representing a foreign key with a null value allowed.",
         "eq": null,
-        "reference": "consumers"
+        "type": "foreign"
       }
     },
     {
@@ -19,26 +16,26 @@
           "http",
           "https"
         ],
+        "required": true,
+        "description": "A set of strings representing HTTP protocols.",
+        "type": "set",
         "elements": {
+          "type": "string",
           "one_of": [
             "grpc",
             "grpcs",
             "http",
             "https"
-          ],
-          "type": "string"
-        },
-        "type": "set",
-        "description": "A set of strings representing HTTP protocols.",
-        "required": true
+          ]
+        }
       }
     },
     {
       "consumer_group": {
-        "type": "foreign",
+        "reference": "consumer_groups",
         "description": "Custom type for representing a foreign key with a null value allowed.",
         "eq": null,
-        "reference": "consumer_groups"
+        "type": "foreign"
       }
     },
     {
@@ -46,285 +43,287 @@
         "fields": [
           {
             "assertion_consumer_path": {
-              "type": "string",
               "match_none": [
                 {
                   "pattern": "//",
                   "err": "must not have empty segments"
                 }
               ],
+              "description": "A string representing a URL path, such as /path/to/resource. Must start with a forward slash (/) and must not contain empty segments (i.e., two consecutive forward slashes).",
               "starts_with": "/",
-              "required": true,
-              "description": "A string representing a URL path, such as /path/to/resource. Must start with a forward slash (/) and must not contain empty segments (i.e., two consecutive forward slashes)."
-            }
-          },
-          {
-            "idp_sso_url": {
-              "description": "A string representing a URL, such as https://example.com/path/to/resource?q=search.",
               "required": true,
               "type": "string"
             }
           },
           {
-            "idp_certificate": {
-              "referenceable": true,
+            "idp_sso_url": {
+              "description": "A string representing a URL, such as https://example.com/path/to/resource?q=search.",
               "type": "string",
+              "required": true
+            }
+          },
+          {
+            "idp_certificate": {
+              "type": "string",
+              "encrypted": true,
+              "referenceable": true,
               "description": "The public certificate provided by the IdP. This is used to validate responses from the IdP.  Only include the contents of the certificate. Do not include the header (`BEGIN CERTIFICATE`) and footer (`END CERTIFICATE`) lines.",
-              "required": false,
-              "encrypted": true
+              "required": false
             }
           },
           {
             "response_encryption_key": {
-              "referenceable": true,
               "type": "string",
+              "encrypted": true,
+              "referenceable": true,
               "description": "The private encryption key required to decrypt encrypted assertions.",
-              "required": false,
-              "encrypted": true
+              "required": false
             }
           },
           {
             "request_signing_key": {
-              "referenceable": true,
               "type": "string",
+              "encrypted": true,
+              "referenceable": true,
               "description": "The private key for signing requests.  If this parameter is set, requests sent to the IdP are signed.  The `request_signing_certificate` parameter must be set as well.",
-              "required": false,
-              "encrypted": true
+              "required": false
             }
           },
           {
             "request_signing_certificate": {
-              "referenceable": true,
               "type": "string",
+              "encrypted": true,
+              "referenceable": true,
               "description": "The certificate for signing requests.",
-              "required": false,
-              "encrypted": true
+              "required": false
             }
           },
           {
             "request_signature_algorithm": {
               "default": "SHA256",
-              "type": "string",
-              "description": "The signature algorithm for signing Authn requests. Options available are: - `SHA256` - `SHA384` - `SHA512`",
               "required": false,
               "one_of": [
                 "SHA256",
                 "SHA384",
                 "SHA512"
-              ]
+              ],
+              "type": "string",
+              "description": "The signature algorithm for signing Authn requests. Options available are: - `SHA256` - `SHA384` - `SHA512`"
             }
           },
           {
             "request_digest_algorithm": {
               "default": "SHA256",
-              "type": "string",
-              "description": "The digest algorithm for Authn requests: - `SHA256` - `SHA1`",
               "required": false,
               "one_of": [
                 "SHA256",
                 "SHA1"
-              ]
+              ],
+              "type": "string",
+              "description": "The digest algorithm for Authn requests: - `SHA256` - `SHA1`"
             }
           },
           {
             "response_signature_algorithm": {
               "default": "SHA256",
-              "type": "string",
-              "description": "The algorithm for validating signatures in SAML responses. Options available are: - `SHA256` - `SHA384` - `SHA512`",
               "required": false,
               "one_of": [
                 "SHA256",
                 "SHA384",
                 "SHA512"
-              ]
+              ],
+              "type": "string",
+              "description": "The algorithm for validating signatures in SAML responses. Options available are: - `SHA256` - `SHA384` - `SHA512`"
             }
           },
           {
             "response_digest_algorithm": {
               "default": "SHA256",
-              "type": "string",
-              "description": "The algorithm for verifying digest in SAML responses: - `SHA256` - `SHA1`",
               "required": false,
               "one_of": [
                 "SHA256",
                 "SHA1"
-              ]
+              ],
+              "type": "string",
+              "description": "The algorithm for verifying digest in SAML responses: - `SHA256` - `SHA1`"
             }
           },
           {
             "issuer": {
-              "description": "The unique identifier of the IdP application. Formatted as a URL containing information about the IdP so the SP can validate that the SAML assertions it receives are issued from the correct IdP.",
               "required": true,
+              "description": "The unique identifier of the IdP application. Formatted as a URL containing information about the IdP so the SP can validate that the SAML assertions it receives are issued from the correct IdP.",
               "type": "string"
             }
           },
           {
             "nameid_format": {
               "default": "EmailAddress",
-              "type": "string",
-              "description": "The requested `NameId` format. Options available are: - `Unspecified` - `EmailAddress` - `Persistent` - `Transient`",
               "required": false,
               "one_of": [
                 "Unspecified",
                 "EmailAddress",
                 "Persistent",
                 "Transient"
-              ]
+              ],
+              "type": "string",
+              "description": "The requested `NameId` format. Options available are: - `Unspecified` - `EmailAddress` - `Persistent` - `Transient`"
             }
           },
           {
             "validate_assertion_signature": {
               "default": true,
-              "description": "Enable signature validation for SAML responses.",
               "required": false,
-              "type": "boolean"
+              "type": "boolean",
+              "description": "Enable signature validation for SAML responses."
             }
           },
           {
             "anonymous": {
+              "type": "string",
               "description": "An optional string (consumer UUID or username) value to use as an “anonymous” consumer. If not set, a Kong Consumer must exist for the SAML IdP user credentials, mapping the username format to the Kong Consumer username.",
-              "required": false,
-              "type": "string"
+              "required": false
             }
           },
           {
             "session_secret": {
-              "referenceable": true,
-              "description": "The session secret. This must be a random string of 32 characters from the base64 alphabet (letters, numbers, `/`, `_` and `+`). It is used as the secret key for encrypting session data as well as state information that is sent to the IdP in the authentication exchange.",
               "required": true,
+              "referenceable": true,
+              "type": "string",
               "match": "^[0-9a-zA-Z/_+]+$",
               "len_min": 32,
               "len_max": 32,
-              "encrypted": true,
-              "type": "string"
+              "description": "The session secret. This must be a random string of 32 characters from the base64 alphabet (letters, numbers, `/`, `_` and `+`). It is used as the secret key for encrypting session data as well as state information that is sent to the IdP in the authentication exchange.",
+              "encrypted": true
             }
           },
           {
             "session_audience": {
               "default": "default",
-              "description": "The session audience, for example \"my-application\"",
+              "type": "string",
               "required": false,
-              "type": "string"
+              "description": "The session audience, for example \"my-application\""
             }
           },
           {
             "session_cookie_name": {
               "default": "session",
-              "description": "The session cookie name.",
+              "type": "string",
               "required": false,
-              "type": "string"
+              "description": "The session cookie name."
             }
           },
           {
             "session_remember": {
               "default": false,
-              "description": "Enables or disables persistent sessions",
+              "type": "boolean",
               "required": false,
-              "type": "boolean"
+              "description": "Enables or disables persistent sessions"
             }
           },
           {
             "session_remember_cookie_name": {
               "default": "remember",
-              "description": "Persistent session cookie name",
+              "type": "string",
               "required": false,
-              "type": "string"
+              "description": "Persistent session cookie name"
             }
           },
           {
             "session_remember_rolling_timeout": {
               "default": 604800,
-              "description": "Persistent session rolling timeout in seconds.",
+              "type": "number",
               "required": false,
-              "type": "number"
+              "description": "Persistent session rolling timeout in seconds."
             }
           },
           {
             "session_remember_absolute_timeout": {
               "default": 2592000,
-              "description": "Persistent session absolute timeout in seconds.",
+              "type": "number",
               "required": false,
-              "type": "number"
+              "description": "Persistent session absolute timeout in seconds."
             }
           },
           {
             "session_idling_timeout": {
               "default": 900,
-              "description": "The session cookie idle time in seconds.",
+              "type": "number",
               "required": false,
-              "type": "number"
+              "description": "The session cookie idle time in seconds."
             }
           },
           {
             "session_rolling_timeout": {
               "default": 3600,
-              "description": "The session cookie absolute timeout in seconds. Specifies how long the session can be used until it is no longer valid.",
+              "type": "number",
               "required": false,
-              "type": "number"
+              "description": "The session cookie absolute timeout in seconds. Specifies how long the session can be used until it is no longer valid."
             }
           },
           {
             "session_absolute_timeout": {
               "default": 86400,
-              "description": "The session cookie absolute timeout in seconds. Specifies how long the session can be used until it is no longer valid.",
+              "type": "number",
               "required": false,
-              "type": "number"
+              "description": "The session cookie absolute timeout in seconds. Specifies how long the session can be used until it is no longer valid."
             }
           },
           {
             "session_cookie_path": {
               "default": "/",
-              "type": "string",
-              "description": "A string representing a URL path, such as /path/to/resource. Must start with a forward slash (/) and must not contain empty segments (i.e., two consecutive forward slashes).",
-              "starts_with": "/",
-              "required": false,
               "match_none": [
                 {
                   "pattern": "//",
                   "err": "must not have empty segments"
                 }
-              ]
+              ],
+              "type": "string",
+              "starts_with": "/",
+              "required": false,
+              "description": "A string representing a URL path, such as /path/to/resource. Must start with a forward slash (/) and must not contain empty segments (i.e., two consecutive forward slashes)."
             }
           },
           {
             "session_cookie_domain": {
+              "type": "string",
               "description": "The session cookie domain flag.",
-              "required": false,
-              "type": "string"
+              "required": false
             }
           },
           {
             "session_cookie_same_site": {
               "default": "Lax",
-              "type": "string",
-              "description": "Controls whether a cookie is sent with cross-origin requests, providing some protection against cross-site request forgery attacks.",
               "required": false,
               "one_of": [
                 "Strict",
                 "Lax",
                 "None",
                 "Default"
-              ]
+              ],
+              "type": "string",
+              "description": "Controls whether a cookie is sent with cross-origin requests, providing some protection against cross-site request forgery attacks."
             }
           },
           {
             "session_cookie_http_only": {
               "default": true,
-              "description": "Forbids JavaScript from accessing the cookie, for example, through the `Document.cookie` property.",
+              "type": "boolean",
               "required": false,
-              "type": "boolean"
+              "description": "Forbids JavaScript from accessing the cookie, for example, through the `Document.cookie` property."
             }
           },
           {
             "session_cookie_secure": {
+              "type": "boolean",
               "description": "The cookie is only sent to the server when a request is made with the https:scheme (except on localhost), and therefore is more resistant to man-in-the-middle attacks.",
-              "required": false,
-              "type": "boolean"
+              "required": false
             }
           },
           {
             "session_request_headers": {
+              "type": "set",
               "elements": {
+                "type": "string",
                 "one_of": [
                   "id",
                   "audience",
@@ -333,15 +332,15 @@
                   "idling-timeout",
                   "rolling-timeout",
                   "absolute-timeout"
-                ],
-                "type": "string"
-              },
-              "type": "set"
+                ]
+              }
             }
           },
           {
             "session_response_headers": {
+              "type": "set",
               "elements": {
+                "type": "string",
                 "one_of": [
                   "id",
                   "audience",
@@ -350,78 +349,76 @@
                   "idling-timeout",
                   "rolling-timeout",
                   "absolute-timeout"
-                ],
-                "type": "string"
-              },
-              "type": "set"
+                ]
+              }
             }
           },
           {
             "session_storage": {
               "default": "cookie",
-              "type": "string",
-              "description": "The session storage for session data: - `cookie`: stores session data with the session cookie. The session cannot be invalidated or revoked without changing the session secret, but is stateless, and doesn't require a database. - `memcached`: stores session data in memcached - `redis`: stores session data in Redis",
               "required": false,
               "one_of": [
                 "cookie",
                 "memcache",
                 "memcached",
                 "redis"
-              ]
+              ],
+              "type": "string",
+              "description": "The session storage for session data: - `cookie`: stores session data with the session cookie. The session cannot be invalidated or revoked without changing the session secret, but is stateless, and doesn't require a database. - `memcached`: stores session data in memcached - `redis`: stores session data in Redis"
             }
           },
           {
             "session_store_metadata": {
               "default": false,
-              "description": "Configures whether or not session metadata should be stored. This includes information about the active sessions for the `specific_audience` belonging to a specific subject.",
+              "type": "boolean",
               "required": false,
-              "type": "boolean"
+              "description": "Configures whether or not session metadata should be stored. This includes information about the active sessions for the `specific_audience` belonging to a specific subject."
             }
           },
           {
             "session_enforce_same_subject": {
               "default": false,
-              "description": "When set to `true`, audiences are forced to share the same subject.",
+              "type": "boolean",
               "required": false,
-              "type": "boolean"
+              "description": "When set to `true`, audiences are forced to share the same subject."
             }
           },
           {
             "session_hash_subject": {
               "default": false,
-              "description": "When set to `true`, the value of subject is hashed before being stored. Only applies when `session_store_metadata` is enabled.",
+              "type": "boolean",
               "required": false,
-              "type": "boolean"
+              "description": "When set to `true`, the value of subject is hashed before being stored. Only applies when `session_store_metadata` is enabled."
             }
           },
           {
             "session_hash_storage_key": {
               "default": false,
-              "description": "When set to `true`, the storage key (session ID) is hashed for extra security. Hashing the storage key means it is impossible to decrypt data from the storage without a cookie.",
+              "type": "boolean",
               "required": false,
-              "type": "boolean"
+              "description": "When set to `true`, the storage key (session ID) is hashed for extra security. Hashing the storage key means it is impossible to decrypt data from the storage without a cookie."
             }
           },
           {
             "session_memcached_prefix": {
+              "type": "string",
               "description": "The memcached session key prefix.",
-              "required": false,
-              "type": "string"
+              "required": false
             }
           },
           {
             "session_memcached_socket": {
+              "type": "string",
               "description": "The memcached unix socket path.",
-              "required": false,
-              "type": "string"
+              "required": false
             }
           },
           {
             "session_memcached_host": {
               "default": "127.0.0.1",
-              "description": "The memcached host.",
+              "type": "string",
               "required": false,
-              "type": "string"
+              "description": "The memcached host."
             }
           },
           {
@@ -432,30 +429,30 @@
                 0,
                 65535
               ],
-              "description": "An integer representing a port number between 0 and 65535, inclusive.",
-              "required": false
+              "required": false,
+              "description": "An integer representing a port number between 0 and 65535, inclusive."
             }
           },
           {
             "session_redis_prefix": {
+              "type": "string",
               "description": "The Redis session key prefix.",
-              "required": false,
-              "type": "string"
+              "required": false
             }
           },
           {
             "session_redis_socket": {
+              "type": "string",
               "description": "The Redis unix socket path.",
-              "required": false,
-              "type": "string"
+              "required": false
             }
           },
           {
             "session_redis_host": {
               "default": "127.0.0.1",
-              "description": "The Redis host IP.",
+              "type": "string",
               "required": false,
-              "type": "string"
+              "description": "The Redis host IP."
             }
           },
           {
@@ -466,107 +463,107 @@
                 0,
                 65535
               ],
-              "description": "An integer representing a port number between 0 and 65535, inclusive.",
-              "required": false
+              "required": false,
+              "description": "An integer representing a port number between 0 and 65535, inclusive."
             }
           },
           {
             "session_redis_username": {
+              "type": "string",
               "referenceable": true,
-              "description": "Redis username if the `redis` session storage is defined and ACL authentication is desired.If undefined, ACL authentication will not be performed.  This requires Redis v6.0.0+. The username **cannot** be set to `default`.",
               "required": false,
-              "type": "string"
+              "description": "Redis username if the `redis` session storage is defined and ACL authentication is desired.If undefined, ACL authentication will not be performed.  This requires Redis v6.0.0+. The username **cannot** be set to `default`."
             }
           },
           {
             "session_redis_password": {
-              "referenceable": true,
               "type": "string",
+              "encrypted": true,
+              "referenceable": true,
               "description": "Password to use for Redis connection when the `redis` session storage is defined. If undefined, no auth commands are sent to Redis. This value is pulled from",
-              "required": false,
-              "encrypted": true
+              "required": false
             }
           },
           {
             "session_redis_connect_timeout": {
+              "type": "integer",
               "description": "The Redis connection timeout in milliseconds.",
-              "required": false,
-              "type": "integer"
+              "required": false
             }
           },
           {
             "session_redis_read_timeout": {
+              "type": "integer",
               "description": "The Redis read timeout in milliseconds.",
-              "required": false,
-              "type": "integer"
+              "required": false
             }
           },
           {
             "session_redis_send_timeout": {
+              "type": "integer",
               "description": "The Redis send timeout in milliseconds.",
-              "required": false,
-              "type": "integer"
+              "required": false
             }
           },
           {
             "session_redis_ssl": {
               "default": false,
-              "description": "Use SSL/TLS for the Redis connection.",
+              "type": "boolean",
               "required": false,
-              "type": "boolean"
+              "description": "Use SSL/TLS for the Redis connection."
             }
           },
           {
             "session_redis_ssl_verify": {
               "default": false,
-              "description": "Verify the Redis server certificate.",
+              "type": "boolean",
               "required": false,
-              "type": "boolean"
+              "description": "Verify the Redis server certificate."
             }
           },
           {
             "session_redis_server_name": {
+              "type": "string",
               "description": "The SNI used for connecting to the Redis server.",
-              "required": false,
-              "type": "string"
+              "required": false
             }
           },
           {
             "session_redis_cluster_nodes": {
+              "type": "array",
               "required": false,
-              "description": "The Redis cluster node host. Takes an array of host records, with either `ip` or `host`, and `port` values.",
               "elements": {
                 "fields": [
                   {
                     "ip": {
-                      "description": "A string representing a host name, such as example.com.",
                       "default": "127.0.0.1",
                       "required": true,
-                      "type": "string"
+                      "type": "string",
+                      "description": "A string representing a host name, such as example.com."
                     }
                   },
                   {
                     "port": {
+                      "default": 6379,
+                      "description": "An integer representing a port number between 0 and 65535, inclusive.",
                       "between": [
                         0,
                         65535
                       ],
-                      "default": 6379,
-                      "description": "An integer representing a port number between 0 and 65535, inclusive.",
                       "type": "integer"
                     }
                   }
                 ],
                 "type": "record"
               },
-              "type": "array"
+              "description": "The Redis cluster node host. Takes an array of host records, with either `ip` or `host`, and `port` values."
             }
           },
           {
             "session_redis_cluster_max_redirections": {
+              "type": "integer",
               "description": "The Redis cluster maximum redirects.",
-              "required": false,
-              "type": "integer"
+              "required": false
             }
           }
         ],
@@ -646,5 +643,8 @@
         "type": "record"
       }
     }
+  ],
+  "entity_checks": [
+
   ]
 }

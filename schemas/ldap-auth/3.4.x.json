@@ -1,19 +1,15 @@
 {
-  "entity_checks": [
-
-  ],
   "fields": [
     {
       "consumer": {
-        "type": "foreign",
+        "reference": "consumers",
         "description": "Custom type for representing a foreign key with a null value allowed.",
         "eq": null,
-        "reference": "consumers"
+        "type": "foreign"
       }
     },
     {
       "protocols": {
-        "required": true,
         "default": [
           "grpc",
           "grpcs",
@@ -22,7 +18,10 @@
           "ws",
           "wss"
         ],
+        "required": true,
+        "type": "set",
         "elements": {
+          "type": "string",
           "one_of": [
             "grpc",
             "grpcs",
@@ -30,18 +29,16 @@
             "https",
             "ws",
             "wss"
-          ],
-          "type": "string"
-        },
-        "type": "set"
+          ]
+        }
       }
     },
     {
       "consumer_group": {
-        "type": "foreign",
+        "reference": "consumer_groups",
         "description": "Custom type for representing a foreign key with a null value allowed.",
         "eq": null,
-        "reference": "consumer_groups"
+        "type": "foreign"
       }
     },
     {
@@ -50,8 +47,8 @@
           {
             "ldap_host": {
               "description": "A string representing a host name, such as example.com.",
-              "required": true,
-              "type": "string"
+              "type": "string",
+              "required": true
             }
           },
           {
@@ -62,32 +59,32 @@
                 0,
                 65535
               ],
-              "description": "An integer representing a port number between 0 and 65535, inclusive.",
-              "required": true
+              "required": true,
+              "description": "An integer representing a port number between 0 and 65535, inclusive."
             }
           },
           {
             "ldaps": {
               "default": false,
               "description": "Set to `true` to connect using the LDAPS protocol (LDAP over TLS).  When `ldaps` is configured, you must use port 636. If the `ldap` setting is enabled, ensure the `start_tls` setting is disabled.",
-              "required": true,
-              "type": "boolean"
+              "type": "boolean",
+              "required": true
             }
           },
           {
             "start_tls": {
               "default": false,
               "description": "Set it to `true` to issue StartTLS (Transport Layer Security) extended operation over `ldap` connection. If the `start_tls` setting is enabled, ensure the `ldaps` setting is disabled.",
-              "required": true,
-              "type": "boolean"
+              "type": "boolean",
+              "required": true
             }
           },
           {
             "verify_ldap_host": {
               "default": false,
               "description": "Set to `true` to authenticate LDAP server. The server certificate will be verified according to the CA certificates specified by the `lua_ssl_trusted_certificate` directive.",
-              "required": true,
-              "type": "boolean"
+              "type": "boolean",
+              "required": true
             }
           },
           {
@@ -108,16 +105,16 @@
             "cache_ttl": {
               "default": 60,
               "description": "Cache expiry time in seconds.",
-              "required": true,
-              "type": "number"
+              "type": "number",
+              "required": true
             }
           },
           {
             "hide_credentials": {
               "default": false,
               "description": "An optional boolean value telling the plugin to hide the credential to the upstream server. It will be removed by Kong before proxying the request.",
-              "required": true,
-              "type": "boolean"
+              "type": "boolean",
+              "required": true
             }
           },
           {
@@ -136,8 +133,8 @@
           },
           {
             "anonymous": {
-              "type": "string",
-              "description": "An optional string (consumer UUID or username) value to use as an “anonymous” consumer if authentication fails. If empty (default null), the request fails with an authentication failure `4xx`."
+              "description": "An optional string (consumer UUID or username) value to use as an “anonymous” consumer if authentication fails. If empty (default null), the request fails with an authentication failure `4xx`.",
+              "type": "string"
             }
           },
           {
@@ -154,18 +151,21 @@
               "then_match": {
                 "eq": false
               },
-              "then_err": "'ldaps' and 'start_tls' cannot be enabled simultaneously",
+              "then_field": "start_tls",
               "if_match": {
                 "eq": true
               },
-              "then_field": "start_tls",
-              "if_field": "ldaps"
+              "if_field": "ldaps",
+              "then_err": "'ldaps' and 'start_tls' cannot be enabled simultaneously"
             }
           }
         ],
-        "required": true,
-        "type": "record"
+        "type": "record",
+        "required": true
       }
     }
+  ],
+  "entity_checks": [
+
   ]
 }
