@@ -1,13 +1,4 @@
 {
-  "entity_checks": [
-    {
-      "custom_entity_check": {
-        "field_sources": [
-          "config"
-        ]
-      }
-    }
-  ],
   "fields": [
     {
       "protocols": {
@@ -17,18 +8,18 @@
           "http",
           "https"
         ],
+        "required": true,
+        "description": "A set of strings representing HTTP protocols.",
+        "type": "set",
         "elements": {
+          "type": "string",
           "one_of": [
             "grpc",
             "grpcs",
             "http",
             "https"
-          ],
-          "type": "string"
-        },
-        "type": "set",
-        "description": "A set of strings representing HTTP protocols.",
-        "required": true
+          ]
+        }
       }
     },
     {
@@ -38,8 +29,6 @@
             "identifier": {
               "default": "consumer",
               "type": "string",
-              "description": "The type of identifier used to generate the rate limit key. Defines the scope used to increment the rate limiting counters. Can be `ip`, `credential`, `consumer`, `service`, `header`, or `path`.",
-              "required": true,
               "one_of": [
                 "ip",
                 "credential",
@@ -47,38 +36,40 @@
                 "service",
                 "header",
                 "path"
-              ]
+              ],
+              "description": "The type of identifier used to generate the rate limit key. Defines the scope used to increment the rate limiting counters. Can be `ip`, `credential`, `consumer`, `service`, `header`, or `path`.",
+              "required": true
             }
           },
           {
             "window_size": {
-              "required": true,
+              "type": "array",
               "description": "One or more window sizes to apply a limit to (defined in seconds). There must be a matching number of window limits and sizes specified.",
               "elements": {
                 "type": "number"
               },
-              "type": "array"
+              "required": true
             }
           },
           {
             "window_type": {
               "default": "sliding",
-              "description": "Sets the time window type to either `sliding` (default) or `fixed`. Sliding windows apply the rate limiting logic while taking into account previous hit rates (from the window that immediately precedes the current) using a dynamic weight. Fixed windows consist of buckets that are statically assigned to a definitive time range, each request is mapped to only one fixed window based on its timestamp and will affect only that window's counters.",
               "one_of": [
                 "fixed",
                 "sliding"
               ],
-              "type": "string"
+              "type": "string",
+              "description": "Sets the time window type to either `sliding` (default) or `fixed`. Sliding windows apply the rate limiting logic while taking into account previous hit rates (from the window that immediately precedes the current) using a dynamic weight. Fixed windows consist of buckets that are statically assigned to a definitive time range, each request is mapped to only one fixed window based on its timestamp and will affect only that window's counters."
             }
           },
           {
             "limit": {
-              "required": true,
+              "type": "array",
               "description": "One or more requests-per-window limits to apply. There must be a matching number of window limits and sizes specified.",
               "elements": {
                 "type": "number"
               },
-              "type": "array"
+              "required": true
             }
           },
           {
@@ -90,44 +81,44 @@
           {
             "namespace": {
               "auto": true,
-              "description": "The rate limiting library namespace to use for this plugin instance. Counter data and sync configuration is isolated in each namespace.",
-              "required": true,
-              "type": "string"
+              "type": "string",
+              "description": "The rate limiting library namespace to use for this plugin instance. Counter data and sync configuration is isolated in each namespace. NOTE: For the plugin instances sharing the same namespace, all the configurations that are required for synchronizing counters, e.g. `strategy`, `redis`, `sync_rate`, `window_size`, `dictionary_name`, need to be the same.",
+              "required": true
             }
           },
           {
             "strategy": {
               "default": "local",
               "type": "string",
-              "description": "The rate-limiting strategy to use for retrieving and incrementing the limits. Available values are: `local` and `cluster`.",
-              "required": true,
               "one_of": [
                 "cluster",
                 "redis",
                 "local"
-              ]
+              ],
+              "description": "The rate-limiting strategy to use for retrieving and incrementing the limits. Available values are: `local` and `cluster`.",
+              "required": true
             }
           },
           {
             "dictionary_name": {
               "default": "kong_rate_limiting_counters",
+              "type": "string",
               "description": "The shared dictionary where counters are stored. When the plugin is configured to synchronize counter data externally (that is `config.strategy` is `cluster` or `redis` and `config.sync_rate` isn't `-1`), this dictionary serves as a buffer to populate counters in the data store on each synchronization cycle.",
-              "required": true,
-              "type": "string"
+              "required": true
             }
           },
           {
             "hide_client_headers": {
               "default": false,
-              "description": "Optionally hide informative response headers that would otherwise provide information about the current status of limits and counters.",
-              "type": "boolean"
+              "type": "boolean",
+              "description": "Optionally hide informative response headers that would otherwise provide information about the current status of limits and counters."
             }
           },
           {
             "retry_after_jitter_max": {
               "default": 0,
-              "description": "The upper bound of a jitter (random delay) in seconds to be added to the `Retry-After` header of denied requests (status = `429`) in order to prevent all the clients from coming back at the same time. The lower bound of the jitter is `0`; in this case, the `Retry-After` header is equal to the `RateLimit-Reset` header.",
-              "type": "number"
+              "type": "number",
+              "description": "The upper bound of a jitter (random delay) in seconds to be added to the `Retry-After` header of denied requests (status = `429`) in order to prevent all the clients from coming back at the same time. The lower bound of the jitter is `0`; in this case, the `Retry-After` header is equal to the `RateLimit-Reset` header."
             }
           },
           {
@@ -138,15 +129,15 @@
           },
           {
             "path": {
-              "type": "string",
-              "description": "A string representing a URL path, such as /path/to/resource. Must start with a forward slash (/) and must not contain empty segments (i.e., two consecutive forward slashes).",
               "starts_with": "/",
+              "description": "A string representing a URL path, such as /path/to/resource. Must start with a forward slash (/) and must not contain empty segments (i.e., two consecutive forward slashes).",
               "match_none": [
                 {
                   "pattern": "//",
                   "err": "must not have empty segments"
                 }
-              ]
+              ],
+              "type": "string"
             }
           },
           {
@@ -164,18 +155,18 @@
                       0,
                       65535
                     ],
-                    "description": "An integer representing a port number between 0 and 65535, inclusive.",
-                    "type": "integer"
+                    "type": "integer",
+                    "description": "An integer representing a port number between 0 and 65535, inclusive."
                   }
                 },
                 {
                   "timeout": {
+                    "default": 2000,
+                    "description": "An integer representing a timeout in milliseconds. Must be between 0 and 2^31-2.",
                     "between": [
                       0,
                       2147483646
                     ],
-                    "default": 2000,
-                    "description": "An integer representing a timeout in milliseconds. Must be between 0 and 2^31-2.",
                     "type": "integer"
                   }
                 },
@@ -185,8 +176,8 @@
                       0,
                       2147483646
                     ],
-                    "description": "An integer representing a timeout in milliseconds. Must be between 0 and 2^31-2.",
-                    "type": "integer"
+                    "type": "integer",
+                    "description": "An integer representing a timeout in milliseconds. Must be between 0 and 2^31-2."
                   }
                 },
                 {
@@ -195,8 +186,8 @@
                       0,
                       2147483646
                     ],
-                    "description": "An integer representing a timeout in milliseconds. Must be between 0 and 2^31-2.",
-                    "type": "integer"
+                    "type": "integer",
+                    "description": "An integer representing a timeout in milliseconds. Must be between 0 and 2^31-2."
                   }
                 },
                 {
@@ -205,8 +196,8 @@
                       0,
                       2147483646
                     ],
-                    "description": "An integer representing a timeout in milliseconds. Must be between 0 and 2^31-2.",
-                    "type": "integer"
+                    "type": "integer",
+                    "description": "An integer representing a timeout in milliseconds. Must be between 0 and 2^31-2."
                   }
                 },
                 {
@@ -218,10 +209,10 @@
                 },
                 {
                   "password": {
-                    "referenceable": true,
-                    "description": "Password to use for Redis connections. If undefined, no AUTH commands are sent to Redis.",
                     "encrypted": true,
-                    "type": "string"
+                    "referenceable": true,
+                    "type": "string",
+                    "description": "Password to use for Redis connections. If undefined, no AUTH commands are sent to Redis."
                   }
                 },
                 {
@@ -233,27 +224,27 @@
                 },
                 {
                   "sentinel_password": {
-                    "referenceable": true,
-                    "description": "Sentinel password to authenticate with a Redis Sentinel instance. If undefined, no AUTH commands are sent to Redis Sentinels.",
                     "encrypted": true,
-                    "type": "string"
+                    "referenceable": true,
+                    "type": "string",
+                    "description": "Sentinel password to authenticate with a Redis Sentinel instance. If undefined, no AUTH commands are sent to Redis Sentinels."
                   }
                 },
                 {
                   "database": {
-                    "description": "Database to use for the Redis connection when using the `redis` strategy",
                     "default": 0,
+                    "description": "Database to use for the Redis connection when using the `redis` strategy",
                     "type": "integer"
                   }
                 },
                 {
                   "keepalive_pool_size": {
+                    "default": 256,
+                    "description": "The size limit for every cosocket connection pool associated with every remote server, per worker process. If neither `keepalive_pool_size` nor `keepalive_backlog` is specified, no pool is created. If `keepalive_pool_size` isn't specified but `keepalive_backlog` is specified, then the pool uses the default value. Try to increase (e.g. 512) this value if latency is high or throughput is low.",
                     "between": [
                       1,
                       2147483646
                     ],
-                    "default": 30,
-                    "description": "The size limit for every cosocket connection pool associated with every remote server, per worker process. If neither `keepalive_pool_size` nor `keepalive_backlog` is specified, no pool is created. If `keepalive_pool_size` isn't specified but `keepalive_backlog` is specified, then the pool uses the default value.",
                     "type": "integer"
                   }
                 },
@@ -263,8 +254,8 @@
                       0,
                       2147483646
                     ],
-                    "description": "Limits the total number of opened connections for a pool. If the connection pool is full, all connection queues beyond the maximum limit go into the backlog queue. If the backlog queue is full, subsequent connect operations fail and return `nil`. Queued connect operations resume once the number of connections in the pool is less than `keepalive_pool_size`. Note that queued connect operations are subject to set timeouts.",
-                    "type": "integer"
+                    "type": "integer",
+                    "description": "Limits the total number of opened connections for a pool. If the connection pool is full, connection queues above the limit go into the backlog queue. If the backlog queue is full, subsequent connect operations fail and return `nil`. Queued operations (subject to set timeouts) resume once the number of connections in the pool is less than `keepalive_pool_size`. If latency is high or throughput is low, try increasing this value. Empirically, this value is larger than `keepalive_pool_size`."
                   }
                 },
                 {
@@ -275,47 +266,47 @@
                 },
                 {
                   "sentinel_role": {
-                    "description": "Sentinel role to use for Redis connections when the `redis` strategy is defined. Defining this value implies using Redis Sentinel.",
                     "one_of": [
                       "master",
                       "slave",
                       "any"
                     ],
-                    "type": "string"
+                    "type": "string",
+                    "description": "Sentinel role to use for Redis connections when the `redis` strategy is defined. Defining this value implies using Redis Sentinel."
                   }
                 },
                 {
                   "sentinel_addresses": {
                     "len_min": 1,
-                    "description": "Sentinel addresses to use for Redis connections when the `redis` strategy is defined. Defining this value implies using Redis Sentinel. Each string element must be a hostname. The minimum length of the array is 1 element.",
                     "elements": {
                       "type": "string"
                     },
+                    "description": "Sentinel addresses to use for Redis connections when the `redis` strategy is defined. Defining this value implies using Redis Sentinel. Each string element must be a hostname. The minimum length of the array is 1 element.",
                     "type": "array"
                   }
                 },
                 {
                   "cluster_addresses": {
                     "len_min": 1,
-                    "description": "Cluster addresses to use for Redis connections when the `redis` strategy is defined. Defining this value implies using Redis Cluster. Each string element must be a hostname. The minimum length of the array is 1 element.",
                     "elements": {
                       "type": "string"
                     },
+                    "description": "Cluster addresses to use for Redis connections when the `redis` strategy is defined. Defining this value implies using Redis Cluster. Each string element must be a hostname. The minimum length of the array is 1 element.",
                     "type": "array"
                   }
                 },
                 {
                   "ssl": {
-                    "description": "If set to true, uses SSL to connect to Redis.",
                     "default": false,
+                    "description": "If set to true, uses SSL to connect to Redis.",
                     "required": false,
                     "type": "boolean"
                   }
                 },
                 {
                   "ssl_verify": {
-                    "description": "If set to true, verifies the validity of the server SSL certificate. If setting this parameter, also configure `lua_ssl_trusted_certificate` in `kong.conf` to specify the CA (or server) certificate used by your Redis server. You may also need to configure `lua_ssl_verify_depth` accordingly.",
                     "default": false,
+                    "description": "If set to true, verifies the validity of the server SSL certificate. If setting this parameter, also configure `lua_ssl_trusted_certificate` in `kong.conf` to specify the CA (or server) certificate used by your Redis server. You may also need to configure `lua_ssl_verify_depth` accordingly.",
                     "required": false,
                     "type": "boolean"
                   }
@@ -323,8 +314,8 @@
                 {
                   "server_name": {
                     "description": "A string representing an SNI (server name indication) value for TLS.",
-                    "required": false,
-                    "type": "string"
+                    "type": "string",
+                    "required": false
                   }
                 }
               ],
@@ -386,15 +377,15 @@
                   ]
                 }
               ],
-              "required": true,
-              "type": "record"
+              "type": "record",
+              "required": true
             }
           },
           {
             "enforce_consumer_groups": {
               "default": false,
-              "description": "Determines if consumer groups are allowed to override the rate limiting settings for the given Route or Service. Flipping `enforce_consumer_groups` from `true` to `false` disables the group override, but does not clear the list of consumer groups. You can then flip `enforce_consumer_groups` to `true` to re-enforce the groups.",
-              "type": "boolean"
+              "type": "boolean",
+              "description": "Determines if consumer groups are allowed to override the rate limiting settings for the given Route or Service. Flipping `enforce_consumer_groups` from `true` to `false` disables the group override, but does not clear the list of consumer groups. You can then flip `enforce_consumer_groups` to `true` to re-enforce the groups."
             }
           },
           {
@@ -409,28 +400,37 @@
           {
             "disable_penalty": {
               "default": false,
-              "description": "If set to `true`, this doesn't count denied requests (status = `429`). If set to `false`, all requests, including denied ones, are counted. This parameter only affects the `sliding` window_type.",
-              "type": "boolean"
+              "type": "boolean",
+              "description": "If set to `true`, this doesn't count denied requests (status = `429`). If set to `false`, all requests, including denied ones, are counted. This parameter only affects the `sliding` window_type."
             }
           },
           {
             "error_code": {
-              "description": "Set a custom error code to return when the rate limit is exceeded.",
-              "gt": 0,
               "default": 429,
-              "type": "number"
+              "gt": 0,
+              "type": "number",
+              "description": "Set a custom error code to return when the rate limit is exceeded."
             }
           },
           {
             "error_message": {
               "default": "API rate limit exceeded",
-              "description": "Set a custom error message to return when the rate limit is exceeded.",
-              "type": "string"
+              "type": "string",
+              "description": "Set a custom error message to return when the rate limit is exceeded."
             }
           }
         ],
-        "required": true,
-        "type": "record"
+        "type": "record",
+        "required": true
+      }
+    }
+  ],
+  "entity_checks": [
+    {
+      "custom_entity_check": {
+        "field_sources": [
+          "config"
+        ]
       }
     }
   ]

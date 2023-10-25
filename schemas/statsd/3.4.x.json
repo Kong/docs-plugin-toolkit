@@ -1,7 +1,4 @@
 {
-  "entity_checks": [
-
-  ],
   "fields": [
     {
       "protocols": {
@@ -11,8 +8,10 @@
           "http",
           "https"
         ],
+        "required": true,
+        "description": "A set of strings representing protocols.",
+        "type": "set",
         "elements": {
-          "description": "A string representing a protocol, such as HTTP or HTTPS.",
           "one_of": [
             "grpc",
             "grpcs",
@@ -25,19 +24,17 @@
             "ws",
             "wss"
           ],
-          "type": "string"
-        },
-        "type": "set",
-        "description": "A set of strings representing protocols.",
-        "required": true
+          "type": "string",
+          "description": "A string representing a protocol, such as HTTP or HTTPS."
+        }
       }
     },
     {
       "consumer_group": {
-        "type": "foreign",
+        "reference": "consumer_groups",
         "description": "Custom type for representing a foreign key with a null value allowed.",
         "eq": null,
-        "reference": "consumer_groups"
+        "type": "foreign"
       }
     },
     {
@@ -52,104 +49,104 @@
           },
           {
             "port": {
+              "default": 8125,
+              "description": "The port of StatsD server to send data to.",
               "between": [
                 0,
                 65535
               ],
-              "description": "The port of StatsD server to send data to.",
-              "default": 8125,
               "type": "integer"
             }
           },
           {
             "prefix": {
-              "description": "String to prefix to each metric's name.",
               "default": "kong",
-              "type": "string"
+              "type": "string",
+              "description": "String to prefix to each metric's name."
             }
           },
           {
             "metrics": {
               "default": [
                 {
-                  "stat_type": "counter",
+                  "sample_rate": 1,
                   "name": "request_count",
-                  "sample_rate": 1
+                  "stat_type": "counter"
                 },
                 {
-                  "stat_type": "timer",
-                  "name": "latency"
+                  "name": "latency",
+                  "stat_type": "timer"
                 },
                 {
-                  "stat_type": "counter",
+                  "sample_rate": 1,
                   "name": "request_size",
-                  "sample_rate": 1
+                  "stat_type": "counter"
                 },
                 {
-                  "stat_type": "counter",
+                  "sample_rate": 1,
                   "name": "status_count",
-                  "sample_rate": 1
+                  "stat_type": "counter"
                 },
                 {
-                  "stat_type": "counter",
+                  "sample_rate": 1,
                   "name": "response_size",
-                  "sample_rate": 1
+                  "stat_type": "counter"
                 },
                 {
-                  "stat_type": "set",
-                  "name": "unique_users"
+                  "name": "unique_users",
+                  "stat_type": "set"
                 },
                 {
-                  "stat_type": "counter",
+                  "sample_rate": 1,
                   "name": "request_per_user",
-                  "sample_rate": 1
+                  "stat_type": "counter"
                 },
                 {
-                  "stat_type": "timer",
-                  "name": "upstream_latency"
+                  "name": "upstream_latency",
+                  "stat_type": "timer"
                 },
                 {
-                  "stat_type": "timer",
-                  "name": "kong_latency"
+                  "name": "kong_latency",
+                  "stat_type": "timer"
                 },
                 {
-                  "stat_type": "counter",
+                  "sample_rate": 1,
                   "name": "status_count_per_user",
-                  "sample_rate": 1
+                  "stat_type": "counter"
                 },
                 {
-                  "stat_type": "counter",
+                  "sample_rate": 1,
                   "name": "status_count_per_workspace",
-                  "sample_rate": 1
+                  "stat_type": "counter"
                 },
                 {
-                  "stat_type": "counter",
+                  "sample_rate": 1,
                   "name": "status_count_per_user_per_route",
-                  "sample_rate": 1
+                  "stat_type": "counter"
                 },
                 {
-                  "stat_type": "gauge",
+                  "sample_rate": 1,
                   "name": "shdict_usage",
-                  "sample_rate": 1
+                  "stat_type": "gauge"
                 },
                 {
-                  "stat_type": "counter",
+                  "sample_rate": 1,
                   "name": "cache_datastore_hits_total",
-                  "sample_rate": 1
+                  "stat_type": "counter"
                 },
                 {
-                  "stat_type": "counter",
+                  "sample_rate": 1,
                   "name": "cache_datastore_misses_total",
-                  "sample_rate": 1
+                  "stat_type": "counter"
                 }
               ],
               "description": "List of metrics to be logged.",
+              "type": "array",
               "elements": {
                 "fields": [
                   {
                     "name": {
                       "required": true,
-                      "description": "StatsD metric’s name.",
                       "one_of": [
                         "kong_latency",
                         "latency",
@@ -167,13 +164,13 @@
                         "cache_datastore_hits_total",
                         "cache_datastore_misses_total"
                       ],
-                      "type": "string"
+                      "type": "string",
+                      "description": "StatsD metric’s name."
                     }
                   },
                   {
                     "stat_type": {
                       "required": true,
-                      "description": "Determines what sort of event a metric represents.",
                       "one_of": [
                         "counter",
                         "gauge",
@@ -182,46 +179,47 @@
                         "set",
                         "timer"
                       ],
-                      "type": "string"
+                      "type": "string",
+                      "description": "Determines what sort of event a metric represents."
                     }
                   },
                   {
                     "sample_rate": {
-                      "description": "Sampling rate",
                       "gt": 0,
-                      "type": "number"
+                      "type": "number",
+                      "description": "Sampling rate"
                     }
                   },
                   {
                     "consumer_identifier": {
-                      "description": "Authenticated user detail.",
                       "one_of": [
                         "consumer_id",
                         "custom_id",
                         "username"
                       ],
+                      "description": "Authenticated user detail.",
                       "type": "string"
                     }
                   },
                   {
                     "service_identifier": {
-                      "description": "Service detail.",
                       "one_of": [
                         "service_id",
                         "service_name",
                         "service_host",
                         "service_name_or_host"
                       ],
+                      "description": "Service detail.",
                       "type": "string"
                     }
                   },
                   {
                     "workspace_identifier": {
-                      "description": "Workspace detail.",
                       "one_of": [
                         "workspace_id",
                         "workspace_name"
                       ],
+                      "description": "Workspace detail.",
                       "type": "string"
                     }
                   }
@@ -229,23 +227,22 @@
                 "entity_checks": [
                   {
                     "conditional": {
-                      "then_match": {
-                        "required": true
-                      },
+                      "then_field": "sample_rate",
                       "if_match": {
                         "one_of": [
                           "counter",
                           "gauge"
                         ]
                       },
-                      "then_field": "sample_rate",
+                      "then_match": {
+                        "required": true
+                      },
                       "if_field": "stat_type"
                     }
                   }
                 ],
                 "type": "record"
-              },
-              "type": "array"
+              }
             }
           },
           {
@@ -260,11 +257,11 @@
           },
           {
             "udp_packet_size": {
+              "default": 0,
               "between": [
                 0,
                 65507
               ],
-              "default": 0,
               "type": "number"
             }
           },
@@ -282,19 +279,18 @@
           },
           {
             "consumer_identifier_default": {
-              "required": true,
               "default": "custom_id",
               "one_of": [
                 "consumer_id",
                 "custom_id",
                 "username"
               ],
-              "type": "string"
+              "type": "string",
+              "required": true
             }
           },
           {
             "service_identifier_default": {
-              "required": true,
               "default": "service_name_or_host",
               "one_of": [
                 "service_id",
@@ -302,18 +298,19 @@
                 "service_host",
                 "service_name_or_host"
               ],
-              "type": "string"
+              "type": "string",
+              "required": true
             }
           },
           {
             "workspace_identifier_default": {
-              "required": true,
               "default": "workspace_id",
               "one_of": [
                 "workspace_id",
                 "workspace_name"
               ],
-              "type": "string"
+              "type": "string",
+              "required": true
             }
           },
           {
@@ -333,13 +330,13 @@
           },
           {
             "tag_style": {
-              "required": false,
               "one_of": [
                 "dogstatsd",
                 "influxdb",
                 "librato",
                 "signalfx"
               ],
+              "required": false,
               "type": "string"
             }
           },
@@ -348,35 +345,35 @@
               "fields": [
                 {
                   "max_batch_size": {
+                    "default": 1,
+                    "type": "integer",
                     "between": [
                       1,
                       1000000
                     ],
-                    "default": 1,
-                    "description": "Maximum number of entries that can be processed at a time.",
-                    "type": "integer"
+                    "description": "Maximum number of entries that can be processed at a time."
                   }
                 },
                 {
                   "max_coalescing_delay": {
+                    "default": 1,
+                    "type": "number",
                     "between": [
                       0,
                       3600
                     ],
-                    "default": 1,
-                    "description": "Maximum number of (fractional) seconds to elapse after the first entry was queued before the queue starts calling the handler.",
-                    "type": "number"
+                    "description": "Maximum number of (fractional) seconds to elapse after the first entry was queued before the queue starts calling the handler."
                   }
                 },
                 {
                   "max_entries": {
+                    "default": 10000,
+                    "type": "integer",
                     "between": [
                       1,
                       1000000
                     ],
-                    "default": 10000,
-                    "description": "Maximum number of entries that can be waiting on the queue.",
-                    "type": "integer"
+                    "description": "Maximum number of entries that can be waiting on the queue."
                   }
                 },
                 {
@@ -387,36 +384,36 @@
                 },
                 {
                   "max_retry_time": {
-                    "description": "Time in seconds before the queue gives up calling a failed handler for a batch.",
                     "default": 60,
-                    "type": "number"
+                    "type": "number",
+                    "description": "Time in seconds before the queue gives up calling a failed handler for a batch."
                   }
                 },
                 {
                   "initial_retry_delay": {
+                    "default": 0.01,
+                    "type": "number",
                     "between": [
                       0.001,
                       1000000
                     ],
-                    "default": 0.01,
-                    "description": "Time in seconds before the initial retry is made for a failing batch.",
-                    "type": "number"
+                    "description": "Time in seconds before the initial retry is made for a failing batch."
                   }
                 },
                 {
                   "max_retry_delay": {
+                    "default": 60,
+                    "type": "number",
                     "between": [
                       0.001,
                       1000000
                     ],
-                    "default": 60,
-                    "description": "Maximum time in seconds between retries, caps exponential backoff.",
-                    "type": "number"
+                    "description": "Maximum time in seconds between retries, caps exponential backoff."
                   }
                 }
               ],
-              "required": true,
-              "type": "record"
+              "type": "record",
+              "required": true
             }
           }
         ],
@@ -431,9 +428,12 @@
             }
           }
         ],
-        "required": true,
-        "type": "record"
+        "type": "record",
+        "required": true
       }
     }
+  ],
+  "entity_checks": [
+
   ]
 }
