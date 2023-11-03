@@ -2,6 +2,14 @@
   "fields": [
     {
       "protocols": {
+        "type": "set",
+        "required": true,
+        "default": [
+          "grpc",
+          "grpcs",
+          "http",
+          "https"
+        ],
         "elements": {
           "one_of": [
             "grpc",
@@ -15,55 +23,52 @@
             "ws",
             "wss"
           ],
-          "description": "A string representing a protocol, such as HTTP or HTTPS.",
-          "type": "string"
+          "type": "string",
+          "description": "A string representing a protocol, such as HTTP or HTTPS."
         },
-        "type": "set",
-        "description": "A set of strings representing protocols.",
-        "required": true,
-        "default": [
-          "grpc",
-          "grpcs",
-          "http",
-          "https"
-        ]
+        "description": "A set of strings representing protocols."
       }
     },
     {
       "consumer_group": {
         "type": "foreign",
+        "reference": "consumer_groups",
         "eq": null,
-        "description": "Custom type for representing a foreign key with a null value allowed.",
-        "reference": "consumer_groups"
+        "description": "Custom type for representing a foreign key with a null value allowed."
       }
     },
     {
       "config": {
-        "required": true,
-        "type": "record",
         "fields": [
           {
             "response_code": {
-              "len_min": 1,
               "type": "array",
-              "description": "Upstream response status code considered cacheable.",
               "required": true,
+              "len_min": 1,
               "default": [
                 200,
                 301,
                 404
               ],
+              "description": "Upstream response status code considered cacheable.",
               "elements": {
+                "type": "integer",
                 "between": [
                   100,
                   900
-                ],
-                "type": "integer"
+                ]
               }
             }
           },
           {
             "request_method": {
+              "type": "array",
+              "required": true,
+              "default": [
+                "GET",
+                "HEAD"
+              ],
+              "description": "Downstream request methods considered cacheable.",
               "elements": {
                 "type": "string",
                 "one_of": [
@@ -73,53 +78,46 @@
                   "PATCH",
                   "PUT"
                 ]
-              },
-              "type": "array",
-              "description": "Downstream request methods considered cacheable.",
-              "required": true,
-              "default": [
-                "GET",
-                "HEAD"
-              ]
+              }
             }
           },
           {
             "content_type": {
-              "elements": {
-                "type": "string"
-              },
               "type": "array",
-              "description": "Upstream response content types considered cacheable. The plugin performs an **exact match** against each specified value.",
               "required": true,
               "default": [
                 "text/plain",
                 "application/json"
-              ]
+              ],
+              "description": "Upstream response content types considered cacheable. The plugin performs an **exact match** against each specified value.",
+              "elements": {
+                "type": "string"
+              }
             }
           },
           {
             "cache_ttl": {
+              "gt": 0,
               "default": 300,
               "type": "integer",
-              "description": "TTL, in seconds, of cache entities.",
-              "gt": 0
+              "description": "TTL, in seconds, of cache entities."
             }
           },
           {
             "strategy": {
-              "required": true,
-              "type": "string",
               "description": "The backing data store in which to hold cache entities.",
               "one_of": [
                 "memory"
-              ]
+              ],
+              "type": "string",
+              "required": true
             }
           },
           {
             "cache_control": {
+              "description": "When enabled, respect the Cache-Control behaviors defined in RFC7234.",
               "default": false,
               "type": "boolean",
-              "description": "When enabled, respect the Cache-Control behaviors defined in RFC7234.",
               "required": true
             }
           },
@@ -132,72 +130,74 @@
           },
           {
             "storage_ttl": {
-              "description": "Number of seconds to keep resources in the storage backend. This value is independent of `cache_ttl` or resource TTLs defined by Cache-Control behaviors.",
-              "type": "integer"
+              "type": "integer",
+              "description": "Number of seconds to keep resources in the storage backend. This value is independent of `cache_ttl` or resource TTLs defined by Cache-Control behaviors."
             }
           },
           {
             "memory": {
-              "required": true,
-              "type": "record",
               "fields": [
                 {
                   "dictionary_name": {
+                    "description": "The name of the shared dictionary in which to hold cache entities when the memory strategy is selected. Note that this dictionary currently must be defined manually in the Kong Nginx template.",
                     "default": "kong_db_cache",
                     "type": "string",
-                    "description": "The name of the shared dictionary in which to hold cache entities when the memory strategy is selected. Note that this dictionary currently must be defined manually in the Kong Nginx template.",
                     "required": true
                   }
                 }
-              ]
+              ],
+              "type": "record",
+              "required": true
             }
           },
           {
             "vary_query_params": {
+              "description": "Relevant query parameters considered for the cache key. If undefined, all params are taken into consideration.",
+              "type": "array",
               "elements": {
                 "type": "string"
-              },
-              "type": "array",
-              "description": "Relevant query parameters considered for the cache key. If undefined, all params are taken into consideration."
+              }
             }
           },
           {
             "vary_headers": {
+              "description": "Relevant headers considered for the cache key. If undefined, none of the headers are taken into consideration.",
+              "type": "array",
               "elements": {
                 "type": "string"
-              },
-              "type": "array",
-              "description": "Relevant headers considered for the cache key. If undefined, none of the headers are taken into consideration."
+              }
             }
           },
           {
             "response_headers": {
-              "required": true,
-              "type": "record",
               "description": "Caching related diagnostic headers that should be included in cached responses",
               "fields": [
                 {
                   "age": {
-                    "default": true,
-                    "type": "boolean"
+                    "type": "boolean",
+                    "default": true
                   }
                 },
                 {
                   "X-Cache-Status": {
-                    "default": true,
-                    "type": "boolean"
+                    "type": "boolean",
+                    "default": true
                   }
                 },
                 {
                   "X-Cache-Key": {
-                    "default": true,
-                    "type": "boolean"
+                    "type": "boolean",
+                    "default": true
                   }
                 }
-              ]
+              ],
+              "type": "record",
+              "required": true
             }
           }
-        ]
+        ],
+        "type": "record",
+        "required": true
       }
     }
   ],

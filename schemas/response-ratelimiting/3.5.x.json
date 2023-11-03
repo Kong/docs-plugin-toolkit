@@ -2,6 +2,14 @@
   "fields": [
     {
       "protocols": {
+        "type": "set",
+        "required": true,
+        "default": [
+          "grpc",
+          "grpcs",
+          "http",
+          "https"
+        ],
         "elements": {
           "type": "string",
           "one_of": [
@@ -11,29 +19,19 @@
             "https"
           ]
         },
-        "type": "set",
-        "description": "A set of strings representing HTTP protocols.",
-        "required": true,
-        "default": [
-          "grpc",
-          "grpcs",
-          "http",
-          "https"
-        ]
+        "description": "A set of strings representing HTTP protocols."
       }
     },
     {
       "consumer_group": {
         "type": "foreign",
+        "reference": "consumer_groups",
         "eq": null,
-        "description": "Custom type for representing a foreign key with a null value allowed.",
-        "reference": "consumer_groups"
+        "description": "Custom type for representing a foreign key with a null value allowed."
       }
     },
     {
       "config": {
-        "required": true,
-        "type": "record",
         "fields": [
           {
             "header_name": {
@@ -44,88 +42,88 @@
           },
           {
             "limit_by": {
-              "default": "consumer",
-              "type": "string",
-              "description": "The entity that will be used when aggregating the limits: `consumer`, `credential`, `ip`. If the `consumer` or the `credential` cannot be determined, the system will always fallback to `ip`.",
               "one_of": [
                 "consumer",
                 "credential",
                 "ip"
-              ]
+              ],
+              "default": "consumer",
+              "type": "string",
+              "description": "The entity that will be used when aggregating the limits: `consumer`, `credential`, `ip`. If the `consumer` or the `credential` cannot be determined, the system will always fallback to `ip`."
             }
           },
           {
             "policy": {
-              "default": "local",
-              "type": "string",
-              "description": "The rate-limiting policies to use for retrieving and incrementing the limits.",
               "one_of": [
                 "local",
                 "cluster",
                 "redis"
-              ]
+              ],
+              "default": "local",
+              "type": "string",
+              "description": "The rate-limiting policies to use for retrieving and incrementing the limits."
             }
           },
           {
             "fault_tolerant": {
+              "required": true,
               "default": true,
               "type": "boolean",
-              "description": "A boolean value that determines if the requests should be proxied even if Kong has troubles connecting a third-party datastore. If `true`, requests will be proxied anyway, effectively disabling the rate-limiting function until the datastore is working again. If `false`, then the clients will see `500` errors.",
-              "required": true
+              "description": "A boolean value that determines if the requests should be proxied even if Kong has troubles connecting a third-party datastore. If `true`, requests will be proxied anyway, effectively disabling the rate-limiting function until the datastore is working again. If `false`, then the clients will see `500` errors."
             }
           },
           {
             "redis_host": {
-              "description": "When using the `redis` policy, this property specifies the address to the Redis server.",
-              "type": "string"
+              "type": "string",
+              "description": "When using the `redis` policy, this property specifies the address to the Redis server."
             }
           },
           {
             "redis_port": {
-              "default": 6379,
-              "type": "integer",
-              "description": "When using the `redis` policy, this property specifies the port of the Redis server.",
               "between": [
                 0,
                 65535
-              ]
+              ],
+              "default": 6379,
+              "type": "integer",
+              "description": "When using the `redis` policy, this property specifies the port of the Redis server."
             }
           },
           {
             "redis_password": {
               "len_min": 0,
+              "referenceable": true,
               "type": "string",
-              "description": "When using the `redis` policy, this property specifies the password to connect to the Redis server.",
-              "referenceable": true
+              "description": "When using the `redis` policy, this property specifies the password to connect to the Redis server."
             }
           },
           {
             "redis_username": {
+              "referenceable": true,
               "type": "string",
-              "description": "When using the `redis` policy, this property specifies the username to connect to the Redis server when ACL authentication is desired.\nThis requires Redis v6.0.0+. The username **cannot** be set to `default`.",
-              "referenceable": true
+              "description": "When using the `redis` policy, this property specifies the username to connect to the Redis server when ACL authentication is desired.\nThis requires Redis v6.0.0+. The username **cannot** be set to `default`."
             }
           },
           {
             "redis_ssl": {
+              "required": true,
               "default": false,
               "type": "boolean",
-              "description": "When using the `redis` policy, this property specifies if SSL is used to connect to the Redis server.",
-              "required": true
+              "description": "When using the `redis` policy, this property specifies if SSL is used to connect to the Redis server."
             }
           },
           {
             "redis_ssl_verify": {
+              "required": true,
               "default": false,
               "type": "boolean",
-              "description": "When using the `redis` policy with `redis_ssl` set to `true`, this property specifies if the server SSL certificate is validated. Note that you need to configure the `lua_ssl_trusted_certificate` to specify the CA (or server) certificate used by your Redis server. You may also need to configure `lua_ssl_verify_depth` accordingly.",
-              "required": true
+              "description": "When using the `redis` policy with `redis_ssl` set to `true`, this property specifies if the server SSL certificate is validated. Note that you need to configure the `lua_ssl_trusted_certificate` to specify the CA (or server) certificate used by your Redis server. You may also need to configure `lua_ssl_verify_depth` accordingly."
             }
           },
           {
             "redis_server_name": {
-              "description": "When using the `redis` policy with `redis_ssl` set to `true`, this property specifies the server name for the TLS extension Server Name Indication (SNI).",
-              "type": "string"
+              "type": "string",
+              "description": "When using the `redis` policy with `redis_ssl` set to `true`, this property specifies the server name for the TLS extension Server Name Indication (SNI)."
             }
           },
           {
@@ -144,32 +142,29 @@
           },
           {
             "block_on_first_violation": {
+              "required": true,
               "default": false,
               "type": "boolean",
-              "description": "A boolean value that determines if the requests should be blocked as soon as one limit is being exceeded. This will block requests that are supposed to consume other limits too.",
-              "required": true
+              "description": "A boolean value that determines if the requests should be blocked as soon as one limit is being exceeded. This will block requests that are supposed to consume other limits too."
             }
           },
           {
             "hide_client_headers": {
+              "required": true,
               "default": false,
               "type": "boolean",
-              "description": "Optionally hide informative response headers.",
-              "required": true
+              "description": "Optionally hide informative response headers."
             }
           },
           {
             "limits": {
-              "len_min": 1,
-              "type": "map",
-              "description": "A map that defines rate limits for the plugin.",
               "keys": {
                 "type": "string"
               },
+              "type": "map",
               "required": true,
+              "len_min": 1,
               "values": {
-                "required": true,
-                "type": "record",
                 "entity_checks": [
                   {
                     "at_least_one_of": [
@@ -219,11 +214,16 @@
                       "gt": 0
                     }
                   }
-                ]
-              }
+                ],
+                "type": "record",
+                "required": true
+              },
+              "description": "A map that defines rate limits for the plugin."
             }
           }
-        ]
+        ],
+        "type": "record",
+        "required": true
       }
     }
   ],

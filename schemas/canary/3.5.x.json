@@ -3,21 +3,29 @@
     {
       "consumer": {
         "type": "foreign",
-        "description": "Custom type for representing a foreign key with a null value allowed.",
         "eq": null,
-        "reference": "consumers"
+        "reference": "consumers",
+        "description": "Custom type for representing a foreign key with a null value allowed."
       }
     },
     {
       "consumer_group": {
         "type": "foreign",
+        "reference": "consumer_groups",
         "eq": null,
-        "description": "Custom type for representing a foreign key with a null value allowed.",
-        "reference": "consumer_groups"
+        "description": "Custom type for representing a foreign key with a null value allowed."
       }
     },
     {
       "protocols": {
+        "type": "set",
+        "required": true,
+        "default": [
+          "grpc",
+          "grpcs",
+          "http",
+          "https"
+        ],
         "elements": {
           "type": "string",
           "one_of": [
@@ -27,15 +35,7 @@
             "https"
           ]
         },
-        "type": "set",
-        "description": "A set of strings representing HTTP protocols.",
-        "required": true,
-        "default": [
-          "grpc",
-          "grpcs",
-          "http",
-          "https"
-        ]
+        "description": "A set of strings representing HTTP protocols."
       }
     },
     {
@@ -43,25 +43,20 @@
         "shorthand_fields": [
           {
             "hash": {
-              "description": "Hash algorithm to be used for canary release. `whitelist` is deprecated. Use `allow` instead `blacklist` is deprecated. Use `deny` instead.",
-              "type": "string"
+              "type": "string",
+              "description": "Hash algorithm to be used for canary release. `whitelist` is deprecated. Use `allow` instead `blacklist` is deprecated. Use `deny` instead."
             }
           }
         ],
-        "type": "record",
-        "required": true,
         "fields": [
           {
             "start": {
-              "description": "Future time in seconds since epoch, when the canary release will start. Ignored when `percentage` is set, or when using `allow` or `deny` in `hash`.",
-              "type": "number"
+              "type": "number",
+              "description": "Future time in seconds since epoch, when the canary release will start. Ignored when `percentage` is set, or when using `allow` or `deny` in `hash`."
             }
           },
           {
             "hash": {
-              "default": "consumer",
-              "type": "string",
-              "description": "Hash algorithm to be used for canary release.\n\n* `consumer`: The hash will be based on the consumer.\n* `ip`: The hash will be based on the client IP address.\n* `none`: No hash will be applied.\n* `allow`: Allows the specified groups to access the canary release.\n* `deny`: Denies the specified groups from accessing the canary release.\n* `header`: The hash will be based on the specified header value.",
               "one_of": [
                 "consumer",
                 "ip",
@@ -69,29 +64,32 @@
                 "allow",
                 "deny",
                 "header"
-              ]
+              ],
+              "default": "consumer",
+              "type": "string",
+              "description": "Hash algorithm to be used for canary release.\n\n* `consumer`: The hash will be based on the consumer.\n* `ip`: The hash will be based on the client IP address.\n* `none`: No hash will be applied.\n* `allow`: Allows the specified groups to access the canary release.\n* `deny`: Denies the specified groups from accessing the canary release.\n* `header`: The hash will be based on the specified header value."
             }
           },
           {
             "hash_header": {
-              "description": "A string representing an HTTP header name.",
-              "type": "string"
+              "type": "string",
+              "description": "A string representing an HTTP header name."
             }
           },
           {
             "duration": {
+              "gt": 0,
               "default": 3600,
               "type": "number",
-              "description": "The duration of the canary release in seconds.",
-              "gt": 0
+              "description": "The duration of the canary release in seconds."
             }
           },
           {
             "steps": {
+              "gt": 1,
               "default": 1000,
               "type": "number",
-              "description": "The number of steps for the canary release.",
-              "gt": 1
+              "description": "The number of steps for the canary release."
             }
           },
           {
@@ -106,8 +104,8 @@
           },
           {
             "upstream_host": {
-              "description": "A string representing a host name, such as example.com.",
-              "type": "string"
+              "type": "string",
+              "description": "A string representing a host name, such as example.com."
             }
           },
           {
@@ -129,28 +127,30 @@
           },
           {
             "upstream_fallback": {
-              "required": true,
-              "type": "boolean",
               "description": "Specifies whether to fallback to the upstream server if the canary release fails.",
-              "default": false
+              "default": false,
+              "type": "boolean",
+              "required": true
             }
           },
           {
             "groups": {
+              "description": "The groups allowed to access the canary release.",
+              "type": "array",
               "elements": {
                 "type": "string"
-              },
-              "type": "array",
-              "description": "The groups allowed to access the canary release."
+              }
             }
           },
           {
             "canary_by_header_name": {
-              "description": "A string representing an HTTP header name.",
-              "type": "string"
+              "type": "string",
+              "description": "A string representing an HTTP header name."
             }
           }
-        ]
+        ],
+        "type": "record",
+        "required": true
       }
     }
   ],

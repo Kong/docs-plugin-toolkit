@@ -3,21 +3,29 @@
     {
       "consumer": {
         "type": "foreign",
-        "description": "Custom type for representing a foreign key with a null value allowed.",
         "eq": null,
-        "reference": "consumers"
+        "reference": "consumers",
+        "description": "Custom type for representing a foreign key with a null value allowed."
       }
     },
     {
       "route": {
         "type": "foreign",
-        "description": "A reference to the 'routes' table with a null value allowed.",
         "eq": null,
-        "reference": "routes"
+        "reference": "routes",
+        "description": "A reference to the 'routes' table with a null value allowed."
       }
     },
     {
       "protocols": {
+        "type": "set",
+        "required": true,
+        "default": [
+          "grpc",
+          "grpcs",
+          "http",
+          "https"
+        ],
         "elements": {
           "type": "string",
           "one_of": [
@@ -27,68 +35,60 @@
             "https"
           ]
         },
-        "type": "set",
-        "description": "A set of strings representing HTTP protocols.",
-        "required": true,
-        "default": [
-          "grpc",
-          "grpcs",
-          "http",
-          "https"
-        ]
+        "description": "A set of strings representing HTTP protocols."
       }
     },
     {
       "consumer_group": {
         "type": "foreign",
+        "reference": "consumer_groups",
         "eq": null,
-        "description": "Custom type for representing a foreign key with a null value allowed.",
-        "reference": "consumer_groups"
+        "description": "Custom type for representing a foreign key with a null value allowed."
       }
     },
     {
       "config": {
-        "required": true,
-        "type": "record",
         "entity_checks": [
 
         ],
         "fields": [
           {
             "key_names": {
-              "elements": {
-                "description": "A string representing an HTTP header name.",
-                "type": "string"
-              },
               "type": "array",
-              "description": "The names of the headers containing the API key. You can specify multiple header names.",
               "required": true,
               "default": [
                 "apikey"
-              ]
+              ],
+              "elements": {
+                "type": "string",
+                "description": "A string representing an HTTP header name."
+              },
+              "description": "The names of the headers containing the API key. You can specify multiple header names."
             }
           },
           {
             "auth_type": {
               "type": "string",
-              "description": "The type of authentication to be performed. Possible values are: 'openid-connect', 'key-auth'.",
               "required": true,
-              "default": "openid-connect",
               "one_of": [
                 "openid-connect",
                 "key-auth"
-              ]
+              ],
+              "default": "openid-connect",
+              "description": "The type of authentication to be performed. Possible values are: 'openid-connect', 'key-auth'."
             }
           },
           {
             "scope": {
-              "required": true,
-              "type": "string",
               "description": "The unique scope identifier for the plugin configuration.",
-              "unique": true
+              "unique": true,
+              "type": "string",
+              "required": true
             }
           }
-        ]
+        ],
+        "type": "record",
+        "required": true
       }
     }
   ],

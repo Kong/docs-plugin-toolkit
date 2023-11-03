@@ -2,6 +2,14 @@
   "fields": [
     {
       "protocols": {
+        "type": "set",
+        "required": true,
+        "default": [
+          "grpc",
+          "grpcs",
+          "http",
+          "https"
+        ],
         "elements": {
           "type": "string",
           "one_of": [
@@ -11,29 +19,19 @@
             "https"
           ]
         },
-        "type": "set",
-        "description": "A set of strings representing HTTP protocols.",
-        "required": true,
-        "default": [
-          "grpc",
-          "grpcs",
-          "http",
-          "https"
-        ]
+        "description": "A set of strings representing HTTP protocols."
       }
     },
     {
       "consumer_group": {
         "type": "foreign",
+        "reference": "consumer_groups",
         "eq": null,
-        "description": "Custom type for representing a foreign key with a null value allowed.",
-        "reference": "consumer_groups"
+        "description": "Custom type for representing a foreign key with a null value allowed."
       }
     },
     {
       "config": {
-        "required": true,
-        "type": "record",
         "fields": [
           {
             "header_name": {
@@ -44,25 +42,27 @@
           },
           {
             "generator": {
-              "default": "uuid#counter",
-              "type": "string",
-              "description": "The generator to use for the correlation ID. Accepted values are `uuid`, `uuid#counter`, and `tracker`. See [Generators](#generators).",
               "one_of": [
                 "uuid",
                 "uuid#counter",
                 "tracker"
-              ]
+              ],
+              "default": "uuid#counter",
+              "type": "string",
+              "description": "The generator to use for the correlation ID. Accepted values are `uuid`, `uuid#counter`, and `tracker`. See [Generators](#generators)."
             }
           },
           {
             "echo_downstream": {
+              "required": true,
               "default": false,
               "type": "boolean",
-              "description": "Whether to echo the header back to downstream (the client).",
-              "required": true
+              "description": "Whether to echo the header back to downstream (the client)."
             }
           }
-        ]
+        ],
+        "type": "record",
+        "required": true
       }
     }
   ],
