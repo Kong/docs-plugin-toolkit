@@ -2,6 +2,14 @@
   "fields": [
     {
       "protocols": {
+        "type": "set",
+        "required": true,
+        "default": [
+          "grpc",
+          "grpcs",
+          "http",
+          "https"
+        ],
         "elements": {
           "type": "string",
           "one_of": [
@@ -11,29 +19,19 @@
             "https"
           ]
         },
-        "type": "set",
-        "description": "A set of strings representing HTTP protocols.",
-        "required": true,
-        "default": [
-          "grpc",
-          "grpcs",
-          "http",
-          "https"
-        ]
+        "description": "A set of strings representing HTTP protocols."
       }
     },
     {
       "consumer_group": {
         "type": "foreign",
+        "reference": "consumer_groups",
         "eq": null,
-        "description": "Custom type for representing a foreign key with a null value allowed.",
-        "reference": "consumer_groups"
+        "description": "Custom type for representing a foreign key with a null value allowed."
       }
     },
     {
       "config": {
-        "required": true,
-        "type": "record",
         "entity_checks": [
           {
             "custom_entity_check": {
@@ -56,6 +54,8 @@
         "fields": [
           {
             "bootstrap_servers": {
+              "description": "Set of bootstrap brokers in a `{host: host, port: port}` list format.",
+              "type": "set",
               "elements": {
                 "type": "record",
                 "fields": [
@@ -68,19 +68,17 @@
                   },
                   {
                     "port": {
-                      "required": true,
-                      "type": "integer",
-                      "description": "An integer representing a port number between 0 and 65535, inclusive.",
                       "between": [
                         0,
                         65535
-                      ]
+                      ],
+                      "required": true,
+                      "type": "integer",
+                      "description": "An integer representing a port number between 0 and 65535, inclusive."
                     }
                   }
                 ]
-              },
-              "type": "set",
-              "description": "Set of bootstrap brokers in a `{host: host, port: port}` list format."
+              }
             }
           },
           {
@@ -106,35 +104,33 @@
           },
           {
             "keepalive_enabled": {
-              "default": false,
-              "type": "boolean"
+              "type": "boolean",
+              "default": false
             }
           },
           {
             "authentication": {
-              "required": true,
-              "type": "record",
               "fields": [
                 {
                   "strategy": {
                     "required": false,
-                    "type": "string",
-                    "description": "The authentication strategy for the plugin, the only option for the value is `sasl`.",
                     "one_of": [
                       "sasl"
-                    ]
+                    ],
+                    "type": "string",
+                    "description": "The authentication strategy for the plugin, the only option for the value is `sasl`."
                   }
                 },
                 {
                   "mechanism": {
                     "required": false,
-                    "type": "string",
-                    "description": "The SASL authentication mechanism.  Supported options: `PLAIN`, `SCRAM-SHA-256`, or `SCRAM-SHA-512`.",
                     "one_of": [
                       "PLAIN",
                       "SCRAM-SHA-256",
                       "SCRAM-SHA-512"
-                    ]
+                    ],
+                    "type": "string",
+                    "description": "The SASL authentication mechanism.  Supported options: `PLAIN`, `SCRAM-SHA-256`, or `SCRAM-SHA-512`."
                   }
                 },
                 {
@@ -146,36 +142,36 @@
                 },
                 {
                   "user": {
-                    "referenceable": true,
-                    "description": "Username for SASL authentication.",
-                    "encrypted": true,
                     "type": "string",
-                    "required": false
+                    "required": false,
+                    "referenceable": true,
+                    "encrypted": true,
+                    "description": "Username for SASL authentication."
                   }
                 },
                 {
                   "password": {
-                    "referenceable": true,
-                    "description": "Password for SASL authentication.",
-                    "encrypted": true,
                     "type": "string",
-                    "required": false
+                    "required": false,
+                    "referenceable": true,
+                    "encrypted": true,
+                    "description": "Password for SASL authentication."
                   }
                 }
-              ]
+              ],
+              "type": "record",
+              "required": true
             }
           },
           {
             "security": {
-              "required": true,
-              "type": "record",
               "fields": [
                 {
                   "certificate_id": {
                     "uuid": true,
+                    "required": false,
                     "type": "string",
-                    "description": "UUID of certificate entity for mTLS authentication.",
-                    "required": false
+                    "description": "UUID of certificate entity for mTLS authentication."
                   }
                 },
                 {
@@ -185,7 +181,9 @@
                     "description": "Enables TLS."
                   }
                 }
-              ]
+              ],
+              "type": "record",
+              "required": true
             }
           },
           {
@@ -219,21 +217,21 @@
           {
             "cluster_name": {
               "required": false,
-              "type": "string",
               "auto": true,
+              "type": "string",
               "description": "An identifier for the Kafka cluster. By default, this field generates a random string. You can also set your own custom cluster identifier.  If more than one Kafka plugin is configured without a `cluster_name` (that is, if the default autogenerated value is removed), these plugins will use the same producer, and by extension, the same cluster. Logs will be sent to the leader of the cluster."
             }
           },
           {
             "producer_request_acks": {
-              "default": 1,
-              "type": "integer",
-              "description": "The number of acknowledgments the producer requires the leader to have received before considering a request complete. Allowed values: 0 for no acknowledgments; 1 for only the leader; and -1 for the full ISR (In-Sync Replica set).",
               "one_of": [
                 -1,
                 0,
                 1
-              ]
+              ],
+              "default": 1,
+              "type": "integer",
+              "description": "The number of acknowledgments the producer requires the leader to have received before considering a request complete. Allowed values: 0 for no acknowledgments; 1 for only the leader; and -1 for the full ISR (In-Sync Replica set)."
             }
           },
           {
@@ -292,7 +290,9 @@
               "description": "Maximum number of messages that can be buffered in memory in asynchronous mode."
             }
           }
-        ]
+        ],
+        "type": "record",
+        "required": true
       }
     }
   ],

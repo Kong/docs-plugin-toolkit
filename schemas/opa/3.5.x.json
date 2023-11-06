@@ -3,13 +3,21 @@
     {
       "consumer": {
         "type": "foreign",
-        "description": "Custom type for representing a foreign key with a null value allowed.",
         "eq": null,
-        "reference": "consumers"
+        "reference": "consumers",
+        "description": "Custom type for representing a foreign key with a null value allowed."
       }
     },
     {
       "protocols": {
+        "type": "set",
+        "required": true,
+        "default": [
+          "grpc",
+          "grpcs",
+          "http",
+          "https"
+        ],
         "elements": {
           "type": "string",
           "one_of": [
@@ -19,73 +27,63 @@
             "https"
           ]
         },
-        "type": "set",
-        "description": "A set of strings representing HTTP protocols.",
-        "required": true,
-        "default": [
-          "grpc",
-          "grpcs",
-          "http",
-          "https"
-        ]
+        "description": "A set of strings representing HTTP protocols."
       }
     },
     {
       "consumer_group": {
         "type": "foreign",
+        "reference": "consumer_groups",
         "eq": null,
-        "description": "Custom type for representing a foreign key with a null value allowed.",
-        "reference": "consumer_groups"
+        "description": "Custom type for representing a foreign key with a null value allowed."
       }
     },
     {
       "config": {
-        "required": true,
-        "type": "record",
         "fields": [
           {
             "opa_protocol": {
-              "default": "http",
-              "type": "string",
-              "description": "The protocol to use when talking to Open Policy Agent (OPA) server. Allowed protocols are `http` and `https`.",
               "one_of": [
                 "http",
                 "https"
-              ]
+              ],
+              "default": "http",
+              "type": "string",
+              "description": "The protocol to use when talking to Open Policy Agent (OPA) server. Allowed protocols are `http` and `https`."
             }
           },
           {
             "opa_host": {
+              "description": "A string representing a host name, such as example.com.",
               "default": "localhost",
               "type": "string",
-              "description": "A string representing a host name, such as example.com.",
               "required": true
             }
           },
           {
             "opa_port": {
+              "type": "integer",
+              "required": true,
               "between": [
                 0,
                 65535
               ],
-              "type": "integer",
-              "description": "An integer representing a port number between 0 and 65535, inclusive.",
               "default": 8181,
-              "required": true
+              "description": "An integer representing a port number between 0 and 65535, inclusive."
             }
           },
           {
             "opa_path": {
-              "starts_with": "/",
               "type": "string",
-              "description": "A string representing a URL path, such as /path/to/resource. Must start with a forward slash (/) and must not contain empty segments (i.e., two consecutive forward slashes).",
               "required": true,
+              "starts_with": "/",
               "match_none": [
                 {
                   "pattern": "//",
                   "err": "must not have empty segments"
                 }
-              ]
+              ],
+              "description": "A string representing a URL path, such as /path/to/resource. Must start with a forward slash (/) and must not contain empty segments (i.e., two consecutive forward slashes)."
             }
           },
           {
@@ -111,8 +109,8 @@
           },
           {
             "include_body_in_opa_input": {
-              "default": false,
-              "type": "boolean"
+              "type": "boolean",
+              "default": false
             }
           },
           {
@@ -132,12 +130,14 @@
           {
             "ssl_verify": {
               "required": true,
+              "default": true,
               "type": "boolean",
-              "description": "If set to true, the OPA certificate will be verified according to the CA certificates specified in lua_ssl_trusted_certificate.",
-              "default": true
+              "description": "If set to true, the OPA certificate will be verified according to the CA certificates specified in lua_ssl_trusted_certificate."
             }
           }
-        ]
+        ],
+        "type": "record",
+        "required": true
       }
     }
   ],

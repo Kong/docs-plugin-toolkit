@@ -3,15 +3,23 @@
     {
       "consumer": {
         "type": "foreign",
-        "description": "Custom type for representing a foreign key with a null value allowed.",
         "eq": null,
-        "reference": "consumers"
+        "reference": "consumers",
+        "description": "Custom type for representing a foreign key with a null value allowed."
       }
     },
     {
       "protocols": {
+        "type": "set",
+        "required": true,
+        "default": [
+          "grpc",
+          "grpcs",
+          "http",
+          "https"
+        ],
         "elements": {
-          "required": true,
+          "len_min": 1,
           "one_of": [
             "grpc",
             "grpcs",
@@ -19,61 +27,52 @@
             "https"
           ],
           "type": "string",
-          "len_min": 1
+          "required": true
         },
-        "type": "set",
-        "description": "A set of strings representing HTTP protocols.",
-        "required": true,
-        "default": [
-          "grpc",
-          "grpcs",
-          "http",
-          "https"
-        ]
+        "description": "A set of strings representing HTTP protocols."
       }
     },
     {
       "consumer_group": {
         "type": "foreign",
+        "reference": "consumer_groups",
         "eq": null,
-        "description": "Custom type for representing a foreign key with a null value allowed.",
-        "reference": "consumer_groups"
+        "description": "Custom type for representing a foreign key with a null value allowed."
       }
     },
     {
       "config": {
-        "required": true,
-        "type": "record",
         "fields": [
           {
             "origins": {
+              "description": "List of allowed domains for the `Access-Control-Allow-Origin` header. If you want to allow all origins, add `*` as a single value to this configuration field. The accepted values can either be flat strings or PCRE regexes.",
+              "type": "array",
               "elements": {
                 "type": "string"
-              },
-              "type": "array",
-              "description": "List of allowed domains for the `Access-Control-Allow-Origin` header. If you want to allow all origins, add `*` as a single value to this configuration field. The accepted values can either be flat strings or PCRE regexes."
+              }
             }
           },
           {
             "headers": {
+              "description": "Value for the `Access-Control-Allow-Headers` header.",
+              "type": "array",
               "elements": {
                 "type": "string"
-              },
-              "type": "array",
-              "description": "Value for the `Access-Control-Allow-Headers` header."
+              }
             }
           },
           {
             "exposed_headers": {
+              "description": "Value for the `Access-Control-Expose-Headers` header. If not specified, no custom headers are exposed.",
+              "type": "array",
               "elements": {
                 "type": "string"
-              },
-              "type": "array",
-              "description": "Value for the `Access-Control-Expose-Headers` header. If not specified, no custom headers are exposed."
+              }
             }
           },
           {
             "methods": {
+              "description": "'Value for the `Access-Control-Allow-Methods` header. Available options include `GET`, `HEAD`, `PUT`, `PATCH`, `POST`, `DELETE`, `OPTIONS`, `TRACE`, `CONNECT`. By default, all options are allowed.'",
               "default": [
                 "GET",
                 "HEAD",
@@ -86,7 +85,6 @@
                 "CONNECT"
               ],
               "type": "array",
-              "description": "'Value for the `Access-Control-Allow-Methods` header. Available options include `GET`, `HEAD`, `PUT`, `PATCH`, `POST`, `DELETE`, `OPTIONS`, `TRACE`, `CONNECT`. By default, all options are allowed.'",
               "elements": {
                 "type": "string",
                 "one_of": [
@@ -105,35 +103,37 @@
           },
           {
             "max_age": {
-              "description": "Indicates how long the results of the preflight request can be cached, in `seconds`.",
-              "type": "number"
+              "type": "number",
+              "description": "Indicates how long the results of the preflight request can be cached, in `seconds`."
             }
           },
           {
             "credentials": {
               "required": true,
+              "default": false,
               "type": "boolean",
-              "description": "Flag to determine whether the `Access-Control-Allow-Credentials` header should be sent with `true` as the value.",
-              "default": false
+              "description": "Flag to determine whether the `Access-Control-Allow-Credentials` header should be sent with `true` as the value."
             }
           },
           {
             "private_network": {
               "required": true,
+              "default": false,
               "type": "boolean",
-              "description": "Flag to determine whether the `Access-Control-Allow-Private-Network` header should be sent with `true` as the value.",
-              "default": false
+              "description": "Flag to determine whether the `Access-Control-Allow-Private-Network` header should be sent with `true` as the value."
             }
           },
           {
             "preflight_continue": {
               "required": true,
+              "default": false,
               "type": "boolean",
-              "description": "A boolean value that instructs the plugin to proxy the `OPTIONS` preflight request to the Upstream service.",
-              "default": false
+              "description": "A boolean value that instructs the plugin to proxy the `OPTIONS` preflight request to the Upstream service."
             }
           }
-        ]
+        ],
+        "type": "record",
+        "required": true
       }
     }
   ],
