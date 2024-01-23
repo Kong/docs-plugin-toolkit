@@ -2,8 +2,8 @@
   "fields": [
     {
       "protocols": {
-        "type": "set",
         "required": true,
+        "type": "set",
         "default": [
           "grpc",
           "grpcs",
@@ -32,11 +32,13 @@
     },
     {
       "config": {
+        "type": "record",
+        "required": true,
         "fields": [
           {
             "identifier": {
-              "type": "string",
               "required": true,
+              "type": "string",
               "one_of": [
                 "ip",
                 "credential",
@@ -48,40 +50,40 @@
           },
           {
             "window_size": {
-              "description": "One or more window sizes to apply a limit to (defined in seconds).",
+              "type": "array",
+              "required": true,
               "elements": {
                 "type": "number"
               },
-              "type": "array",
-              "required": true
+              "description": "One or more window sizes to apply a limit to (defined in seconds)."
             }
           },
           {
             "window_type": {
+              "type": "string",
               "one_of": [
                 "fixed",
                 "sliding"
               ],
               "default": "sliding",
-              "type": "string",
               "description": "Sets the time window to either `sliding` or `fixed`."
             }
           },
           {
             "limit": {
-              "description": "One or more requests-per-window limits to apply.",
+              "type": "array",
+              "required": true,
               "elements": {
                 "type": "number"
               },
-              "type": "array",
-              "required": true
+              "description": "One or more requests-per-window limits to apply."
             }
           },
           {
             "sync_rate": {
-              "description": "How often to sync counter data to the central data store. A value of 0 results in synchronous behavior; a value of -1 ignores sync behavior entirely and only stores counters in node memory. A value greater than 0 syncs the counters in that many number of seconds.",
               "type": "number",
-              "required": true
+              "required": true,
+              "description": "How often to sync counter data to the central data store. A value of 0 results in synchronous behavior; a value of -1 ignores sync behavior entirely and only stores counters in node memory. A value greater than 0 syncs the counters in that many number of seconds."
             }
           },
           {
@@ -93,8 +95,8 @@
           },
           {
             "strategy": {
-              "type": "string",
               "required": true,
+              "type": "string",
               "one_of": [
                 "cluster",
                 "redis"
@@ -105,10 +107,10 @@
           },
           {
             "dictionary_name": {
-              "description": "The shared dictionary where counters will be stored until the next sync cycle.",
-              "default": "kong_rate_limiting_counters",
               "type": "string",
-              "required": true
+              "default": "kong_rate_limiting_counters",
+              "required": true,
+              "description": "The shared dictionary where counters will be stored until the next sync cycle."
             }
           },
           {
@@ -120,12 +122,12 @@
           },
           {
             "cost_strategy": {
+              "type": "string",
               "one_of": [
                 "default",
                 "node_quantifier"
               ],
               "default": "default",
-              "type": "string",
               "description": "Strategy to use to evaluate query costs. Either `default` or `node_quantifier`."
             }
           },
@@ -140,14 +142,15 @@
           },
           {
             "max_cost": {
-              "description": "A defined maximum cost per query. 0 means unlimited.",
-              "default": 0,
               "type": "number",
-              "required": false
+              "default": 0,
+              "required": false,
+              "description": "A defined maximum cost per query. 0 means unlimited."
             }
           },
           {
             "redis": {
+              "type": "record",
               "entity_checks": [
                 {
                   "mutually_exclusive_sets": {
@@ -206,6 +209,7 @@
                   ]
                 }
               ],
+              "required": true,
               "fields": [
                 {
                   "host": {
@@ -268,15 +272,15 @@
                   "username": {
                     "referenceable": true,
                     "type": "string",
-                    "description": "Username to use for Redis connections. If undefined, ACL authentication won't be performed. This requires Redis v6.0.0+. The username **cannot** be set to `default`."
+                    "description": "Username to use for Redis connections. If undefined, ACL authentication won't be performed. This requires Redis v6.0.0+. To be compatible with Redis v5.x.y, you can set it to `default`."
                   }
                 },
                 {
                   "password": {
-                    "description": "Password to use for Redis connections. If undefined, no AUTH commands are sent to Redis.",
+                    "encrypted": true,
                     "referenceable": true,
                     "type": "string",
-                    "encrypted": true
+                    "description": "Password to use for Redis connections. If undefined, no AUTH commands are sent to Redis."
                   }
                 },
                 {
@@ -288,10 +292,10 @@
                 },
                 {
                   "sentinel_password": {
-                    "description": "Sentinel password to authenticate with a Redis Sentinel instance. If undefined, no AUTH commands are sent to Redis Sentinels.",
+                    "encrypted": true,
                     "referenceable": true,
                     "type": "string",
-                    "encrypted": true
+                    "description": "Sentinel password to authenticate with a Redis Sentinel instance. If undefined, no AUTH commands are sent to Redis Sentinels."
                   }
                 },
                 {
@@ -361,18 +365,18 @@
                 },
                 {
                   "ssl": {
-                    "description": "If set to true, uses SSL to connect to Redis.",
                     "default": false,
+                    "required": false,
                     "type": "boolean",
-                    "required": false
+                    "description": "If set to true, uses SSL to connect to Redis."
                   }
                 },
                 {
                   "ssl_verify": {
-                    "description": "If set to true, verifies the validity of the server SSL certificate. If setting this parameter, also configure `lua_ssl_trusted_certificate` in `kong.conf` to specify the CA (or server) certificate used by your Redis server. You may also need to configure `lua_ssl_verify_depth` accordingly.",
                     "default": false,
+                    "required": false,
                     "type": "boolean",
-                    "required": false
+                    "description": "If set to true, verifies the validity of the server SSL certificate. If setting this parameter, also configure `lua_ssl_trusted_certificate` in `kong.conf` to specify the CA (or server) certificate used by your Redis server. You may also need to configure `lua_ssl_verify_depth` accordingly."
                   }
                 },
                 {
@@ -382,14 +386,10 @@
                     "description": "A string representing an SNI (server name indication) value for TLS."
                   }
                 }
-              ],
-              "type": "record",
-              "required": true
+              ]
             }
           }
-        ],
-        "type": "record",
-        "required": true
+        ]
       }
     }
   ],

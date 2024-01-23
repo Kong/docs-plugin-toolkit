@@ -2,8 +2,8 @@
   "fields": [
     {
       "protocols": {
-        "type": "set",
         "required": true,
+        "type": "set",
         "default": [
           "grpc",
           "grpcs",
@@ -32,6 +32,7 @@
     },
     {
       "config": {
+        "type": "record",
         "entity_checks": [
           {
             "conditional": {
@@ -70,51 +71,52 @@
             }
           }
         ],
+        "required": true,
         "fields": [
           {
             "checked_content_types": {
               "type": "set",
               "required": true,
+              "elements": {
+                "match": "^[^%s]+%/[^ ;]+$",
+                "type": "string",
+                "required": true
+              },
               "default": [
                 "application/xml"
               ],
-              "description": "A list of Content-Type values with payloads that must be validated.",
-              "elements": {
-                "type": "string",
-                "match": "^[^%s]+%/[^ ;]+$",
-                "required": true
-              }
+              "description": "A list of Content-Type values with payloads that must be validated."
             }
           },
           {
             "allowed_content_types": {
               "type": "set",
               "required": true,
+              "elements": {
+                "match": "^[^%s]+%/[^ ;]+$",
+                "type": "string",
+                "required": true
+              },
               "default": [
 
               ],
-              "description": "A list of Content-Type values with payloads that are allowed, but aren't validated.",
-              "elements": {
-                "type": "string",
-                "match": "^[^%s]+%/[^ ;]+$",
-                "required": true
-              }
+              "description": "A list of Content-Type values with payloads that are allowed, but aren't validated."
             }
           },
           {
             "allow_dtd": {
-              "description": "Indicates whether an XML Document Type Definition (DTD) section is allowed.",
-              "default": false,
               "type": "boolean",
-              "required": true
+              "default": false,
+              "required": true,
+              "description": "Indicates whether an XML Document Type Definition (DTD) section is allowed."
             }
           },
           {
             "namespace_aware": {
-              "description": "If not parsing namespace aware, all prefixes and namespace attributes will be counted as regular attributes and element names, and validated as such.",
-              "default": true,
               "type": "boolean",
-              "required": true
+              "default": true,
+              "required": true,
+              "description": "If not parsing namespace aware, all prefixes and namespace attributes will be counted as regular attributes and element names, and validated as such."
             }
           },
           {
@@ -156,8 +158,8 @@
           {
             "document": {
               "gt": 0,
-              "type": "integer",
               "required": true,
+              "type": "integer",
               "default": 10485760,
               "description": "Maximum size of the entire document."
             }
@@ -165,8 +167,8 @@
           {
             "buffer": {
               "gt": 0,
-              "type": "integer",
               "required": true,
+              "type": "integer",
               "default": 1048576,
               "description": "Maximum size of the unparsed buffer (see below)."
             }
@@ -174,8 +176,8 @@
           {
             "comment": {
               "gt": 0,
-              "type": "integer",
               "required": true,
+              "type": "integer",
               "default": 1024,
               "description": "Maximum size of comments."
             }
@@ -183,8 +185,8 @@
           {
             "localname": {
               "gt": 0,
-              "type": "integer",
               "required": true,
+              "type": "integer",
               "default": 1024,
               "description": "Maximum size of the localname. This applies to tags and attributes."
             }
@@ -192,8 +194,8 @@
           {
             "prefix": {
               "gt": 0,
-              "type": "integer",
               "required": false,
+              "type": "integer",
               "default": 1024,
               "description": "Maximum size of the prefix. This applies to tags and attributes. This value is required if parsing is namespace-aware."
             }
@@ -201,8 +203,8 @@
           {
             "namespaceuri": {
               "gt": 0,
-              "type": "integer",
               "required": false,
+              "type": "integer",
               "default": 1024,
               "description": "Maximum size of the namespace URI. This value is required if parsing is namespace-aware."
             }
@@ -210,8 +212,8 @@
           {
             "attribute": {
               "gt": 0,
-              "type": "integer",
               "required": true,
+              "type": "integer",
               "default": 1048576,
               "description": "Maximum size of the attribute value."
             }
@@ -219,8 +221,8 @@
           {
             "text": {
               "gt": 0,
-              "type": "integer",
               "required": true,
+              "type": "integer",
               "default": 1048576,
               "description": "Maximum text inside tags (counted over all adjacent text/CDATA elements combined)."
             }
@@ -228,8 +230,8 @@
           {
             "pitarget": {
               "gt": 0,
-              "type": "integer",
               "required": true,
+              "type": "integer",
               "default": 1024,
               "description": "Maximum size of processing instruction targets."
             }
@@ -237,8 +239,8 @@
           {
             "pidata": {
               "gt": 0,
-              "type": "integer",
               "required": true,
+              "type": "integer",
               "default": 1024,
               "description": "Maximum size of processing instruction data."
             }
@@ -246,8 +248,8 @@
           {
             "entityname": {
               "gt": 0,
-              "type": "integer",
               "required": true,
+              "type": "integer",
               "default": 1024,
               "description": "Maximum size of entity names in EntityDecl."
             }
@@ -255,8 +257,8 @@
           {
             "entity": {
               "gt": 0,
-              "type": "integer",
               "required": true,
+              "type": "integer",
               "default": 1024,
               "description": "Maximum size of entity values in EntityDecl."
             }
@@ -264,8 +266,8 @@
           {
             "entityproperty": {
               "gt": 0,
-              "type": "integer",
               "required": true,
+              "type": "integer",
               "default": 1024,
               "description": "Maximum size of systemId, publicId, or notationName in EntityDecl."
             }
@@ -282,15 +284,13 @@
           {
             "bla_threshold": {
               "gt": 1024,
-              "type": "integer",
               "required": true,
+              "type": "integer",
               "default": 8388608,
               "description": "Sets the threshold after which the protection starts. This protects against the Billion Laughs Attack."
             }
           }
-        ],
-        "type": "record",
-        "required": true
+        ]
       }
     }
   ],

@@ -2,8 +2,8 @@
   "fields": [
     {
       "protocols": {
-        "type": "set",
         "required": true,
+        "type": "set",
         "default": [
           "grpc",
           "grpcs",
@@ -32,6 +32,7 @@
     },
     {
       "config": {
+        "type": "record",
         "shorthand_fields": [
           {
             "proxy_host": {
@@ -44,11 +45,38 @@
             }
           }
         ],
+        "entity_checks": [
+          {
+            "at_least_one_of": [
+              "http_proxy_host",
+              "https_proxy_host"
+            ]
+          },
+          {
+            "at_least_one_of": [
+              "http_proxy_port",
+              "https_proxy_port"
+            ]
+          },
+          {
+            "mutually_required": [
+              "http_proxy_host",
+              "http_proxy_port"
+            ]
+          },
+          {
+            "mutually_required": [
+              "https_proxy_host",
+              "https_proxy_port"
+            ]
+          }
+        ],
+        "required": true,
         "fields": [
           {
             "x_headers": {
-              "type": "string",
               "required": true,
+              "type": "string",
               "one_of": [
                 "append",
                 "transparent",
@@ -92,8 +120,8 @@
           },
           {
             "proxy_scheme": {
-              "type": "string",
               "required": true,
+              "type": "string",
               "one_of": [
                 "http"
               ],
@@ -103,55 +131,27 @@
           },
           {
             "auth_username": {
-              "description": "The username to authenticate with, if the forward proxy is protected\nby basic authentication.",
-              "referenceable": true,
               "type": "string",
-              "required": false
+              "referenceable": true,
+              "required": false,
+              "description": "The username to authenticate with, if the forward proxy is protected\nby basic authentication."
             }
           },
           {
             "auth_password": {
-              "description": "The password to authenticate with, if the forward proxy is protected\nby basic authentication.",
-              "referenceable": true,
               "type": "string",
-              "required": false
+              "referenceable": true,
+              "required": false,
+              "description": "The password to authenticate with, if the forward proxy is protected\nby basic authentication."
             }
           },
           {
             "https_verify": {
-              "required": true,
               "default": false,
               "type": "boolean",
+              "required": true,
               "description": "Whether the server certificate will be verified according to the CA certificates specified in lua_ssl_trusted_certificate."
             }
-          }
-        ],
-        "type": "record",
-        "required": true,
-        "entity_checks": [
-          {
-            "at_least_one_of": [
-              "http_proxy_host",
-              "https_proxy_host"
-            ]
-          },
-          {
-            "at_least_one_of": [
-              "http_proxy_port",
-              "https_proxy_port"
-            ]
-          },
-          {
-            "mutually_required": [
-              "http_proxy_host",
-              "http_proxy_port"
-            ]
-          },
-          {
-            "mutually_required": [
-              "https_proxy_host",
-              "https_proxy_port"
-            ]
           }
         ]
       }

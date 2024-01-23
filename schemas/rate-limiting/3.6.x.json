@@ -2,8 +2,8 @@
   "fields": [
     {
       "protocols": {
-        "type": "set",
         "required": true,
+        "type": "set",
         "default": [
           "grpc",
           "grpcs",
@@ -23,15 +23,9 @@
       }
     },
     {
-      "consumer_group": {
-        "type": "foreign",
-        "reference": "consumer_groups",
-        "eq": null,
-        "description": "Custom type for representing a foreign key with a null value allowed."
-      }
-    },
-    {
       "config": {
+        "type": "record",
+        "required": true,
         "fields": [
           {
             "second": {
@@ -77,15 +71,16 @@
           },
           {
             "limit_by": {
+              "default": "consumer",
               "one_of": [
                 "consumer",
                 "credential",
                 "ip",
                 "service",
                 "header",
-                "path"
+                "path",
+                "consumer-group"
               ],
-              "default": "consumer",
               "type": "string",
               "description": "The entity that is used when aggregating the limits."
             }
@@ -113,20 +108,20 @@
             "policy": {
               "type": "string",
               "len_min": 0,
-              "default": "local",
               "one_of": [
                 "local",
                 "cluster",
                 "redis"
               ],
+              "default": "local",
               "description": "The rate-limiting policies to use for retrieving and incrementing the limits."
             }
           },
           {
             "fault_tolerant": {
-              "required": true,
-              "default": true,
               "type": "boolean",
+              "default": true,
+              "required": true,
               "description": "A boolean value that determines if the requests should be proxied even if Kong has troubles connecting a third-party data store. If `true`, requests will be proxied anyway, effectively disabling the rate-limiting function until the data store is working again. If `false`, then the clients will see `500` errors."
             }
           },
@@ -164,17 +159,17 @@
           },
           {
             "redis_ssl": {
-              "required": true,
-              "default": false,
               "type": "boolean",
+              "default": false,
+              "required": true,
               "description": "When using the `redis` policy, this property specifies if SSL is used to connect to the Redis server."
             }
           },
           {
             "redis_ssl_verify": {
-              "required": true,
-              "default": false,
               "type": "boolean",
+              "default": false,
+              "required": true,
               "description": "When using the `redis` policy with `redis_ssl` set to `true`, this property specifies it server SSL certificate is validated. Note that you need to configure the lua_ssl_trusted_certificate to specify the CA (or server) certificate used by your Redis server. You may also need to configure lua_ssl_verify_depth accordingly."
             }
           },
@@ -200,16 +195,16 @@
           },
           {
             "hide_client_headers": {
-              "required": true,
-              "default": false,
               "type": "boolean",
+              "default": false,
+              "required": true,
               "description": "Optionally hide informative response headers."
             }
           },
           {
             "error_code": {
-              "gt": 0,
               "default": 429,
+              "gt": 0,
               "type": "number",
               "description": "Set a custom error code to return when the rate limit is exceeded."
             }
@@ -223,15 +218,13 @@
           },
           {
             "sync_rate": {
-              "required": true,
-              "default": -1,
               "type": "number",
+              "default": -1,
+              "required": true,
               "description": "How often to sync counter data to the central data store. A value of -1 results in synchronous behavior."
             }
           }
-        ],
-        "type": "record",
-        "required": true
+        ]
       }
     }
   ],
