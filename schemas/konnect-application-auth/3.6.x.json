@@ -1,0 +1,2582 @@
+{
+  "fields": [
+    {
+      "consumer": {
+        "type": "foreign",
+        "reference": "consumers",
+        "eq": null,
+        "description": "Custom type for representing a foreign key with a null value allowed."
+      }
+    },
+    {
+      "protocols": {
+        "required": true,
+        "type": "set",
+        "default": [
+          "grpc",
+          "grpcs",
+          "http",
+          "https"
+        ],
+        "elements": {
+          "type": "string",
+          "one_of": [
+            "grpc",
+            "grpcs",
+            "http",
+            "https"
+          ]
+        },
+        "description": "A set of strings representing HTTP protocols."
+      }
+    },
+    {
+      "consumer_group": {
+        "type": "foreign",
+        "reference": "consumer_groups",
+        "eq": null,
+        "description": "Custom type for representing a foreign key with a null value allowed."
+      }
+    },
+    {
+      "config": {
+        "type": "record",
+        "entity_checks": [
+
+        ],
+        "required": true,
+        "fields": [
+          {
+            "key_names": {
+              "required": true,
+              "type": "array",
+              "default": [
+                "apikey"
+              ],
+              "elements": {
+                "type": "string",
+                "description": "A string representing an HTTP header name."
+              },
+              "description": "The names of the headers containing the API key. You can specify multiple header names."
+            }
+          },
+          {
+            "auth_type": {
+              "type": "string",
+              "required": true,
+              "one_of": [
+                "openid-connect",
+                "key-auth",
+                "v2-strategies"
+              ],
+              "default": "openid-connect",
+              "description": "The type of authentication to be performed. Possible values are: 'openid-connect', 'key-auth', 'v2-strategies'."
+            }
+          },
+          {
+            "scope": {
+              "unique": true,
+              "required": true,
+              "type": "string",
+              "description": "The unique scope identifier for the plugin configuration."
+            }
+          },
+          {
+            "v2_strategies": {
+              "required": false,
+              "description": "The map of v2 strategies.",
+              "type": "record",
+              "default": [
+
+              ],
+              "fields": [
+                {
+                  "key_auth": {
+                    "type": "array",
+                    "required": false,
+                    "elements": {
+                      "type": "record",
+                      "fields": [
+                        {
+                          "strategy_id": {
+                            "required": true,
+                            "type": "string",
+                            "description": "The strategy id the config is tied to."
+                          }
+                        },
+                        {
+                          "config": {
+                            "required": true,
+                            "type": "record",
+                            "fields": [
+                              {
+                                "key_names": {
+                                  "required": true,
+                                  "type": "array",
+                                  "default": [
+                                    "apikey"
+                                  ],
+                                  "elements": {
+                                    "type": "string",
+                                    "description": "A string representing an HTTP header name."
+                                  },
+                                  "description": "The names of the headers containing the API key. You can specify multiple header names."
+                                }
+                              }
+                            ]
+                          }
+                        }
+                      ]
+                    },
+                    "description": "List of key_auth strategies."
+                  }
+                },
+                {
+                  "openid_connect": {
+                    "type": "array",
+                    "required": false,
+                    "elements": {
+                      "type": "record",
+                      "fields": [
+                        {
+                          "strategy_id": {
+                            "required": true,
+                            "type": "string",
+                            "description": "The strategy id the config is tied to."
+                          }
+                        },
+                        {
+                          "config": {
+                            "description": "openid-connect plugin configuration.",
+                            "type": "record",
+                            "fields": [
+                              {
+                                "issuer": {
+                                  "required": true,
+                                  "type": "string",
+                                  "description": "The discovery endpoint (or the issuer identifier). When there is no discovery endpoint, please also configure `config.using_pseudo_issuer=true`."
+                                }
+                              },
+                              {
+                                "using_pseudo_issuer": {
+                                  "default": false,
+                                  "type": "boolean",
+                                  "required": false,
+                                  "description": "If the plugin uses a pseudo issuer. When set to true, the plugin will not discover the configuration from the issuer URL specified with `config.issuer`."
+                                }
+                              },
+                              {
+                                "discovery_headers_names": {
+                                  "required": false,
+                                  "type": "array",
+                                  "elements": {
+                                    "type": "string"
+                                  },
+                                  "description": "Extra header names passed to the discovery endpoint."
+                                }
+                              },
+                              {
+                                "discovery_headers_values": {
+                                  "required": false,
+                                  "type": "array",
+                                  "elements": {
+                                    "type": "string"
+                                  },
+                                  "description": "Extra header values passed to the discovery endpoint."
+                                }
+                              },
+                              {
+                                "extra_jwks_uris": {
+                                  "required": false,
+                                  "type": "set",
+                                  "elements": {
+                                    "type": "string",
+                                    "description": "A string representing a URL, such as https://example.com/path/to/resource?q=search."
+                                  },
+                                  "description": "JWKS URIs whose public keys are trusted (in addition to the keys found with the discovery)."
+                                }
+                              },
+                              {
+                                "rediscovery_lifetime": {
+                                  "default": 30,
+                                  "type": "number",
+                                  "required": false,
+                                  "description": "Specifies how long (in seconds) the plugin waits between discovery attempts. Discovery is still triggered on an as-needed basis."
+                                }
+                              },
+                              {
+                                "auth_methods": {
+                                  "required": false,
+                                  "type": "array",
+                                  "elements": {
+                                    "type": "string",
+                                    "one_of": [
+                                      "password",
+                                      "client_credentials",
+                                      "authorization_code",
+                                      "bearer",
+                                      "introspection",
+                                      "userinfo",
+                                      "kong_oauth2",
+                                      "refresh_token",
+                                      "session"
+                                    ]
+                                  },
+                                  "default": [
+                                    "password",
+                                    "client_credentials",
+                                    "authorization_code",
+                                    "bearer",
+                                    "introspection",
+                                    "userinfo",
+                                    "kong_oauth2",
+                                    "refresh_token",
+                                    "session"
+                                  ],
+                                  "description": "Types of credentials/grants to enable."
+                                }
+                              },
+                              {
+                                "client_id": {
+                                  "type": "array",
+                                  "encrypted": true,
+                                  "required": false,
+                                  "elements": {
+                                    "type": "string",
+                                    "referenceable": true
+                                  },
+                                  "description": "The client id(s) that the plugin uses when it calls authenticated endpoints on the identity provider."
+                                }
+                              },
+                              {
+                                "client_secret": {
+                                  "type": "array",
+                                  "encrypted": true,
+                                  "required": false,
+                                  "elements": {
+                                    "type": "string",
+                                    "referenceable": true
+                                  },
+                                  "description": "The client secret."
+                                }
+                              },
+                              {
+                                "client_auth": {
+                                  "required": false,
+                                  "type": "array",
+                                  "elements": {
+                                    "type": "string",
+                                    "one_of": [
+                                      "client_secret_basic",
+                                      "client_secret_post",
+                                      "client_secret_jwt",
+                                      "private_key_jwt",
+                                      "tls_client_auth",
+                                      "self_signed_tls_client_auth",
+                                      "none"
+                                    ]
+                                  },
+                                  "description": "The default OpenID Connect client authentication method is 'client_secret_basic' (using 'Authorization: Basic' header), 'client_secret_post' (credentials in body), 'client_secret_jwt' (signed client assertion in body), 'private_key_jwt' (private key-signed assertion), 'tls_client_auth' (client certificate), 'self_signed_tls_client_auth' (self-signed client certificate), and 'none' (no authentication)."
+                                }
+                              },
+                              {
+                                "client_jwk": {
+                                  "required": false,
+                                  "type": "array",
+                                  "elements": {
+                                    "type": "record",
+                                    "required": false,
+                                    "fields": [
+                                      {
+                                        "issuer": {
+                                          "type": "string",
+                                          "required": false
+                                        }
+                                      },
+                                      {
+                                        "kty": {
+                                          "type": "string",
+                                          "required": false
+                                        }
+                                      },
+                                      {
+                                        "use": {
+                                          "type": "string",
+                                          "required": false
+                                        }
+                                      },
+                                      {
+                                        "key_ops": {
+                                          "required": false,
+                                          "elements": {
+                                            "type": "string",
+                                            "required": false
+                                          },
+                                          "type": "array"
+                                        }
+                                      },
+                                      {
+                                        "alg": {
+                                          "type": "string",
+                                          "required": false
+                                        }
+                                      },
+                                      {
+                                        "kid": {
+                                          "type": "string",
+                                          "required": false
+                                        }
+                                      },
+                                      {
+                                        "x5u": {
+                                          "type": "string",
+                                          "required": false
+                                        }
+                                      },
+                                      {
+                                        "x5c": {
+                                          "required": false,
+                                          "elements": {
+                                            "type": "string",
+                                            "required": false
+                                          },
+                                          "type": "array"
+                                        }
+                                      },
+                                      {
+                                        "x5t": {
+                                          "type": "string",
+                                          "required": false
+                                        }
+                                      },
+                                      {
+                                        "x5t#S256": {
+                                          "type": "string",
+                                          "required": false
+                                        }
+                                      },
+                                      {
+                                        "k": {
+                                          "required": false,
+                                          "referenceable": true,
+                                          "encrypted": true,
+                                          "type": "string"
+                                        }
+                                      },
+                                      {
+                                        "x": {
+                                          "type": "string",
+                                          "required": false
+                                        }
+                                      },
+                                      {
+                                        "y": {
+                                          "type": "string",
+                                          "required": false
+                                        }
+                                      },
+                                      {
+                                        "crv": {
+                                          "type": "string",
+                                          "required": false
+                                        }
+                                      },
+                                      {
+                                        "n": {
+                                          "type": "string",
+                                          "required": false
+                                        }
+                                      },
+                                      {
+                                        "e": {
+                                          "type": "string",
+                                          "required": false
+                                        }
+                                      },
+                                      {
+                                        "d": {
+                                          "required": false,
+                                          "referenceable": true,
+                                          "encrypted": true,
+                                          "type": "string"
+                                        }
+                                      },
+                                      {
+                                        "p": {
+                                          "required": false,
+                                          "referenceable": true,
+                                          "encrypted": true,
+                                          "type": "string"
+                                        }
+                                      },
+                                      {
+                                        "q": {
+                                          "required": false,
+                                          "referenceable": true,
+                                          "encrypted": true,
+                                          "type": "string"
+                                        }
+                                      },
+                                      {
+                                        "dp": {
+                                          "required": false,
+                                          "referenceable": true,
+                                          "encrypted": true,
+                                          "type": "string"
+                                        }
+                                      },
+                                      {
+                                        "dq": {
+                                          "required": false,
+                                          "referenceable": true,
+                                          "encrypted": true,
+                                          "type": "string"
+                                        }
+                                      },
+                                      {
+                                        "qi": {
+                                          "required": false,
+                                          "referenceable": true,
+                                          "encrypted": true,
+                                          "type": "string"
+                                        }
+                                      },
+                                      {
+                                        "oth": {
+                                          "required": false,
+                                          "referenceable": true,
+                                          "encrypted": true,
+                                          "type": "string"
+                                        }
+                                      },
+                                      {
+                                        "r": {
+                                          "required": false,
+                                          "referenceable": true,
+                                          "encrypted": true,
+                                          "type": "string"
+                                        }
+                                      },
+                                      {
+                                        "t": {
+                                          "required": false,
+                                          "referenceable": true,
+                                          "encrypted": true,
+                                          "type": "string"
+                                        }
+                                      }
+                                    ]
+                                  },
+                                  "description": "The JWK used for the private_key_jwt authentication."
+                                }
+                              },
+                              {
+                                "client_alg": {
+                                  "required": false,
+                                  "type": "array",
+                                  "elements": {
+                                    "type": "string",
+                                    "one_of": [
+                                      "HS256",
+                                      "HS384",
+                                      "HS512",
+                                      "RS256",
+                                      "RS384",
+                                      "RS512",
+                                      "ES256",
+                                      "ES384",
+                                      "ES512",
+                                      "PS256",
+                                      "PS384",
+                                      "PS512",
+                                      "EdDSA"
+                                    ]
+                                  },
+                                  "description": "The algorithm to use for client_secret_jwt (only HS***) or private_key_jwt authentication."
+                                }
+                              },
+                              {
+                                "client_arg": {
+                                  "default": "client_id",
+                                  "type": "string",
+                                  "required": false,
+                                  "description": "The client to use for this request (the selection is made with a request parameter with the same name)."
+                                }
+                              },
+                              {
+                                "redirect_uri": {
+                                  "required": false,
+                                  "type": "array",
+                                  "elements": {
+                                    "type": "string",
+                                    "description": "A string representing a URL, such as https://example.com/path/to/resource?q=search."
+                                  },
+                                  "description": "The redirect URI passed to the authorization and token endpoints."
+                                }
+                              },
+                              {
+                                "login_redirect_uri": {
+                                  "required": false,
+                                  "type": "array",
+                                  "elements": {
+                                    "referenceable": true,
+                                    "type": "string",
+                                    "description": "A string representing a URL, such as https://example.com/path/to/resource?q=search."
+                                  },
+                                  "description": "Where to redirect the client when `login_action` is set to `redirect`."
+                                }
+                              },
+                              {
+                                "logout_redirect_uri": {
+                                  "required": false,
+                                  "type": "array",
+                                  "elements": {
+                                    "referenceable": true,
+                                    "type": "string",
+                                    "description": "A string representing a URL, such as https://example.com/path/to/resource?q=search."
+                                  },
+                                  "description": "Where to redirect the client after the logout."
+                                }
+                              },
+                              {
+                                "forbidden_redirect_uri": {
+                                  "required": false,
+                                  "type": "array",
+                                  "elements": {
+                                    "type": "string",
+                                    "description": "A string representing a URL, such as https://example.com/path/to/resource?q=search."
+                                  },
+                                  "description": "Where to redirect the client on forbidden requests."
+                                }
+                              },
+                              {
+                                "forbidden_error_message": {
+                                  "default": "Forbidden",
+                                  "type": "string",
+                                  "required": false,
+                                  "description": "The error message for the forbidden requests (when not using the redirection)."
+                                }
+                              },
+                              {
+                                "forbidden_destroy_session": {
+                                  "default": true,
+                                  "type": "boolean",
+                                  "required": false,
+                                  "description": "Destroy any active session for the forbidden requests."
+                                }
+                              },
+                              {
+                                "unauthorized_destroy_session": {
+                                  "default": true,
+                                  "type": "boolean",
+                                  "required": false,
+                                  "description": "Destroy any active session for the unauthorized requests."
+                                }
+                              },
+                              {
+                                "unauthorized_redirect_uri": {
+                                  "required": false,
+                                  "type": "array",
+                                  "elements": {
+                                    "type": "string",
+                                    "description": "A string representing a URL, such as https://example.com/path/to/resource?q=search."
+                                  },
+                                  "description": "Where to redirect the client on unauthorized requests."
+                                }
+                              },
+                              {
+                                "unauthorized_error_message": {
+                                  "default": "Unauthorized",
+                                  "type": "string",
+                                  "required": false,
+                                  "description": "The error message for the unauthorized requests (when not using the redirection)."
+                                }
+                              },
+                              {
+                                "unexpected_redirect_uri": {
+                                  "required": false,
+                                  "type": "array",
+                                  "elements": {
+                                    "type": "string",
+                                    "description": "A string representing a URL, such as https://example.com/path/to/resource?q=search."
+                                  },
+                                  "description": "Where to redirect the client when unexpected errors happen with the requests."
+                                }
+                              },
+                              {
+                                "response_mode": {
+                                  "type": "string",
+                                  "required": false,
+                                  "one_of": [
+                                    "query",
+                                    "form_post",
+                                    "fragment"
+                                  ],
+                                  "default": "query",
+                                  "description": "The response mode passed to the authorization endpoint: - `query`: Instructs the identity provider to pass parameters in query string - `form_post`: Instructs the identity provider to pass parameters in request body - `fragment`: Instructs the identity provider to pass parameters in uri fragment (rarely useful as the plugin itself cannot read it)."
+                                }
+                              },
+                              {
+                                "response_type": {
+                                  "required": false,
+                                  "type": "array",
+                                  "elements": {
+                                    "type": "string"
+                                  },
+                                  "default": [
+                                    "code"
+                                  ],
+                                  "description": "The response type passed to the authorization endpoint."
+                                }
+                              },
+                              {
+                                "scopes": {
+                                  "required": false,
+                                  "type": "array",
+                                  "elements": {
+                                    "type": "string",
+                                    "referenceable": true
+                                  },
+                                  "default": [
+                                    "openid"
+                                  ],
+                                  "description": "The scopes passed to the authorization and token endpoints."
+                                }
+                              },
+                              {
+                                "audience": {
+                                  "required": false,
+                                  "type": "array",
+                                  "elements": {
+                                    "type": "string"
+                                  },
+                                  "description": "The audience passed to the authorization endpoint."
+                                }
+                              },
+                              {
+                                "issuers_allowed": {
+                                  "required": false,
+                                  "type": "array",
+                                  "elements": {
+                                    "type": "string"
+                                  },
+                                  "description": "The issuers allowed to be present in the tokens (`iss` claim)."
+                                }
+                              },
+                              {
+                                "scopes_required": {
+                                  "required": false,
+                                  "type": "array",
+                                  "elements": {
+                                    "type": "string"
+                                  },
+                                  "description": "The scopes (`scopes_claim` claim) required to be present in the access token (or introspection results) for successful authorization. This config parameter works in both **AND** / **OR** cases."
+                                }
+                              },
+                              {
+                                "scopes_claim": {
+                                  "required": false,
+                                  "type": "array",
+                                  "elements": {
+                                    "type": "string"
+                                  },
+                                  "default": [
+                                    "scope"
+                                  ],
+                                  "description": "The claim that contains the scopes. If multiple values are set, it means the claim is inside a nested object of the token payload."
+                                }
+                              },
+                              {
+                                "audience_required": {
+                                  "required": false,
+                                  "type": "array",
+                                  "elements": {
+                                    "type": "string"
+                                  },
+                                  "description": "The audiences (`audience_claim` claim) required to be present in the access token (or introspection results) for successful authorization. This config parameter works in both **AND** / **OR** cases."
+                                }
+                              },
+                              {
+                                "audience_claim": {
+                                  "required": false,
+                                  "type": "array",
+                                  "elements": {
+                                    "type": "string"
+                                  },
+                                  "default": [
+                                    "aud"
+                                  ],
+                                  "description": "The claim that contains the audience. If multiple values are set, it means the claim is inside a nested object of the token payload."
+                                }
+                              },
+                              {
+                                "groups_required": {
+                                  "required": false,
+                                  "type": "array",
+                                  "elements": {
+                                    "type": "string"
+                                  },
+                                  "description": "The groups (`groups_claim` claim) required to be present in the access token (or introspection results) for successful authorization. This config parameter works in both **AND** / **OR** cases."
+                                }
+                              },
+                              {
+                                "groups_claim": {
+                                  "required": false,
+                                  "type": "array",
+                                  "elements": {
+                                    "type": "string"
+                                  },
+                                  "default": [
+                                    "groups"
+                                  ],
+                                  "description": "The claim that contains the groups. If multiple values are set, it means the claim is inside a nested object of the token payload."
+                                }
+                              },
+                              {
+                                "roles_required": {
+                                  "required": false,
+                                  "type": "array",
+                                  "elements": {
+                                    "type": "string"
+                                  },
+                                  "description": "The roles (`roles_claim` claim) required to be present in the access token (or introspection results) for successful authorization. This config parameter works in both **AND** / **OR** cases."
+                                }
+                              },
+                              {
+                                "roles_claim": {
+                                  "required": false,
+                                  "type": "array",
+                                  "elements": {
+                                    "type": "string"
+                                  },
+                                  "default": [
+                                    "roles"
+                                  ],
+                                  "description": "The claim that contains the roles. If multiple values are set, it means the claim is inside a nested object of the token payload."
+                                }
+                              },
+                              {
+                                "domains": {
+                                  "required": false,
+                                  "type": "array",
+                                  "elements": {
+                                    "type": "string"
+                                  },
+                                  "description": "The allowed values for the `hd` claim."
+                                }
+                              },
+                              {
+                                "max_age": {
+                                  "type": "number",
+                                  "required": false,
+                                  "description": "The maximum age (in seconds) compared to the `auth_time` claim."
+                                }
+                              },
+                              {
+                                "authenticated_groups_claim": {
+                                  "required": false,
+                                  "type": "array",
+                                  "elements": {
+                                    "type": "string"
+                                  },
+                                  "description": "The claim that contains authenticated groups. This setting can be used together with ACL plugin, but it also enables IdP managed groups with other applications and integrations. If multiple values are set, it means the claim is inside a nested object of the token payload."
+                                }
+                              },
+                              {
+                                "pushed_authorization_request_endpoint": {
+                                  "required": false,
+                                  "type": "string",
+                                  "description": "The pushed authorization endpoint. If set it overrides the value in `pushed_authorization_request_endpoint` returned by the discovery endpoint."
+                                }
+                              },
+                              {
+                                "pushed_authorization_request_endpoint_auth_method": {
+                                  "type": "string",
+                                  "one_of": [
+                                    "client_secret_basic",
+                                    "client_secret_post",
+                                    "client_secret_jwt",
+                                    "private_key_jwt",
+                                    "tls_client_auth",
+                                    "self_signed_tls_client_auth",
+                                    "none"
+                                  ],
+                                  "required": false,
+                                  "description": "The pushed authorization request endpoint authentication method: `client_secret_basic`, `client_secret_post`, `client_secret_jwt`, `private_key_jwt`, `tls_client_auth`, `self_signed_tls_client_auth`, or `none`: do not authenticate"
+                                }
+                              },
+                              {
+                                "require_pushed_authorization_requests": {
+                                  "type": "boolean",
+                                  "required": false,
+                                  "description": "Forcibly enable or disable the pushed authorization requests. When not set the value is determined through the discovery using the value of `require_pushed_authorization_requests` (which defaults to `false`)."
+                                }
+                              },
+                              {
+                                "require_proof_key_for_code_exchange": {
+                                  "type": "boolean",
+                                  "required": false,
+                                  "description": "Forcibly enable or disable the proof key for code exchange. When not set the value is determined through the discovery using the value of `code_challenge_methods_supported`, and enabled automatically (in case the `code_challenge_methods_supported` is missing, the PKCE will not be enabled)."
+                                }
+                              },
+                              {
+                                "authorization_endpoint": {
+                                  "required": false,
+                                  "type": "string",
+                                  "description": "The authorization endpoint. If set it overrides the value in `authorization_endpoint` returned by the discovery endpoint."
+                                }
+                              },
+                              {
+                                "authorization_query_args_names": {
+                                  "required": false,
+                                  "type": "array",
+                                  "elements": {
+                                    "type": "string"
+                                  },
+                                  "description": "Extra query argument names passed to the authorization endpoint."
+                                }
+                              },
+                              {
+                                "authorization_query_args_values": {
+                                  "required": false,
+                                  "type": "array",
+                                  "elements": {
+                                    "type": "string"
+                                  },
+                                  "description": "Extra query argument values passed to the authorization endpoint."
+                                }
+                              },
+                              {
+                                "authorization_query_args_client": {
+                                  "required": false,
+                                  "type": "array",
+                                  "elements": {
+                                    "type": "string"
+                                  },
+                                  "description": "Extra query arguments passed from the client to the authorization endpoint."
+                                }
+                              },
+                              {
+                                "authorization_rolling_timeout": {
+                                  "default": 600,
+                                  "type": "number",
+                                  "required": false,
+                                  "description": "Specifies how long the session used for the authorization code flow can be used in seconds until it needs to be renewed. 0 disables the checks and rolling."
+                                }
+                              },
+                              {
+                                "authorization_cookie_name": {
+                                  "default": "authorization",
+                                  "type": "string",
+                                  "required": false,
+                                  "description": "The authorization cookie name."
+                                }
+                              },
+                              {
+                                "authorization_cookie_path": {
+                                  "required": false,
+                                  "type": "string",
+                                  "starts_with": "/",
+                                  "match_none": [
+                                    {
+                                      "pattern": "//",
+                                      "err": "must not have empty segments"
+                                    }
+                                  ],
+                                  "default": "/",
+                                  "description": "The authorization cookie Path flag."
+                                }
+                              },
+                              {
+                                "authorization_cookie_domain": {
+                                  "type": "string",
+                                  "required": false,
+                                  "description": "The authorization cookie Domain flag."
+                                }
+                              },
+                              {
+                                "authorization_cookie_same_site": {
+                                  "type": "string",
+                                  "required": false,
+                                  "one_of": [
+                                    "Strict",
+                                    "Lax",
+                                    "None",
+                                    "Default"
+                                  ],
+                                  "default": "Default",
+                                  "description": "Controls whether a cookie is sent with cross-origin requests, providing some protection against cross-site request forgery attacks."
+                                }
+                              },
+                              {
+                                "authorization_cookie_http_only": {
+                                  "default": true,
+                                  "type": "boolean",
+                                  "required": false,
+                                  "description": "Forbids JavaScript from accessing the cookie, for example, through the `Document.cookie` property."
+                                }
+                              },
+                              {
+                                "authorization_cookie_secure": {
+                                  "type": "boolean",
+                                  "required": false,
+                                  "description": "Cookie is only sent to the server when a request is made with the https: scheme (except on localhost), and therefore is more resistant to man-in-the-middle attacks."
+                                }
+                              },
+                              {
+                                "preserve_query_args": {
+                                  "default": false,
+                                  "type": "boolean",
+                                  "required": false,
+                                  "description": "With this parameter, you can preserve request query arguments even when doing authorization code flow."
+                                }
+                              },
+                              {
+                                "token_endpoint": {
+                                  "required": false,
+                                  "type": "string",
+                                  "description": "The token endpoint. If set it overrides the value in `token_endpoint` returned by the discovery endpoint."
+                                }
+                              },
+                              {
+                                "token_endpoint_auth_method": {
+                                  "type": "string",
+                                  "one_of": [
+                                    "client_secret_basic",
+                                    "client_secret_post",
+                                    "client_secret_jwt",
+                                    "private_key_jwt",
+                                    "tls_client_auth",
+                                    "self_signed_tls_client_auth",
+                                    "none"
+                                  ],
+                                  "required": false,
+                                  "description": "The token endpoint authentication method: `client_secret_basic`, `client_secret_post`, `client_secret_jwt`, `private_key_jwt`, `tls_client_auth`, `self_signed_tls_client_auth`, or `none`: do not authenticate"
+                                }
+                              },
+                              {
+                                "token_headers_names": {
+                                  "required": false,
+                                  "type": "array",
+                                  "elements": {
+                                    "type": "string"
+                                  },
+                                  "description": "Extra header names passed to the token endpoint."
+                                }
+                              },
+                              {
+                                "token_headers_values": {
+                                  "required": false,
+                                  "type": "array",
+                                  "elements": {
+                                    "type": "string"
+                                  },
+                                  "description": "Extra header values passed to the token endpoint."
+                                }
+                              },
+                              {
+                                "token_headers_client": {
+                                  "required": false,
+                                  "type": "array",
+                                  "elements": {
+                                    "type": "string"
+                                  },
+                                  "description": "Extra headers passed from the client to the token endpoint."
+                                }
+                              },
+                              {
+                                "token_headers_replay": {
+                                  "required": false,
+                                  "type": "array",
+                                  "elements": {
+                                    "type": "string"
+                                  },
+                                  "description": "The names of token endpoint response headers to forward to the downstream client."
+                                }
+                              },
+                              {
+                                "token_headers_prefix": {
+                                  "type": "string",
+                                  "required": false,
+                                  "description": "Add a prefix to the token endpoint response headers before forwarding them to the downstream client."
+                                }
+                              },
+                              {
+                                "token_headers_grants": {
+                                  "required": false,
+                                  "type": "array",
+                                  "elements": {
+                                    "type": "string",
+                                    "one_of": [
+                                      "password",
+                                      "client_credentials",
+                                      "authorization_code",
+                                      "refresh_token"
+                                    ]
+                                  },
+                                  "description": "Enable the sending of the token endpoint response headers only with certain grants: - `password`: with OAuth password grant - `client_credentials`: with OAuth client credentials grant - `authorization_code`: with authorization code flow - `refresh_token` with refresh token grant."
+                                }
+                              },
+                              {
+                                "token_post_args_names": {
+                                  "required": false,
+                                  "type": "array",
+                                  "elements": {
+                                    "type": "string"
+                                  },
+                                  "description": "Extra post argument names passed to the token endpoint."
+                                }
+                              },
+                              {
+                                "token_post_args_values": {
+                                  "required": false,
+                                  "type": "array",
+                                  "elements": {
+                                    "type": "string"
+                                  },
+                                  "description": "Extra post argument values passed to the token endpoint."
+                                }
+                              },
+                              {
+                                "token_post_args_client": {
+                                  "required": false,
+                                  "type": "array",
+                                  "elements": {
+                                    "type": "string"
+                                  },
+                                  "description": "Pass extra arguments from the client to the OpenID-Connect plugin. If arguments exist, the client can pass them using: - Query parameters - Request Body - Reqest Header  This parameter can be used with `scope` values, like this:  `config.token_post_args_client=scope`  In this case, the token would take the `scope` value from the query parameter or from the request body or from the header and send it to the token endpoint."
+                                }
+                              },
+                              {
+                                "introspection_endpoint": {
+                                  "required": false,
+                                  "type": "string",
+                                  "description": "The introspection endpoint. If set it overrides the value in `introspection_endpoint` returned by the discovery endpoint."
+                                }
+                              },
+                              {
+                                "introspection_endpoint_auth_method": {
+                                  "type": "string",
+                                  "one_of": [
+                                    "client_secret_basic",
+                                    "client_secret_post",
+                                    "client_secret_jwt",
+                                    "private_key_jwt",
+                                    "tls_client_auth",
+                                    "self_signed_tls_client_auth",
+                                    "none"
+                                  ],
+                                  "required": false,
+                                  "description": "The introspection endpoint authentication method: : `client_secret_basic`, `client_secret_post`, `client_secret_jwt`, `private_key_jwt`, `tls_client_auth`, `self_signed_tls_client_auth`, or `none`: do not authenticate"
+                                }
+                              },
+                              {
+                                "introspection_hint": {
+                                  "default": "access_token",
+                                  "type": "string",
+                                  "required": false,
+                                  "description": "Introspection hint parameter value passed to the introspection endpoint."
+                                }
+                              },
+                              {
+                                "introspection_check_active": {
+                                  "default": true,
+                                  "type": "boolean",
+                                  "required": false,
+                                  "description": "Check that the introspection response has an `active` claim with a value of `true`."
+                                }
+                              },
+                              {
+                                "introspection_accept": {
+                                  "type": "string",
+                                  "required": false,
+                                  "one_of": [
+                                    "application/json",
+                                    "application/token-introspection+jwt",
+                                    "application/jwt"
+                                  ],
+                                  "default": "application/json",
+                                  "description": "The value of `Accept` header for introspection requests: - `application/json`: introspection response as JSON - `application/token-introspection+jwt`: introspection response as JWT (from the current IETF draft document) - `application/jwt`: introspection response as JWT (from the obsolete IETF draft document)."
+                                }
+                              },
+                              {
+                                "introspection_headers_names": {
+                                  "required": false,
+                                  "type": "array",
+                                  "elements": {
+                                    "type": "string"
+                                  },
+                                  "description": "Extra header names passed to the introspection endpoint."
+                                }
+                              },
+                              {
+                                "introspection_headers_values": {
+                                  "required": false,
+                                  "type": "array",
+                                  "elements": {
+                                    "type": "string"
+                                  },
+                                  "description": "Extra header values passed to the introspection endpoint."
+                                }
+                              },
+                              {
+                                "introspection_headers_client": {
+                                  "required": false,
+                                  "type": "array",
+                                  "elements": {
+                                    "type": "string"
+                                  },
+                                  "description": "Extra headers passed from the client to the introspection endpoint."
+                                }
+                              },
+                              {
+                                "introspection_post_args_names": {
+                                  "required": false,
+                                  "type": "array",
+                                  "elements": {
+                                    "type": "string"
+                                  },
+                                  "description": "Extra post argument names passed to the introspection endpoint."
+                                }
+                              },
+                              {
+                                "introspection_post_args_values": {
+                                  "required": false,
+                                  "type": "array",
+                                  "elements": {
+                                    "type": "string"
+                                  },
+                                  "description": "Extra post argument values passed to the introspection endpoint."
+                                }
+                              },
+                              {
+                                "introspection_post_args_client": {
+                                  "required": false,
+                                  "type": "array",
+                                  "elements": {
+                                    "type": "string"
+                                  },
+                                  "description": "Extra post arguments passed from the client to the introspection endpoint."
+                                }
+                              },
+                              {
+                                "introspect_jwt_tokens": {
+                                  "default": false,
+                                  "type": "boolean",
+                                  "required": false,
+                                  "description": "Specifies whether to introspect the JWT access tokens (can be used to check for revocations)."
+                                }
+                              },
+                              {
+                                "revocation_endpoint": {
+                                  "required": false,
+                                  "type": "string",
+                                  "description": "The revocation endpoint. If set it overrides the value in `revocation_endpoint` returned by the discovery endpoint."
+                                }
+                              },
+                              {
+                                "revocation_endpoint_auth_method": {
+                                  "type": "string",
+                                  "one_of": [
+                                    "client_secret_basic",
+                                    "client_secret_post",
+                                    "client_secret_jwt",
+                                    "private_key_jwt",
+                                    "tls_client_auth",
+                                    "self_signed_tls_client_auth",
+                                    "none"
+                                  ],
+                                  "required": false,
+                                  "description": "The revocation endpoint authentication method: : `client_secret_basic`, `client_secret_post`, `client_secret_jwt`, `private_key_jwt`, `tls_client_auth`, `self_signed_tls_client_auth`, or `none`: do not authenticate"
+                                }
+                              },
+                              {
+                                "end_session_endpoint": {
+                                  "required": false,
+                                  "type": "string",
+                                  "description": "The end session endpoint. If set it overrides the value in `end_session_endpoint` returned by the discovery endpoint."
+                                }
+                              },
+                              {
+                                "userinfo_endpoint": {
+                                  "required": false,
+                                  "type": "string",
+                                  "description": "The user info endpoint. If set it overrides the value in `userinfo_endpoint` returned by the discovery endpoint."
+                                }
+                              },
+                              {
+                                "userinfo_accept": {
+                                  "type": "string",
+                                  "required": false,
+                                  "one_of": [
+                                    "application/json",
+                                    "application/jwt"
+                                  ],
+                                  "default": "application/json",
+                                  "description": "The value of `Accept` header for user info requests: - `application/json`: user info response as JSON - `application/jwt`: user info response as JWT (from the obsolete IETF draft document)."
+                                }
+                              },
+                              {
+                                "userinfo_headers_names": {
+                                  "required": false,
+                                  "type": "array",
+                                  "elements": {
+                                    "type": "string"
+                                  },
+                                  "description": "Extra header names passed to the user info endpoint."
+                                }
+                              },
+                              {
+                                "userinfo_headers_values": {
+                                  "required": false,
+                                  "type": "array",
+                                  "elements": {
+                                    "type": "string"
+                                  },
+                                  "description": "Extra header values passed to the user info endpoint."
+                                }
+                              },
+                              {
+                                "userinfo_headers_client": {
+                                  "required": false,
+                                  "type": "array",
+                                  "elements": {
+                                    "type": "string"
+                                  },
+                                  "description": "Extra headers passed from the client to the user info endpoint."
+                                }
+                              },
+                              {
+                                "userinfo_query_args_names": {
+                                  "required": false,
+                                  "type": "array",
+                                  "elements": {
+                                    "type": "string"
+                                  },
+                                  "description": "Extra query argument names passed to the user info endpoint."
+                                }
+                              },
+                              {
+                                "userinfo_query_args_values": {
+                                  "required": false,
+                                  "type": "array",
+                                  "elements": {
+                                    "type": "string"
+                                  },
+                                  "description": "Extra query argument values passed to the user info endpoint."
+                                }
+                              },
+                              {
+                                "userinfo_query_args_client": {
+                                  "required": false,
+                                  "type": "array",
+                                  "elements": {
+                                    "type": "string"
+                                  },
+                                  "description": "Extra query arguments passed from the client to the user info endpoint."
+                                }
+                              },
+                              {
+                                "token_exchange_endpoint": {
+                                  "required": false,
+                                  "type": "string",
+                                  "description": "The token exchange endpoint."
+                                }
+                              },
+                              {
+                                "session_secret": {
+                                  "type": "string",
+                                  "required": false,
+                                  "referenceable": true,
+                                  "encrypted": true,
+                                  "description": "The session secret."
+                                }
+                              },
+                              {
+                                "session_audience": {
+                                  "default": "default",
+                                  "type": "string",
+                                  "required": false,
+                                  "description": "The session audience, which is the intended target application. For example `\"my-application\"`."
+                                }
+                              },
+                              {
+                                "session_cookie_name": {
+                                  "default": "session",
+                                  "type": "string",
+                                  "required": false,
+                                  "description": "The session cookie name."
+                                }
+                              },
+                              {
+                                "session_remember": {
+                                  "default": false,
+                                  "type": "boolean",
+                                  "required": false,
+                                  "description": "Enables or disables persistent sessions."
+                                }
+                              },
+                              {
+                                "session_remember_cookie_name": {
+                                  "default": "remember",
+                                  "type": "string",
+                                  "required": false,
+                                  "description": "Persistent session cookie name. Use with the `remember` configuration parameter."
+                                }
+                              },
+                              {
+                                "session_remember_rolling_timeout": {
+                                  "default": 604800,
+                                  "type": "number",
+                                  "required": false,
+                                  "description": "Specifies how long the persistent session is considered valid in seconds. 0 disables the checks and rolling."
+                                }
+                              },
+                              {
+                                "session_remember_absolute_timeout": {
+                                  "default": 2592000,
+                                  "type": "number",
+                                  "required": false,
+                                  "description": "Limits how long the persistent session can be renewed in seconds, until re-authentication is required. 0 disables the checks."
+                                }
+                              },
+                              {
+                                "session_idling_timeout": {
+                                  "default": 900,
+                                  "type": "number",
+                                  "required": false,
+                                  "description": "Specifies how long the session can be inactive until it is considered invalid in seconds. 0 disables the checks and touching."
+                                }
+                              },
+                              {
+                                "session_rolling_timeout": {
+                                  "default": 3600,
+                                  "type": "number",
+                                  "required": false,
+                                  "description": "Specifies how long the session can be used in seconds until it needs to be renewed. 0 disables the checks and rolling."
+                                }
+                              },
+                              {
+                                "session_absolute_timeout": {
+                                  "default": 86400,
+                                  "type": "number",
+                                  "required": false,
+                                  "description": "Limits how long the session can be renewed in seconds, until re-authentication is required. 0 disables the checks."
+                                }
+                              },
+                              {
+                                "session_cookie_path": {
+                                  "required": false,
+                                  "type": "string",
+                                  "starts_with": "/",
+                                  "match_none": [
+                                    {
+                                      "pattern": "//",
+                                      "err": "must not have empty segments"
+                                    }
+                                  ],
+                                  "default": "/",
+                                  "description": "The session cookie Path flag."
+                                }
+                              },
+                              {
+                                "session_cookie_domain": {
+                                  "type": "string",
+                                  "required": false,
+                                  "description": "The session cookie Domain flag."
+                                }
+                              },
+                              {
+                                "session_cookie_same_site": {
+                                  "type": "string",
+                                  "required": false,
+                                  "one_of": [
+                                    "Strict",
+                                    "Lax",
+                                    "None",
+                                    "Default"
+                                  ],
+                                  "default": "Lax",
+                                  "description": "Controls whether a cookie is sent with cross-origin requests, providing some protection against cross-site request forgery attacks."
+                                }
+                              },
+                              {
+                                "session_cookie_http_only": {
+                                  "default": true,
+                                  "type": "boolean",
+                                  "required": false,
+                                  "description": "Forbids JavaScript from accessing the cookie, for example, through the `Document.cookie` property."
+                                }
+                              },
+                              {
+                                "session_cookie_secure": {
+                                  "type": "boolean",
+                                  "required": false,
+                                  "description": "Cookie is only sent to the server when a request is made with the https: scheme (except on localhost), and therefore is more resistant to man-in-the-middle attacks."
+                                }
+                              },
+                              {
+                                "session_request_headers": {
+                                  "type": "set",
+                                  "required": false,
+                                  "elements": {
+                                    "type": "string",
+                                    "one_of": [
+                                      "id",
+                                      "audience",
+                                      "subject",
+                                      "timeout",
+                                      "idling-timeout",
+                                      "rolling-timeout",
+                                      "absolute-timeout"
+                                    ]
+                                  },
+                                  "description": "Set of headers to send to upstream, use id, audience, subject, timeout, idling-timeout, rolling-timeout, absolute-timeout. E.g. `[ \"id\", \"timeout\" ]` will set Session-Id and Session-Timeout request headers."
+                                }
+                              },
+                              {
+                                "session_response_headers": {
+                                  "type": "set",
+                                  "required": false,
+                                  "elements": {
+                                    "type": "string",
+                                    "one_of": [
+                                      "id",
+                                      "audience",
+                                      "subject",
+                                      "timeout",
+                                      "idling-timeout",
+                                      "rolling-timeout",
+                                      "absolute-timeout"
+                                    ]
+                                  },
+                                  "description": "Set of headers to send to downstream, use id, audience, subject, timeout, idling-timeout, rolling-timeout, absolute-timeout. E.g. `[ \"id\", \"timeout\" ]` will set Session-Id and Session-Timeout response headers."
+                                }
+                              },
+                              {
+                                "session_storage": {
+                                  "type": "string",
+                                  "required": false,
+                                  "one_of": [
+                                    "cookie",
+                                    "memcache",
+                                    "memcached",
+                                    "redis"
+                                  ],
+                                  "default": "cookie",
+                                  "description": "The session storage for session data: - `cookie`: stores session data with the session cookie (the session cannot be invalidated or revoked without changing session secret, but is stateless, and doesn't require a database) - `memcache`: stores session data in memcached - `redis`: stores session data in Redis."
+                                }
+                              },
+                              {
+                                "session_store_metadata": {
+                                  "default": false,
+                                  "type": "boolean",
+                                  "required": false,
+                                  "description": "Configures whether or not session metadata should be stored. This metadata includes information about the active sessions for a specific audience belonging to a specific subject."
+                                }
+                              },
+                              {
+                                "session_enforce_same_subject": {
+                                  "default": false,
+                                  "type": "boolean",
+                                  "required": false,
+                                  "description": "When set to `true`, audiences are forced to share the same subject."
+                                }
+                              },
+                              {
+                                "session_hash_subject": {
+                                  "default": false,
+                                  "type": "boolean",
+                                  "required": false,
+                                  "description": "When set to `true`, the value of subject is hashed before being stored. Only applies when `session_store_metadata` is enabled."
+                                }
+                              },
+                              {
+                                "session_hash_storage_key": {
+                                  "default": false,
+                                  "type": "boolean",
+                                  "required": false,
+                                  "description": "When set to `true`, the storage key (session ID) is hashed for extra security. Hashing the storage key means it is impossible to decrypt data from the storage without a cookie."
+                                }
+                              },
+                              {
+                                "session_memcached_prefix": {
+                                  "type": "string",
+                                  "required": false,
+                                  "description": "The memcached session key prefix."
+                                }
+                              },
+                              {
+                                "session_memcached_socket": {
+                                  "type": "string",
+                                  "required": false,
+                                  "description": "The memcached unix socket path."
+                                }
+                              },
+                              {
+                                "session_memcached_host": {
+                                  "default": "127.0.0.1",
+                                  "type": "string",
+                                  "required": false,
+                                  "description": "The memcached host."
+                                }
+                              },
+                              {
+                                "session_memcached_port": {
+                                  "required": false,
+                                  "between": [
+                                    0,
+                                    65535
+                                  ],
+                                  "type": "integer",
+                                  "default": 11211,
+                                  "description": "The memcached port."
+                                }
+                              },
+                              {
+                                "session_redis_prefix": {
+                                  "type": "string",
+                                  "required": false,
+                                  "description": "The Redis session key prefix."
+                                }
+                              },
+                              {
+                                "session_redis_socket": {
+                                  "type": "string",
+                                  "required": false,
+                                  "description": "The Redis unix socket path."
+                                }
+                              },
+                              {
+                                "session_redis_host": {
+                                  "default": "127.0.0.1",
+                                  "type": "string",
+                                  "required": false,
+                                  "description": "The Redis host."
+                                }
+                              },
+                              {
+                                "session_redis_port": {
+                                  "required": false,
+                                  "between": [
+                                    0,
+                                    65535
+                                  ],
+                                  "type": "integer",
+                                  "default": 6379,
+                                  "description": "The Redis port."
+                                }
+                              },
+                              {
+                                "session_redis_username": {
+                                  "type": "string",
+                                  "referenceable": true,
+                                  "required": false,
+                                  "description": "Username to use for Redis connection when the `redis` session storage is defined and ACL authentication is desired. If undefined, ACL authentication will not be performed. This requires Redis v6.0.0+. To be compatible with Redis v5.x.y, you can set it to `default`."
+                                }
+                              },
+                              {
+                                "session_redis_password": {
+                                  "type": "string",
+                                  "required": false,
+                                  "referenceable": true,
+                                  "encrypted": true,
+                                  "description": "Password to use for Redis connection when the `redis` session storage is defined. If undefined, no AUTH commands are sent to Redis."
+                                }
+                              },
+                              {
+                                "session_redis_connect_timeout": {
+                                  "type": "integer",
+                                  "required": false,
+                                  "description": "Session redis connection timeout in milliseconds."
+                                }
+                              },
+                              {
+                                "session_redis_read_timeout": {
+                                  "type": "integer",
+                                  "required": false,
+                                  "description": "Session redis read timeout in milliseconds."
+                                }
+                              },
+                              {
+                                "session_redis_send_timeout": {
+                                  "type": "integer",
+                                  "required": false,
+                                  "description": "Session redis send timeout in milliseconds."
+                                }
+                              },
+                              {
+                                "session_redis_ssl": {
+                                  "default": false,
+                                  "type": "boolean",
+                                  "required": false,
+                                  "description": "Use SSL/TLS for Redis connection."
+                                }
+                              },
+                              {
+                                "session_redis_ssl_verify": {
+                                  "default": false,
+                                  "type": "boolean",
+                                  "required": false,
+                                  "description": "Verify identity provider server certificate."
+                                }
+                              },
+                              {
+                                "session_redis_server_name": {
+                                  "type": "string",
+                                  "required": false,
+                                  "description": "The SNI used for connecting the Redis server."
+                                }
+                              },
+                              {
+                                "session_redis_cluster_nodes": {
+                                  "required": false,
+                                  "type": "array",
+                                  "elements": {
+                                    "type": "record",
+                                    "fields": [
+                                      {
+                                        "ip": {
+                                          "default": "127.0.0.1",
+                                          "required": true,
+                                          "type": "string",
+                                          "description": "A string representing a host name, such as example.com."
+                                        }
+                                      },
+                                      {
+                                        "port": {
+                                          "between": [
+                                            0,
+                                            65535
+                                          ],
+                                          "default": 6379,
+                                          "type": "integer",
+                                          "description": "An integer representing a port number between 0 and 65535, inclusive."
+                                        }
+                                      }
+                                    ]
+                                  },
+                                  "description": "The Redis cluster node host. Takes an array of host records, with either `ip` or `host`, and `port` values."
+                                }
+                              },
+                              {
+                                "session_redis_cluster_max_redirections": {
+                                  "type": "integer",
+                                  "required": false,
+                                  "description": "The Redis cluster maximum redirects."
+                                }
+                              },
+                              {
+                                "reverify": {
+                                  "default": false,
+                                  "type": "boolean",
+                                  "required": false,
+                                  "description": "Specifies whether to always verify tokens stored in the session."
+                                }
+                              },
+                              {
+                                "jwt_session_claim": {
+                                  "default": "sid",
+                                  "type": "string",
+                                  "required": false,
+                                  "description": "The claim to match against the JWT session cookie."
+                                }
+                              },
+                              {
+                                "jwt_session_cookie": {
+                                  "type": "string",
+                                  "required": false,
+                                  "description": "The name of the JWT session cookie."
+                                }
+                              },
+                              {
+                                "bearer_token_param_type": {
+                                  "required": false,
+                                  "type": "array",
+                                  "elements": {
+                                    "type": "string",
+                                    "one_of": [
+                                      "header",
+                                      "cookie",
+                                      "query",
+                                      "body"
+                                    ]
+                                  },
+                                  "default": [
+                                    "header",
+                                    "query",
+                                    "body"
+                                  ],
+                                  "description": "Where to look for the bearer token: - `header`: search the HTTP headers - `query`: search the URL's query string - `body`: search the HTTP request body - `cookie`: search the HTTP request cookies specified with `config.bearer_token_cookie_name`."
+                                }
+                              },
+                              {
+                                "bearer_token_cookie_name": {
+                                  "type": "string",
+                                  "required": false,
+                                  "description": "The name of the cookie in which the bearer token is passed."
+                                }
+                              },
+                              {
+                                "client_credentials_param_type": {
+                                  "required": false,
+                                  "type": "array",
+                                  "elements": {
+                                    "type": "string",
+                                    "one_of": [
+                                      "header",
+                                      "query",
+                                      "body"
+                                    ]
+                                  },
+                                  "default": [
+                                    "header",
+                                    "query",
+                                    "body"
+                                  ],
+                                  "description": "Where to look for the client credentials: - `header`: search the HTTP headers - `query`: search the URL's query string - `body`: search from the HTTP request body."
+                                }
+                              },
+                              {
+                                "password_param_type": {
+                                  "required": false,
+                                  "type": "array",
+                                  "elements": {
+                                    "type": "string",
+                                    "one_of": [
+                                      "header",
+                                      "query",
+                                      "body"
+                                    ]
+                                  },
+                                  "default": [
+                                    "header",
+                                    "query",
+                                    "body"
+                                  ],
+                                  "description": "Where to look for the username and password: - `header`: search the HTTP headers - `query`: search the URL's query string - `body`: search the HTTP request body."
+                                }
+                              },
+                              {
+                                "id_token_param_type": {
+                                  "required": false,
+                                  "type": "array",
+                                  "elements": {
+                                    "type": "string",
+                                    "one_of": [
+                                      "header",
+                                      "query",
+                                      "body"
+                                    ]
+                                  },
+                                  "default": [
+                                    "header",
+                                    "query",
+                                    "body"
+                                  ],
+                                  "description": "Where to look for the id token: - `header`: search the HTTP headers - `query`: search the URL's query string - `body`: search the HTTP request body."
+                                }
+                              },
+                              {
+                                "id_token_param_name": {
+                                  "type": "string",
+                                  "required": false,
+                                  "description": "The name of the parameter used to pass the id token."
+                                }
+                              },
+                              {
+                                "refresh_token_param_type": {
+                                  "required": false,
+                                  "type": "array",
+                                  "elements": {
+                                    "type": "string",
+                                    "one_of": [
+                                      "header",
+                                      "query",
+                                      "body"
+                                    ]
+                                  },
+                                  "default": [
+                                    "header",
+                                    "query",
+                                    "body"
+                                  ],
+                                  "description": "Where to look for the refresh token: - `header`: search the HTTP headers - `query`: search the URL's query string - `body`: search the HTTP request body."
+                                }
+                              },
+                              {
+                                "refresh_token_param_name": {
+                                  "type": "string",
+                                  "required": false,
+                                  "description": "The name of the parameter used to pass the refresh token."
+                                }
+                              },
+                              {
+                                "refresh_tokens": {
+                                  "default": true,
+                                  "type": "boolean",
+                                  "required": false,
+                                  "description": "Specifies whether the plugin should try to refresh (soon to be) expired access tokens if the plugin has a `refresh_token` available."
+                                }
+                              },
+                              {
+                                "upstream_headers_claims": {
+                                  "required": false,
+                                  "type": "array",
+                                  "elements": {
+                                    "type": "string"
+                                  },
+                                  "description": "The upstream header claims. If multiple values are set, it means the claim is inside a nested object of the token payload."
+                                }
+                              },
+                              {
+                                "upstream_headers_names": {
+                                  "required": false,
+                                  "type": "array",
+                                  "elements": {
+                                    "type": "string"
+                                  },
+                                  "description": "The upstream header names for the claim values."
+                                }
+                              },
+                              {
+                                "upstream_access_token_header": {
+                                  "default": "authorization:bearer",
+                                  "type": "string",
+                                  "required": false,
+                                  "description": "The upstream access token header."
+                                }
+                              },
+                              {
+                                "upstream_access_token_jwk_header": {
+                                  "type": "string",
+                                  "required": false,
+                                  "description": "The upstream access token JWK header."
+                                }
+                              },
+                              {
+                                "upstream_id_token_header": {
+                                  "type": "string",
+                                  "required": false,
+                                  "description": "The upstream id token header."
+                                }
+                              },
+                              {
+                                "upstream_id_token_jwk_header": {
+                                  "type": "string",
+                                  "required": false,
+                                  "description": "The upstream id token JWK header."
+                                }
+                              },
+                              {
+                                "upstream_refresh_token_header": {
+                                  "type": "string",
+                                  "required": false,
+                                  "description": "The upstream refresh token header."
+                                }
+                              },
+                              {
+                                "upstream_user_info_header": {
+                                  "type": "string",
+                                  "required": false,
+                                  "description": "The upstream user info header."
+                                }
+                              },
+                              {
+                                "upstream_user_info_jwt_header": {
+                                  "type": "string",
+                                  "required": false,
+                                  "description": "The upstream user info JWT header (in case the user info returns a JWT response)."
+                                }
+                              },
+                              {
+                                "upstream_introspection_header": {
+                                  "type": "string",
+                                  "required": false,
+                                  "description": "The upstream introspection header."
+                                }
+                              },
+                              {
+                                "upstream_introspection_jwt_header": {
+                                  "type": "string",
+                                  "required": false,
+                                  "description": "The upstream introspection JWT header."
+                                }
+                              },
+                              {
+                                "upstream_session_id_header": {
+                                  "type": "string",
+                                  "required": false,
+                                  "description": "The upstream session id header."
+                                }
+                              },
+                              {
+                                "downstream_headers_claims": {
+                                  "required": false,
+                                  "type": "array",
+                                  "elements": {
+                                    "type": "string"
+                                  },
+                                  "description": "The downstream header claims. If multiple values are set, it means the claim is inside a nested object of the token payload."
+                                }
+                              },
+                              {
+                                "downstream_headers_names": {
+                                  "required": false,
+                                  "type": "array",
+                                  "elements": {
+                                    "type": "string"
+                                  },
+                                  "description": "The downstream header names for the claim values."
+                                }
+                              },
+                              {
+                                "downstream_access_token_header": {
+                                  "type": "string",
+                                  "required": false,
+                                  "description": "The downstream access token header."
+                                }
+                              },
+                              {
+                                "downstream_access_token_jwk_header": {
+                                  "type": "string",
+                                  "required": false,
+                                  "description": "The downstream access token JWK header."
+                                }
+                              },
+                              {
+                                "downstream_id_token_header": {
+                                  "type": "string",
+                                  "required": false,
+                                  "description": "The downstream id token header."
+                                }
+                              },
+                              {
+                                "downstream_id_token_jwk_header": {
+                                  "type": "string",
+                                  "required": false,
+                                  "description": "The downstream id token JWK header."
+                                }
+                              },
+                              {
+                                "downstream_refresh_token_header": {
+                                  "type": "string",
+                                  "required": false,
+                                  "description": "The downstream refresh token header."
+                                }
+                              },
+                              {
+                                "downstream_user_info_header": {
+                                  "type": "string",
+                                  "required": false,
+                                  "description": "The downstream user info header."
+                                }
+                              },
+                              {
+                                "downstream_user_info_jwt_header": {
+                                  "type": "string",
+                                  "required": false,
+                                  "description": "The downstream user info JWT header (in case the user info returns a JWT response)."
+                                }
+                              },
+                              {
+                                "downstream_introspection_header": {
+                                  "type": "string",
+                                  "required": false,
+                                  "description": "The downstream introspection header."
+                                }
+                              },
+                              {
+                                "downstream_introspection_jwt_header": {
+                                  "type": "string",
+                                  "required": false,
+                                  "description": "The downstream introspection JWT header."
+                                }
+                              },
+                              {
+                                "downstream_session_id_header": {
+                                  "type": "string",
+                                  "required": false,
+                                  "description": "The downstream session id header."
+                                }
+                              },
+                              {
+                                "login_methods": {
+                                  "required": false,
+                                  "type": "array",
+                                  "elements": {
+                                    "type": "string",
+                                    "one_of": [
+                                      "password",
+                                      "client_credentials",
+                                      "authorization_code",
+                                      "bearer",
+                                      "introspection",
+                                      "userinfo",
+                                      "kong_oauth2",
+                                      "refresh_token",
+                                      "session"
+                                    ]
+                                  },
+                                  "default": [
+                                    "authorization_code"
+                                  ],
+                                  "description": "Enable login functionality with specified grants."
+                                }
+                              },
+                              {
+                                "login_action": {
+                                  "type": "string",
+                                  "required": false,
+                                  "one_of": [
+                                    "upstream",
+                                    "response",
+                                    "redirect"
+                                  ],
+                                  "default": "upstream",
+                                  "description": "What to do after successful login: - `upstream`: proxy request to upstream service - `response`: terminate request with a response - `redirect`: redirect to a different location."
+                                }
+                              },
+                              {
+                                "login_tokens": {
+                                  "required": false,
+                                  "type": "array",
+                                  "elements": {
+                                    "type": "string",
+                                    "one_of": [
+                                      "id_token",
+                                      "access_token",
+                                      "refresh_token",
+                                      "tokens",
+                                      "introspection"
+                                    ]
+                                  },
+                                  "default": [
+                                    "id_token"
+                                  ],
+                                  "description": "What tokens to include in `response` body or `redirect` query string or fragment: - `id_token`: include id token - `access_token`: include access token - `refresh_token`: include refresh token - `tokens`: include the full token endpoint response - `introspection`: include introspection response."
+                                }
+                              },
+                              {
+                                "login_redirect_mode": {
+                                  "type": "string",
+                                  "required": false,
+                                  "one_of": [
+                                    "query",
+                                    "fragment"
+                                  ],
+                                  "default": "fragment",
+                                  "description": "Where to place `login_tokens` when using `redirect` `login_action`: - `query`: place tokens in query string - `fragment`: place tokens in url fragment (not readable by servers)."
+                                }
+                              },
+                              {
+                                "logout_query_arg": {
+                                  "type": "string",
+                                  "required": false,
+                                  "description": "The request query argument that activates the logout."
+                                }
+                              },
+                              {
+                                "logout_post_arg": {
+                                  "type": "string",
+                                  "required": false,
+                                  "description": "The request body argument that activates the logout."
+                                }
+                              },
+                              {
+                                "logout_uri_suffix": {
+                                  "type": "string",
+                                  "required": false,
+                                  "description": "The request URI suffix that activates the logout."
+                                }
+                              },
+                              {
+                                "logout_methods": {
+                                  "required": false,
+                                  "type": "array",
+                                  "elements": {
+                                    "type": "string",
+                                    "one_of": [
+                                      "POST",
+                                      "GET",
+                                      "DELETE"
+                                    ]
+                                  },
+                                  "default": [
+                                    "POST",
+                                    "DELETE"
+                                  ],
+                                  "description": "The request methods that can activate the logout: - `POST`: HTTP POST method - `GET`: HTTP GET method - `DELETE`: HTTP DELETE method."
+                                }
+                              },
+                              {
+                                "logout_revoke": {
+                                  "default": false,
+                                  "type": "boolean",
+                                  "required": false,
+                                  "description": "Revoke tokens as part of the logout.\n\nFor more granular token revocation, you can also adjust the `logout_revoke_access_token` and `logout_revoke_refresh_token` parameters."
+                                }
+                              },
+                              {
+                                "logout_revoke_access_token": {
+                                  "default": true,
+                                  "type": "boolean",
+                                  "required": false,
+                                  "description": "Revoke the access token as part of the logout. Requires `logout_revoke` to be set to `true`."
+                                }
+                              },
+                              {
+                                "logout_revoke_refresh_token": {
+                                  "default": true,
+                                  "type": "boolean",
+                                  "required": false,
+                                  "description": "Revoke the refresh token as part of the logout. Requires `logout_revoke` to be set to `true`."
+                                }
+                              },
+                              {
+                                "consumer_claim": {
+                                  "required": false,
+                                  "type": "array",
+                                  "elements": {
+                                    "type": "string"
+                                  },
+                                  "description": "The claim used for consumer mapping. If multiple values are set, it means the claim is inside a nested object of the token payload."
+                                }
+                              },
+                              {
+                                "consumer_by": {
+                                  "required": false,
+                                  "type": "array",
+                                  "elements": {
+                                    "type": "string",
+                                    "one_of": [
+                                      "id",
+                                      "username",
+                                      "custom_id"
+                                    ]
+                                  },
+                                  "default": [
+                                    "username",
+                                    "custom_id"
+                                  ],
+                                  "description": "Consumer fields used for mapping: - `id`: try to find the matching Consumer by `id` - `username`: try to find the matching Consumer by `username` - `custom_id`: try to find the matching Consumer by `custom_id`."
+                                }
+                              },
+                              {
+                                "consumer_optional": {
+                                  "default": false,
+                                  "type": "boolean",
+                                  "required": false,
+                                  "description": "Do not terminate the request if consumer mapping fails."
+                                }
+                              },
+                              {
+                                "credential_claim": {
+                                  "required": false,
+                                  "type": "array",
+                                  "elements": {
+                                    "type": "string"
+                                  },
+                                  "default": [
+                                    "sub"
+                                  ],
+                                  "description": "The claim used to derive virtual credentials (e.g. to be consumed by the rate-limiting plugin), in case the consumer mapping is not used. If multiple values are set, it means the claim is inside a nested object of the token payload."
+                                }
+                              },
+                              {
+                                "anonymous": {
+                                  "type": "string",
+                                  "required": false,
+                                  "description": "An optional string (consumer UUID or username) value that functions as an “anonymous” consumer if authentication fails. If empty (default null), requests that fail authentication will return a `4xx` HTTP status code. This value must refer to the consumer `id` or `username` attribute, and **not** its `custom_id`."
+                                }
+                              },
+                              {
+                                "run_on_preflight": {
+                                  "default": true,
+                                  "type": "boolean",
+                                  "required": false,
+                                  "description": "Specifies whether to run this plugin on pre-flight (`OPTIONS`) requests."
+                                }
+                              },
+                              {
+                                "leeway": {
+                                  "default": 0,
+                                  "type": "number",
+                                  "required": false,
+                                  "description": "Allow some leeway (in seconds) on the iat claim and ttl / expiry verification."
+                                }
+                              },
+                              {
+                                "verify_parameters": {
+                                  "default": false,
+                                  "type": "boolean",
+                                  "required": false,
+                                  "description": "Verify plugin configuration against discovery."
+                                }
+                              },
+                              {
+                                "verify_nonce": {
+                                  "default": true,
+                                  "type": "boolean",
+                                  "required": false,
+                                  "description": "Verify nonce on authorization code flow."
+                                }
+                              },
+                              {
+                                "verify_claims": {
+                                  "default": true,
+                                  "type": "boolean",
+                                  "required": false,
+                                  "description": "Verify tokens for standard claims."
+                                }
+                              },
+                              {
+                                "verify_signature": {
+                                  "default": true,
+                                  "type": "boolean",
+                                  "required": false,
+                                  "description": "Verify signature of tokens."
+                                }
+                              },
+                              {
+                                "ignore_signature": {
+                                  "required": false,
+                                  "type": "array",
+                                  "elements": {
+                                    "type": "string",
+                                    "one_of": [
+                                      "password",
+                                      "client_credentials",
+                                      "authorization_code",
+                                      "refresh_token",
+                                      "session",
+                                      "introspection",
+                                      "userinfo"
+                                    ]
+                                  },
+                                  "default": [
+
+                                  ],
+                                  "description": "Skip the token signature verification on certain grants: - `password`: OAuth password grant - `client_credentials`: OAuth client credentials grant - `authorization_code`: authorization code flow - `refresh_token`: OAuth refresh token grant - `session`: session cookie authentication - `introspection`: OAuth introspection - `userinfo`: OpenID Connect user info endpoint authentication."
+                                }
+                              },
+                              {
+                                "enable_hs_signatures": {
+                                  "default": false,
+                                  "type": "boolean",
+                                  "required": false,
+                                  "description": "Enable shared secret, for example, HS256, signatures (when disabled they will not be accepted)."
+                                }
+                              },
+                              {
+                                "disable_session": {
+                                  "required": false,
+                                  "type": "array",
+                                  "elements": {
+                                    "type": "string",
+                                    "one_of": [
+                                      "password",
+                                      "client_credentials",
+                                      "authorization_code",
+                                      "bearer",
+                                      "introspection",
+                                      "userinfo",
+                                      "kong_oauth2",
+                                      "refresh_token",
+                                      "session"
+                                    ]
+                                  },
+                                  "description": "Disable issuing the session cookie with the specified grants."
+                                }
+                              },
+                              {
+                                "cache_ttl": {
+                                  "default": 3600,
+                                  "type": "number",
+                                  "required": false,
+                                  "description": "The default cache ttl in seconds that is used in case the cached object does not specify the expiry."
+                                }
+                              },
+                              {
+                                "cache_ttl_max": {
+                                  "type": "number",
+                                  "required": false,
+                                  "description": "The maximum cache ttl in seconds (enforced)."
+                                }
+                              },
+                              {
+                                "cache_ttl_min": {
+                                  "type": "number",
+                                  "required": false,
+                                  "description": "The minimum cache ttl in seconds (enforced)."
+                                }
+                              },
+                              {
+                                "cache_ttl_neg": {
+                                  "type": "number",
+                                  "required": false,
+                                  "description": "The negative cache ttl in seconds."
+                                }
+                              },
+                              {
+                                "cache_ttl_resurrect": {
+                                  "type": "number",
+                                  "required": false,
+                                  "description": "The resurrection ttl in seconds."
+                                }
+                              },
+                              {
+                                "cache_tokens": {
+                                  "default": true,
+                                  "type": "boolean",
+                                  "required": false,
+                                  "description": "Cache the token endpoint requests."
+                                }
+                              },
+                              {
+                                "cache_tokens_salt": {
+                                  "auto": true,
+                                  "type": "string",
+                                  "required": false,
+                                  "description": "Salt used for generating the cache key that is used for caching the token endpoint requests."
+                                }
+                              },
+                              {
+                                "cache_introspection": {
+                                  "default": true,
+                                  "type": "boolean",
+                                  "required": false,
+                                  "description": "Cache the introspection endpoint requests."
+                                }
+                              },
+                              {
+                                "cache_token_exchange": {
+                                  "default": true,
+                                  "type": "boolean",
+                                  "required": false,
+                                  "description": "Cache the token exchange endpoint requests."
+                                }
+                              },
+                              {
+                                "cache_user_info": {
+                                  "default": true,
+                                  "type": "boolean",
+                                  "required": false,
+                                  "description": "Cache the user info requests."
+                                }
+                              },
+                              {
+                                "search_user_info": {
+                                  "default": false,
+                                  "type": "boolean",
+                                  "required": false,
+                                  "description": "Specify whether to use the user info endpoint to get additional claims for consumer mapping, credential mapping, authenticated groups, and upstream and downstream headers."
+                                }
+                              },
+                              {
+                                "hide_credentials": {
+                                  "default": false,
+                                  "type": "boolean",
+                                  "required": false,
+                                  "description": "Remove the credentials used for authentication from the request. If multiple credentials are sent with the same request, the plugin will remove those that were used for successful authentication."
+                                }
+                              },
+                              {
+                                "http_version": {
+                                  "required": false,
+                                  "default": 1.1,
+                                  "type": "number",
+                                  "description": "The HTTP version used for the requests by this plugin: - `1.1`: HTTP 1.1 (the default) - `1.0`: HTTP 1.0."
+                                }
+                              },
+                              {
+                                "http_proxy": {
+                                  "required": false,
+                                  "type": "string",
+                                  "description": "The HTTP proxy."
+                                }
+                              },
+                              {
+                                "http_proxy_authorization": {
+                                  "type": "string",
+                                  "required": false,
+                                  "description": "The HTTP proxy authorization."
+                                }
+                              },
+                              {
+                                "https_proxy": {
+                                  "required": false,
+                                  "type": "string",
+                                  "description": "The HTTPS proxy."
+                                }
+                              },
+                              {
+                                "https_proxy_authorization": {
+                                  "type": "string",
+                                  "required": false,
+                                  "description": "The HTTPS proxy authorization."
+                                }
+                              },
+                              {
+                                "no_proxy": {
+                                  "type": "string",
+                                  "required": false,
+                                  "description": "Do not use proxy with these hosts."
+                                }
+                              },
+                              {
+                                "keepalive": {
+                                  "default": true,
+                                  "type": "boolean",
+                                  "required": false,
+                                  "description": "Use keepalive with the HTTP client."
+                                }
+                              },
+                              {
+                                "ssl_verify": {
+                                  "default": false,
+                                  "type": "boolean",
+                                  "required": false,
+                                  "description": "Verify identity provider server certificate."
+                                }
+                              },
+                              {
+                                "timeout": {
+                                  "default": 10000,
+                                  "type": "number",
+                                  "required": false,
+                                  "description": "Network IO timeout in milliseconds."
+                                }
+                              },
+                              {
+                                "display_errors": {
+                                  "default": false,
+                                  "type": "boolean",
+                                  "required": false,
+                                  "description": "Display errors on failure responses."
+                                }
+                              },
+                              {
+                                "by_username_ignore_case": {
+                                  "default": false,
+                                  "type": "boolean",
+                                  "required": false,
+                                  "description": "If `consumer_by` is set to `username`, specify whether `username` can match consumers case-insensitively."
+                                }
+                              },
+                              {
+                                "resolve_distributed_claims": {
+                                  "default": false,
+                                  "type": "boolean",
+                                  "required": false,
+                                  "description": "Distributed claims are represented by the `_claim_names` and `_claim_sources` members of the JSON object containing the claims. If this parameter is set to `true`, the plugin explicitly resolves these distributed claims."
+                                }
+                              },
+                              {
+                                "expose_error_code": {
+                                  "type": "boolean",
+                                  "default": true,
+                                  "description": "Specifies whether to expose the error code header, as defined in RFC 6750. If an authorization request fails, this header is sent in the response. Set to `false` to disable."
+                                }
+                              },
+                              {
+                                "token_cache_key_include_scope": {
+                                  "type": "boolean",
+                                  "default": false,
+                                  "description": "Include the scope in the token cache key, so token with different scopes are considered diffrent tokens."
+                                }
+                              },
+                              {
+                                "introspection_token_param_name": {
+                                  "default": "token",
+                                  "type": "string",
+                                  "required": false,
+                                  "description": "Designate token's parameter name for introspection."
+                                }
+                              },
+                              {
+                                "revocation_token_param_name": {
+                                  "default": "token",
+                                  "type": "string",
+                                  "required": false,
+                                  "description": "Designate token's parameter name for revocation."
+                                }
+                              },
+                              {
+                                "proof_of_possession_mtls": {
+                                  "type": "string",
+                                  "required": false,
+                                  "one_of": [
+                                    "off",
+                                    "strict",
+                                    "optional"
+                                  ],
+                                  "default": "off",
+                                  "description": "Enable mtls proof of possession. If set to strict, all tokens (from supported auth_methods: bearer, introspection, and session granted with bearer or introspection) are verified, if set to optional, only tokens that contain the certificate hash claim are verified. If the verification fails, the request will be rejected with 401."
+                                }
+                              },
+                              {
+                                "proof_of_possession_auth_methods_validation": {
+                                  "default": true,
+                                  "type": "boolean",
+                                  "required": false,
+                                  "description": "If set to true, only the auth_methods that are compatible with Proof of Possession (PoP) can be configured when PoP is enabled. If set to false, all auth_methods will be configurable and PoP checks will be silently skipped for those auth_methods that are not compatible with PoP."
+                                }
+                              },
+                              {
+                                "tls_client_auth_cert_id": {
+                                  "uuid": true,
+                                  "type": "string",
+                                  "description": "ID of the Certificate entity representing the client certificate to use for mTLS client authentication for connections between Kong and the Auth Server.",
+                                  "required": false,
+                                  "auto": false
+                                }
+                              },
+                              {
+                                "tls_client_auth_ssl_verify": {
+                                  "default": true,
+                                  "type": "boolean",
+                                  "required": false,
+                                  "description": "Verify identity provider server certificate during mTLS client authentication."
+                                }
+                              },
+                              {
+                                "mtls_token_endpoint": {
+                                  "required": false,
+                                  "type": "string",
+                                  "description": "Alias for the token endpoint to be used for mTLS client authentication. If set it overrides the value in `mtls_endpoint_aliases` returned by the discovery endpoint."
+                                }
+                              },
+                              {
+                                "mtls_introspection_endpoint": {
+                                  "required": false,
+                                  "type": "string",
+                                  "description": "Alias for the introspection endpoint to be used for mTLS client authentication. If set it overrides the value in `mtls_endpoint_aliases` returned by the discovery endpoint."
+                                }
+                              },
+                              {
+                                "mtls_revocation_endpoint": {
+                                  "required": false,
+                                  "type": "string",
+                                  "description": "Alias for the introspection endpoint to be used for mTLS client authentication. If set it overrides the value in `mtls_endpoint_aliases` returned by the discovery endpoint."
+                                }
+                              }
+                            ]
+                          }
+                        }
+                      ]
+                    },
+                    "description": "List of openid_connect strategies."
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      }
+    }
+  ],
+  "entity_checks": [
+
+  ]
+}

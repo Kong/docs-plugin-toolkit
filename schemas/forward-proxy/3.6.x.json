@@ -1,0 +1,163 @@
+{
+  "fields": [
+    {
+      "protocols": {
+        "required": true,
+        "type": "set",
+        "default": [
+          "grpc",
+          "grpcs",
+          "http",
+          "https"
+        ],
+        "elements": {
+          "type": "string",
+          "one_of": [
+            "grpc",
+            "grpcs",
+            "http",
+            "https"
+          ]
+        },
+        "description": "A set of strings representing HTTP protocols."
+      }
+    },
+    {
+      "consumer_group": {
+        "type": "foreign",
+        "reference": "consumer_groups",
+        "eq": null,
+        "description": "Custom type for representing a foreign key with a null value allowed."
+      }
+    },
+    {
+      "config": {
+        "type": "record",
+        "shorthand_fields": [
+          {
+            "proxy_host": {
+              "type": "string"
+            }
+          },
+          {
+            "proxy_port": {
+              "type": "integer"
+            }
+          }
+        ],
+        "entity_checks": [
+          {
+            "at_least_one_of": [
+              "http_proxy_host",
+              "https_proxy_host"
+            ]
+          },
+          {
+            "at_least_one_of": [
+              "http_proxy_port",
+              "https_proxy_port"
+            ]
+          },
+          {
+            "mutually_required": [
+              "http_proxy_host",
+              "http_proxy_port"
+            ]
+          },
+          {
+            "mutually_required": [
+              "https_proxy_host",
+              "https_proxy_port"
+            ]
+          }
+        ],
+        "required": true,
+        "fields": [
+          {
+            "x_headers": {
+              "required": true,
+              "type": "string",
+              "one_of": [
+                "append",
+                "transparent",
+                "delete"
+              ],
+              "default": "append",
+              "description": "Determines how to handle headers when forwarding the request."
+            }
+          },
+          {
+            "http_proxy_host": {
+              "type": "string",
+              "description": "A string representing a host name, such as example.com."
+            }
+          },
+          {
+            "http_proxy_port": {
+              "between": [
+                0,
+                65535
+              ],
+              "type": "integer",
+              "description": "An integer representing a port number between 0 and 65535, inclusive."
+            }
+          },
+          {
+            "https_proxy_host": {
+              "type": "string",
+              "description": "A string representing a host name, such as example.com."
+            }
+          },
+          {
+            "https_proxy_port": {
+              "between": [
+                0,
+                65535
+              ],
+              "type": "integer",
+              "description": "An integer representing a port number between 0 and 65535, inclusive."
+            }
+          },
+          {
+            "proxy_scheme": {
+              "required": true,
+              "type": "string",
+              "one_of": [
+                "http"
+              ],
+              "default": "http",
+              "description": "The proxy scheme to use when connecting. Only `http` is supported."
+            }
+          },
+          {
+            "auth_username": {
+              "type": "string",
+              "referenceable": true,
+              "required": false,
+              "description": "The username to authenticate with, if the forward proxy is protected\nby basic authentication."
+            }
+          },
+          {
+            "auth_password": {
+              "type": "string",
+              "referenceable": true,
+              "required": false,
+              "description": "The password to authenticate with, if the forward proxy is protected\nby basic authentication."
+            }
+          },
+          {
+            "https_verify": {
+              "default": false,
+              "type": "boolean",
+              "required": true,
+              "description": "Whether the server certificate will be verified according to the CA certificates specified in lua_ssl_trusted_certificate."
+            }
+          }
+        ]
+      }
+    }
+  ],
+  "entity_checks": [
+
+  ]
+}
