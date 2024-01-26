@@ -95,6 +95,23 @@ For example, running:
 ```
 generates a file `./data/referenceable_fields/3.4.x.json` containing a list of plugins that have referenceable fields, and their corresponding referenceable fields.
 
+### Generate Plugin Priorities
+
+| Options | Descriptions  |
+|--------------------------- |-----|
+| `version` | **Required**. Kong Gateway release version, e.g. `3.3.x`. |
+| `plugins` | **Required**. Space separated list of plugins to use, .e.g. `acme acl`. |
+| `host`    | Name of the host in which the API is running. Default: `localhost`.  |
+| `port`    | Port in which the API is listening. Default: `8001`. |
+| `type`    | Whether the API is running the `Enterprise` or `OSS` edition. Enum: `oss` or `ee`.  |
+| `destination` | Path to the root folder in which the file will be stored. Default: `./data`  |
+
+For example, running:
+```bash
+./plugins generate_plugin_priorities --type=ee --version 3.4.x --plugins $(ls ./schemas)
+```
+generates a file `./data/priorities/ee/3.4.x.json` containing a list of plugins and their corresponded priorities order by priority (desc).
+
 ## Updating the repo after a new release
 
 Whenever a new version of Kong Gateway is released, we need run the following commands in order. For all of them, specify all the plugins `--plugins $(ls ./schemas)`
@@ -103,3 +120,4 @@ Whenever a new version of Kong Gateway is released, we need run the following co
 1. Copy Examples - specify the previous version `_x.x.y` of the example that gets copied
 1. Validate Examples  - specify the new version `_x.x.x`
 1. Generate Referenceable Fields List - specify the new version `x.x.x`
+1. Generate Priorities List - for `oss` and `ee` and specify the new version `x.x.x`
