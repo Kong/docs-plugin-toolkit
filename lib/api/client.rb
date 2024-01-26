@@ -30,5 +30,13 @@ module API
         puts e.message
       end
     end
+
+    def root
+      begin
+        Net::HTTP.get_response(URI("#{@base_url}/"))
+      rescue Errno::ECONNREFUSED => e
+        puts e.message
+      end
+    end
   end
 end
