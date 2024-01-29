@@ -103,14 +103,14 @@ generates a file `./data/referenceable_fields/3.4.x.json` containing a list of p
 | `plugins` | **Required**. Space separated list of plugins to use, .e.g. `acme acl`. |
 | `host`    | Name of the host in which the API is running. Default: `localhost`.  |
 | `port`    | Port in which the API is listening. Default: `8001`. |
-| `type`    | Whether the API is running the `Enterprise` or `OSS` edition. Enum: `oss` or `ee`.  |
+| `ee-path` | Path to the local copy of kong enterprise. |
 | `destination` | Path to the root folder in which the file will be stored. Default: `./data`  |
 
 For example, running:
 ```bash
-./plugins generate_plugin_priorities --type=ee --version 3.4.x --plugins $(ls ./schemas)
+./plugins generate_plugin_priorities --ee-path=../kong-enterprise/ --version 3.4.x --plugins $(ls ./schemas)
 ```
-generates a file `./data/priorities/ee/3.4.x.json` containing a list of plugins and their corresponded priorities order by priority (desc).
+generates a file `./data/priorities/3.4.x.json` containing a list of plugins and their corresponded priorities order by priority (desc).
 
 ## Updating the repo after a new release
 
