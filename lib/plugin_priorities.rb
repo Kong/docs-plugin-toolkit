@@ -14,7 +14,7 @@ class PluginPriorities
   end
 
   def run!
-    create_folder
+    create_folders
     fetch_priorities
     order_priorities
     process_priorities
@@ -27,7 +27,7 @@ class PluginPriorities
       handler = handler_file_path(plugin)
       next unless handler
 
-      priority = File.read(handler)[/PRIORITY\s=\s(\d+)/, 1].to_i
+      priority = File.read(handler)[/PRIORITY\s=\s(\d+)(,|\s*\n)/, 1].to_i
       @priorities[plugin] = priority
     end
   end
@@ -53,20 +53,23 @@ class PluginPriorities
   end
 
   def file_path
-    "#{@options[:destination]}/priorities/#{@options[:version]}.json"
+    "#{@options[:destination]}/priorities/#{@options[:type]}/#{@options[:version]}.json"
   end
 
-  def create_folder
-    FileUtils.mkdir_p("#{@options[:destination]}/priorities/")
+  def create_folders
+    FileUtils.mkdir_p("#{@options[:destination]}/priorities/ee/")
+    FileUtils.mkdir_p("#{@options[:destination]}/priorities/oss/")
   end
 
   def handler_file_path(plugin)
-    oss_path = "#{@options[:ee_path]}/kong/plugins/#{plugin}/handler.lua"
-    ee_path = "#{@options[:ee_path]}/plugins-ee/#{plugin}/kong/plugins/#{plugin}/handler.lua"
-    if File.exist?(oss_path)
-      oss_path
-    elsif File.exist?(ee_path)
-      ee_path
+    path = if @options[:type] == 'oss'
+             "#{@options[:source]}/kong/plugins/#{plugin}/handler.lua"
+           else
+             ee = "#{@options[:source]}/plugins-ee/#{plugin}/kong/plugins/#{plugin}/handler.lua"
+             File.exist?(ee) ? ee : "#{@options[:source]}/kong/plugins/#{plugin}/handler.lua"
+           end
+    if File.exist?(path)
+      path
     else
       puts "Plugin #{plugin} handler.lua can't be found"
     end
