@@ -10,40 +10,42 @@ class PluginPriorities
   def initialize(plugins:, options:)
     @plugins = plugins
     @options = options
-    @priorities = {}
+    @client  = API::Client.new(host: @options[:host], port: @options[:port])
   end
 
   def run!
     create_folders
-    fetch_priorities
-    order_priorities
-    process_priorities
+
+    @res = @client.root
+
+    process_response
   end
 
   private
 
-  def fetch_priorities
-    @plugins.each do |plugin|
-      handler = handler_file_path(plugin)
-      next unless handler
+  def process_response
+    if success?
+      @response = JSON.parse(@res.body)
 
-      priority = File.read(handler)[/PRIORITY\s=\s(\d+)(,|\s*\n)/, 1].to_i
-      @priorities[plugin] = priority
+      if @options['verbose']
+        puts 'Plugins ordered by priority'
+        puts JSON.pretty_generate(priorities)
+      else
+        puts "#{success? ? '✅' : '❌'}"
+      end
+
+      write_to_file(priorities)
     end
   end
 
-  def process_priorities
-    if @options['verbose']
-      puts 'Plugins ordered by priority'
-      puts JSON.pretty_generate(@priorities)
-    end
-
-    write_to_file(@priorities)
+  def success?
+    @res && @res.code == '200'
   end
 
-  def order_priorities
-    @priorities = @priorities
-      .select { |k, v| !v.nil? }
+  def priorities
+    @priorities ||= @response
+      .dig('plugins', 'available_on_server')
+      .each_with_object({}) { |(k, v), hash| hash[k] = v['priority'] }
       .sort_by { |k, v| -v }
       .to_h
   end
@@ -57,21 +59,7 @@ class PluginPriorities
   end
 
   def create_folders
-    FileUtils.mkdir_p("#{@options[:destination]}/priorities/ee/")
-    FileUtils.mkdir_p("#{@options[:destination]}/priorities/oss/")
-  end
-
-  def handler_file_path(plugin)
-    path = if @options[:type] == 'oss'
-             "#{@options[:source]}/kong/plugins/#{plugin}/handler.lua"
-           else
-             ee = "#{@options[:source]}/plugins-ee/#{plugin}/kong/plugins/#{plugin}/handler.lua"
-             File.exist?(ee) ? ee : "#{@options[:source]}/kong/plugins/#{plugin}/handler.lua"
-           end
-    if File.exist?(path)
-      path
-    else
-      puts "Plugin #{plugin} handler.lua can't be found"
-    end
+    FileUtils.mkdir_p("#{@options[:destination]}/priorities/ee")
+    FileUtils.mkdir_p("#{@options[:destination]}/priorities/oss")
   end
 end
