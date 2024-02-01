@@ -44,9 +44,13 @@ class PluginPriorities
   def priorities
     @priorities ||= @response
       .dig('plugins', 'available_on_server')
-      .each_with_object({}) { |(k, v), hash| hash[k] = v['priority'] }
-      .sort_by { |k, v| -v }
-      .to_h
+      .each_with_object({}) do |(k, v), hash|
+        next if k == 'konnect-application-auth'
+
+        hash[k] = v['priority']
+      end
+        .sort_by { |k, v| -v }
+        .to_h
   end
 
   def write_to_file(priorities)
