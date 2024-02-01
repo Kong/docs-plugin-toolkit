@@ -105,6 +105,8 @@ generates a file `./data/referenceable_fields/3.4.x.json` containing a list of p
 | `type`    | Whether the API is running the `Enterprise` or `OSS` edition. Enum: `oss` or `ee`.  |
 | `destination` | Path to the root folder in which the file will be stored. Default: `./data`  |
 
+NOTE: when generating priorities for enterprise, make sure the appdynamics plugin is installed
+
 For example, running:
 ```bash
 ./plugins generate_plugin_priorities --type=ee --version 3.4.x
