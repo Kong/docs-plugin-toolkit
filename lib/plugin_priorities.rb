@@ -49,7 +49,7 @@ class PluginPriorities
 
         hash[k] = v['priority']
       end
-        .sort_by { |k, v| -v }
+        .sort_by { |k, v| [-v, k] }
         .to_h
   end
 
