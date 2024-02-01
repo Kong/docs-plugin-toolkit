@@ -100,7 +100,6 @@ generates a file `./data/referenceable_fields/3.4.x.json` containing a list of p
 | Options | Descriptions  |
 |--------------------------- |-----|
 | `version` | **Required**. Kong Gateway release version, e.g. `3.3.x`. |
-| `plugins` | **Required**. Space separated list of plugins to use, .e.g. `acme acl`. |
 | `host`    | Name of the host in which the API is running. Default: `localhost`.  |
 | `port`    | Port in which the API is listening. Default: `8001`. |
 | `type`    | Whether the API is running the `Enterprise` or `OSS` edition. Enum: `oss` or `ee`.  |
@@ -108,7 +107,7 @@ generates a file `./data/referenceable_fields/3.4.x.json` containing a list of p
 
 For example, running:
 ```bash
-./plugins generate_plugin_priorities --type=ee --version 3.4.x --plugins $(ls ./schemas)
+./plugins generate_plugin_priorities --type=ee --version 3.4.x
 ```
 generates a file `./data/priorities/ee/3.4.x.json` containing a list of plugins and their corresponded priorities order by priority (desc).
 
