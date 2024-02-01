@@ -3,12 +3,11 @@ require 'fileutils'
 require_relative 'api/client'
 
 class PluginPriorities
-  def self.run!(plugins:, options:)
-    new(plugins:, options:).run!
+  def self.run!(options:)
+    new(options:).run!
   end
 
-  def initialize(plugins:, options:)
-    @plugins = plugins
+  def initialize(options:)
     @options = options
     @client  = API::Client.new(host: @options[:host], port: @options[:port])
   end
