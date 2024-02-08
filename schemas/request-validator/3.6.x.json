@@ -1,8 +1,25 @@
 {
+  "entity_checks": [
+    {
+      "custom_entity_check": {
+        "field_sources": [
+          "config"
+        ]
+      }
+    }
+  ],
   "fields": [
     {
       "protocols": {
-        "required": true,
+        "elements": {
+          "one_of": [
+            "grpc",
+            "grpcs",
+            "http",
+            "https"
+          ],
+          "type": "string"
+        },
         "type": "set",
         "default": [
           "grpc",
@@ -10,29 +27,20 @@
           "http",
           "https"
         ],
-        "elements": {
-          "type": "string",
-          "one_of": [
-            "grpc",
-            "grpcs",
-            "http",
-            "https"
-          ]
-        },
+        "required": true,
         "description": "A set of strings representing HTTP protocols."
       }
     },
     {
       "consumer_group": {
-        "type": "foreign",
         "reference": "consumer_groups",
+        "type": "foreign",
         "eq": null,
         "description": "Custom type for representing a foreign key with a null value allowed."
       }
     },
     {
       "config": {
-        "type": "record",
         "entity_checks": [
           {
             "at_least_one_of": [
@@ -41,44 +49,45 @@
             ]
           }
         ],
-        "required": true,
+        "type": "record",
         "fields": [
           {
             "body_schema": {
-              "type": "string",
               "required": false,
+              "type": "string",
               "description": "The request body schema specification. One of `body_schema` or `parameter_schema` must be specified."
             }
           },
           {
             "allowed_content_types": {
-              "default": [
-                "application/json"
-              ],
-              "type": "set",
               "elements": {
                 "required": true,
                 "type": "string"
               },
-              "description": "List of allowed content types. The value can be configured with the `charset` parameter. For example, `application/json; charset=UTF-8`."
+              "type": "set",
+              "description": "List of allowed content types. The value can be configured with the `charset` parameter. For example, `application/json; charset=UTF-8`.",
+              "default": [
+                "application/json"
+              ]
             }
           },
           {
             "version": {
-              "required": true,
               "type": "string",
+              "default": "kong",
+              "required": true,
+              "description": "Which validator to use. Supported values are `kong` (default) for using Kong's own schema validator, or `draft4` for using a JSON Schema Draft 4-compliant validator.",
               "one_of": [
                 "kong",
                 "draft4"
-              ],
-              "default": "kong",
-              "description": "Which validator to use. Supported values are `kong` (default) for using Kong's own schema validator, or `draft4` for using a JSON Schema Draft 4-compliant validator."
+              ]
             }
           },
           {
             "parameter_schema": {
-              "type": "array",
               "required": false,
+              "type": "array",
+              "description": "Array of parameter validator specification. One of `body_schema` or `parameter_schema` must be specified.",
               "elements": {
                 "entity_checks": [
                   {
@@ -101,27 +110,27 @@
                 "fields": [
                   {
                     "in": {
+                      "required": true,
                       "type": "string",
+                      "description": "The location of the parameter.",
                       "one_of": [
                         "query",
                         "header",
                         "path"
-                      ],
-                      "required": true,
-                      "description": "The location of the parameter."
+                      ]
                     }
                   },
                   {
                     "name": {
-                      "type": "string",
                       "required": true,
+                      "type": "string",
                       "description": "The name of the parameter. Parameter names are case-sensitive, and correspond to the parameter name used by the `in` property. If `in` is `path`, the `name` field MUST correspond to the named capture group from the configured `route`."
                     }
                   },
                   {
                     "required": {
-                      "type": "boolean",
                       "required": true,
+                      "type": "boolean",
                       "description": "Determines whether this parameter is mandatory."
                     }
                   },
@@ -142,39 +151,30 @@
                   },
                   {
                     "explode": {
-                      "type": "boolean",
-                      "description": "Required when `schema` and `style` are set. When `explode` is `true`, parameter values of type `array` or `object` generate separate parameters for each value of the array or key-value pair of the map. For other types of parameters, this property has no effect."
+                      "description": "Required when `schema` and `style` are set. When `explode` is `true`, parameter values of type `array` or `object` generate separate parameters for each value of the array or key-value pair of the map. For other types of parameters, this property has no effect.",
+                      "type": "boolean"
                     }
                   },
                   {
                     "schema": {
-                      "type": "string",
-                      "description": "Requred when `style` and `explode` are set. This is the schema defining the type used for the parameter. It is validated using `draft4` for JSON Schema draft 4 compliant validator. In addition to being a valid JSON Schema, the parameter schema MUST have a top-level `type` property to enable proper deserialization before validating."
+                      "description": "Requred when `style` and `explode` are set. This is the schema defining the type used for the parameter. It is validated using `draft4` for JSON Schema draft 4 compliant validator. In addition to being a valid JSON Schema, the parameter schema MUST have a top-level `type` property to enable proper deserialization before validating.",
+                      "type": "string"
                     }
                   }
                 ]
-              },
-              "description": "Array of parameter validator specification. One of `body_schema` or `parameter_schema` must be specified."
+              }
             }
           },
           {
             "verbose_response": {
               "required": true,
               "type": "boolean",
-              "default": false,
-              "description": "If enabled, the plugin returns more verbose and detailed validation errors."
+              "description": "If enabled, the plugin returns more verbose and detailed validation errors.",
+              "default": false
             }
           }
-        ]
-      }
-    }
-  ],
-  "entity_checks": [
-    {
-      "custom_entity_check": {
-        "field_sources": [
-          "config"
-        ]
+        ],
+        "required": true
       }
     }
   ]
