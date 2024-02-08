@@ -5,6 +5,7 @@ require_relative 'lib/example_validator'
 require_relative 'lib/example_copier'
 require_relative 'lib/referenceable_fields'
 require_relative 'lib/plugin_priorities'
+require_relative 'lib/convert_json_schema'
 
 class Plugins < Thor
   class_option :verbose, :type => :boolean
@@ -84,6 +85,19 @@ class Plugins < Thor
     PluginPriorities.run!(options: options)
 
     puts 'Done!'
+  end
+
+  desc 'convert_json_schema', 'Converts Kong plugin schema to JSON schema'
+  option :version,     aliases: '-v',    type: :string,  required: true,                        desc: 'Kong Version'
+  option :plugins,     aliases: '-p',    type: :array,   required: true,                        desc: 'List containing the name of the plugins'
+  option :source,      aliases: '-s',    type: :string,                 default: './schemas', desc: 'Source folder containing the schemas'
+  option :destination, aliases: '--dest', type: :string,                   default: './json_schemas', desc: 'Destination folder where the schemas will be written'
+  def convert_json_schema
+    #puts 'Converting plugins to JSON schema...'
+
+    ConvertJsonSchema.run!(plugins: options[:plugins], options: options)
+
+    #puts 'Done!'
   end
 end
 
