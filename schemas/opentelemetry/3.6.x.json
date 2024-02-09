@@ -1,8 +1,19 @@
 {
+  "entity_checks": [
+
+  ],
   "fields": [
     {
       "protocols": {
-        "required": true,
+        "elements": {
+          "one_of": [
+            "grpc",
+            "grpcs",
+            "http",
+            "https"
+          ],
+          "type": "string"
+        },
         "type": "set",
         "default": [
           "grpc",
@@ -10,29 +21,20 @@
           "http",
           "https"
         ],
-        "elements": {
-          "type": "string",
-          "one_of": [
-            "grpc",
-            "grpcs",
-            "http",
-            "https"
-          ]
-        },
+        "required": true,
         "description": "A set of strings representing HTTP protocols."
       }
     },
     {
       "consumer_group": {
-        "type": "foreign",
         "reference": "consumer_groups",
+        "type": "foreign",
         "eq": null,
         "description": "Custom type for representing a foreign key with a null value allowed."
       }
     },
     {
       "config": {
-        "type": "record",
         "entity_checks": [
           {
             "custom_entity_check": {
@@ -43,85 +45,85 @@
             }
           }
         ],
-        "required": true,
+        "type": "record",
         "fields": [
           {
             "endpoint": {
-              "required": true,
               "referenceable": true,
               "type": "string",
-              "description": "A string representing a URL, such as https://example.com/path/to/resource?q=search."
+              "description": "A string representing a URL, such as https://example.com/path/to/resource?q=search.",
+              "required": true
             }
           },
           {
             "headers": {
               "keys": {
-                "type": "string",
-                "description": "A string representing an HTTP header name."
-              },
-              "values": {
-                "type": "string",
-                "referenceable": true
+                "description": "A string representing an HTTP header name.",
+                "type": "string"
               },
               "type": "map",
-              "description": "The custom headers to be added in the HTTP request sent to the OTLP server. This setting is useful for adding the authentication headers (token) for the APM backend."
+              "description": "The custom headers to be added in the HTTP request sent to the OTLP server. This setting is useful for adding the authentication headers (token) for the APM backend.",
+              "values": {
+                "referenceable": true,
+                "type": "string"
+              }
             }
           },
           {
             "resource_attributes": {
               "keys": {
-                "type": "string",
-                "required": true
+                "required": true,
+                "type": "string"
               },
               "type": "map",
               "values": {
-                "type": "string",
-                "required": true
+                "required": true,
+                "type": "string"
               }
             }
           },
           {
             "queue": {
-              "type": "record",
               "required": true,
+              "type": "record",
               "fields": [
                 {
                   "max_batch_size": {
+                    "default": 1,
+                    "type": "integer",
+                    "description": "Maximum number of entries that can be processed at a time.",
                     "between": [
                       1,
                       1000000
-                    ],
-                    "type": "integer",
-                    "default": 1,
-                    "description": "Maximum number of entries that can be processed at a time."
+                    ]
                   }
                 },
                 {
                   "max_coalescing_delay": {
+                    "default": 1,
+                    "type": "number",
+                    "description": "Maximum number of (fractional) seconds to elapse after the first entry was queued before the queue starts calling the handler.",
                     "between": [
                       0,
                       3600
-                    ],
-                    "type": "number",
-                    "default": 1,
-                    "description": "Maximum number of (fractional) seconds to elapse after the first entry was queued before the queue starts calling the handler."
+                    ]
                   }
                 },
                 {
                   "max_entries": {
+                    "default": 10000,
+                    "type": "integer",
+                    "description": "Maximum number of entries that can be waiting on the queue.",
                     "between": [
                       1,
                       1000000
-                    ],
-                    "type": "integer",
-                    "default": 10000,
-                    "description": "Maximum number of entries that can be waiting on the queue."
+                    ]
                   }
                 },
                 {
                   "max_bytes": {
-                    "type": "integer",
-                    "description": "Maximum number of bytes that can be waiting on a queue, requires string content."
+                    "description": "Maximum number of bytes that can be waiting on a queue, requires string content.",
+                    "type": "integer"
                   }
                 },
                 {
@@ -133,24 +135,24 @@
                 },
                 {
                   "initial_retry_delay": {
+                    "default": 0.01,
+                    "type": "number",
+                    "description": "Time in seconds before the initial retry is made for a failing batch.",
                     "between": [
                       0.001,
                       1000000
-                    ],
-                    "type": "number",
-                    "default": 0.01,
-                    "description": "Time in seconds before the initial retry is made for a failing batch."
+                    ]
                   }
                 },
                 {
                   "max_retry_delay": {
+                    "default": 60,
+                    "type": "number",
+                    "description": "Maximum time in seconds between retries, caps exponential backoff.",
                     "between": [
                       0.001,
                       1000000
-                    ],
-                    "type": "number",
-                    "default": 60,
-                    "description": "Maximum time in seconds between retries, caps exponential backoff."
+                    ]
                   }
                 }
               ]
@@ -158,47 +160,47 @@
           },
           {
             "batch_span_count": {
-              "type": "integer",
-              "description": "The number of spans to be sent in a single batch."
+              "description": "The number of spans to be sent in a single batch.",
+              "type": "integer"
             }
           },
           {
             "batch_flush_delay": {
-              "type": "integer",
-              "description": "The delay, in seconds, between two consecutive batches."
+              "description": "The delay, in seconds, between two consecutive batches.",
+              "type": "integer"
             }
           },
           {
             "connect_timeout": {
+              "default": 1000,
+              "type": "integer",
+              "description": "An integer representing a timeout in milliseconds. Must be between 0 and 2^31-2.",
               "between": [
                 0,
                 2147483646
-              ],
-              "default": 1000,
-              "type": "integer",
-              "description": "An integer representing a timeout in milliseconds. Must be between 0 and 2^31-2."
+              ]
             }
           },
           {
             "send_timeout": {
+              "default": 5000,
+              "type": "integer",
+              "description": "An integer representing a timeout in milliseconds. Must be between 0 and 2^31-2.",
               "between": [
                 0,
                 2147483646
-              ],
-              "default": 5000,
-              "type": "integer",
-              "description": "An integer representing a timeout in milliseconds. Must be between 0 and 2^31-2."
+              ]
             }
           },
           {
             "read_timeout": {
+              "default": 5000,
+              "type": "integer",
+              "description": "An integer representing a timeout in milliseconds. Must be between 0 and 2^31-2.",
               "between": [
                 0,
                 2147483646
-              ],
-              "default": 5000,
-              "type": "integer",
-              "description": "An integer representing a timeout in milliseconds. Must be between 0 and 2^31-2."
+              ]
             }
           },
           {
@@ -208,7 +210,9 @@
           },
           {
             "header_type": {
+              "required": false,
               "type": "string",
+              "default": "preserve",
               "one_of": [
                 "preserve",
                 "ignore",
@@ -220,27 +224,23 @@
                 "aws",
                 "gcp",
                 "datadog"
-              ],
-              "default": "preserve",
-              "required": false
+              ]
             }
           },
           {
             "sampling_rate": {
+              "required": false,
+              "type": "number",
+              "description": "Tracing sampling rate for configuring the probability-based sampler. When set, this value supersedes the global `tracing_sampling_rate` setting from kong.conf.",
               "between": [
                 0,
                 1
-              ],
-              "type": "number",
-              "required": false,
-              "description": "Tracing sampling rate for configuring the probability-based sampler. When set, this value supersedes the global `tracing_sampling_rate` setting from kong.conf."
+              ]
             }
           }
-        ]
+        ],
+        "required": true
       }
     }
-  ],
-  "entity_checks": [
-
   ]
 }

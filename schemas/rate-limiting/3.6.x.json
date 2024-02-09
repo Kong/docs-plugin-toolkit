@@ -1,8 +1,88 @@
 {
+  "entity_checks": [
+    {
+      "at_least_one_of": [
+        "config.second",
+        "config.minute",
+        "config.hour",
+        "config.day",
+        "config.month",
+        "config.year"
+      ]
+    },
+    {
+      "conditional": {
+        "then_field": "config.redis.host",
+        "if_field": "config.policy",
+        "then_match": {
+          "required": true
+        },
+        "if_match": {
+          "eq": "redis"
+        }
+      }
+    },
+    {
+      "conditional": {
+        "then_field": "config.redis.port",
+        "if_field": "config.policy",
+        "then_match": {
+          "required": true
+        },
+        "if_match": {
+          "eq": "redis"
+        }
+      }
+    },
+    {
+      "conditional": {
+        "then_field": "config.redis.timeout",
+        "if_field": "config.policy",
+        "then_match": {
+          "required": true
+        },
+        "if_match": {
+          "eq": "redis"
+        }
+      }
+    },
+    {
+      "conditional": {
+        "then_field": "config.header_name",
+        "if_field": "config.limit_by",
+        "then_match": {
+          "required": true
+        },
+        "if_match": {
+          "eq": "header"
+        }
+      }
+    },
+    {
+      "conditional": {
+        "then_field": "config.path",
+        "if_field": "config.limit_by",
+        "then_match": {
+          "required": true
+        },
+        "if_match": {
+          "eq": "path"
+        }
+      }
+    }
+  ],
   "fields": [
     {
       "protocols": {
-        "required": true,
+        "elements": {
+          "one_of": [
+            "grpc",
+            "grpcs",
+            "http",
+            "https"
+          ],
+          "type": "string"
+        },
         "type": "set",
         "default": [
           "grpc",
@@ -10,22 +90,14 @@
           "http",
           "https"
         ],
-        "elements": {
-          "type": "string",
-          "one_of": [
-            "grpc",
-            "grpcs",
-            "http",
-            "https"
-          ]
-        },
+        "required": true,
         "description": "A set of strings representing HTTP protocols."
       }
     },
     {
       "config": {
-        "type": "record",
         "required": true,
+        "type": "record",
         "fields": [
           {
             "second": {
@@ -71,7 +143,6 @@
           },
           {
             "limit_by": {
-              "default": "consumer",
               "one_of": [
                 "consumer",
                 "credential",
@@ -82,18 +153,18 @@
                 "consumer-group"
               ],
               "type": "string",
+              "default": "consumer",
               "description": "The entity that is used when aggregating the limits."
             }
           },
           {
             "header_name": {
-              "type": "string",
-              "description": "A string representing an HTTP header name."
+              "description": "A string representing an HTTP header name.",
+              "type": "string"
             }
           },
           {
             "path": {
-              "starts_with": "/",
               "match_none": [
                 {
                   "pattern": "//",
@@ -101,202 +172,230 @@
                 }
               ],
               "type": "string",
-              "description": "A string representing a URL path, such as /path/to/resource. Must start with a forward slash (/) and must not contain empty segments (i.e., two consecutive forward slashes)."
+              "description": "A string representing a URL path, such as /path/to/resource. Must start with a forward slash (/) and must not contain empty segments (i.e., two consecutive forward slashes).",
+              "starts_with": "/"
             }
           },
           {
             "policy": {
               "type": "string",
+              "default": "local",
               "len_min": 0,
               "one_of": [
                 "local",
                 "cluster",
                 "redis"
               ],
-              "default": "local",
               "description": "The rate-limiting policies to use for retrieving and incrementing the limits."
             }
           },
           {
             "fault_tolerant": {
+              "required": true,
               "type": "boolean",
               "default": true,
-              "required": true,
               "description": "A boolean value that determines if the requests should be proxied even if Kong has troubles connecting a third-party data store. If `true`, requests will be proxied anyway, effectively disabling the rate-limiting function until the data store is working again. If `false`, then the clients will see `500` errors."
             }
           },
           {
-            "redis_host": {
-              "type": "string",
-              "description": "A string representing a host name, such as example.com."
-            }
-          },
-          {
-            "redis_port": {
-              "between": [
-                0,
-                65535
-              ],
-              "default": 6379,
-              "type": "integer",
-              "description": "An integer representing a port number between 0 and 65535, inclusive."
-            }
-          },
-          {
-            "redis_password": {
-              "len_min": 0,
-              "referenceable": true,
-              "type": "string",
-              "description": "When using the `redis` policy, this property specifies the password to connect to the Redis server."
-            }
-          },
-          {
-            "redis_username": {
-              "referenceable": true,
-              "type": "string",
-              "description": "When using the `redis` policy, this property specifies the username to connect to the Redis server when ACL authentication is desired."
-            }
-          },
-          {
-            "redis_ssl": {
-              "type": "boolean",
-              "default": false,
+            "redis": {
               "required": true,
-              "description": "When using the `redis` policy, this property specifies if SSL is used to connect to the Redis server."
-            }
-          },
-          {
-            "redis_ssl_verify": {
-              "type": "boolean",
-              "default": false,
-              "required": true,
-              "description": "When using the `redis` policy with `redis_ssl` set to `true`, this property specifies it server SSL certificate is validated. Note that you need to configure the lua_ssl_trusted_certificate to specify the CA (or server) certificate used by your Redis server. You may also need to configure lua_ssl_verify_depth accordingly."
-            }
-          },
-          {
-            "redis_server_name": {
-              "type": "string",
-              "description": "A string representing an SNI (server name indication) value for TLS."
-            }
-          },
-          {
-            "redis_timeout": {
-              "default": 2000,
-              "type": "number",
-              "description": "When using the `redis` policy, this property specifies the timeout in milliseconds of any command submitted to the Redis server."
-            }
-          },
-          {
-            "redis_database": {
-              "default": 0,
-              "type": "integer",
-              "description": "When using the `redis` policy, this property specifies the Redis database to use."
+              "type": "record",
+              "description": "Redis configuration",
+              "fields": [
+                {
+                  "host": {
+                    "description": "A string representing a host name, such as example.com.",
+                    "type": "string"
+                  }
+                },
+                {
+                  "port": {
+                    "default": 6379,
+                    "type": "integer",
+                    "description": "An integer representing a port number between 0 and 65535, inclusive.",
+                    "between": [
+                      0,
+                      65535
+                    ]
+                  }
+                },
+                {
+                  "timeout": {
+                    "default": 2000,
+                    "type": "integer",
+                    "description": "An integer representing a timeout in milliseconds. Must be between 0 and 2^31-2.",
+                    "between": [
+                      0,
+                      2147483646
+                    ]
+                  }
+                },
+                {
+                  "username": {
+                    "referenceable": true,
+                    "type": "string",
+                    "description": "Username to use for Redis connections. If undefined, ACL authentication won't be performed. This requires Redis v6.0.0+. To be compatible with Redis v5.x.y, you can set it to `default`."
+                  }
+                },
+                {
+                  "password": {
+                    "referenceable": true,
+                    "type": "string",
+                    "len_min": 0,
+                    "encrypted": true,
+                    "description": "Password to use for Redis connections. If undefined, no AUTH commands are sent to Redis."
+                  }
+                },
+                {
+                  "database": {
+                    "type": "integer",
+                    "description": "Database to use for the Redis connection when using the `redis` strategy",
+                    "default": 0
+                  }
+                },
+                {
+                  "ssl": {
+                    "required": false,
+                    "type": "boolean",
+                    "description": "If set to true, uses SSL to connect to Redis.",
+                    "default": false
+                  }
+                },
+                {
+                  "ssl_verify": {
+                    "required": false,
+                    "type": "boolean",
+                    "description": "If set to true, verifies the validity of the server SSL certificate. If setting this parameter, also configure `lua_ssl_trusted_certificate` in `kong.conf` to specify the CA (or server) certificate used by your Redis server. You may also need to configure `lua_ssl_verify_depth` accordingly.",
+                    "default": false
+                  }
+                },
+                {
+                  "server_name": {
+                    "required": false,
+                    "type": "string",
+                    "description": "A string representing an SNI (server name indication) value for TLS."
+                  }
+                }
+              ]
             }
           },
           {
             "hide_client_headers": {
+              "required": true,
               "type": "boolean",
               "default": false,
-              "required": true,
               "description": "Optionally hide informative response headers."
             }
           },
           {
             "error_code": {
-              "default": 429,
               "gt": 0,
               "type": "number",
+              "default": 429,
               "description": "Set a custom error code to return when the rate limit is exceeded."
             }
           },
           {
             "error_message": {
-              "default": "API rate limit exceeded",
               "type": "string",
+              "default": "API rate limit exceeded",
               "description": "Set a custom error message to return when the rate limit is exceeded."
             }
           },
           {
             "sync_rate": {
+              "required": true,
               "type": "number",
               "default": -1,
-              "required": true,
               "description": "How often to sync counter data to the central data store. A value of -1 results in synchronous behavior."
             }
           }
+        ],
+        "shorthand_fields": [
+          {
+            "redis_host": {
+              "translate_backwards": [
+                "redis",
+                "host"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "redis_port": {
+              "translate_backwards": [
+                "redis",
+                "port"
+              ],
+              "type": "integer"
+            }
+          },
+          {
+            "redis_password": {
+              "translate_backwards": [
+                "redis",
+                "password"
+              ],
+              "type": "string",
+              "len_min": 0
+            }
+          },
+          {
+            "redis_username": {
+              "translate_backwards": [
+                "redis",
+                "username"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "redis_ssl": {
+              "translate_backwards": [
+                "redis",
+                "ssl"
+              ],
+              "type": "boolean"
+            }
+          },
+          {
+            "redis_ssl_verify": {
+              "translate_backwards": [
+                "redis",
+                "ssl_verify"
+              ],
+              "type": "boolean"
+            }
+          },
+          {
+            "redis_server_name": {
+              "translate_backwards": [
+                "redis",
+                "server_name"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "redis_timeout": {
+              "translate_backwards": [
+                "redis",
+                "timeout"
+              ],
+              "type": "integer"
+            }
+          },
+          {
+            "redis_database": {
+              "translate_backwards": [
+                "redis",
+                "database"
+              ],
+              "type": "integer"
+            }
+          }
         ]
-      }
-    }
-  ],
-  "entity_checks": [
-    {
-      "at_least_one_of": [
-        "config.second",
-        "config.minute",
-        "config.hour",
-        "config.day",
-        "config.month",
-        "config.year"
-      ]
-    },
-    {
-      "conditional": {
-        "then_field": "config.redis_host",
-        "if_match": {
-          "eq": "redis"
-        },
-        "then_match": {
-          "required": true
-        },
-        "if_field": "config.policy"
-      }
-    },
-    {
-      "conditional": {
-        "then_field": "config.redis_port",
-        "if_match": {
-          "eq": "redis"
-        },
-        "then_match": {
-          "required": true
-        },
-        "if_field": "config.policy"
-      }
-    },
-    {
-      "conditional": {
-        "then_field": "config.header_name",
-        "if_match": {
-          "eq": "header"
-        },
-        "then_match": {
-          "required": true
-        },
-        "if_field": "config.limit_by"
-      }
-    },
-    {
-      "conditional": {
-        "then_field": "config.path",
-        "if_match": {
-          "eq": "path"
-        },
-        "then_match": {
-          "required": true
-        },
-        "if_field": "config.limit_by"
-      }
-    },
-    {
-      "conditional": {
-        "then_field": "config.redis_timeout",
-        "if_match": {
-          "eq": "redis"
-        },
-        "then_match": {
-          "required": true
-        },
-        "if_field": "config.policy"
       }
     }
   ]

@@ -1,242 +1,4 @@
 {
-  "fields": [
-    {
-      "protocols": {
-        "required": true,
-        "type": "set",
-        "default": [
-          "grpc",
-          "grpcs",
-          "http",
-          "https"
-        ],
-        "elements": {
-          "type": "string",
-          "one_of": [
-            "grpc",
-            "grpcs",
-            "http",
-            "https"
-          ]
-        },
-        "description": "A set of strings representing HTTP protocols."
-      }
-    },
-    {
-      "consumer_group": {
-        "type": "foreign",
-        "reference": "consumer_groups",
-        "eq": null,
-        "description": "Custom type for representing a foreign key with a null value allowed."
-      }
-    },
-    {
-      "config": {
-        "type": "record",
-        "required": true,
-        "fields": [
-          {
-            "timeout": {
-              "type": "number",
-              "default": 60000,
-              "required": true,
-              "description": "An optional timeout in milliseconds when invoking the function."
-            }
-          },
-          {
-            "keepalive": {
-              "type": "number",
-              "default": 60000,
-              "required": true,
-              "description": "An optional value in milliseconds that defines how long an idle connection lives before being closed."
-            }
-          },
-          {
-            "aws_key": {
-              "encrypted": true,
-              "referenceable": true,
-              "type": "string",
-              "description": "The AWS key credential to be used when invoking the function."
-            }
-          },
-          {
-            "aws_secret": {
-              "encrypted": true,
-              "referenceable": true,
-              "type": "string",
-              "description": "The AWS secret credential to be used when invoking the function. "
-            }
-          },
-          {
-            "aws_assume_role_arn": {
-              "encrypted": true,
-              "referenceable": true,
-              "type": "string",
-              "description": "The target AWS IAM role ARN used to invoke the Lambda function."
-            }
-          },
-          {
-            "aws_role_session_name": {
-              "default": "kong",
-              "type": "string",
-              "description": "The identifier of the assumed role session."
-            }
-          },
-          {
-            "aws_region": {
-              "type": "string",
-              "description": "A string representing a host name, such as example.com."
-            }
-          },
-          {
-            "function_name": {
-              "type": "string",
-              "required": false,
-              "description": "The AWS Lambda function name to invoke."
-            }
-          },
-          {
-            "qualifier": {
-              "type": "string",
-              "description": "The qualifier to use when invoking the function."
-            }
-          },
-          {
-            "invocation_type": {
-              "required": true,
-              "type": "string",
-              "one_of": [
-                "RequestResponse",
-                "Event",
-                "DryRun"
-              ],
-              "default": "RequestResponse",
-              "description": "The InvocationType to use when invoking the function. Available types are RequestResponse, Event, DryRun."
-            }
-          },
-          {
-            "log_type": {
-              "required": true,
-              "type": "string",
-              "one_of": [
-                "Tail",
-                "None"
-              ],
-              "default": "Tail",
-              "description": "The LogType to use when invoking the function. By default, None and Tail are supported."
-            }
-          },
-          {
-            "host": {
-              "type": "string",
-              "description": "A string representing a host name, such as example.com."
-            }
-          },
-          {
-            "port": {
-              "between": [
-                0,
-                65535
-              ],
-              "default": 443,
-              "type": "integer",
-              "description": "An integer representing a port number between 0 and 65535, inclusive."
-            }
-          },
-          {
-            "disable_https": {
-              "type": "boolean",
-              "default": false
-            }
-          },
-          {
-            "unhandled_status": {
-              "between": [
-                100,
-                999
-              ],
-              "type": "integer",
-              "description": "The response status code to use (instead of the default 200, 202, or 204) in the case of an Unhandled Function Error."
-            }
-          },
-          {
-            "forward_request_method": {
-              "default": false,
-              "type": "boolean",
-              "description": "An optional value that defines whether the original HTTP request method verb is sent in the request_method field of the JSON-encoded request."
-            }
-          },
-          {
-            "forward_request_uri": {
-              "default": false,
-              "type": "boolean",
-              "description": "An optional value that defines whether the original HTTP request URI is sent in the request_uri field of the JSON-encoded request."
-            }
-          },
-          {
-            "forward_request_headers": {
-              "default": false,
-              "type": "boolean",
-              "description": "An optional value that defines whether the original HTTP request headers are sent as a map in the request_headers field of the JSON-encoded request."
-            }
-          },
-          {
-            "forward_request_body": {
-              "default": false,
-              "type": "boolean",
-              "description": "An optional value that defines whether the request body is sent in the request_body field of the JSON-encoded request. If the body arguments can be parsed, they are sent in the separate request_body_args field of the request. "
-            }
-          },
-          {
-            "is_proxy_integration": {
-              "default": false,
-              "type": "boolean",
-              "description": "An optional value that defines whether the response format to receive from the Lambda to this format."
-            }
-          },
-          {
-            "awsgateway_compatible": {
-              "default": false,
-              "type": "boolean",
-              "description": "An optional value that defines whether the plugin should wrap requests into the Amazon API gateway."
-            }
-          },
-          {
-            "proxy_url": {
-              "type": "string",
-              "description": "A string representing a URL, such as https://example.com/path/to/resource?q=search."
-            }
-          },
-          {
-            "skip_large_bodies": {
-              "default": true,
-              "type": "boolean",
-              "description": "An optional value that defines whether Kong should send large bodies that are buffered to disk"
-            }
-          },
-          {
-            "base64_encode_body": {
-              "default": true,
-              "type": "boolean",
-              "description": "An optional value that Base64-encodes the request body."
-            }
-          },
-          {
-            "aws_imds_protocol_version": {
-              "required": true,
-              "type": "string",
-              "one_of": [
-                "v1",
-                "v2"
-              ],
-              "default": "v1",
-              "description": "Identifier to select the IMDS protocol version to use: `v1` or `v2`."
-            }
-          }
-        ]
-      }
-    }
-  ],
   "entity_checks": [
     {
       "mutually_required": [
@@ -248,6 +10,244 @@
       "custom_entity_check": {
         "field_sources": [
           "config.proxy_url"
+        ]
+      }
+    }
+  ],
+  "fields": [
+    {
+      "protocols": {
+        "elements": {
+          "one_of": [
+            "grpc",
+            "grpcs",
+            "http",
+            "https"
+          ],
+          "type": "string"
+        },
+        "type": "set",
+        "default": [
+          "grpc",
+          "grpcs",
+          "http",
+          "https"
+        ],
+        "required": true,
+        "description": "A set of strings representing HTTP protocols."
+      }
+    },
+    {
+      "consumer_group": {
+        "reference": "consumer_groups",
+        "type": "foreign",
+        "eq": null,
+        "description": "Custom type for representing a foreign key with a null value allowed."
+      }
+    },
+    {
+      "config": {
+        "required": true,
+        "type": "record",
+        "fields": [
+          {
+            "timeout": {
+              "required": true,
+              "type": "number",
+              "description": "An optional timeout in milliseconds when invoking the function.",
+              "default": 60000
+            }
+          },
+          {
+            "keepalive": {
+              "required": true,
+              "type": "number",
+              "description": "An optional value in milliseconds that defines how long an idle connection lives before being closed.",
+              "default": 60000
+            }
+          },
+          {
+            "aws_key": {
+              "referenceable": true,
+              "type": "string",
+              "description": "The AWS key credential to be used when invoking the function.",
+              "encrypted": true
+            }
+          },
+          {
+            "aws_secret": {
+              "referenceable": true,
+              "type": "string",
+              "description": "The AWS secret credential to be used when invoking the function. ",
+              "encrypted": true
+            }
+          },
+          {
+            "aws_assume_role_arn": {
+              "referenceable": true,
+              "type": "string",
+              "description": "The target AWS IAM role ARN used to invoke the Lambda function.",
+              "encrypted": true
+            }
+          },
+          {
+            "aws_role_session_name": {
+              "type": "string",
+              "description": "The identifier of the assumed role session.",
+              "default": "kong"
+            }
+          },
+          {
+            "aws_region": {
+              "description": "A string representing a host name, such as example.com.",
+              "type": "string"
+            }
+          },
+          {
+            "function_name": {
+              "required": false,
+              "type": "string",
+              "description": "The AWS Lambda function name to invoke."
+            }
+          },
+          {
+            "qualifier": {
+              "description": "The qualifier to use when invoking the function.",
+              "type": "string"
+            }
+          },
+          {
+            "invocation_type": {
+              "type": "string",
+              "default": "RequestResponse",
+              "required": true,
+              "description": "The InvocationType to use when invoking the function. Available types are RequestResponse, Event, DryRun.",
+              "one_of": [
+                "RequestResponse",
+                "Event",
+                "DryRun"
+              ]
+            }
+          },
+          {
+            "log_type": {
+              "type": "string",
+              "default": "Tail",
+              "required": true,
+              "description": "The LogType to use when invoking the function. By default, None and Tail are supported.",
+              "one_of": [
+                "Tail",
+                "None"
+              ]
+            }
+          },
+          {
+            "host": {
+              "description": "A string representing a host name, such as example.com.",
+              "type": "string"
+            }
+          },
+          {
+            "port": {
+              "default": 443,
+              "type": "integer",
+              "description": "An integer representing a port number between 0 and 65535, inclusive.",
+              "between": [
+                0,
+                65535
+              ]
+            }
+          },
+          {
+            "disable_https": {
+              "default": false,
+              "type": "boolean"
+            }
+          },
+          {
+            "unhandled_status": {
+              "type": "integer",
+              "description": "The response status code to use (instead of the default 200, 202, or 204) in the case of an Unhandled Function Error.",
+              "between": [
+                100,
+                999
+              ]
+            }
+          },
+          {
+            "forward_request_method": {
+              "type": "boolean",
+              "description": "An optional value that defines whether the original HTTP request method verb is sent in the request_method field of the JSON-encoded request.",
+              "default": false
+            }
+          },
+          {
+            "forward_request_uri": {
+              "type": "boolean",
+              "description": "An optional value that defines whether the original HTTP request URI is sent in the request_uri field of the JSON-encoded request.",
+              "default": false
+            }
+          },
+          {
+            "forward_request_headers": {
+              "type": "boolean",
+              "description": "An optional value that defines whether the original HTTP request headers are sent as a map in the request_headers field of the JSON-encoded request.",
+              "default": false
+            }
+          },
+          {
+            "forward_request_body": {
+              "type": "boolean",
+              "description": "An optional value that defines whether the request body is sent in the request_body field of the JSON-encoded request. If the body arguments can be parsed, they are sent in the separate request_body_args field of the request. ",
+              "default": false
+            }
+          },
+          {
+            "is_proxy_integration": {
+              "type": "boolean",
+              "description": "An optional value that defines whether the response format to receive from the Lambda to this format.",
+              "default": false
+            }
+          },
+          {
+            "awsgateway_compatible": {
+              "type": "boolean",
+              "description": "An optional value that defines whether the plugin should wrap requests into the Amazon API gateway.",
+              "default": false
+            }
+          },
+          {
+            "proxy_url": {
+              "description": "A string representing a URL, such as https://example.com/path/to/resource?q=search.",
+              "type": "string"
+            }
+          },
+          {
+            "skip_large_bodies": {
+              "type": "boolean",
+              "description": "An optional value that defines whether Kong should send large bodies that are buffered to disk",
+              "default": true
+            }
+          },
+          {
+            "base64_encode_body": {
+              "type": "boolean",
+              "description": "An optional value that Base64-encodes the request body.",
+              "default": true
+            }
+          },
+          {
+            "aws_imds_protocol_version": {
+              "type": "string",
+              "default": "v1",
+              "required": true,
+              "description": "Identifier to select the IMDS protocol version to use: `v1` or `v2`.",
+              "one_of": [
+                "v1",
+                "v2"
+              ]
+            }
+          }
         ]
       }
     }

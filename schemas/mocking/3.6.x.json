@@ -1,8 +1,24 @@
 {
+  "entity_checks": [
+    {
+      "at_least_one_of": [
+        "config.api_specification_filename",
+        "config.api_specification"
+      ]
+    }
+  ],
   "fields": [
     {
       "protocols": {
-        "required": true,
+        "elements": {
+          "one_of": [
+            "grpc",
+            "grpcs",
+            "http",
+            "https"
+          ],
+          "type": "string"
+        },
         "type": "set",
         "default": [
           "grpc",
@@ -10,42 +26,34 @@
           "http",
           "https"
         ],
-        "elements": {
-          "type": "string",
-          "one_of": [
-            "grpc",
-            "grpcs",
-            "http",
-            "https"
-          ]
-        },
+        "required": true,
         "description": "A set of strings representing HTTP protocols."
       }
     },
     {
       "consumer_group": {
-        "type": "foreign",
         "reference": "consumer_groups",
+        "type": "foreign",
         "eq": null,
         "description": "Custom type for representing a foreign key with a null value allowed."
       }
     },
     {
       "config": {
-        "type": "record",
         "required": true,
+        "type": "record",
         "fields": [
           {
             "api_specification_filename": {
-              "type": "string",
               "required": false,
+              "type": "string",
               "description": "The path and name of the specification file loaded into Kong Gateway's database. You cannot use this option for DB-less or hybrid mode."
             }
           },
           {
             "api_specification": {
-              "type": "string",
               "required": false,
+              "type": "string",
               "description": "The contents of the specification file. You must use this option for hybrid or DB-less mode. You can include the full specification as part of the configuration. In Kong Manager, you can copy and paste the contents of the spec directly into the `Config.Api Specification` text field."
             }
           },
@@ -79,10 +87,10 @@
           },
           {
             "included_status_codes": {
-              "type": "array",
               "elements": {
                 "type": "integer"
               },
+              "type": "array",
               "description": "A global list of the HTTP status codes that can only be selected and returned."
             }
           },
@@ -104,14 +112,6 @@
           }
         ]
       }
-    }
-  ],
-  "entity_checks": [
-    {
-      "at_least_one_of": [
-        "config.api_specification_filename",
-        "config.api_specification"
-      ]
     }
   ]
 }
