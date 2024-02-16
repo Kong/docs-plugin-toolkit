@@ -1,0 +1,214 @@
+{
+  "fields": [
+    {
+      "consumer": {
+        "type": "foreign",
+        "reference": "consumers",
+        "description": "Custom type for representing a foreign key with a null value allowed.",
+        "eq": null
+      }
+    },
+    {
+      "protocols": {
+        "type": "set",
+        "elements": {
+          "type": "string",
+          "one_of": [
+            "grpc",
+            "grpcs",
+            "http",
+            "https",
+            "ws",
+            "wss"
+          ]
+        },
+        "default": [
+          "grpc",
+          "grpcs",
+          "http",
+          "https",
+          "ws",
+          "wss"
+        ],
+        "required": true
+      }
+    },
+    {
+      "consumer_group": {
+        "type": "foreign",
+        "reference": "consumer_groups",
+        "description": "Custom type for representing a foreign key with a null value allowed.",
+        "eq": null
+      }
+    },
+    {
+      "config": {
+        "type": "record",
+        "entity_checks": [
+          {
+            "conditional": {
+              "then_field": "scopes",
+              "if_field": "mandatory_scope",
+              "then_match": {
+                "required": true
+              },
+              "if_match": {
+                "eq": true
+              }
+            }
+          }
+        ],
+        "fields": [
+          {
+            "scopes": {
+              "type": "array",
+              "description": "Describes an array of scope names that will be available to the end user. If `mandatory_scope` is set to `true`, then `scopes` are required.",
+              "elements": {
+                "type": "string"
+              }
+            }
+          },
+          {
+            "mandatory_scope": {
+              "type": "boolean",
+              "description": "An optional boolean value telling the plugin to require at least one `scope` to be authorized by the end user.",
+              "default": false,
+              "required": true
+            }
+          },
+          {
+            "provision_key": {
+              "type": "string",
+              "auto": true,
+              "required": true,
+              "unique": true,
+              "description": "The unique key the plugin has generated when it has been added to the Service.",
+              "encrypted": true
+            }
+          },
+          {
+            "token_expiration": {
+              "type": "number",
+              "description": "An optional integer value telling the plugin how many seconds a token should last, after which the client will need to refresh the token. Set to `0` to disable the expiration.",
+              "default": 7200,
+              "required": true
+            }
+          },
+          {
+            "enable_authorization_code": {
+              "type": "boolean",
+              "description": "An optional boolean value to enable the three-legged Authorization Code flow (RFC 6742 Section 4.1).",
+              "default": false,
+              "required": true
+            }
+          },
+          {
+            "enable_implicit_grant": {
+              "type": "boolean",
+              "description": "An optional boolean value to enable the Implicit Grant flow which allows to provision a token as a result of the authorization process (RFC 6742 Section 4.2).",
+              "default": false,
+              "required": true
+            }
+          },
+          {
+            "enable_client_credentials": {
+              "type": "boolean",
+              "description": "An optional boolean value to enable the Client Credentials Grant flow (RFC 6742 Section 4.4).",
+              "default": false,
+              "required": true
+            }
+          },
+          {
+            "enable_password_grant": {
+              "type": "boolean",
+              "description": "An optional boolean value to enable the Resource Owner Password Credentials Grant flow (RFC 6742 Section 4.3).",
+              "default": false,
+              "required": true
+            }
+          },
+          {
+            "hide_credentials": {
+              "type": "boolean",
+              "description": "An optional boolean value telling the plugin to show or hide the credential from the upstream service.",
+              "default": false,
+              "required": true
+            }
+          },
+          {
+            "accept_http_if_already_terminated": {
+              "type": "boolean",
+              "description": "Accepts HTTPs requests that have already been terminated by a proxy or load balancer.",
+              "default": false,
+              "required": true
+            }
+          },
+          {
+            "anonymous": {
+              "type": "string",
+              "description": "An optional string (consumer UUID or username) value to use as an “anonymous” consumer if authentication fails."
+            }
+          },
+          {
+            "global_credentials": {
+              "type": "boolean",
+              "description": "An optional boolean value that allows using the same OAuth credentials generated by the plugin with any other service whose OAuth 2.0 plugin configuration also has `config.global_credentials=true`.",
+              "default": false,
+              "required": true
+            }
+          },
+          {
+            "auth_header_name": {
+              "type": "string",
+              "description": "The name of the header that is supposed to carry the access token.",
+              "default": "authorization"
+            }
+          },
+          {
+            "refresh_token_ttl": {
+              "type": "number",
+              "default": 1209600,
+              "required": true,
+              "description": "Time-to-live value for data",
+              "between": [
+                0,
+                100000000
+              ]
+            }
+          },
+          {
+            "reuse_refresh_token": {
+              "type": "boolean",
+              "description": "An optional boolean value that indicates whether an OAuth refresh token is reused when refreshing an access token.",
+              "default": false,
+              "required": true
+            }
+          },
+          {
+            "persistent_refresh_token": {
+              "type": "boolean",
+              "default": false,
+              "required": true
+            }
+          },
+          {
+            "pkce": {
+              "type": "string",
+              "default": "lax",
+              "required": false,
+              "description": "Specifies a mode of how the Proof Key for Code Exchange (PKCE) should be handled by the plugin.",
+              "one_of": [
+                "none",
+                "lax",
+                "strict"
+              ]
+            }
+          }
+        ],
+        "required": true
+      }
+    }
+  ],
+  "entity_checks": [
+
+  ]
+}

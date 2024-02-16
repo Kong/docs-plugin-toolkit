@@ -1,0 +1,302 @@
+{
+  "fields": [
+    {
+      "protocols": {
+        "type": "set",
+        "elements": {
+          "type": "string",
+          "one_of": [
+            "grpc",
+            "grpcs",
+            "http",
+            "https"
+          ]
+        },
+        "default": [
+          "grpc",
+          "grpcs",
+          "http",
+          "https"
+        ],
+        "required": true,
+        "description": "A set of strings representing HTTP protocols."
+      }
+    },
+    {
+      "consumer_group": {
+        "type": "foreign",
+        "reference": "consumer_groups",
+        "description": "Custom type for representing a foreign key with a null value allowed.",
+        "eq": null
+      }
+    },
+    {
+      "config": {
+        "type": "record",
+        "fields": [
+          {
+            "bootstrap_servers": {
+              "type": "set",
+              "description": "Set of bootstrap brokers in a `{host: host, port: port}` list format.",
+              "elements": {
+                "type": "record",
+                "fields": [
+                  {
+                    "host": {
+                      "type": "string",
+                      "description": "A string representing a host name, such as example.com.",
+                      "required": true
+                    }
+                  },
+                  {
+                    "port": {
+                      "type": "integer",
+                      "description": "An integer representing a port number between 0 and 65535, inclusive.",
+                      "required": true,
+                      "between": [
+                        0,
+                        65535
+                      ]
+                    }
+                  }
+                ]
+              }
+            }
+          },
+          {
+            "topic": {
+              "type": "string",
+              "description": "The Kafka topic to publish to.",
+              "required": true
+            }
+          },
+          {
+            "timeout": {
+              "type": "integer",
+              "description": "Socket timeout in milliseconds.",
+              "default": 10000
+            }
+          },
+          {
+            "keepalive": {
+              "type": "integer",
+              "description": "Keepalive timeout in milliseconds.",
+              "default": 60000
+            }
+          },
+          {
+            "keepalive_enabled": {
+              "type": "boolean",
+              "default": false
+            }
+          },
+          {
+            "authentication": {
+              "type": "record",
+              "fields": [
+                {
+                  "strategy": {
+                    "type": "string",
+                    "description": "The authentication strategy for the plugin, the only option for the value is `sasl`.",
+                    "one_of": [
+                      "sasl"
+                    ],
+                    "required": false
+                  }
+                },
+                {
+                  "mechanism": {
+                    "type": "string",
+                    "description": "The SASL authentication mechanism.  Supported options: `PLAIN`, `SCRAM-SHA-256`, or `SCRAM-SHA-512`.",
+                    "one_of": [
+                      "PLAIN",
+                      "SCRAM-SHA-256",
+                      "SCRAM-SHA-512"
+                    ],
+                    "required": false
+                  }
+                },
+                {
+                  "tokenauth": {
+                    "type": "boolean",
+                    "description": "Enable this to indicate `DelegationToken` authentication.",
+                    "required": false
+                  }
+                },
+                {
+                  "user": {
+                    "referenceable": true,
+                    "required": false,
+                    "description": "Username for SASL authentication.",
+                    "encrypted": true,
+                    "type": "string"
+                  }
+                },
+                {
+                  "password": {
+                    "referenceable": true,
+                    "required": false,
+                    "description": "Password for SASL authentication.",
+                    "encrypted": true,
+                    "type": "string"
+                  }
+                }
+              ],
+              "required": true
+            }
+          },
+          {
+            "security": {
+              "type": "record",
+              "fields": [
+                {
+                  "certificate_id": {
+                    "type": "string",
+                    "description": "UUID of certificate entity for mTLS authentication.",
+                    "uuid": true,
+                    "required": false
+                  }
+                },
+                {
+                  "ssl": {
+                    "type": "boolean",
+                    "description": "Enables TLS.",
+                    "required": false
+                  }
+                }
+              ],
+              "required": true
+            }
+          },
+          {
+            "forward_method": {
+              "type": "boolean",
+              "description": "Include the request method in the message. At least one of these must be true: `forward_method`, `forward_uri`, `forward_headers`, `forward_body`.",
+              "default": false
+            }
+          },
+          {
+            "forward_uri": {
+              "type": "boolean",
+              "description": "Include the request URI and URI arguments (as in, query arguments) in the message. At least one of these must be true: `forward_method`, `forward_uri`, `forward_headers`, `forward_body`.",
+              "default": false
+            }
+          },
+          {
+            "forward_headers": {
+              "type": "boolean",
+              "description": "Include the request headers in the message. At least one of these must be true: `forward_method`, `forward_uri`, `forward_headers`, `forward_body`.",
+              "default": false
+            }
+          },
+          {
+            "forward_body": {
+              "type": "boolean",
+              "description": "Include the request body in the message. At least one of these must be true: `forward_method`, `forward_uri`, `forward_headers`, `forward_body`.",
+              "default": true
+            }
+          },
+          {
+            "cluster_name": {
+              "type": "string",
+              "description": "An identifier for the Kafka cluster. By default, this field generates a random string. You can also set your own custom cluster identifier.  If more than one Kafka plugin is configured without a `cluster_name` (that is, if the default autogenerated value is removed), these plugins will use the same producer, and by extension, the same cluster. Logs will be sent to the leader of the cluster.",
+              "auto": true,
+              "required": false
+            }
+          },
+          {
+            "producer_request_acks": {
+              "type": "integer",
+              "description": "The number of acknowledgments the producer requires the leader to have received before considering a request complete. Allowed values: 0 for no acknowledgments; 1 for only the leader; and -1 for the full ISR (In-Sync Replica set).",
+              "default": 1,
+              "one_of": [
+                -1,
+                0,
+                1
+              ]
+            }
+          },
+          {
+            "producer_request_timeout": {
+              "type": "integer",
+              "description": "Time to wait for a Produce response in milliseconds.",
+              "default": 2000
+            }
+          },
+          {
+            "producer_request_limits_messages_per_request": {
+              "type": "integer",
+              "description": "Maximum number of messages to include into a single producer request.",
+              "default": 200
+            }
+          },
+          {
+            "producer_request_limits_bytes_per_request": {
+              "type": "integer",
+              "description": "Maximum size of a Produce request in bytes.",
+              "default": 1048576
+            }
+          },
+          {
+            "producer_request_retries_max_attempts": {
+              "type": "integer",
+              "description": "Maximum number of retry attempts per single Produce request.",
+              "default": 10
+            }
+          },
+          {
+            "producer_request_retries_backoff_timeout": {
+              "type": "integer",
+              "description": "Backoff interval between retry attempts in milliseconds.",
+              "default": 100
+            }
+          },
+          {
+            "producer_async": {
+              "type": "boolean",
+              "description": "Flag to enable asynchronous mode.",
+              "default": true
+            }
+          },
+          {
+            "producer_async_flush_timeout": {
+              "type": "integer",
+              "description": "Maximum time interval in milliseconds between buffer flushes in asynchronous mode.",
+              "default": 1000
+            }
+          },
+          {
+            "producer_async_buffering_limits_messages_in_memory": {
+              "type": "integer",
+              "description": "Maximum number of messages that can be buffered in memory in asynchronous mode.",
+              "default": 50000
+            }
+          }
+        ],
+        "entity_checks": [
+          {
+            "custom_entity_check": {
+              "field_sources": [
+                "forward_method",
+                "forward_uri",
+                "forward_headers",
+                "forward_body"
+              ]
+            }
+          },
+          {
+            "custom_entity_check": {
+              "field_sources": [
+                "authentication"
+              ]
+            }
+          }
+        ],
+        "required": true
+      }
+    }
+  ],
+  "entity_checks": [
+
+  ]
+}
