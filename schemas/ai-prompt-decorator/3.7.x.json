@@ -1,0 +1,118 @@
+{
+  "fields": [
+    {
+      "protocols": {
+        "type": "set",
+        "elements": {
+          "type": "string",
+          "one_of": [
+            "grpc",
+            "grpcs",
+            "http",
+            "https"
+          ]
+        },
+        "default": [
+          "grpc",
+          "grpcs",
+          "http",
+          "https"
+        ],
+        "required": true,
+        "description": "A set of strings representing HTTP protocols."
+      }
+    },
+    {
+      "config": {
+        "type": "record",
+        "fields": [
+          {
+            "prompts": {
+              "type": "record",
+              "fields": [
+                {
+                  "prepend": {
+                    "type": "array",
+                    "elements": {
+                      "type": "record",
+                      "fields": [
+                        {
+                          "role": {
+                            "type": "string",
+                            "one_of": [
+                              "system",
+                              "assistant",
+                              "user"
+                            ],
+                            "default": "system",
+                            "required": true
+                          }
+                        },
+                        {
+                          "content": {
+                            "len_max": 500,
+                            "len_min": 1,
+                            "type": "string",
+                            "required": true
+                          }
+                        }
+                      ],
+                      "required": false
+                    },
+                    "required": false,
+                    "description": "Insert chat messages at the beginning of the chat message array. This array preserves exact order when adding messages.",
+                    "len_max": 15
+                  }
+                },
+                {
+                  "append": {
+                    "type": "array",
+                    "elements": {
+                      "type": "record",
+                      "fields": [
+                        {
+                          "role": {
+                            "type": "string",
+                            "one_of": [
+                              "system",
+                              "assistant",
+                              "user"
+                            ],
+                            "default": "system",
+                            "required": true
+                          }
+                        },
+                        {
+                          "content": {
+                            "len_max": 500,
+                            "len_min": 1,
+                            "type": "string",
+                            "required": true
+                          }
+                        }
+                      ],
+                      "required": false
+                    },
+                    "required": false,
+                    "description": "Insert chat messages at the end of the chat message array. This array preserves exact order when adding messages.",
+                    "len_max": 15
+                  }
+                }
+              ],
+              "required": false
+            }
+          }
+        ],
+        "required": true
+      }
+    }
+  ],
+  "entity_checks": [
+    {
+      "at_least_one_of": [
+        "config.prompts.prepend",
+        "config.prompts.append"
+      ]
+    }
+  ]
+}
