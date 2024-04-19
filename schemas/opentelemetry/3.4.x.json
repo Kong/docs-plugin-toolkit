@@ -2,15 +2,7 @@
   "fields": [
     {
       "protocols": {
-        "default": [
-          "grpc",
-          "grpcs",
-          "http",
-          "https"
-        ],
-        "required": true,
         "description": "A set of strings representing HTTP protocols.",
-        "type": "set",
         "elements": {
           "type": "string",
           "one_of": [
@@ -19,89 +11,109 @@
             "http",
             "https"
           ]
-        }
+        },
+        "default": [
+          "grpc",
+          "grpcs",
+          "http",
+          "https"
+        ],
+        "required": true,
+        "type": "set"
       }
     },
     {
       "consumer_group": {
-        "reference": "consumer_groups",
         "description": "Custom type for representing a foreign key with a null value allowed.",
         "eq": null,
+        "reference": "consumer_groups",
         "type": "foreign"
       }
     },
     {
       "config": {
+        "entity_checks": [
+          {
+            "custom_entity_check": {
+              "field_sources": [
+                "batch_span_count",
+                "batch_flush_delay"
+              ]
+            }
+          }
+        ],
         "fields": [
           {
             "endpoint": {
-              "required": true,
-              "referenceable": true,
               "description": "A string representing a URL, such as https://example.com/path/to/resource?q=search.",
-              "type": "string"
+              "referenceable": true,
+              "type": "string",
+              "required": true
             }
           },
           {
             "headers": {
+              "description": "The custom headers to be added in the HTTP request sent to the OTLP server. This setting is useful for adding the authentication headers (token) for the APM backend.",
+              "keys": {
+                "description": "A string representing an HTTP header name.",
+                "type": "string"
+              },
+              "type": "map",
               "values": {
                 "type": "string",
                 "referenceable": true
-              },
-              "keys": {
-                "type": "string",
-                "description": "A string representing an HTTP header name."
-              },
-              "description": "The custom headers to be added in the HTTP request sent to the OTLP server. This setting is useful for adding the authentication headers (token) for the APM backend.",
-              "type": "map"
+              }
             }
           },
           {
             "resource_attributes": {
-              "description": "Attributes to add to the OpenTelemetry resource object, following the spec for Semantic Attributes. \nThe following attributes are automatically added:\n- `service.name`: The name of the service (default: `kong`).\n- `service.version`: The version of Kong Gateway.\n- `service.instance.id`: The node ID of Kong Gateway.\n\nYou can use this property to override default attribute values. For example, to override the default for `service.name`, you can specify `{ \"service.name\": \"my-service\" }`.",
-              "values": {
-                "type": "string",
-                "required": true
-              },
               "keys": {
                 "type": "string",
                 "required": true
               },
-              "type": "map"
+              "type": "map",
+              "values": {
+                "type": "string",
+                "required": true
+              }
             }
           },
           {
             "queue": {
+              "default": {
+                "max_batch_size": 200
+              },
               "fields": [
                 {
                   "max_batch_size": {
                     "default": 1,
-                    "type": "integer",
                     "between": [
                       1,
                       1000000
                     ],
+                    "type": "integer",
                     "description": "Maximum number of entries that can be processed at a time."
                   }
                 },
                 {
                   "max_coalescing_delay": {
                     "default": 1,
-                    "type": "number",
                     "between": [
                       0,
                       3600
                     ],
+                    "type": "number",
                     "description": "Maximum number of (fractional) seconds to elapse after the first entry was queued before the queue starts calling the handler."
                   }
                 },
                 {
                   "max_entries": {
                     "default": 10000,
-                    "type": "integer",
                     "between": [
                       1,
                       1000000
                     ],
+                    "type": "integer",
                     "description": "Maximum number of entries that can be waiting on the queue."
                   }
                 },
@@ -121,23 +133,23 @@
                 {
                   "initial_retry_delay": {
                     "default": 0.01,
-                    "type": "number",
                     "between": [
                       0.001,
                       1000000
                     ],
+                    "type": "number",
                     "description": "Time in seconds before the initial retry is made for a failing batch."
                   }
                 },
                 {
                   "max_retry_delay": {
                     "default": 60,
+                    "description": "Maximum time in seconds between retries, caps exponential backoff.",
                     "type": "number",
                     "between": [
                       0.001,
                       1000000
-                    ],
-                    "description": "Maximum time in seconds between retries, caps exponential backoff."
+                    ]
                   }
                 }
               ],
@@ -160,45 +172,46 @@
           {
             "connect_timeout": {
               "default": 1000,
-              "description": "An integer representing a timeout in milliseconds. Must be between 0 and 2^31-2.",
               "between": [
                 0,
                 2147483646
               ],
-              "type": "integer"
+              "type": "integer",
+              "description": "An integer representing a timeout in milliseconds. Must be between 0 and 2^31-2."
             }
           },
           {
             "send_timeout": {
               "default": 5000,
-              "description": "An integer representing a timeout in milliseconds. Must be between 0 and 2^31-2.",
               "between": [
                 0,
                 2147483646
               ],
-              "type": "integer"
+              "type": "integer",
+              "description": "An integer representing a timeout in milliseconds. Must be between 0 and 2^31-2."
             }
           },
           {
             "read_timeout": {
               "default": 5000,
-              "description": "An integer representing a timeout in milliseconds. Must be between 0 and 2^31-2.",
               "between": [
                 0,
                 2147483646
               ],
-              "type": "integer"
+              "type": "integer",
+              "description": "An integer representing a timeout in milliseconds. Must be between 0 and 2^31-2."
             }
           },
           {
             "http_response_header_for_traceid": {
-              "description": "Specifies a custom header for the `trace_id`. If set, the plugin sets the corresponding header in the response.",
               "type": "string"
             }
           },
           {
             "header_type": {
               "default": "preserve",
+              "required": false,
+              "type": "string",
               "one_of": [
                 "preserve",
                 "ignore",
@@ -209,19 +222,6 @@
                 "ot",
                 "aws",
                 "datadog"
-              ],
-              "type": "string",
-              "description": "All HTTP requests going through the plugin are tagged with a tracing HTTP request. This property codifies what kind of tracing header the plugin expects on incoming requests.",
-              "required": false
-            }
-          }
-        ],
-        "entity_checks": [
-          {
-            "custom_entity_check": {
-              "field_sources": [
-                "batch_span_count",
-                "batch_flush_delay"
               ]
             }
           }

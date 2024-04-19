@@ -2,47 +2,39 @@
   "fields": [
     {
       "consumer": {
-        "reference": "consumers",
         "description": "Custom type for representing a foreign key with a null value allowed.",
         "eq": null,
+        "reference": "consumers",
         "type": "foreign"
       }
     },
     {
       "service": {
-        "reference": "services",
         "description": "A reference to the 'services' table with a null value allowed.",
         "eq": null,
+        "reference": "services",
         "type": "foreign"
       }
     },
     {
       "route": {
-        "reference": "routes",
         "description": "A reference to the 'routes' table with a null value allowed.",
         "eq": null,
+        "reference": "routes",
         "type": "foreign"
       }
     },
     {
       "consumer_group": {
-        "reference": "consumer_groups",
         "description": "Custom type for representing a foreign key with a null value allowed.",
         "eq": null,
+        "reference": "consumer_groups",
         "type": "foreign"
       }
     },
     {
       "protocols": {
-        "default": [
-          "grpc",
-          "grpcs",
-          "http",
-          "https"
-        ],
-        "required": true,
         "description": "A set of strings representing HTTP protocols.",
-        "type": "set",
         "elements": {
           "type": "string",
           "one_of": [
@@ -51,7 +43,15 @@
             "http",
             "https"
           ]
-        }
+        },
+        "default": [
+          "grpc",
+          "grpcs",
+          "http",
+          "https"
+        ],
+        "required": true,
+        "type": "set"
       }
     },
     {
@@ -59,16 +59,19 @@
         "fields": [
           {
             "account_email": {
+              "description": "The account identifier. Can be reused in a different plugin instance.",
+              "referenceable": true,
+              "match": "%w*%p*@+%w*%.?%w*",
               "encrypted": true,
               "type": "string",
-              "match": "%w*%p*@+%w*%.?%w*",
-              "referenceable": true,
-              "description": "The account identifier. Can be reused in a different plugin instance.",
               "required": true
             }
           },
           {
             "account_key": {
+              "description": "The private key associated with the account.",
+              "required": false,
+              "type": "record",
               "fields": [
                 {
                   "key_id": {
@@ -83,24 +86,21 @@
                     "type": "string"
                   }
                 }
-              ],
-              "description": "The private key associated with the account.",
-              "type": "record",
-              "required": false
+              ]
             }
           },
           {
             "api_uri": {
               "default": "https://acme-v02.api.letsencrypt.org/directory",
-              "description": "A string representing a URL, such as https://example.com/path/to/resource?q=search.",
-              "type": "string"
+              "type": "string",
+              "description": "A string representing a URL, such as https://example.com/path/to/resource?q=search."
             }
           },
           {
             "tos_accepted": {
-              "default": false,
               "description": "If you are using Let's Encrypt, you must set this to `true` to agree the terms of service.",
-              "type": "boolean"
+              "type": "boolean",
+              "default": false
             }
           },
           {
@@ -126,8 +126,8 @@
                 "rsa",
                 "ecc"
               ],
-              "description": "The certificate type to create. The possible values are `'rsa'` for RSA certificate or `'ecc'` for EC certificate.",
-              "type": "string"
+              "type": "string",
+              "description": "The certificate type to create. The possible values are `'rsa'` for RSA certificate or `'ecc'` for EC certificate."
             }
           },
           {
@@ -138,24 +138,25 @@
                 3072,
                 4096
               ],
-              "description": "RSA private key size for the certificate. The possible values are 2048, 3072, or 4096.",
-              "type": "number"
+              "type": "number",
+              "description": "RSA private key size for the certificate. The possible values are 2048, 3072, or 4096."
             }
           },
           {
             "renew_threshold_days": {
               "default": 14,
-              "description": "Days remaining to renew the certificate before it expires.",
-              "type": "number"
+              "type": "number",
+              "description": "Days remaining to renew the certificate before it expires."
             }
           },
           {
             "domains": {
+              "description": "An array of strings representing hosts. A valid host is a string containing one or more labels separated by periods, with at most one wildcard label ('*')",
               "elements": {
                 "match_all": [
                   {
-                    "pattern": "^[^*]*%*?[^*]*$",
-                    "err": "invalid wildcard: must have at most one wildcard"
+                    "err": "invalid wildcard: must have at most one wildcard",
+                    "pattern": "^[^*]*%*?[^*]*$"
                   }
                 ],
                 "type": "string",
@@ -168,22 +169,21 @@
                   ]
                 }
               },
-              "description": "An array of strings representing hosts. A valid host is a string containing one or more labels separated by periods, with at most one wildcard label ('*')",
               "type": "array"
             }
           },
           {
             "allow_any_domain": {
               "default": false,
-              "description": "If set to `true`, the plugin allows all domains and ignores any values in the `domains` list.",
-              "type": "boolean"
+              "type": "boolean",
+              "description": "If set to `true`, the plugin allows all domains and ignores any values in the `domains` list."
             }
           },
           {
             "fail_backoff_minutes": {
               "default": 5,
-              "description": "Minutes to wait for each domain that fails to create a certificate. This applies to both a\nnew certificate and a renewal certificate.",
-              "type": "number"
+              "type": "number",
+              "description": "Minutes to wait for each domain that fails to create a certificate. This applies to both a\nnew certificate and a renewal certificate."
             }
           },
           {
@@ -196,8 +196,8 @@
                 "consul",
                 "vault"
               ],
-              "description": "The backend storage type to use. The possible values are `'kong'`, `'shm'`, `'redis'`, `'consul'`, or `'vault'`. In DB-less mode, `'kong'` storage is unavailable. Note that `'shm'` storage does not persist during Kong restarts and does not work for Kong running on different machines, so consider using one of `'kong'`, `'redis'`, `'consul'`, or `'vault'` in production. Please refer to the Hybrid Mode sections below as well.",
-              "type": "string"
+              "type": "string",
+              "description": "The backend storage type to use. The possible values are `'kong'`, `'shm'`, `'redis'`, `'consul'`, or `'vault'`. In DB-less mode, `'kong'` storage is unavailable. Note that `'shm'` storage does not persist during Kong restarts and does not work for Kong running on different machines, so consider using one of `'kong'`, `'redis'`, `'consul'`, or `'vault'` in production. Please refer to the Hybrid Mode sections below as well."
             }
           },
           {
@@ -209,8 +209,8 @@
                       {
                         "shm_name": {
                           "default": "kong",
-                          "description": "Name of shared memory zone used for Kong API gateway storage",
-                          "type": "string"
+                          "type": "string",
+                          "description": "Name of shared memory zone used for Kong API gateway storage"
                         }
                       }
                     ],
@@ -232,8 +232,8 @@
                     "fields": [
                       {
                         "host": {
-                          "type": "string",
-                          "description": "A string representing a host name, such as example.com."
+                          "description": "A string representing a host name, such as example.com.",
+                          "type": "string"
                         }
                       },
                       {
@@ -254,41 +254,41 @@
                       },
                       {
                         "auth": {
-                          "referenceable": true,
                           "description": "The Redis password to use for authentication. ",
+                          "referenceable": true,
                           "type": "string"
                         }
                       },
                       {
                         "ssl": {
-                          "default": false,
                           "description": "Whether to use SSL/TLS encryption when connecting to the Redis server.",
+                          "required": true,
                           "type": "boolean",
-                          "required": true
+                          "default": false
                         }
                       },
                       {
                         "ssl_verify": {
-                          "default": false,
                           "description": "Whether to verify the SSL/TLS certificate presented by the Redis server. This should be a boolean value.",
+                          "required": true,
                           "type": "boolean",
-                          "required": true
+                          "default": false
                         }
                       },
                       {
                         "ssl_server_name": {
+                          "description": "The expected server name for the SSL/TLS certificate presented by the Redis server.",
                           "required": false,
-                          "type": "string",
-                          "description": "The expected server name for the SSL/TLS certificate presented by the Redis server."
+                          "type": "string"
                         }
                       },
                       {
                         "namespace": {
+                          "description": "A namespace to prepend to all keys stored in Redis.",
                           "default": "",
                           "required": true,
-                          "len_min": 0,
                           "type": "string",
-                          "description": "A namespace to prepend to all keys stored in Redis."
+                          "len_min": 0
                         }
                       }
                     ],
@@ -301,15 +301,15 @@
                     "fields": [
                       {
                         "https": {
-                          "default": false,
                           "description": "Boolean representation of https.",
-                          "type": "boolean"
+                          "type": "boolean",
+                          "default": false
                         }
                       },
                       {
                         "host": {
-                          "type": "string",
-                          "description": "A string representing a host name, such as example.com."
+                          "description": "A string representing a host name, such as example.com.",
+                          "type": "string"
                         }
                       },
                       {
@@ -336,8 +336,8 @@
                       },
                       {
                         "token": {
-                          "referenceable": true,
                           "description": "Consul ACL token.",
+                          "referenceable": true,
                           "type": "string"
                         }
                       }
@@ -351,15 +351,15 @@
                     "fields": [
                       {
                         "https": {
-                          "default": false,
                           "description": "Boolean representation of https.",
-                          "type": "boolean"
+                          "type": "boolean",
+                          "default": false
                         }
                       },
                       {
                         "host": {
-                          "type": "string",
-                          "description": "A string representing a host name, such as example.com."
+                          "description": "A string representing a host name, such as example.com.",
+                          "type": "string"
                         }
                       },
                       {
@@ -386,16 +386,16 @@
                       },
                       {
                         "token": {
-                          "referenceable": true,
                           "description": "Consul ACL token.",
+                          "referenceable": true,
                           "type": "string"
                         }
                       },
                       {
                         "tls_verify": {
-                          "default": true,
                           "description": "Turn on TLS verification.",
-                          "type": "boolean"
+                          "type": "boolean",
+                          "default": true
                         }
                       },
                       {
@@ -406,13 +406,13 @@
                       },
                       {
                         "auth_method": {
-                          "default": "token",
+                          "description": "Auth Method, default to token, can be 'token' or 'kubernetes'.",
                           "one_of": [
                             "token",
                             "kubernetes"
                           ],
-                          "description": "Auth Method, default to token, can be 'token' or 'kubernetes'.",
-                          "type": "string"
+                          "type": "string",
+                          "default": "token"
                         }
                       },
                       {
@@ -445,15 +445,15 @@
           },
           {
             "preferred_chain": {
-              "description": "A string value that specifies the preferred certificate chain to use when generating certificates.",
-              "type": "string"
+              "type": "string",
+              "description": "A string value that specifies the preferred certificate chain to use when generating certificates."
             }
           },
           {
             "enable_ipv4_common_name": {
               "default": true,
-              "description": "A boolean value that controls whether to include the IPv4 address in the common name field of generated certificates.",
-              "type": "boolean"
+              "type": "boolean",
+              "description": "A boolean value that controls whether to include the IPv4 address in the common name field of generated certificates."
             }
           }
         ],
@@ -465,18 +465,18 @@
   "entity_checks": [
     {
       "conditional": {
+        "then_field": "config.tos_accepted",
         "then_match": {
           "eq": true
         },
-        "then_field": "config.tos_accepted",
+        "then_err": "terms of service must be accepted, see https://letsencrypt.org/repository/",
         "if_match": {
           "one_of": [
             "https://acme-v02.api.letsencrypt.org",
             "https://acme-staging-v02.api.letsencrypt.org"
           ]
         },
-        "if_field": "config.api_uri",
-        "then_err": "terms of service must be accepted, see https://letsencrypt.org/repository/"
+        "if_field": "config.api_uri"
       }
     },
     {
