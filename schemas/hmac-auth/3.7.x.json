@@ -2,15 +2,15 @@
   "fields": [
     {
       "consumer": {
-        "type": "foreign",
         "reference": "consumers",
+        "type": "foreign",
         "description": "Custom type for representing a foreign key with a null value allowed.",
         "eq": null
       }
     },
     {
       "protocols": {
-        "type": "set",
+        "required": true,
         "elements": {
           "type": "string",
           "one_of": [
@@ -22,6 +22,7 @@
             "wss"
           ]
         },
+        "type": "set",
         "default": [
           "grpc",
           "grpcs",
@@ -29,35 +30,33 @@
           "https",
           "ws",
           "wss"
-        ],
-        "required": true
+        ]
       }
     },
     {
       "consumer_group": {
-        "type": "foreign",
         "reference": "consumer_groups",
+        "type": "foreign",
         "description": "Custom type for representing a foreign key with a null value allowed.",
         "eq": null
       }
     },
     {
       "config": {
-        "type": "record",
         "fields": [
           {
             "hide_credentials": {
+              "required": true,
               "type": "boolean",
               "description": "An optional boolean value telling the plugin to show or hide the credential from the upstream service.",
-              "default": false,
-              "required": true
+              "default": false
             }
           },
           {
             "clock_skew": {
+              "default": 300,
               "type": "number",
               "description": "Clock skew in seconds to prevent replay attacks.",
-              "default": 300,
               "gt": 0
             }
           },
@@ -69,34 +68,27 @@
           },
           {
             "validate_request_body": {
+              "required": true,
               "type": "boolean",
               "description": "A boolean value telling the plugin to enable body validation.",
-              "default": false,
-              "required": true
+              "default": false
             }
           },
           {
             "enforce_headers": {
               "type": "array",
+              "elements": {
+                "type": "string"
+              },
               "description": "A list of headers that the client should at least use for HTTP signature creation.",
               "default": [
 
-              ],
-              "elements": {
-                "type": "string"
-              }
+              ]
             }
           },
           {
             "algorithms": {
               "type": "array",
-              "description": "A list of HMAC digest algorithms that the user wants to support. Allowed values are `hmac-sha1`, `hmac-sha256`, `hmac-sha384`, and `hmac-sha512`",
-              "default": [
-                "hmac-sha1",
-                "hmac-sha256",
-                "hmac-sha384",
-                "hmac-sha512"
-              ],
               "elements": {
                 "type": "string",
                 "one_of": [
@@ -105,10 +97,18 @@
                   "hmac-sha384",
                   "hmac-sha512"
                 ]
-              }
+              },
+              "description": "A list of HMAC digest algorithms that the user wants to support. Allowed values are `hmac-sha1`, `hmac-sha256`, `hmac-sha384`, and `hmac-sha512`",
+              "default": [
+                "hmac-sha1",
+                "hmac-sha256",
+                "hmac-sha384",
+                "hmac-sha512"
+              ]
             }
           }
         ],
+        "type": "record",
         "required": true
       }
     }

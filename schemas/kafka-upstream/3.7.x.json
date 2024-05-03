@@ -3,6 +3,7 @@
     {
       "protocols": {
         "type": "set",
+        "required": true,
         "elements": {
           "type": "string",
           "one_of": [
@@ -12,47 +13,43 @@
             "https"
           ]
         },
+        "description": "A set of strings representing HTTP protocols.",
         "default": [
           "grpc",
           "grpcs",
           "http",
           "https"
-        ],
-        "required": true,
-        "description": "A set of strings representing HTTP protocols."
+        ]
       }
     },
     {
       "consumer_group": {
-        "type": "foreign",
         "reference": "consumer_groups",
+        "type": "foreign",
         "description": "Custom type for representing a foreign key with a null value allowed.",
         "eq": null
       }
     },
     {
       "config": {
-        "type": "record",
         "fields": [
           {
             "bootstrap_servers": {
-              "type": "set",
-              "description": "Set of bootstrap brokers in a `{host: host, port: port}` list format.",
               "elements": {
                 "type": "record",
                 "fields": [
                   {
                     "host": {
-                      "type": "string",
+                      "required": true,
                       "description": "A string representing a host name, such as example.com.",
-                      "required": true
+                      "type": "string"
                     }
                   },
                   {
                     "port": {
-                      "type": "integer",
-                      "description": "An integer representing a port number between 0 and 65535, inclusive.",
                       "required": true,
+                      "description": "An integer representing a port number between 0 and 65535, inclusive.",
+                      "type": "integer",
                       "between": [
                         0,
                         65535
@@ -60,14 +57,16 @@
                     }
                   }
                 ]
-              }
+              },
+              "type": "set",
+              "description": "Set of bootstrap brokers in a `{host: host, port: port}` list format."
             }
           },
           {
             "topic": {
+              "required": true,
               "type": "string",
-              "description": "The Kafka topic to publish to.",
-              "required": true
+              "description": "The Kafka topic to publish to."
             }
           },
           {
@@ -92,79 +91,79 @@
           },
           {
             "authentication": {
-              "type": "record",
               "fields": [
                 {
                   "strategy": {
+                    "required": false,
                     "type": "string",
                     "description": "The authentication strategy for the plugin, the only option for the value is `sasl`.",
                     "one_of": [
                       "sasl"
-                    ],
-                    "required": false
+                    ]
                   }
                 },
                 {
                   "mechanism": {
+                    "required": false,
                     "type": "string",
                     "description": "The SASL authentication mechanism.  Supported options: `PLAIN`, `SCRAM-SHA-256`, or `SCRAM-SHA-512`.",
                     "one_of": [
                       "PLAIN",
                       "SCRAM-SHA-256",
                       "SCRAM-SHA-512"
-                    ],
-                    "required": false
+                    ]
                   }
                 },
                 {
                   "tokenauth": {
+                    "required": false,
                     "type": "boolean",
-                    "description": "Enable this to indicate `DelegationToken` authentication.",
-                    "required": false
+                    "description": "Enable this to indicate `DelegationToken` authentication."
                   }
                 },
                 {
                   "user": {
+                    "encrypted": true,
                     "referenceable": true,
                     "required": false,
-                    "description": "Username for SASL authentication.",
-                    "encrypted": true,
-                    "type": "string"
+                    "type": "string",
+                    "description": "Username for SASL authentication."
                   }
                 },
                 {
                   "password": {
+                    "encrypted": true,
                     "referenceable": true,
                     "required": false,
-                    "description": "Password for SASL authentication.",
-                    "encrypted": true,
-                    "type": "string"
+                    "type": "string",
+                    "description": "Password for SASL authentication."
                   }
                 }
               ],
+              "type": "record",
               "required": true
             }
           },
           {
             "security": {
-              "type": "record",
               "fields": [
                 {
                   "certificate_id": {
-                    "type": "string",
+                    "required": false,
                     "description": "UUID of certificate entity for mTLS authentication.",
                     "uuid": true,
-                    "required": false
+                    "type": "string"
                   }
                 },
                 {
                   "ssl": {
+                    "required": false,
                     "type": "boolean",
-                    "description": "Enables TLS.",
-                    "required": false
+                    "description": "Enables TLS."
                   }
                 }
               ],
+              "type": "record",
               "required": true
             }
           },
@@ -198,17 +197,17 @@
           },
           {
             "cluster_name": {
-              "type": "string",
+              "required": false,
               "description": "An identifier for the Kafka cluster. By default, this field generates a random string. You can also set your own custom cluster identifier.  If more than one Kafka plugin is configured without a `cluster_name` (that is, if the default autogenerated value is removed), these plugins will use the same producer, and by extension, the same cluster. Logs will be sent to the leader of the cluster.",
-              "auto": true,
-              "required": false
+              "type": "string",
+              "auto": true
             }
           },
           {
             "producer_request_acks": {
+              "default": 1,
               "type": "integer",
               "description": "The number of acknowledgments the producer requires the leader to have received before considering a request complete. Allowed values: 0 for no acknowledgments; 1 for only the leader; and -1 for the full ISR (In-Sync Replica set).",
-              "default": 1,
               "one_of": [
                 -1,
                 0,
@@ -292,6 +291,7 @@
             }
           }
         ],
+        "type": "record",
         "required": true
       }
     }

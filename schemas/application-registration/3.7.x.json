@@ -2,24 +2,24 @@
   "fields": [
     {
       "consumer": {
-        "type": "foreign",
         "reference": "consumers",
+        "type": "foreign",
         "description": "Custom type for representing a foreign key with a null value allowed.",
         "eq": null
       }
     },
     {
       "service": {
-        "type": "foreign",
         "reference": "services",
-        "ne": null,
-        "on_delete": "cascade"
+        "on_delete": "cascade",
+        "type": "foreign",
+        "ne": null
       }
     },
     {
       "route": {
-        "type": "foreign",
         "reference": "routes",
+        "type": "foreign",
         "description": "A reference to the 'routes' table with a null value allowed.",
         "eq": null
       }
@@ -27,6 +27,7 @@
     {
       "protocols": {
         "type": "set",
+        "required": true,
         "elements": {
           "type": "string",
           "one_of": [
@@ -36,60 +37,67 @@
             "https"
           ]
         },
+        "description": "A set of strings representing HTTP protocols.",
         "default": [
           "grpc",
           "grpcs",
           "http",
           "https"
-        ],
-        "required": true,
-        "description": "A set of strings representing HTTP protocols."
+        ]
       }
     },
     {
       "consumer_group": {
-        "type": "foreign",
         "reference": "consumer_groups",
+        "type": "foreign",
         "description": "Custom type for representing a foreign key with a null value allowed.",
         "eq": null
       }
     },
     {
       "config": {
-        "type": "record",
         "fields": [
           {
             "display_name": {
-              "unique": true,
+              "required": true,
               "description": "Unique display name used for a Service in the Developer Portal.",
               "type": "string",
-              "required": true
+              "unique": true
             }
           },
           {
             "description": {
-              "type": "string",
               "description": "Unique description displayed in information about a Service in the Developer Portal.",
+              "type": "string",
               "unique": true
             }
           },
           {
             "auto_approve": {
-              "type": "boolean",
+              "required": true,
               "description": "If enabled, all new Service Contracts requests are automatically approved.",
-              "default": false,
-              "required": true
+              "type": "boolean",
+              "default": false
             }
           },
           {
             "show_issuer": {
-              "type": "boolean",
+              "required": true,
               "description": "Displays the **Issuer URL** in the **Service Details** dialog.",
-              "default": false,
-              "required": true
+              "type": "boolean",
+              "default": false
+            }
+          },
+          {
+            "enable_proxy_with_consumer_credential": {
+              "required": true,
+              "description": "If enabled, the Route of the Service can be accessed using the Consumer's credential",
+              "type": "boolean",
+              "default": false
             }
           }
         ],
+        "type": "record",
         "required": true
       }
     }
