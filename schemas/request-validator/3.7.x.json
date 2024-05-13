@@ -3,6 +3,7 @@
     {
       "protocols": {
         "type": "set",
+        "required": true,
         "elements": {
           "type": "string",
           "one_of": [
@@ -12,91 +13,87 @@
             "https"
           ]
         },
+        "description": "A set of strings representing HTTP protocols.",
         "default": [
           "grpc",
           "grpcs",
           "http",
           "https"
-        ],
-        "required": true,
-        "description": "A set of strings representing HTTP protocols."
+        ]
       }
     },
     {
       "consumer_group": {
-        "type": "foreign",
         "reference": "consumer_groups",
+        "type": "foreign",
         "description": "Custom type for representing a foreign key with a null value allowed.",
         "eq": null
       }
     },
     {
       "config": {
-        "type": "record",
         "fields": [
           {
             "body_schema": {
+              "required": false,
               "type": "string",
-              "description": "The request body schema specification. One of `body_schema` or `parameter_schema` must be specified.",
-              "required": false
+              "description": "The request body schema specification. One of `body_schema` or `parameter_schema` must be specified."
             }
           },
           {
             "allowed_content_types": {
               "type": "set",
+              "elements": {
+                "required": true,
+                "type": "string"
+              },
               "description": "List of allowed content types. The value can be configured with the `charset` parameter. For example, `application/json; charset=UTF-8`.",
               "default": [
                 "application/json"
-              ],
-              "elements": {
-                "type": "string",
-                "required": true
-              }
-            }
-          },
-          {
-            "version": {
-              "type": "string",
-              "default": "kong",
-              "required": true,
-              "description": "Which validator to use. Supported values are `kong` (default) for using Kong's own schema validator, or `draft4` for using a JSON Schema Draft 4-compliant validator.",
-              "one_of": [
-                "kong",
-                "draft4"
               ]
             }
           },
           {
+            "version": {
+              "one_of": [
+                "kong",
+                "draft4"
+              ],
+              "required": true,
+              "type": "string",
+              "description": "Which validator to use. Supported values are `kong` (default) for using Kong's own schema validator, or `draft4` for using a JSON Schema Draft 4-compliant validator.",
+              "default": "kong"
+            }
+          },
+          {
             "parameter_schema": {
-              "type": "array",
-              "description": "Array of parameter validator specification. One of `body_schema` or `parameter_schema` must be specified.",
+              "required": false,
               "elements": {
-                "type": "record",
                 "fields": [
                   {
                     "in": {
+                      "required": true,
                       "type": "string",
                       "description": "The location of the parameter.",
                       "one_of": [
                         "query",
                         "header",
                         "path"
-                      ],
-                      "required": true
+                      ]
                     }
                   },
                   {
                     "name": {
+                      "required": true,
                       "type": "string",
-                      "description": "The name of the parameter. Parameter names are case-sensitive, and correspond to the parameter name used by the `in` property. If `in` is `path`, the `name` field MUST correspond to the named capture group from the configured `route`.",
-                      "required": true
+                      "description": "The name of the parameter. Parameter names are case-sensitive, and correspond to the parameter name used by the `in` property. If `in` is `path`, the `name` field MUST correspond to the named capture group from the configured `route`."
                     }
                   },
                   {
                     "required": {
+                      "required": true,
                       "type": "boolean",
-                      "description": "Determines whether this parameter is mandatory.",
-                      "required": true
+                      "description": "Determines whether this parameter is mandatory."
                     }
                   },
                   {
@@ -143,17 +140,19 @@
                       ]
                     }
                   }
-                ]
+                ],
+                "type": "record"
               },
-              "required": false
+              "type": "array",
+              "description": "Array of parameter validator specification. One of `body_schema` or `parameter_schema` must be specified."
             }
           },
           {
             "verbose_response": {
+              "required": true,
               "type": "boolean",
               "description": "If enabled, the plugin returns more verbose and detailed validation errors.",
-              "default": false,
-              "required": true
+              "default": false
             }
           }
         ],
@@ -165,6 +164,7 @@
             ]
           }
         ],
+        "type": "record",
         "required": true
       }
     }

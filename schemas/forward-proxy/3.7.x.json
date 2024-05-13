@@ -3,6 +3,7 @@
     {
       "protocols": {
         "type": "set",
+        "required": true,
         "elements": {
           "type": "string",
           "one_of": [
@@ -12,27 +13,25 @@
             "https"
           ]
         },
+        "description": "A set of strings representing HTTP protocols.",
         "default": [
           "grpc",
           "grpcs",
           "http",
           "https"
-        ],
-        "required": true,
-        "description": "A set of strings representing HTTP protocols."
+        ]
       }
     },
     {
       "consumer_group": {
-        "type": "foreign",
         "reference": "consumer_groups",
+        "type": "foreign",
         "description": "Custom type for representing a foreign key with a null value allowed.",
         "eq": null
       }
     },
     {
       "config": {
-        "type": "record",
         "entity_checks": [
           {
             "at_least_one_of": [
@@ -59,13 +58,32 @@
             ]
           }
         ],
-        "required": true,
+        "shorthand_fields": [
+          {
+            "proxy_host": {
+              "type": "string",
+              "deprecation": {
+                "removal_in_version": "4.0",
+                "message": "forward-proxy: config.proxy_host is deprecated, please use config.http_proxy_host instead"
+              }
+            }
+          },
+          {
+            "proxy_port": {
+              "type": "integer",
+              "deprecation": {
+                "removal_in_version": "4.0",
+                "message": "forward-proxy: config.proxy_port is deprecated, please use config.http_proxy_port instead"
+              }
+            }
+          }
+        ],
         "fields": [
           {
             "x_headers": {
-              "type": "string",
               "default": "append",
               "required": true,
+              "type": "string",
               "description": "Determines how to handle headers when forwarding the request.",
               "one_of": [
                 "append",
@@ -108,9 +126,9 @@
           },
           {
             "proxy_scheme": {
-              "type": "string",
               "default": "http",
               "required": true,
+              "type": "string",
               "description": "The proxy scheme to use when connecting. Only `http` is supported.",
               "one_of": [
                 "http"
@@ -119,41 +137,31 @@
           },
           {
             "auth_username": {
-              "type": "string",
+              "required": false,
               "description": "The username to authenticate with, if the forward proxy is protected\nby basic authentication.",
               "referenceable": true,
-              "required": false
-            }
-          },
-          {
-            "auth_password": {
-              "type": "string",
-              "description": "The password to authenticate with, if the forward proxy is protected\nby basic authentication.",
-              "referenceable": true,
-              "required": false
-            }
-          },
-          {
-            "https_verify": {
-              "type": "boolean",
-              "description": "Whether the server certificate will be verified according to the CA certificates specified in lua_ssl_trusted_certificate.",
-              "default": false,
-              "required": true
-            }
-          }
-        ],
-        "shorthand_fields": [
-          {
-            "proxy_host": {
               "type": "string"
             }
           },
           {
-            "proxy_port": {
-              "type": "integer"
+            "auth_password": {
+              "required": false,
+              "description": "The password to authenticate with, if the forward proxy is protected\nby basic authentication.",
+              "referenceable": true,
+              "type": "string"
+            }
+          },
+          {
+            "https_verify": {
+              "required": true,
+              "type": "boolean",
+              "description": "Whether the server certificate will be verified according to the CA certificates specified in lua_ssl_trusted_certificate.",
+              "default": false
             }
           }
-        ]
+        ],
+        "type": "record",
+        "required": true
       }
     }
   ],

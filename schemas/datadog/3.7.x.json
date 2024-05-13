@@ -3,6 +3,7 @@
     {
       "protocols": {
         "type": "set",
+        "required": true,
         "elements": {
           "type": "string",
           "description": "A string representing a protocol, such as HTTP or HTTPS.",
@@ -19,41 +20,39 @@
             "wss"
           ]
         },
+        "description": "A set of strings representing protocols.",
         "default": [
           "grpc",
           "grpcs",
           "http",
           "https"
-        ],
-        "required": true,
-        "description": "A set of strings representing protocols."
+        ]
       }
     },
     {
       "consumer_group": {
-        "type": "foreign",
         "reference": "consumer_groups",
+        "type": "foreign",
         "description": "Custom type for representing a foreign key with a null value allowed.",
         "eq": null
       }
     },
     {
       "config": {
-        "type": "record",
         "fields": [
           {
             "host": {
-              "referenceable": true,
               "description": "A string representing a host name, such as example.com.",
-              "default": "localhost",
-              "type": "string"
+              "type": "string",
+              "referenceable": true,
+              "default": "localhost"
             }
           },
           {
             "port": {
-              "type": "integer",
-              "description": "An integer representing a port number between 0 and 65535, inclusive.",
               "default": 8125,
+              "description": "An integer representing a port number between 0 and 65535, inclusive.",
+              "type": "integer",
               "between": [
                 0,
                 65535
@@ -62,59 +61,73 @@
           },
           {
             "prefix": {
-              "type": "string",
               "description": "String to be attached as a prefix to a metric's name.",
+              "type": "string",
               "default": "kong"
             }
           },
           {
             "service_name_tag": {
-              "type": "string",
               "description": "String to be attached as the name of the service.",
+              "type": "string",
               "default": "name"
             }
           },
           {
             "status_tag": {
-              "type": "string",
               "description": "String to be attached as the tag of the HTTP status.",
+              "type": "string",
               "default": "status"
             }
           },
           {
             "consumer_tag": {
-              "type": "string",
               "description": "String to be attached as tag of the consumer.",
+              "type": "string",
               "default": "consumer"
             }
           },
           {
             "retry_count": {
-              "type": "integer",
-              "description": "Number of times to retry when sending data to the upstream server."
+              "deprecation": {
+                "old_default": 10,
+                "removal_in_version": "4.0",
+                "message": "datadog: config.retry_count no longer works, please use config.queue.max_retry_time instead"
+              },
+              "description": "Number of times to retry when sending data to the upstream server.",
+              "type": "integer"
             }
           },
           {
             "queue_size": {
-              "type": "integer",
-              "description": "Maximum number of log entries to be sent on each message to the upstream server."
+              "deprecation": {
+                "old_default": 1,
+                "removal_in_version": "4.0",
+                "message": "datadog: config.queue_size is deprecated, please use config.queue.max_batch_size instead"
+              },
+              "description": "Maximum number of log entries to be sent on each message to the upstream server.",
+              "type": "integer"
             }
           },
           {
             "flush_timeout": {
-              "type": "number",
-              "description": "Optional time in seconds. If `queue_size` > 1, this is the max idle time before sending a log with less than `queue_size` records."
+              "deprecation": {
+                "old_default": 2,
+                "removal_in_version": "4.0",
+                "message": "datadog: config.flush_timeout is deprecated, please use config.queue.max_coalescing_delay instead"
+              },
+              "description": "Optional time in seconds. If `queue_size` > 1, this is the max idle time before sending a log with less than `queue_size` records.",
+              "type": "number"
             }
           },
           {
             "queue": {
-              "type": "record",
               "fields": [
                 {
                   "max_batch_size": {
+                    "default": 1,
                     "type": "integer",
                     "description": "Maximum number of entries that can be processed at a time.",
-                    "default": 1,
                     "between": [
                       1,
                       1000000
@@ -123,9 +136,9 @@
                 },
                 {
                   "max_coalescing_delay": {
+                    "default": 1,
                     "type": "number",
                     "description": "Maximum number of (fractional) seconds to elapse after the first entry was queued before the queue starts calling the handler.",
-                    "default": 1,
                     "between": [
                       0,
                       3600
@@ -134,9 +147,9 @@
                 },
                 {
                   "max_entries": {
+                    "default": 10000,
                     "type": "integer",
                     "description": "Maximum number of entries that can be waiting on the queue.",
-                    "default": 10000,
                     "between": [
                       1,
                       1000000
@@ -158,9 +171,9 @@
                 },
                 {
                   "initial_retry_delay": {
+                    "default": 0.01,
                     "type": "number",
                     "description": "Time in seconds before the initial retry is made for a failing batch.",
-                    "default": 0.01,
                     "between": [
                       0.001,
                       1000000
@@ -169,9 +182,9 @@
                 },
                 {
                   "max_retry_delay": {
+                    "default": 60,
                     "type": "number",
                     "description": "Maximum time in seconds between retries, caps exponential backoff.",
-                    "default": 60,
                     "between": [
                       0.001,
                       1000000
@@ -179,19 +192,21 @@
                   }
                 }
               ],
+              "type": "record",
               "required": true
             }
           },
           {
             "metrics": {
               "type": "array",
+              "required": true,
               "elements": {
-                "type": "record",
                 "fields": [
                   {
                     "name": {
-                      "type": "string",
+                      "required": true,
                       "description": "Datadog metric’s name",
+                      "type": "string",
                       "one_of": [
                         "kong_latency",
                         "latency",
@@ -199,14 +214,14 @@
                         "request_size",
                         "response_size",
                         "upstream_latency"
-                      ],
-                      "required": true
+                      ]
                     }
                   },
                   {
                     "stat_type": {
-                      "type": "string",
+                      "required": true,
                       "description": "Determines what sort of event the metric represents",
+                      "type": "string",
                       "one_of": [
                         "counter",
                         "gauge",
@@ -215,24 +230,23 @@
                         "set",
                         "timer",
                         "distribution"
-                      ],
-                      "required": true
+                      ]
                     }
                   },
                   {
                     "tags": {
-                      "type": "array",
-                      "description": "List of tags",
                       "elements": {
                         "type": "string",
                         "match": "^.*[^:]$"
-                      }
+                      },
+                      "description": "List of tags",
+                      "type": "array"
                     }
                   },
                   {
                     "sample_rate": {
-                      "type": "number",
                       "description": "Sampling rate",
+                      "type": "number",
                       "between": [
                         0,
                         1
@@ -241,8 +255,8 @@
                   },
                   {
                     "consumer_identifier": {
-                      "type": "string",
                       "description": "Authenticated user detail",
+                      "type": "string",
                       "one_of": [
                         "consumer_id",
                         "custom_id",
@@ -254,88 +268,78 @@
                 "entity_checks": [
                   {
                     "conditional": {
-                      "then_field": "sample_rate",
                       "if_field": "stat_type",
-                      "then_match": {
-                        "required": true
-                      },
                       "if_match": {
                         "one_of": [
                           "counter",
                           "gauge"
                         ]
+                      },
+                      "then_field": "sample_rate",
+                      "then_match": {
+                        "required": true
                       }
                     }
                   }
-                ]
+                ],
+                "type": "record"
               },
+              "description": "List of metrics to be logged.",
               "default": [
                 {
+                  "stat_type": "counter",
                   "tags": [
                     "app:kong"
                   ],
-                  "name": "request_count",
                   "consumer_identifier": "custom_id",
-                  "stat_type": "counter",
+                  "name": "request_count",
                   "sample_rate": 1
                 },
                 {
-                  "consumer_identifier": "custom_id",
                   "stat_type": "timer",
                   "name": "latency",
                   "tags": [
                     "app:kong"
-                  ]
+                  ],
+                  "consumer_identifier": "custom_id"
                 },
                 {
-                  "consumer_identifier": "custom_id",
                   "stat_type": "timer",
                   "name": "request_size",
                   "tags": [
                     "app:kong"
-                  ]
+                  ],
+                  "consumer_identifier": "custom_id"
                 },
                 {
-                  "consumer_identifier": "custom_id",
                   "stat_type": "timer",
                   "name": "response_size",
                   "tags": [
                     "app:kong"
-                  ]
+                  ],
+                  "consumer_identifier": "custom_id"
                 },
                 {
-                  "consumer_identifier": "custom_id",
                   "stat_type": "timer",
                   "name": "upstream_latency",
                   "tags": [
                     "app:kong"
-                  ]
+                  ],
+                  "consumer_identifier": "custom_id"
                 },
                 {
-                  "consumer_identifier": "custom_id",
                   "stat_type": "timer",
                   "name": "kong_latency",
                   "tags": [
                     "app:kong"
-                  ]
+                  ],
+                  "consumer_identifier": "custom_id"
                 }
-              ],
-              "required": true,
-              "description": "List of metrics to be logged."
-            }
-          }
-        ],
-        "entity_checks": [
-          {
-            "custom_entity_check": {
-              "field_sources": [
-                "retry_count",
-                "queue_size",
-                "flush_timeout"
               ]
             }
           }
         ],
+        "type": "record",
         "required": true
       }
     }

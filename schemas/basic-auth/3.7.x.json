@@ -2,15 +2,15 @@
   "fields": [
     {
       "consumer": {
-        "type": "foreign",
         "reference": "consumers",
+        "type": "foreign",
         "description": "Custom type for representing a foreign key with a null value allowed.",
         "eq": null
       }
     },
     {
       "protocols": {
-        "type": "set",
+        "required": true,
         "elements": {
           "type": "string",
           "one_of": [
@@ -22,6 +22,7 @@
             "wss"
           ]
         },
+        "type": "set",
         "default": [
           "grpc",
           "grpcs",
@@ -29,45 +30,44 @@
           "https",
           "ws",
           "wss"
-        ],
-        "required": true
+        ]
       }
     },
     {
       "consumer_group": {
-        "type": "foreign",
         "reference": "consumer_groups",
+        "type": "foreign",
         "description": "Custom type for representing a foreign key with a null value allowed.",
         "eq": null
       }
     },
     {
       "config": {
-        "type": "record",
         "fields": [
           {
             "anonymous": {
-              "type": "string",
-              "description": "An optional string (Consumer UUID or username) value to use as an “anonymous” consumer if authentication fails. If empty (default null), the request will fail with an authentication failure `4xx`. Please note that this value must refer to the Consumer `id` or `username` attribute, and **not** its `custom_id`."
+              "description": "An optional string (Consumer UUID or username) value to use as an “anonymous” consumer if authentication fails. If empty (default null), the request will fail with an authentication failure `4xx`. Please note that this value must refer to the Consumer `id` or `username` attribute, and **not** its `custom_id`.",
+              "type": "string"
             }
           },
           {
             "hide_credentials": {
+              "required": true,
               "type": "boolean",
               "description": "An optional boolean value telling the plugin to show or hide the credential from the upstream service. If `true`, the plugin will strip the credential from the request (i.e. the `Authorization` header) before proxying it.",
-              "default": false,
-              "required": true
+              "default": false
             }
           },
           {
             "realm": {
+              "required": true,
               "type": "string",
-              "description": "When authentication or authorization fails, or there is an unexpected error, the plugin sends an `WWW-Authenticate` header with the `realm` attribute value.",
-              "default": "service",
-              "required": true
+              "description": "When authentication fails the plugin sends `WWW-Authenticate` header with `realm` attribute value.",
+              "default": "service"
             }
           }
         ],
+        "type": "record",
         "required": true
       }
     }
