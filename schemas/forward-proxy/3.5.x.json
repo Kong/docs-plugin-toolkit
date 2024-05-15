@@ -1,9 +1,12 @@
 {
+  "entity_checks": [
+
+  ],
   "fields": [
     {
       "protocols": {
-        "type": "set",
         "required": true,
+        "type": "set",
         "default": [
           "grpc",
           "grpcs",
@@ -25,13 +28,15 @@
     {
       "consumer_group": {
         "type": "foreign",
-        "reference": "consumer_groups",
         "eq": null,
-        "description": "Custom type for representing a foreign key with a null value allowed."
+        "description": "Custom type for representing a foreign key with a null value allowed.",
+        "reference": "consumer_groups"
       }
     },
     {
       "config": {
+        "required": true,
+        "type": "record",
         "shorthand_fields": [
           {
             "proxy_host": {
@@ -47,14 +52,14 @@
         "fields": [
           {
             "x_headers": {
-              "type": "string",
               "required": true,
+              "type": "string",
+              "default": "append",
               "one_of": [
                 "append",
                 "transparent",
                 "delete"
               ],
-              "default": "append",
               "description": "Determines how to handle headers when forwarding the request."
             }
           },
@@ -66,12 +71,12 @@
           },
           {
             "http_proxy_port": {
+              "type": "integer",
+              "description": "An integer representing a port number between 0 and 65535, inclusive.",
               "between": [
                 0,
                 65535
-              ],
-              "type": "integer",
-              "description": "An integer representing a port number between 0 and 65535, inclusive."
+              ]
             }
           },
           {
@@ -82,52 +87,50 @@
           },
           {
             "https_proxy_port": {
+              "type": "integer",
+              "description": "An integer representing a port number between 0 and 65535, inclusive.",
               "between": [
                 0,
                 65535
-              ],
-              "type": "integer",
-              "description": "An integer representing a port number between 0 and 65535, inclusive."
+              ]
             }
           },
           {
             "proxy_scheme": {
-              "type": "string",
               "required": true,
+              "type": "string",
+              "default": "http",
               "one_of": [
                 "http"
               ],
-              "default": "http",
               "description": "The proxy scheme to use when connecting. Only `http` is supported."
             }
           },
           {
             "auth_username": {
-              "description": "The username to authenticate with, if the forward proxy is protected\nby basic authentication.",
               "referenceable": true,
-              "type": "string",
-              "required": false
+              "required": false,
+              "description": "The username to authenticate with, if the forward proxy is protected\nby basic authentication.",
+              "type": "string"
             }
           },
           {
             "auth_password": {
-              "description": "The password to authenticate with, if the forward proxy is protected\nby basic authentication.",
               "referenceable": true,
-              "type": "string",
-              "required": false
+              "required": false,
+              "description": "The password to authenticate with, if the forward proxy is protected\nby basic authentication.",
+              "type": "string"
             }
           },
           {
             "https_verify": {
               "required": true,
-              "default": false,
               "type": "boolean",
-              "description": "Whether the server certificate will be verified according to the CA certificates specified in lua_ssl_trusted_certificate."
+              "description": "Whether the server certificate will be verified according to the CA certificates specified in lua_ssl_trusted_certificate.",
+              "default": false
             }
           }
         ],
-        "type": "record",
-        "required": true,
         "entity_checks": [
           {
             "at_least_one_of": [
@@ -156,8 +159,5 @@
         ]
       }
     }
-  ],
-  "entity_checks": [
-
   ]
 }
