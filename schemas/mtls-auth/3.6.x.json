@@ -1,48 +1,191 @@
 {
-  "entity_checks": [
-
-  ],
   "fields": [
     {
       "consumer": {
+        "eq": null,
         "reference": "consumers",
         "type": "foreign",
-        "eq": null,
         "description": "Custom type for representing a foreign key with a null value allowed."
       }
     },
     {
       "protocols": {
-        "elements": {
-          "one_of": [
-            "grpc",
-            "grpcs",
-            "http",
-            "https"
-          ],
-          "type": "string"
-        },
-        "type": "set",
+        "required": true,
         "default": [
           "grpc",
           "grpcs",
           "http",
           "https"
         ],
-        "required": true,
+        "elements": {
+          "type": "string",
+          "one_of": [
+            "grpc",
+            "grpcs",
+            "http",
+            "https"
+          ]
+        },
+        "type": "set",
         "description": "A set of strings representing HTTP protocols."
       }
     },
     {
       "consumer_group": {
+        "eq": null,
         "reference": "consumer_groups",
         "type": "foreign",
-        "eq": null,
         "description": "Custom type for representing a foreign key with a null value allowed."
       }
     },
     {
       "config": {
+        "fields": [
+          {
+            "anonymous": {
+              "description": "An optional string (consumer UUID or username) value to use as an “anonymous” consumer if authentication fails. If empty (default null), the request fails with an authentication failure `4xx`. Note that this value must refer to the consumer `id` or `username` attribute, and **not** its `custom_id`.",
+              "type": "string"
+            }
+          },
+          {
+            "consumer_by": {
+              "required": false,
+              "default": [
+                "username",
+                "custom_id"
+              ],
+              "elements": {
+                "type": "string",
+                "one_of": [
+                  "username",
+                  "custom_id"
+                ]
+              },
+              "type": "array",
+              "description": "Whether to match the subject name of the client-supplied certificate against consumer's `username` and/or `custom_id` attribute. If set to `[]` (the empty array), then auto-matching is disabled."
+            }
+          },
+          {
+            "ca_certificates": {
+              "required": true,
+              "type": "array",
+              "elements": {
+                "uuid": true,
+                "type": "string"
+              },
+              "description": "List of CA Certificates strings to use as Certificate Authorities (CA) when validating a client certificate. At least one is required but you can specify as many as needed. The value of this array is comprised of primary keys (`id`)."
+            }
+          },
+          {
+            "cache_ttl": {
+              "required": true,
+              "type": "number",
+              "default": 60,
+              "description": "Cache expiry time in seconds."
+            }
+          },
+          {
+            "skip_consumer_lookup": {
+              "required": true,
+              "type": "boolean",
+              "default": false,
+              "description": "Skip consumer lookup once certificate is trusted against the configured CA list."
+            }
+          },
+          {
+            "allow_partial_chain": {
+              "required": true,
+              "type": "boolean",
+              "default": false,
+              "description": "Allow certificate verification with only an intermediate certificate. When this is enabled, you don't need to upload the full chain to Kong Certificates."
+            }
+          },
+          {
+            "authenticated_group_by": {
+              "required": false,
+              "default": "CN",
+              "type": "string",
+              "description": "Certificate property to use as the authenticated group. Valid values are `CN` (Common Name) or `DN` (Distinguished Name). Once `skip_consumer_lookup` is applied, any client with a valid certificate can access the Service/API. To restrict usage to only some of the authenticated users, also add the ACL plugin (not covered here) and create allowed or denied groups of users.",
+              "one_of": [
+                "CN",
+                "DN"
+              ]
+            }
+          },
+          {
+            "revocation_check_mode": {
+              "required": false,
+              "default": "IGNORE_CA_ERROR",
+              "type": "string",
+              "description": "Controls client certificate revocation check behavior. If set to `SKIP`, no revocation check is performed. If set to `IGNORE_CA_ERROR`, the plugin respects the revocation status when either OCSP or CRL URL is set, and doesn't fail on network issues. If set to `STRICT`, the plugin only treats the certificate as valid when it's able to verify the revocation status.",
+              "one_of": [
+                "SKIP",
+                "IGNORE_CA_ERROR",
+                "STRICT"
+              ]
+            }
+          },
+          {
+            "http_timeout": {
+              "default": 30000,
+              "type": "number",
+              "description": "HTTP timeout threshold in milliseconds when communicating with the OCSP server or downloading CRL."
+            }
+          },
+          {
+            "cert_cache_ttl": {
+              "default": 60000,
+              "type": "number",
+              "description": "The length of time in milliseconds between refreshes of the revocation check status cache."
+            }
+          },
+          {
+            "send_ca_dn": {
+              "default": false,
+              "type": "boolean",
+              "description": "Sends the distinguished names (DN) of the configured CA list in the TLS handshake message."
+            }
+          },
+          {
+            "default_consumer": {
+              "description": "The UUID or username of the consumer to use when a trusted client certificate is presented but no consumer matches. Note that this value must refer to the consumer `id` or `username` attribute, and **not** its `custom_id`.",
+              "type": "string"
+            }
+          },
+          {
+            "http_proxy_host": {
+              "description": "A string representing a host name, such as example.com.",
+              "type": "string"
+            }
+          },
+          {
+            "http_proxy_port": {
+              "type": "integer",
+              "between": [
+                0,
+                65535
+              ],
+              "description": "An integer representing a port number between 0 and 65535, inclusive."
+            }
+          },
+          {
+            "https_proxy_host": {
+              "description": "A string representing a host name, such as example.com.",
+              "type": "string"
+            }
+          },
+          {
+            "https_proxy_port": {
+              "type": "integer",
+              "between": [
+                0,
+                65535
+              ],
+              "description": "An integer representing a port number between 0 and 65535, inclusive."
+            }
+          }
+        ],
+        "type": "record",
         "entity_checks": [
           {
             "mutually_required": [
@@ -57,148 +200,11 @@
             ]
           }
         ],
-        "type": "record",
-        "fields": [
-          {
-            "anonymous": {
-              "description": "An optional string (consumer UUID or username) value to use as an “anonymous” consumer if authentication fails. If empty (default null), the request fails with an authentication failure `4xx`. Note that this value must refer to the consumer `id` or `username` attribute, and **not** its `custom_id`.",
-              "type": "string"
-            }
-          },
-          {
-            "consumer_by": {
-              "elements": {
-                "one_of": [
-                  "username",
-                  "custom_id"
-                ],
-                "type": "string"
-              },
-              "type": "array",
-              "default": [
-                "username",
-                "custom_id"
-              ],
-              "required": false,
-              "description": "Whether to match the subject name of the client-supplied certificate against consumer's `username` and/or `custom_id` attribute. If set to `[]` (the empty array), then auto-matching is disabled."
-            }
-          },
-          {
-            "ca_certificates": {
-              "required": true,
-              "type": "array",
-              "description": "List of CA Certificates strings to use as Certificate Authorities (CA) when validating a client certificate. At least one is required but you can specify as many as needed. The value of this array is comprised of primary keys (`id`).",
-              "elements": {
-                "uuid": true,
-                "type": "string"
-              }
-            }
-          },
-          {
-            "cache_ttl": {
-              "required": true,
-              "type": "number",
-              "description": "Cache expiry time in seconds.",
-              "default": 60
-            }
-          },
-          {
-            "skip_consumer_lookup": {
-              "required": true,
-              "type": "boolean",
-              "description": "Skip consumer lookup once certificate is trusted against the configured CA list.",
-              "default": false
-            }
-          },
-          {
-            "allow_partial_chain": {
-              "required": true,
-              "type": "boolean",
-              "description": "Allow certificate verification with only an intermediate certificate. When this is enabled, you don't need to upload the full chain to Kong Certificates.",
-              "default": false
-            }
-          },
-          {
-            "authenticated_group_by": {
-              "type": "string",
-              "default": "CN",
-              "required": false,
-              "description": "Certificate property to use as the authenticated group. Valid values are `CN` (Common Name) or `DN` (Distinguished Name). Once `skip_consumer_lookup` is applied, any client with a valid certificate can access the Service/API. To restrict usage to only some of the authenticated users, also add the ACL plugin (not covered here) and create allowed or denied groups of users.",
-              "one_of": [
-                "CN",
-                "DN"
-              ]
-            }
-          },
-          {
-            "revocation_check_mode": {
-              "type": "string",
-              "default": "IGNORE_CA_ERROR",
-              "required": false,
-              "description": "Controls client certificate revocation check behavior. If set to `SKIP`, no revocation check is performed. If set to `IGNORE_CA_ERROR`, the plugin respects the revocation status when either OCSP or CRL URL is set, and doesn't fail on network issues. If set to `STRICT`, the plugin only treats the certificate as valid when it's able to verify the revocation status.",
-              "one_of": [
-                "SKIP",
-                "IGNORE_CA_ERROR",
-                "STRICT"
-              ]
-            }
-          },
-          {
-            "http_timeout": {
-              "type": "number",
-              "description": "HTTP timeout threshold in milliseconds when communicating with the OCSP server or downloading CRL.",
-              "default": 30000
-            }
-          },
-          {
-            "cert_cache_ttl": {
-              "type": "number",
-              "description": "The length of time in milliseconds between refreshes of the revocation check status cache.",
-              "default": 60000
-            }
-          },
-          {
-            "send_ca_dn": {
-              "type": "boolean",
-              "description": "Sends the distinguished names (DN) of the configured CA list in the TLS handshake message.",
-              "default": false
-            }
-          },
-          {
-            "http_proxy_host": {
-              "description": "A string representing a host name, such as example.com.",
-              "type": "string"
-            }
-          },
-          {
-            "http_proxy_port": {
-              "type": "integer",
-              "description": "An integer representing a port number between 0 and 65535, inclusive.",
-              "between": [
-                0,
-                65535
-              ]
-            }
-          },
-          {
-            "https_proxy_host": {
-              "description": "A string representing a host name, such as example.com.",
-              "type": "string"
-            }
-          },
-          {
-            "https_proxy_port": {
-              "type": "integer",
-              "description": "An integer representing a port number between 0 and 65535, inclusive.",
-              "between": [
-                0,
-                65535
-              ]
-            }
-          }
-        ],
         "required": true
       }
     }
+  ],
+  "entity_checks": [
+
   ]
 }
