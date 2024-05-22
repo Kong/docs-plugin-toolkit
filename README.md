@@ -113,6 +113,21 @@ For example, running:
 ```
 generates a file `./data/priorities/ee/3.4.x.json` containing a list of plugins and their corresponded priorities order by priority (desc).
 
+### Generate JWT Credential Schema
+
+| Options | Descriptions  |
+|--------------------------- |-----|
+| `version` | **Required**. Kong Gateway release version, e.g. `3.3.x`. |
+| `host`    | Name of the host in which the API is running. Default: `localhost`.  |
+| `port`    | Port in which the API is listening. Default: `8001`. |
+| `destination` | Path to the root folder in which the file will be stored. Default: `./data`  |
+
+For example, running:
+```bash
+./plugins generate_jwt_credential --version 3.4.x
+```
+generates a file `./data/jwt_credential/3.4.x.json` containing the schema of a JWT credential.
+
 ## Updating the repo after a new release
 
 Whenever a new version of Kong Gateway is released, we need run the following commands in order. For all of them, specify all the plugins `--plugins $(ls ./schemas)`
@@ -122,3 +137,4 @@ Whenever a new version of Kong Gateway is released, we need run the following co
 1. Validate Examples  - specify the new version `_x.x.x`
 1. Generate Referenceable Fields List - specify the new version `x.x.x`
 1. Generate Priorities List - for `oss` and `ee` and specify the new version `x.x.x`
+1. Generate JWT Credential Schema - specify the new version `x.x.x`

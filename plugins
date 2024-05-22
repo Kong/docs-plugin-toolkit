@@ -5,6 +5,7 @@ require_relative 'lib/example_validator'
 require_relative 'lib/example_copier'
 require_relative 'lib/referenceable_fields'
 require_relative 'lib/plugin_priorities'
+require_relative 'lib/jwt_credential'
 
 class Plugins < Thor
   class_option :verbose, :type => :boolean
@@ -82,6 +83,19 @@ class Plugins < Thor
     puts 'Listing plugins and their priorities...'
 
     PluginPriorities.run!(options: options)
+
+    puts 'Done!'
+  end
+
+  desc 'generate_jwt_credential', 'Generates a json object representing the schema of a jwt credential'
+  option :version,     aliases: '-v',    type: :string,  required: true,       desc: 'Kong Version'
+  option :host,        aliases: '-d',    type: :string,  default: 'localhost', desc: 'Hostname of the server running the API.'
+  option :port,        aliases: '-h',    type: :numeric, default: 8001,        desc: 'Port number'
+  option :destination, aliases: '-dest', type: :string,  default: './data',    desc: 'Destination folder where the json object containing the plugins and their priorities will be written'
+  def generate_jwt_credential
+    puts 'Downloading jwt credential schema...'
+
+    JWTCredential.run!(options: options)
 
     puts 'Done!'
   end
