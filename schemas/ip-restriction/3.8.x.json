@@ -1,0 +1,85 @@
+{
+  "fields": [
+    {
+      "protocols": {
+        "description": "A set of strings representing protocols.",
+        "required": true,
+        "elements": {
+          "type": "string",
+          "description": "A string representing a protocol, such as HTTP or HTTPS.",
+          "one_of": [
+            "grpc",
+            "grpcs",
+            "http",
+            "https",
+            "tcp",
+            "tls",
+            "tls_passthrough",
+            "udp",
+            "ws",
+            "wss"
+          ]
+        },
+        "type": "set",
+        "default": [
+          "http",
+          "https",
+          "tcp",
+          "tls",
+          "grpc",
+          "grpcs"
+        ]
+      }
+    },
+    {
+      "config": {
+        "fields": [
+          {
+            "allow": {
+              "elements": {
+                "type": "string",
+                "description": "A string representing an IP address or CIDR block, such as 192.168.1.1 or 192.168.0.0/16."
+              },
+              "type": "array",
+              "description": "List of IPs or CIDR ranges to allow. One of `config.allow` or `config.deny` must be specified."
+            }
+          },
+          {
+            "deny": {
+              "elements": {
+                "type": "string",
+                "description": "A string representing an IP address or CIDR block, such as 192.168.1.1 or 192.168.0.0/16."
+              },
+              "type": "array",
+              "description": "List of IPs or CIDR ranges to deny. One of `config.allow` or `config.deny` must be specified."
+            }
+          },
+          {
+            "status": {
+              "required": false,
+              "type": "number",
+              "description": "The HTTP status of the requests that will be rejected by the plugin."
+            }
+          },
+          {
+            "message": {
+              "required": false,
+              "type": "string",
+              "description": "The message to send as a response body to rejected requests."
+            }
+          }
+        ],
+        "type": "record",
+        "required": true
+      }
+    }
+  ],
+  "entity_checks": [
+    {
+      "at_least_one_of": [
+        "config.allow",
+        "config.deny"
+      ]
+    }
+  ]
+}
