@@ -38,5 +38,15 @@ module API
         puts e.message
       end
     end
+
+    def jwt_credential_schema
+      begin
+        Net::HTTP.get_response(
+          URI("#{@base_url}/schemas/jwt_secrets")
+        )
+      rescue Errno::ECONNREFUSED => e
+        puts e.message
+      end
+    end
   end
 end
