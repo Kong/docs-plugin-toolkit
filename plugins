@@ -3,6 +3,7 @@ require 'thor'
 require_relative 'lib/schema_downloader'
 require_relative 'lib/example_validator'
 require_relative 'lib/example_copier'
+require_relative 'lib/schema_copier'
 require_relative 'lib/referenceable_fields'
 require_relative 'lib/plugin_priorities'
 
@@ -54,6 +55,20 @@ class Plugins < Thor
 
     options[:plugins].each do |plugin|
       ExampleCopier.run!(plugin:, options:)
+    end
+
+    puts 'Done!'
+  end
+
+  desc 'copy_schemas', 'Copy latest schemas'
+  option :version, aliases: '-v', type: :string, required: true,  default: 'index',     desc: 'Kong Version'
+  option :plugins, aliases: '-p', type: :array,  required: true,                         desc: 'List containing the name of the plugins'
+  option :source,  aliases: '-s', type: :string,                  default: './schemas', desc: 'Source folder containing the schemas'
+  def copy_schemas
+    puts 'Copying schemas...'
+
+    options[:plugins].each do |plugin|
+      SchemaCopier.run!(plugin:, options:)
     end
 
     puts 'Done!'
