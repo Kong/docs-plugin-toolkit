@@ -24,7 +24,10 @@ class ConvertJsonSchema
 
       # If an entity is required, but no children are required
       # it's not actually required
-      json_schema =  remove_object_required_optional_children(json_schema)
+      json_schema = remove_object_required_optional_children(json_schema)
+
+      # Fix any broken defaults
+      json_schema = fix_broken_defaults(json_schema)
 
       # Write the schema to the destination
       FileUtils.mkdir_p("#{@options[:destination]}/#{plugin_name}")
@@ -68,8 +71,27 @@ class ConvertJsonSchema
         next
       end
 
-      # Remove entity checks
-      next if k == 'entity_checks'
+      if k == 'uuid' && fields[k]
+        fields['format'] = 'uuid'
+      end
+
+      # Remove unused fields
+      next if [
+        'entity_checks',
+        'referenceable',
+        'reference',
+        'encrypted',
+        'err',
+        'unique',
+        'auto',
+        'match_none',
+        'starts_with',
+        'deprecation'
+      ].include?(k)
+
+      if k == 'type' && v == 'foreign'
+        v = 'string'
+      end
 
       if v.is_a?(Array) && v.first.is_a?(Hash)
         v = v.reduce({}, :merge)
@@ -84,19 +106,30 @@ class ConvertJsonSchema
   end
 
   def convert_required_list(schema)
+
+    schema['required'] = [] if !schema['required'].is_a?(Array)
+
     if schema['properties']
       schema['properties'].each do |k, v|
         if v['required']
-          schema['required'] ||= []
           schema['required'].push(k)
-          v.delete('required')
         end
+
+        # Always remove required as "required: false" is invalid too
+        v.delete('required')
+
         if v['properties']
           v = convert_required_list(v)
         end
+
+        if v['items']
+          v['items'] = convert_required_list(v['items'])
+        end
       end
+
     end
     
+
     schema
   end
 
@@ -105,12 +138,28 @@ class ConvertJsonSchema
       unused = []
       schema['required'].each do |k|
         schema['properties'][k] = remove_object_required_optional_children(schema['properties'][k])
-        unused.push(k) if !schema['properties'][k]['required']
+        if !schema['properties'][k]['required'] || schema['properties'][k]['required'].size == 0
+          unused.push(k)
+        end
       end
 
       schema['required'] -= unused
     end
     schema
+  end
+
+  def fix_broken_defaults(schema)
+    if schema['default'] && schema['type'] == 'object' && schema['default'].is_a?(Array)
+      schema.delete('default')
+    end
+
+    if schema['properties']
+      schema['properties'].each do |k, v|
+        schema['properties'][k] = fix_broken_defaults(v)
+      end
+    end
+
+    return schema
   end
 
 
