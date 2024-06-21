@@ -2,8 +2,12 @@
   "fields": [
     {
       "protocols": {
-        "type": "set",
-        "required": true,
+        "default": [
+          "grpc",
+          "grpcs",
+          "http",
+          "https"
+        ],
         "elements": {
           "type": "string",
           "one_of": [
@@ -13,21 +17,17 @@
             "https"
           ]
         },
+        "type": "set",
         "description": "A set of strings representing HTTP protocols.",
-        "default": [
-          "grpc",
-          "grpcs",
-          "http",
-          "https"
-        ]
+        "required": true
       }
     },
     {
       "consumer_group": {
-        "reference": "consumer_groups",
-        "type": "foreign",
         "description": "Custom type for representing a foreign key with a null value allowed.",
-        "eq": null
+        "reference": "consumer_groups",
+        "eq": null,
+        "type": "foreign"
       }
     },
     {
@@ -42,27 +42,27 @@
           },
           {
             "allowed_content_types": {
-              "type": "set",
-              "elements": {
-                "required": true,
-                "type": "string"
-              },
-              "description": "List of allowed content types. The value can be configured with the `charset` parameter. For example, `application/json; charset=UTF-8`.",
               "default": [
                 "application/json"
-              ]
+              ],
+              "elements": {
+                "type": "string",
+                "required": true
+              },
+              "type": "set",
+              "description": "List of allowed content types. The value can be configured with the `charset` parameter. For example, `application/json; charset=UTF-8`."
             }
           },
           {
             "version": {
+              "default": "kong",
               "one_of": [
                 "kong",
                 "draft4"
               ],
-              "required": true,
-              "type": "string",
               "description": "Which validator to use. Supported values are `kong` (default) for using Kong's own schema validator, or `draft4` for using a JSON Schema Draft 4-compliant validator.",
-              "default": "kong"
+              "required": true,
+              "type": "string"
             }
           },
           {
@@ -73,13 +73,13 @@
                   {
                     "in": {
                       "required": true,
-                      "type": "string",
                       "description": "The location of the parameter.",
                       "one_of": [
                         "query",
                         "header",
                         "path"
-                      ]
+                      ],
+                      "type": "string"
                     }
                   },
                   {
@@ -99,7 +99,6 @@
                   {
                     "style": {
                       "type": "string",
-                      "description": "Required when `schema` and `explode` are set. Describes how the parameter value will be deserialized depending on the type of the parameter value.",
                       "one_of": [
                         "label",
                         "form",
@@ -108,13 +107,14 @@
                         "spaceDelimited",
                         "pipeDelimited",
                         "deepObject"
-                      ]
+                      ],
+                      "description": "Required when `schema` and `explode` are set. Describes how the parameter value will be deserialized depending on the type of the parameter value."
                     }
                   },
                   {
                     "explode": {
-                      "type": "boolean",
-                      "description": "Required when `schema` and `style` are set. When `explode` is `true`, parameter values of type `array` or `object` generate separate parameters for each value of the array or key-value pair of the map. For other types of parameters, this property has no effect."
+                      "description": "Required when `schema` and `style` are set. When `explode` is `true`, parameter values of type `array` or `object` generate separate parameters for each value of the array or key-value pair of the map. For other types of parameters, this property has no effect.",
+                      "type": "boolean"
                     }
                   },
                   {
@@ -143,16 +143,24 @@
                 ],
                 "type": "record"
               },
-              "type": "array",
-              "description": "Array of parameter validator specification. One of `body_schema` or `parameter_schema` must be specified."
+              "description": "Array of parameter validator specification. One of `body_schema` or `parameter_schema` must be specified.",
+              "type": "array"
             }
           },
           {
             "verbose_response": {
+              "default": false,
               "required": true,
-              "type": "boolean",
               "description": "If enabled, the plugin returns more verbose and detailed validation errors.",
-              "default": false
+              "type": "boolean"
+            }
+          },
+          {
+            "content_type_parameter_validation": {
+              "default": true,
+              "required": true,
+              "description": "Determines whether to enable parameters validation of request content-type.",
+              "type": "boolean"
             }
           }
         ],
