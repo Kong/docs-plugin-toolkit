@@ -1,0 +1,33 @@
+name: Run Kong EE
+inputs:
+  op-token:
+    required: true
+  kong-image-tag:
+    required: true
+    description: |
+      Kong Docker image tag to run, 3.6.1.4.
+  kong-image-name:
+    description: |
+      Kong Docker image name to use, e.g. kong-gateway, kong-gateway-dev.
+
+runs:
+  using: composite
+  steps:
+    - name: Download quickstart script
+      shell: bash
+      uses: ./.github/reusable-steps/download-quickstart-script
+    - name: Download Kong License
+      shell: bash
+      uses: Kong/kong-license@master
+      id: getLicense
+      with:
+        op-token: ${{ inputs.op-token }}
+    - name: Run Kong
+      shell: bash
+      env:
+        KONG_PLUGINS: 'bundled,app-dynamics'
+        KONG_LICENSE_DATA: ${{ steps.getLicense.outputs.license }}
+        KONG_IMAGE_TAG: ${{ inputs.kong-image-tag }}
+        KONG_IMAGE_NAME: ${{ inputs.kong-image-name }}
+      run: |
+        ./quickstart.sh -e "KONG_LICENSE_DATA" -e "KONG_PLUGINS" -e "KONG_IMAGE_TAG" -e "KONG_IMAGE_NAME"

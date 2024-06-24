@@ -1,0 +1,21 @@
+name: Run Kong OSS
+inputs:
+  kong-image-tag:
+    required: true
+    description: |
+      Kong Docker image tag to run, 3.6.1.
+
+runs:
+  using: composite
+  steps:
+    - name: Download quickstart script
+      shell: bash
+      uses: ./.github/reusable-steps/download-quickstart-script
+    - name: Run Kong
+      shell: bash
+      env:
+        KONG_PLUGINS: 'bundled'
+        KONG_IMAGE_TAG: ${{ inputs.kong-image-tag }}
+        KONG_IMAGE_NAME: 'kong'
+      run: |
+        ./quickstart.sh  -e "KONG_PLUGINS" -e "KONG_IMAGE_TAG" -e "KONG_IMAGE_NAME"
