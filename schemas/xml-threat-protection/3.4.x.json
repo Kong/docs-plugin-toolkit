@@ -2,7 +2,6 @@
   "fields": [
     {
       "protocols": {
-        "type": "set",
         "required": true,
         "default": [
           "grpc",
@@ -11,14 +10,15 @@
           "https"
         ],
         "elements": {
+          "type": "string",
           "one_of": [
             "grpc",
             "grpcs",
             "http",
             "https"
-          ],
-          "type": "string"
+          ]
         },
+        "type": "set",
         "description": "A set of strings representing HTTP protocols."
       }
     },
@@ -32,57 +32,97 @@
     },
     {
       "config": {
+        "required": true,
+        "entity_checks": [
+          {
+            "conditional": {
+              "if_field": "namespace_aware",
+              "if_match": {
+                "eq": true
+              },
+              "then_field": "max_namespaces",
+              "then_match": {
+                "required": true
+              }
+            }
+          },
+          {
+            "conditional": {
+              "if_field": "namespace_aware",
+              "if_match": {
+                "eq": true
+              },
+              "then_field": "prefix",
+              "then_match": {
+                "required": true
+              }
+            }
+          },
+          {
+            "conditional": {
+              "if_field": "namespace_aware",
+              "if_match": {
+                "eq": true
+              },
+              "then_field": "namespaceuri",
+              "then_match": {
+                "required": true
+              }
+            }
+          }
+        ],
+        "type": "record",
         "fields": [
           {
             "checked_content_types": {
-              "type": "set",
               "required": true,
+              "type": "set",
+              "elements": {
+                "required": true,
+                "type": "string",
+                "match": "^[^%s]+%/[^ ;]+$"
+              },
               "default": [
                 "application/xml"
               ],
-              "description": "A list of Content-Type values with payloads that must be validated.",
-              "elements": {
-                "type": "string",
-                "required": true,
-                "match": "^[^%s]+%/[^ ;]+$"
-              }
+              "description": "A list of Content-Type values with payloads that must be validated."
             }
           },
           {
             "allowed_content_types": {
-              "type": "set",
               "required": true,
+              "type": "set",
+              "elements": {
+                "required": true,
+                "type": "string",
+                "match": "^[^%s]+%/[^ ;]+$"
+              },
               "default": [
 
               ],
-              "description": "A list of Content-Type values with payloads that are allowed, but aren't validated.",
-              "elements": {
-                "type": "string",
-                "required": true,
-                "match": "^[^%s]+%/[^ ;]+$"
-              }
+              "description": "A list of Content-Type values with payloads that are allowed, but aren't validated."
             }
           },
           {
             "allow_dtd": {
-              "required": true,
               "default": false,
-              "description": "Indicates whether an XML Document Type Definition (DTD) section is allowed.",
-              "type": "boolean"
+              "required": true,
+              "type": "boolean",
+              "description": "Indicates whether an XML Document Type Definition (DTD) section is allowed."
             }
           },
           {
             "namespace_aware": {
-              "required": true,
               "default": true,
-              "description": "If not parsing namespace aware, all prefixes and namespace attributes will be counted as regular attributes and element names, and validated as such.",
-              "type": "boolean"
+              "required": true,
+              "type": "boolean",
+              "description": "If not parsing namespace aware, all prefixes and namespace attributes will be counted as regular attributes and element names, and validated as such."
             }
           },
           {
             "max_depth": {
-              "type": "integer",
               "required": true,
+              "type": "integer",
               "gt": 0,
               "default": 50,
               "description": "Maximum depth of tags. Child elements such as Text or Comments are not counted as another level."
@@ -90,8 +130,8 @@
           },
           {
             "max_children": {
-              "type": "integer",
               "required": true,
+              "type": "integer",
               "gt": 0,
               "default": 100,
               "description": "Maximum number of children allowed (Element, Text, Comment, ProcessingInstruction, CDATASection). Note: Adjacent text and CDATA sections are counted as one. For example, text-cdata-text-cdata is one child."
@@ -99,8 +139,8 @@
           },
           {
             "max_attributes": {
-              "type": "integer",
               "required": true,
+              "type": "integer",
               "gt": 0,
               "default": 100,
               "description": "Maximum number of attributes allowed on a tag, including default ones. Note: If namespace-aware parsing is disabled, then the namespaces definitions are counted as attributes."
@@ -108,8 +148,8 @@
           },
           {
             "max_namespaces": {
-              "type": "integer",
               "required": false,
+              "type": "integer",
               "gt": 0,
               "default": 20,
               "description": "Maximum number of namespaces defined on a tag. This value is required if parsing is namespace-aware."
@@ -117,125 +157,125 @@
           },
           {
             "document": {
-              "type": "integer",
               "required": true,
-              "gt": 0,
               "default": 10485760,
-              "description": "Maximum size of the entire document."
+              "description": "Maximum size of the entire document.",
+              "type": "integer",
+              "gt": 0
             }
           },
           {
             "buffer": {
-              "type": "integer",
               "required": true,
-              "gt": 0,
               "default": 1048576,
-              "description": "Maximum size of the unparsed buffer (see below)."
+              "description": "Maximum size of the unparsed buffer (see below).",
+              "type": "integer",
+              "gt": 0
             }
           },
           {
             "comment": {
-              "type": "integer",
               "required": true,
-              "gt": 0,
               "default": 1024,
-              "description": "Maximum size of comments."
+              "description": "Maximum size of comments.",
+              "type": "integer",
+              "gt": 0
             }
           },
           {
             "localname": {
-              "type": "integer",
               "required": true,
-              "gt": 0,
               "default": 1024,
-              "description": "Maximum size of the localname. This applies to tags and attributes."
+              "description": "Maximum size of the localname. This applies to tags and attributes.",
+              "type": "integer",
+              "gt": 0
             }
           },
           {
             "prefix": {
-              "type": "integer",
               "required": false,
-              "gt": 0,
               "default": 1024,
-              "description": "Maximum size of the prefix. This applies to tags and attributes. This value is required if parsing is namespace-aware."
+              "description": "Maximum size of the prefix. This applies to tags and attributes. This value is required if parsing is namespace-aware.",
+              "type": "integer",
+              "gt": 0
             }
           },
           {
             "namespaceuri": {
-              "type": "integer",
               "required": false,
-              "gt": 0,
               "default": 1024,
-              "description": "Maximum size of the namespace URI. This value is required if parsing is namespace-aware."
+              "description": "Maximum size of the namespace URI. This value is required if parsing is namespace-aware.",
+              "type": "integer",
+              "gt": 0
             }
           },
           {
             "attribute": {
-              "type": "integer",
               "required": true,
-              "gt": 0,
               "default": 1048576,
-              "description": "Maximum size of the attribute value."
+              "description": "Maximum size of the attribute value.",
+              "type": "integer",
+              "gt": 0
             }
           },
           {
             "text": {
-              "type": "integer",
               "required": true,
-              "gt": 0,
               "default": 1048576,
-              "description": "Maximum text inside tags (counted over all adjacent text/CDATA elements combined)."
+              "description": "Maximum text inside tags (counted over all adjacent text/CDATA elements combined).",
+              "type": "integer",
+              "gt": 0
             }
           },
           {
             "pitarget": {
-              "type": "integer",
               "required": true,
-              "gt": 0,
               "default": 1024,
-              "description": "Maximum size of processing instruction targets."
+              "description": "Maximum size of processing instruction targets.",
+              "type": "integer",
+              "gt": 0
             }
           },
           {
             "pidata": {
-              "type": "integer",
               "required": true,
-              "gt": 0,
               "default": 1024,
-              "description": "Maximum size of processing instruction data."
+              "description": "Maximum size of processing instruction data.",
+              "type": "integer",
+              "gt": 0
             }
           },
           {
             "entityname": {
-              "type": "integer",
               "required": true,
-              "gt": 0,
               "default": 1024,
-              "description": "Maximum size of entity names in EntityDecl."
+              "description": "Maximum size of entity names in EntityDecl.",
+              "type": "integer",
+              "gt": 0
             }
           },
           {
             "entity": {
-              "type": "integer",
               "required": true,
-              "gt": 0,
               "default": 1024,
-              "description": "Maximum size of entity values in EntityDecl."
+              "description": "Maximum size of entity values in EntityDecl.",
+              "type": "integer",
+              "gt": 0
             }
           },
           {
             "entityproperty": {
-              "type": "integer",
               "required": true,
-              "gt": 0,
               "default": 1024,
-              "description": "Maximum size of systemId, publicId, or notationName in EntityDecl."
+              "description": "Maximum size of systemId, publicId, or notationName in EntityDecl.",
+              "type": "integer",
+              "gt": 0
             }
           },
           {
             "bla_max_amplification": {
-              "type": "number",
               "required": true,
+              "type": "number",
               "gt": 1,
               "default": 100,
               "description": "Sets the maximum allowed amplification. This protects against the Billion Laughs Attack."
@@ -243,51 +283,11 @@
           },
           {
             "bla_threshold": {
-              "type": "integer",
               "required": true,
-              "gt": 1024,
               "default": 8388608,
+              "gt": 1024,
+              "type": "integer",
               "description": "Sets the threshold after which the protection starts. This protects against the Billion Laughs Attack."
-            }
-          }
-        ],
-        "type": "record",
-        "required": true,
-        "entity_checks": [
-          {
-            "conditional": {
-              "then_field": "max_namespaces",
-              "if_field": "namespace_aware",
-              "then_match": {
-                "required": true
-              },
-              "if_match": {
-                "eq": true
-              }
-            }
-          },
-          {
-            "conditional": {
-              "then_field": "prefix",
-              "if_field": "namespace_aware",
-              "then_match": {
-                "required": true
-              },
-              "if_match": {
-                "eq": true
-              }
-            }
-          },
-          {
-            "conditional": {
-              "then_field": "namespaceuri",
-              "if_field": "namespace_aware",
-              "then_match": {
-                "required": true
-              },
-              "if_match": {
-                "eq": true
-              }
             }
           }
         ]

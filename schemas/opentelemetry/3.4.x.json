@@ -2,7 +2,13 @@
   "fields": [
     {
       "protocols": {
-        "description": "A set of strings representing HTTP protocols.",
+        "required": true,
+        "default": [
+          "grpc",
+          "grpcs",
+          "http",
+          "https"
+        ],
         "elements": {
           "type": "string",
           "one_of": [
@@ -12,26 +18,21 @@
             "https"
           ]
         },
-        "default": [
-          "grpc",
-          "grpcs",
-          "http",
-          "https"
-        ],
-        "required": true,
-        "type": "set"
+        "type": "set",
+        "description": "A set of strings representing HTTP protocols."
       }
     },
     {
       "consumer_group": {
-        "description": "Custom type for representing a foreign key with a null value allowed.",
-        "eq": null,
+        "type": "foreign",
         "reference": "consumer_groups",
-        "type": "foreign"
+        "eq": null,
+        "description": "Custom type for representing a foreign key with a null value allowed."
       }
     },
     {
       "config": {
+        "required": true,
         "entity_checks": [
           {
             "custom_entity_check": {
@@ -42,37 +43,38 @@
             }
           }
         ],
+        "type": "record",
         "fields": [
           {
             "endpoint": {
               "description": "A string representing a URL, such as https://example.com/path/to/resource?q=search.",
-              "referenceable": true,
+              "required": true,
               "type": "string",
-              "required": true
+              "referenceable": true
             }
           },
           {
             "headers": {
-              "description": "The custom headers to be added in the HTTP request sent to the OTLP server. This setting is useful for adding the authentication headers (token) for the APM backend.",
-              "keys": {
-                "description": "A string representing an HTTP header name.",
-                "type": "string"
-              },
-              "type": "map",
               "values": {
                 "type": "string",
                 "referenceable": true
+              },
+              "description": "The custom headers to be added in the HTTP request sent to the OTLP server. This setting is useful for adding the authentication headers (token) for the APM backend.",
+              "type": "map",
+              "keys": {
+                "type": "string",
+                "description": "A string representing an HTTP header name."
               }
             }
           },
           {
             "resource_attributes": {
-              "keys": {
+              "values": {
                 "type": "string",
                 "required": true
               },
               "type": "map",
-              "values": {
+              "keys": {
                 "type": "string",
                 "required": true
               }
@@ -83,37 +85,39 @@
               "default": {
                 "max_batch_size": 200
               },
+              "required": true,
+              "type": "record",
               "fields": [
                 {
                   "max_batch_size": {
-                    "default": 1,
                     "between": [
                       1,
                       1000000
                     ],
                     "type": "integer",
+                    "default": 1,
                     "description": "Maximum number of entries that can be processed at a time."
                   }
                 },
                 {
                   "max_coalescing_delay": {
-                    "default": 1,
                     "between": [
                       0,
                       3600
                     ],
                     "type": "number",
+                    "default": 1,
                     "description": "Maximum number of (fractional) seconds to elapse after the first entry was queued before the queue starts calling the handler."
                   }
                 },
                 {
                   "max_entries": {
-                    "default": 10000,
                     "between": [
                       1,
                       1000000
                     ],
                     "type": "integer",
+                    "default": 10000,
                     "description": "Maximum number of entries that can be waiting on the queue."
                   }
                 },
@@ -125,80 +129,78 @@
                 },
                 {
                   "max_retry_time": {
-                    "default": 60,
                     "type": "number",
+                    "default": 60,
                     "description": "Time in seconds before the queue gives up calling a failed handler for a batch."
                   }
                 },
                 {
                   "initial_retry_delay": {
-                    "default": 0.01,
                     "between": [
                       0.001,
                       1000000
                     ],
                     "type": "number",
+                    "default": 0.01,
                     "description": "Time in seconds before the initial retry is made for a failing batch."
                   }
                 },
                 {
                   "max_retry_delay": {
                     "default": 60,
-                    "description": "Maximum time in seconds between retries, caps exponential backoff.",
                     "type": "number",
                     "between": [
                       0.001,
                       1000000
-                    ]
+                    ],
+                    "description": "Maximum time in seconds between retries, caps exponential backoff."
                   }
                 }
-              ],
-              "type": "record",
-              "required": true
+              ]
             }
           },
           {
             "batch_span_count": {
-              "description": "The number of spans to be sent in a single batch.",
-              "type": "integer"
+              "type": "integer",
+              "description": "The number of spans to be sent in a single batch."
             }
           },
           {
             "batch_flush_delay": {
-              "description": "The delay, in seconds, between two consecutive batches.",
-              "type": "integer"
+              "type": "integer",
+              "description": "The delay, in seconds, between two consecutive batches."
             }
           },
           {
             "connect_timeout": {
+              "type": "integer",
               "default": 1000,
               "between": [
                 0,
                 2147483646
               ],
-              "type": "integer",
               "description": "An integer representing a timeout in milliseconds. Must be between 0 and 2^31-2."
             }
           },
           {
             "send_timeout": {
+              "type": "integer",
               "default": 5000,
               "between": [
                 0,
                 2147483646
               ],
-              "type": "integer",
               "description": "An integer representing a timeout in milliseconds. Must be between 0 and 2^31-2."
             }
           },
           {
             "read_timeout": {
+              "type": "integer",
               "default": 5000,
               "between": [
                 0,
                 2147483646
               ],
-              "type": "integer",
               "description": "An integer representing a timeout in milliseconds. Must be between 0 and 2^31-2."
             }
           },
@@ -209,9 +211,9 @@
           },
           {
             "header_type": {
-              "default": "preserve",
-              "required": false,
               "type": "string",
+              "required": false,
+              "default": "preserve",
               "one_of": [
                 "preserve",
                 "ignore",
@@ -225,9 +227,7 @@
               ]
             }
           }
-        ],
-        "type": "record",
-        "required": true
+        ]
       }
     }
   ],
