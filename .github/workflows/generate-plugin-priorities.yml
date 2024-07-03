@@ -1,0 +1,58 @@
+name: Generate Plugin Priorities
+on:
+  workflow_dispatch:
+    inputs:
+      kong-image-tag:
+        required: true
+        type: string
+        description: |
+          Kong Docker image tag to run, 3.6.1.4.
+      version:
+        required: true
+        type: string
+        description: |
+          Kong Gateway release, e.x. 3.4.x.
+          Used by some commands for storing files in the corresponding folder.
+      kong-edition:
+        required: true
+        type: choice
+        options:
+          - oss
+          - ee
+        description: Whether the API running is the OSS or Enterprise version
+
+jobs:
+  generate-plugin-priorities:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repo
+        uses: actions/checkout@v4
+      - name: Install dependencies
+        uses: ./.github/reusable-steps/install-deps
+      - name: Run Kong EE
+        if: ${{ github.event.inputs.kong-edition == 'ee' }}
+        uses: ./.github/reusable-steps/run-kong-ee
+        with:
+          op-token: ${{ secrets.OP_SERVICE_ACCOUNT_TOKEN }}
+          kong-image-tag: ${{ github.event.inputs.kong-image-tag }}
+      - name: Run Kong OSS
+        if: ${{ github.event.inputs.kong-edition == 'oss' }}
+        uses: ./.github/reusable-steps/run-kong-oss
+        with:
+          kong-image-tag: ${{ github.event.inputs.kong-image-tag }}
+      - name: Run generate_plugin_priorities
+        run: |
+          bundle exec ./plugins generate_plugin_priorities --type=${{ github.event.inputs.kong-edition }} --version=${{ github.event.inputs.version }} --verbose
+      - name: Create Pull Request
+        uses: peter-evans/create-pull-request@v6
+        with:
+          token: ${{ secrets.PAT }}
+          title: "Plugin Priorities for ${{ github.event.inputs.version }}"
+          branch: plugin-priorities
+          commit-message: "Plugin Priorities for ${{ github.event.inputs.version }}"
+          delete-branch: true
+          add-paths: |
+            ./data/priorities/*
+      - name: Cleanup
+        if: always()
+        uses: ./.github/reusable-steps/cleanup
