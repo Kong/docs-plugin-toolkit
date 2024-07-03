@@ -51,7 +51,7 @@ Validates plugin examples config against the plugin schema using the [Admin API]
 
 | Options | Descriptions  |
 |--------------------------- |-----|
-| `version` | **Required**. Kong Gateway release version, e.g. `_3.3.x`. |
+| `version` | **Required**. Kong Gateway release version, e.g. `3.3.x`. |
 | `plugins` | **Required**. Space separated list of plugins to use, .e.g. `acme acl`. |
 | `host` | Name of the host in which the API is running. Default: `localhost`.  |
 | `port` | Port in which the API is listening. Default: `8001`. |
@@ -59,7 +59,7 @@ Validates plugin examples config against the plugin schema using the [Admin API]
 
 For example, running:
 ```
-./plugins validate_examples --version _3.4.x --plugins acme --verbose
+./plugins validate_examples --version 3.4.x --plugins acme --verbose
 ```
 reads the file `./examples/acme/_3.4.x.yaml` and validates it against the schema using the API.
 
@@ -134,7 +134,7 @@ copies the previous schema (assuming the previous version is `3.4.x`,  it copies
 Whenever a new version of Kong Gateway is released, we need run the following commands in order. For all of them, specify all the plugins `--plugins $(ls ./schemas)`
 
 1. Download Schemas - specify the new version `x.x.x`
-1. Copy Examples - specify the previous version `_x.x.y` of the example that gets copied
-1. Validate Examples  - specify the new version `_x.x.x`
+1. Copy Examples - specify the previous version `x.x.y` of the example that gets copied
+1. Validate Examples  - specify the new version `x.x.x`
 1. Generate Referenceable Fields List - specify the new version `x.x.x`
 1. Generate Priorities List - for `oss` and `ee` and specify the new version `x.x.x`

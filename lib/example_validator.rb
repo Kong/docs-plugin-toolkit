@@ -50,6 +50,6 @@ class ExampleValidator < Action
   end
 
   def file_path
-    File.join(@options[:source], @plugin, "#{@options[:version]}.yaml")
+    File.join(@options[:source], @plugin, "_#{@options[:version]}.yaml")
   end
 end
