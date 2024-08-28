@@ -1,368 +1,4 @@
 {
-  "fields": [
-    {
-      "protocols": {
-        "type": "set",
-        "required": true,
-        "elements": {
-          "type": "string",
-          "one_of": [
-            "grpc",
-            "grpcs",
-            "http",
-            "https"
-          ]
-        },
-        "description": "A set of strings representing HTTP protocols.",
-        "default": [
-          "grpc",
-          "grpcs",
-          "http",
-          "https"
-        ]
-      }
-    },
-    {
-      "config": {
-        "fields": [
-          {
-            "second": {
-              "description": "The number of HTTP requests that can be made per second.",
-              "type": "number",
-              "gt": 0
-            }
-          },
-          {
-            "minute": {
-              "description": "The number of HTTP requests that can be made per minute.",
-              "type": "number",
-              "gt": 0
-            }
-          },
-          {
-            "hour": {
-              "description": "The number of HTTP requests that can be made per hour.",
-              "type": "number",
-              "gt": 0
-            }
-          },
-          {
-            "day": {
-              "description": "The number of HTTP requests that can be made per day.",
-              "type": "number",
-              "gt": 0
-            }
-          },
-          {
-            "month": {
-              "description": "The number of HTTP requests that can be made per month.",
-              "type": "number",
-              "gt": 0
-            }
-          },
-          {
-            "year": {
-              "description": "The number of HTTP requests that can be made per year.",
-              "type": "number",
-              "gt": 0
-            }
-          },
-          {
-            "limit_by": {
-              "default": "consumer",
-              "description": "The entity that is used when aggregating the limits.",
-              "type": "string",
-              "one_of": [
-                "consumer",
-                "credential",
-                "ip",
-                "service",
-                "header",
-                "path",
-                "consumer-group"
-              ]
-            }
-          },
-          {
-            "header_name": {
-              "type": "string",
-              "description": "A string representing an HTTP header name."
-            }
-          },
-          {
-            "path": {
-              "match_none": [
-                {
-                  "pattern": "//",
-                  "err": "must not have empty segments"
-                }
-              ],
-              "starts_with": "/",
-              "description": "A string representing a URL path, such as /path/to/resource. Must start with a forward slash (/) and must not contain empty segments (i.e., two consecutive forward slashes).",
-              "type": "string"
-            }
-          },
-          {
-            "policy": {
-              "default": "local",
-              "description": "The rate-limiting policies to use for retrieving and incrementing the limits.",
-              "len_min": 0,
-              "type": "string",
-              "one_of": [
-                "local",
-                "cluster",
-                "redis"
-              ]
-            }
-          },
-          {
-            "fault_tolerant": {
-              "required": true,
-              "description": "A boolean value that determines if the requests should be proxied even if Kong has troubles connecting a third-party data store. If `true`, requests will be proxied anyway, effectively disabling the rate-limiting function until the data store is working again. If `false`, then the clients will see `500` errors.",
-              "type": "boolean",
-              "default": true
-            }
-          },
-          {
-            "redis": {
-              "fields": [
-                {
-                  "host": {
-                    "type": "string",
-                    "description": "A string representing a host name, such as example.com."
-                  }
-                },
-                {
-                  "port": {
-                    "default": 6379,
-                    "description": "An integer representing a port number between 0 and 65535, inclusive.",
-                    "type": "integer",
-                    "between": [
-                      0,
-                      65535
-                    ]
-                  }
-                },
-                {
-                  "timeout": {
-                    "default": 2000,
-                    "description": "An integer representing a timeout in milliseconds. Must be between 0 and 2^31-2.",
-                    "type": "integer",
-                    "between": [
-                      0,
-                      2147483646
-                    ]
-                  }
-                },
-                {
-                  "username": {
-                    "type": "string",
-                    "referenceable": true,
-                    "description": "Username to use for Redis connections. If undefined, ACL authentication won't be performed. This requires Redis v6.0.0+. To be compatible with Redis v5.x.y, you can set it to `default`."
-                  }
-                },
-                {
-                  "password": {
-                    "encrypted": true,
-                    "referenceable": true,
-                    "type": "string",
-                    "description": "Password to use for Redis connections. If undefined, no AUTH commands are sent to Redis.",
-                    "len_min": 0
-                  }
-                },
-                {
-                  "database": {
-                    "description": "Database to use for the Redis connection when using the `redis` strategy",
-                    "type": "integer",
-                    "default": 0
-                  }
-                },
-                {
-                  "ssl": {
-                    "required": false,
-                    "description": "If set to true, uses SSL to connect to Redis.",
-                    "type": "boolean",
-                    "default": false
-                  }
-                },
-                {
-                  "ssl_verify": {
-                    "required": false,
-                    "description": "If set to true, verifies the validity of the server SSL certificate. If setting this parameter, also configure `lua_ssl_trusted_certificate` in `kong.conf` to specify the CA (or server) certificate used by your Redis server. You may also need to configure `lua_ssl_verify_depth` accordingly.",
-                    "type": "boolean",
-                    "default": false
-                  }
-                },
-                {
-                  "server_name": {
-                    "required": false,
-                    "description": "A string representing an SNI (server name indication) value for TLS.",
-                    "type": "string"
-                  }
-                }
-              ],
-              "description": "Redis configuration",
-              "type": "record",
-              "required": true
-            }
-          },
-          {
-            "hide_client_headers": {
-              "required": true,
-              "description": "Optionally hide informative response headers.",
-              "type": "boolean",
-              "default": false
-            }
-          },
-          {
-            "error_code": {
-              "default": 429,
-              "description": "Set a custom error code to return when the rate limit is exceeded.",
-              "type": "number",
-              "gt": 0
-            }
-          },
-          {
-            "error_message": {
-              "description": "Set a custom error message to return when the rate limit is exceeded.",
-              "type": "string",
-              "default": "API rate limit exceeded"
-            }
-          },
-          {
-            "sync_rate": {
-              "required": true,
-              "description": "How often to sync counter data to the central data store. A value of -1 results in synchronous behavior.",
-              "type": "number",
-              "default": -1
-            }
-          }
-        ],
-        "required": true,
-        "shorthand_fields": [
-          {
-            "redis_host": {
-              "deprecation": {
-                "removal_in_version": "4.0",
-                "message": "rate-limiting: config.redis_host is deprecated, please use config.redis.host instead"
-              },
-              "type": "string",
-              "translate_backwards": [
-                "redis",
-                "host"
-              ]
-            }
-          },
-          {
-            "redis_port": {
-              "deprecation": {
-                "removal_in_version": "4.0",
-                "message": "rate-limiting: config.redis_port is deprecated, please use config.redis.port instead"
-              },
-              "type": "integer",
-              "translate_backwards": [
-                "redis",
-                "port"
-              ]
-            }
-          },
-          {
-            "redis_password": {
-              "len_min": 0,
-              "deprecation": {
-                "removal_in_version": "4.0",
-                "message": "rate-limiting: config.redis_password is deprecated, please use config.redis.password instead"
-              },
-              "type": "string",
-              "translate_backwards": [
-                "redis",
-                "password"
-              ]
-            }
-          },
-          {
-            "redis_username": {
-              "deprecation": {
-                "removal_in_version": "4.0",
-                "message": "rate-limiting: config.redis_username is deprecated, please use config.redis.username instead"
-              },
-              "type": "string",
-              "translate_backwards": [
-                "redis",
-                "username"
-              ]
-            }
-          },
-          {
-            "redis_ssl": {
-              "deprecation": {
-                "removal_in_version": "4.0",
-                "message": "rate-limiting: config.redis_ssl is deprecated, please use config.redis.ssl instead"
-              },
-              "type": "boolean",
-              "translate_backwards": [
-                "redis",
-                "ssl"
-              ]
-            }
-          },
-          {
-            "redis_ssl_verify": {
-              "deprecation": {
-                "removal_in_version": "4.0",
-                "message": "rate-limiting: config.redis_ssl_verify is deprecated, please use config.redis.ssl_verify instead"
-              },
-              "type": "boolean",
-              "translate_backwards": [
-                "redis",
-                "ssl_verify"
-              ]
-            }
-          },
-          {
-            "redis_server_name": {
-              "deprecation": {
-                "removal_in_version": "4.0",
-                "message": "rate-limiting: config.redis_server_name is deprecated, please use config.redis.server_name instead"
-              },
-              "type": "string",
-              "translate_backwards": [
-                "redis",
-                "server_name"
-              ]
-            }
-          },
-          {
-            "redis_timeout": {
-              "deprecation": {
-                "removal_in_version": "4.0",
-                "message": "rate-limiting: config.redis_timeout is deprecated, please use config.redis.timeout instead"
-              },
-              "type": "integer",
-              "translate_backwards": [
-                "redis",
-                "timeout"
-              ]
-            }
-          },
-          {
-            "redis_database": {
-              "deprecation": {
-                "removal_in_version": "4.0",
-                "message": "rate-limiting: config.redis_database is deprecated, please use config.redis.database instead"
-              },
-              "type": "integer",
-              "translate_backwards": [
-                "redis",
-                "database"
-              ]
-            }
-          }
-        ],
-        "type": "record"
-      }
-    }
-  ],
   "entity_checks": [
     {
       "at_least_one_of": [
@@ -376,62 +12,426 @@
     },
     {
       "conditional": {
-        "if_field": "config.policy",
-        "if_match": {
-          "eq": "redis"
-        },
         "then_field": "config.redis.host",
+        "if_match": {
+          "eq": "redis"
+        },
         "then_match": {
           "required": true
-        }
+        },
+        "if_field": "config.policy"
       }
     },
     {
       "conditional": {
-        "if_field": "config.policy",
-        "if_match": {
-          "eq": "redis"
-        },
         "then_field": "config.redis.port",
-        "then_match": {
-          "required": true
-        }
-      }
-    },
-    {
-      "conditional": {
-        "if_field": "config.policy",
         "if_match": {
           "eq": "redis"
         },
-        "then_field": "config.redis.timeout",
         "then_match": {
           "required": true
-        }
+        },
+        "if_field": "config.policy"
       }
     },
     {
       "conditional": {
-        "if_field": "config.limit_by",
+        "then_field": "config.redis.timeout",
+        "if_match": {
+          "eq": "redis"
+        },
+        "then_match": {
+          "required": true
+        },
+        "if_field": "config.policy"
+      }
+    },
+    {
+      "conditional": {
+        "then_field": "config.header_name",
         "if_match": {
           "eq": "header"
         },
-        "then_field": "config.header_name",
         "then_match": {
           "required": true
-        }
+        },
+        "if_field": "config.limit_by"
       }
     },
     {
       "conditional": {
-        "if_field": "config.limit_by",
+        "then_field": "config.path",
         "if_match": {
           "eq": "path"
         },
-        "then_field": "config.path",
         "then_match": {
           "required": true
-        }
+        },
+        "if_field": "config.limit_by"
+      }
+    }
+  ],
+  "fields": [
+    {
+      "protocols": {
+        "required": true,
+        "elements": {
+          "type": "string",
+          "one_of": [
+            "grpc",
+            "grpcs",
+            "http",
+            "https"
+          ]
+        },
+        "type": "set",
+        "default": [
+          "grpc",
+          "grpcs",
+          "http",
+          "https"
+        ],
+        "description": "A set of strings representing HTTP protocols."
+      }
+    },
+    {
+      "config": {
+        "required": true,
+        "shorthand_fields": [
+          {
+            "redis_host": {
+              "deprecation": {
+                "message": "rate-limiting: config.redis_host is deprecated, please use config.redis.host instead",
+                "removal_in_version": "4.0"
+              },
+              "translate_backwards": [
+                "redis",
+                "host"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "redis_port": {
+              "deprecation": {
+                "message": "rate-limiting: config.redis_port is deprecated, please use config.redis.port instead",
+                "removal_in_version": "4.0"
+              },
+              "translate_backwards": [
+                "redis",
+                "port"
+              ],
+              "type": "integer"
+            }
+          },
+          {
+            "redis_password": {
+              "deprecation": {
+                "message": "rate-limiting: config.redis_password is deprecated, please use config.redis.password instead",
+                "removal_in_version": "4.0"
+              },
+              "len_min": 0,
+              "translate_backwards": [
+                "redis",
+                "password"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "redis_username": {
+              "deprecation": {
+                "message": "rate-limiting: config.redis_username is deprecated, please use config.redis.username instead",
+                "removal_in_version": "4.0"
+              },
+              "translate_backwards": [
+                "redis",
+                "username"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "redis_ssl": {
+              "deprecation": {
+                "message": "rate-limiting: config.redis_ssl is deprecated, please use config.redis.ssl instead",
+                "removal_in_version": "4.0"
+              },
+              "translate_backwards": [
+                "redis",
+                "ssl"
+              ],
+              "type": "boolean"
+            }
+          },
+          {
+            "redis_ssl_verify": {
+              "deprecation": {
+                "message": "rate-limiting: config.redis_ssl_verify is deprecated, please use config.redis.ssl_verify instead",
+                "removal_in_version": "4.0"
+              },
+              "translate_backwards": [
+                "redis",
+                "ssl_verify"
+              ],
+              "type": "boolean"
+            }
+          },
+          {
+            "redis_server_name": {
+              "deprecation": {
+                "message": "rate-limiting: config.redis_server_name is deprecated, please use config.redis.server_name instead",
+                "removal_in_version": "4.0"
+              },
+              "translate_backwards": [
+                "redis",
+                "server_name"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "redis_timeout": {
+              "deprecation": {
+                "message": "rate-limiting: config.redis_timeout is deprecated, please use config.redis.timeout instead",
+                "removal_in_version": "4.0"
+              },
+              "translate_backwards": [
+                "redis",
+                "timeout"
+              ],
+              "type": "integer"
+            }
+          },
+          {
+            "redis_database": {
+              "deprecation": {
+                "message": "rate-limiting: config.redis_database is deprecated, please use config.redis.database instead",
+                "removal_in_version": "4.0"
+              },
+              "translate_backwards": [
+                "redis",
+                "database"
+              ],
+              "type": "integer"
+            }
+          }
+        ],
+        "fields": [
+          {
+            "second": {
+              "gt": 0,
+              "type": "number",
+              "description": "The number of HTTP requests that can be made per second."
+            }
+          },
+          {
+            "minute": {
+              "gt": 0,
+              "type": "number",
+              "description": "The number of HTTP requests that can be made per minute."
+            }
+          },
+          {
+            "hour": {
+              "gt": 0,
+              "type": "number",
+              "description": "The number of HTTP requests that can be made per hour."
+            }
+          },
+          {
+            "day": {
+              "gt": 0,
+              "type": "number",
+              "description": "The number of HTTP requests that can be made per day."
+            }
+          },
+          {
+            "month": {
+              "gt": 0,
+              "type": "number",
+              "description": "The number of HTTP requests that can be made per month."
+            }
+          },
+          {
+            "year": {
+              "gt": 0,
+              "type": "number",
+              "description": "The number of HTTP requests that can be made per year."
+            }
+          },
+          {
+            "limit_by": {
+              "type": "string",
+              "default": "consumer",
+              "one_of": [
+                "consumer",
+                "credential",
+                "ip",
+                "service",
+                "header",
+                "path",
+                "consumer-group"
+              ],
+              "description": "The entity that is used when aggregating the limits."
+            }
+          },
+          {
+            "header_name": {
+              "type": "string",
+              "description": "A string representing an HTTP header name."
+            }
+          },
+          {
+            "path": {
+              "starts_with": "/",
+              "description": "A string representing a URL path, such as /path/to/resource. Must start with a forward slash (/) and must not contain empty segments (i.e., two consecutive forward slashes).",
+              "match_none": [
+                {
+                  "pattern": "//",
+                  "err": "must not have empty segments"
+                }
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "policy": {
+              "type": "string",
+              "default": "local",
+              "one_of": [
+                "local",
+                "cluster",
+                "redis"
+              ],
+              "len_min": 0,
+              "description": "The rate-limiting policies to use for retrieving and incrementing the limits."
+            }
+          },
+          {
+            "fault_tolerant": {
+              "required": true,
+              "default": true,
+              "type": "boolean",
+              "description": "A boolean value that determines if the requests should be proxied even if Kong has troubles connecting a third-party data store. If `true`, requests will be proxied anyway, effectively disabling the rate-limiting function until the data store is working again. If `false`, then the clients will see `500` errors."
+            }
+          },
+          {
+            "redis": {
+              "fields": [
+                {
+                  "host": {
+                    "type": "string",
+                    "description": "A string representing a host name, such as example.com."
+                  }
+                },
+                {
+                  "port": {
+                    "between": [
+                      0,
+                      65535
+                    ],
+                    "default": 6379,
+                    "description": "An integer representing a port number between 0 and 65535, inclusive.",
+                    "type": "integer"
+                  }
+                },
+                {
+                  "timeout": {
+                    "between": [
+                      0,
+                      2147483646
+                    ],
+                    "default": 2000,
+                    "description": "An integer representing a timeout in milliseconds. Must be between 0 and 2^31-2.",
+                    "type": "integer"
+                  }
+                },
+                {
+                  "username": {
+                    "referenceable": true,
+                    "type": "string",
+                    "description": "Username to use for Redis connections. If undefined, ACL authentication won't be performed. This requires Redis v6.0.0+. To be compatible with Redis v5.x.y, you can set it to `default`."
+                  }
+                },
+                {
+                  "password": {
+                    "referenceable": true,
+                    "len_min": 0,
+                    "type": "string",
+                    "encrypted": true,
+                    "description": "Password to use for Redis connections. If undefined, no AUTH commands are sent to Redis."
+                  }
+                },
+                {
+                  "database": {
+                    "default": 0,
+                    "type": "integer",
+                    "description": "Database to use for the Redis connection when using the `redis` strategy"
+                  }
+                },
+                {
+                  "ssl": {
+                    "required": false,
+                    "default": false,
+                    "type": "boolean",
+                    "description": "If set to true, uses SSL to connect to Redis."
+                  }
+                },
+                {
+                  "ssl_verify": {
+                    "required": false,
+                    "default": false,
+                    "type": "boolean",
+                    "description": "If set to true, verifies the validity of the server SSL certificate. If setting this parameter, also configure `lua_ssl_trusted_certificate` in `kong.conf` to specify the CA (or server) certificate used by your Redis server. You may also need to configure `lua_ssl_verify_depth` accordingly."
+                  }
+                },
+                {
+                  "server_name": {
+                    "required": false,
+                    "description": "A string representing an SNI (server name indication) value for TLS.",
+                    "type": "string"
+                  }
+                }
+              ],
+              "description": "Redis configuration",
+              "required": true,
+              "type": "record"
+            }
+          },
+          {
+            "hide_client_headers": {
+              "required": true,
+              "default": false,
+              "type": "boolean",
+              "description": "Optionally hide informative response headers."
+            }
+          },
+          {
+            "error_code": {
+              "gt": 0,
+              "default": 429,
+              "type": "number",
+              "description": "Set a custom error code to return when the rate limit is exceeded."
+            }
+          },
+          {
+            "error_message": {
+              "default": "API rate limit exceeded",
+              "type": "string",
+              "description": "Set a custom error message to return when the rate limit is exceeded."
+            }
+          },
+          {
+            "sync_rate": {
+              "required": true,
+              "default": -1,
+              "type": "number",
+              "description": "How often to sync counter data to the central data store. A value of -1 results in synchronous behavior."
+            }
+          }
+        ],
+        "type": "record"
       }
     }
   ]

@@ -5,14 +5,7 @@
   "fields": [
     {
       "protocols": {
-        "description": "A set of strings representing HTTP protocols.",
-        "default": [
-          "grpc",
-          "grpcs",
-          "http",
-          "https"
-        ],
-        "type": "set",
+        "required": true,
         "elements": {
           "type": "string",
           "one_of": [
@@ -22,15 +15,22 @@
             "https"
           ]
         },
-        "required": true
+        "type": "set",
+        "default": [
+          "grpc",
+          "grpcs",
+          "http",
+          "https"
+        ],
+        "description": "A set of strings representing HTTP protocols."
       }
     },
     {
       "consumer_group": {
-        "description": "Custom type for representing a foreign key with a null value allowed.",
-        "reference": "consumer_groups",
         "type": "foreign",
-        "eq": null
+        "reference": "consumer_groups",
+        "eq": null,
+        "description": "Custom type for representing a foreign key with a null value allowed."
       }
     },
     {
@@ -39,51 +39,51 @@
           {
             "bootstrap_servers": {
               "description": "Set of bootstrap brokers in a `{host: host, port: port}` list format.",
-              "type": "set",
               "elements": {
-                "type": "record",
                 "fields": [
                   {
                     "host": {
                       "required": true,
-                      "type": "string",
-                      "description": "A string representing a host name, such as example.com."
+                      "description": "A string representing a host name, such as example.com.",
+                      "type": "string"
                     }
                   },
                   {
                     "port": {
                       "required": true,
+                      "description": "An integer representing a port number between 0 and 65535, inclusive.",
                       "between": [
                         0,
                         65535
                       ],
-                      "type": "integer",
-                      "description": "An integer representing a port number between 0 and 65535, inclusive."
+                      "type": "integer"
                     }
                   }
-                ]
-              }
+                ],
+                "type": "record"
+              },
+              "type": "set"
             }
           },
           {
             "topic": {
-              "description": "The Kafka topic to publish to.",
+              "required": true,
               "type": "string",
-              "required": true
+              "description": "The Kafka topic to publish to."
             }
           },
           {
             "timeout": {
-              "description": "Socket timeout in milliseconds.",
+              "default": 10000,
               "type": "integer",
-              "default": 10000
+              "description": "Socket timeout in milliseconds."
             }
           },
           {
             "keepalive": {
-              "description": "Keepalive timeout in milliseconds.",
+              "default": 60000,
               "type": "integer",
-              "default": 60000
+              "description": "Keepalive timeout in milliseconds."
             }
           },
           {
@@ -94,145 +94,146 @@
           },
           {
             "cluster_api_key": {
-              "description": "Username/Apikey for SASL authentication.",
-              "encrypted": true,
               "required": true,
+              "referenceable": true,
               "type": "string",
-              "referenceable": true
+              "encrypted": true,
+              "description": "Username/Apikey for SASL authentication."
             }
           },
           {
             "cluster_api_secret": {
-              "description": "Password/ApiSecret for SASL authentication.",
-              "encrypted": true,
               "required": true,
+              "referenceable": true,
               "type": "string",
-              "referenceable": true
+              "encrypted": true,
+              "description": "Password/ApiSecret for SASL authentication."
             }
           },
           {
             "confluent_cloud_api_key": {
-              "description": "Apikey for authentication with Confluent Cloud. This allows for management tasks such as creating topics, ACLs, etc.",
-              "encrypted": true,
               "required": false,
+              "referenceable": true,
               "type": "string",
-              "referenceable": true
+              "encrypted": true,
+              "description": "Apikey for authentication with Confluent Cloud. This allows for management tasks such as creating topics, ACLs, etc."
             }
           },
           {
             "confluent_cloud_api_secret": {
-              "description": "The corresponding secret for the Confluent Cloud API key.",
-              "encrypted": true,
               "required": false,
+              "referenceable": true,
               "type": "string",
-              "referenceable": true
+              "encrypted": true,
+              "description": "The corresponding secret for the Confluent Cloud API key."
             }
           },
           {
             "forward_method": {
-              "description": "Include the request method in the message. At least one of these must be true: `forward_method`, `forward_uri`, `forward_headers`, `forward_body`.",
+              "default": false,
               "type": "boolean",
-              "default": false
+              "description": "Include the request method in the message. At least one of these must be true: `forward_method`, `forward_uri`, `forward_headers`, `forward_body`."
             }
           },
           {
             "forward_uri": {
-              "description": "Include the request URI and URI arguments (as in, query arguments) in the message. At least one of these must be true: `forward_method`, `forward_uri`, `forward_headers`, `forward_body`.",
+              "default": false,
               "type": "boolean",
-              "default": false
+              "description": "Include the request URI and URI arguments (as in, query arguments) in the message. At least one of these must be true: `forward_method`, `forward_uri`, `forward_headers`, `forward_body`."
             }
           },
           {
             "forward_headers": {
-              "description": "Include the request headers in the message. At least one of these must be true: `forward_method`, `forward_uri`, `forward_headers`, `forward_body`.",
+              "default": false,
               "type": "boolean",
-              "default": false
+              "description": "Include the request headers in the message. At least one of these must be true: `forward_method`, `forward_uri`, `forward_headers`, `forward_body`."
             }
           },
           {
             "forward_body": {
-              "description": "Include the request body in the message. At least one of these must be true: `forward_method`, `forward_uri`, `forward_headers`, `forward_body`.",
+              "default": true,
               "type": "boolean",
-              "default": true
+              "description": "Include the request body in the message. At least one of these must be true: `forward_method`, `forward_uri`, `forward_headers`, `forward_body`."
             }
           },
           {
             "cluster_name": {
-              "description": "An identifier for the Kafka cluster. By default, this field generates a random string. You can also set your own custom cluster identifier.  If more than one Kafka plugin is configured without a `cluster_name` (that is, if the default autogenerated value is removed), these plugins will use the same producer, and by extension, the same cluster. Logs will be sent to the leader of the cluster.",
-              "auto": true,
+              "required": false,
               "type": "string",
-              "required": false
+              "description": "An identifier for the Kafka cluster. By default, this field generates a random string. You can also set your own custom cluster identifier.  If more than one Kafka plugin is configured without a `cluster_name` (that is, if the default autogenerated value is removed), these plugins will use the same producer, and by extension, the same cluster. Logs will be sent to the leader of the cluster.",
+              "auto": true
             }
           },
           {
             "producer_request_acks": {
-              "description": "The number of acknowledgments the producer requires the leader to have received before considering a request complete. Allowed values: 0 for no acknowledgments; 1 for only the leader; and -1 for the full ISR (In-Sync Replica set).",
+              "type": "integer",
+              "default": 1,
               "one_of": [
                 -1,
                 0,
                 1
               ],
-              "type": "integer",
-              "default": 1
+              "description": "The number of acknowledgments the producer requires the leader to have received before considering a request complete. Allowed values: 0 for no acknowledgments; 1 for only the leader; and -1 for the full ISR (In-Sync Replica set)."
             }
           },
           {
             "producer_request_timeout": {
-              "description": "Time to wait for a Produce response in milliseconds.",
+              "default": 2000,
               "type": "integer",
-              "default": 2000
+              "description": "Time to wait for a Produce response in milliseconds."
             }
           },
           {
             "producer_request_limits_messages_per_request": {
-              "description": "Maximum number of messages to include into a single producer request.",
+              "default": 200,
               "type": "integer",
-              "default": 200
+              "description": "Maximum number of messages to include into a single producer request."
             }
           },
           {
             "producer_request_limits_bytes_per_request": {
-              "description": "Maximum size of a Produce request in bytes.",
+              "default": 1048576,
               "type": "integer",
-              "default": 1048576
+              "description": "Maximum size of a Produce request in bytes."
             }
           },
           {
             "producer_request_retries_max_attempts": {
-              "description": "Maximum number of retry attempts per single Produce request.",
+              "default": 10,
               "type": "integer",
-              "default": 10
+              "description": "Maximum number of retry attempts per single Produce request."
             }
           },
           {
             "producer_request_retries_backoff_timeout": {
-              "description": "Backoff interval between retry attempts in milliseconds.",
+              "default": 100,
               "type": "integer",
-              "default": 100
+              "description": "Backoff interval between retry attempts in milliseconds."
             }
           },
           {
             "producer_async": {
-              "description": "Flag to enable asynchronous mode.",
+              "default": true,
               "type": "boolean",
-              "default": true
+              "description": "Flag to enable asynchronous mode."
             }
           },
           {
             "producer_async_flush_timeout": {
-              "description": "Maximum time interval in milliseconds between buffer flushes in asynchronous mode.",
+              "default": 1000,
               "type": "integer",
-              "default": 1000
+              "description": "Maximum time interval in milliseconds between buffer flushes in asynchronous mode."
             }
           },
           {
             "producer_async_buffering_limits_messages_in_memory": {
-              "description": "Maximum number of messages that can be buffered in memory in asynchronous mode.",
+              "default": 50000,
               "type": "integer",
-              "default": 50000
+              "description": "Maximum number of messages that can be buffered in memory in asynchronous mode."
             }
           }
         ],
+        "required": true,
         "entity_checks": [
           {
             "custom_entity_check": {
@@ -245,8 +246,7 @@
             }
           }
         ],
-        "type": "record",
-        "required": true
+        "type": "record"
       }
     }
   ]

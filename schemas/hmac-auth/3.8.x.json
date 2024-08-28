@@ -1,16 +1,33 @@
 {
+  "entity_checks": [
+    {
+      "custom_entity_check": {
+        "field_sources": [
+          "config.algorithms"
+        ]
+      }
+    }
+  ],
   "fields": [
     {
       "consumer": {
-        "reference": "consumers",
         "type": "foreign",
-        "description": "Custom type for representing a foreign key with a null value allowed.",
-        "eq": null
+        "reference": "consumers",
+        "eq": null,
+        "description": "Custom type for representing a foreign key with a null value allowed."
       }
     },
     {
       "protocols": {
         "required": true,
+        "default": [
+          "grpc",
+          "grpcs",
+          "http",
+          "https",
+          "ws",
+          "wss"
+        ],
         "elements": {
           "type": "string",
           "one_of": [
@@ -22,23 +39,15 @@
             "wss"
           ]
         },
-        "type": "set",
-        "default": [
-          "grpc",
-          "grpcs",
-          "http",
-          "https",
-          "ws",
-          "wss"
-        ]
+        "type": "set"
       }
     },
     {
       "consumer_group": {
-        "reference": "consumer_groups",
         "type": "foreign",
-        "description": "Custom type for representing a foreign key with a null value allowed.",
-        "eq": null
+        "reference": "consumer_groups",
+        "eq": null,
+        "description": "Custom type for representing a foreign key with a null value allowed."
       }
     },
     {
@@ -47,17 +56,17 @@
           {
             "hide_credentials": {
               "required": true,
+              "default": false,
               "type": "boolean",
-              "description": "An optional boolean value telling the plugin to show or hide the credential from the upstream service.",
-              "default": false
+              "description": "An optional boolean value telling the plugin to show or hide the credential from the upstream service."
             }
           },
           {
             "clock_skew": {
+              "gt": 0,
               "default": 300,
               "type": "number",
-              "description": "Clock skew in seconds to prevent replay attacks.",
-              "gt": 0
+              "description": "Clock skew in seconds to prevent replay attacks."
             }
           },
           {
@@ -69,26 +78,32 @@
           {
             "validate_request_body": {
               "required": true,
+              "default": false,
               "type": "boolean",
-              "description": "A boolean value telling the plugin to enable body validation.",
-              "default": false
+              "description": "A boolean value telling the plugin to enable body validation."
             }
           },
           {
             "enforce_headers": {
-              "type": "array",
-              "elements": {
-                "type": "string"
-              },
               "description": "A list of headers that the client should at least use for HTTP signature creation.",
               "default": [
 
-              ]
+              ],
+              "elements": {
+                "type": "string"
+              },
+              "type": "array"
             }
           },
           {
             "algorithms": {
-              "type": "array",
+              "description": "A list of HMAC digest algorithms that the user wants to support. Allowed values are `hmac-sha1`, `hmac-sha256`, `hmac-sha384`, and `hmac-sha512`",
+              "default": [
+                "hmac-sha1",
+                "hmac-sha256",
+                "hmac-sha384",
+                "hmac-sha512"
+              ],
               "elements": {
                 "type": "string",
                 "one_of": [
@@ -98,27 +113,19 @@
                   "hmac-sha512"
                 ]
               },
-              "description": "A list of HMAC digest algorithms that the user wants to support. Allowed values are `hmac-sha1`, `hmac-sha256`, `hmac-sha384`, and `hmac-sha512`",
-              "default": [
-                "hmac-sha1",
-                "hmac-sha256",
-                "hmac-sha384",
-                "hmac-sha512"
-              ]
+              "type": "array"
+            }
+          },
+          {
+            "realm": {
+              "required": false,
+              "type": "string",
+              "description": "When authentication fails the plugin sends `WWW-Authenticate` header with `realm` attribute value."
             }
           }
         ],
-        "type": "record",
-        "required": true
-      }
-    }
-  ],
-  "entity_checks": [
-    {
-      "custom_entity_check": {
-        "field_sources": [
-          "config.algorithms"
-        ]
+        "required": true,
+        "type": "record"
       }
     }
   ]
