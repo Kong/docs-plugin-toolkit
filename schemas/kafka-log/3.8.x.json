@@ -1,4 +1,7 @@
 {
+  "entity_checks": [
+
+  ],
   "fields": [
     {
       "protocols": {
@@ -27,55 +30,65 @@
     },
     {
       "consumer_group": {
+        "eq": null,
         "reference": "consumer_groups",
-        "type": "foreign",
         "description": "Custom type for representing a foreign key with a null value allowed.",
-        "eq": null
+        "type": "foreign"
       }
     },
     {
       "config": {
+        "entity_checks": [
+          {
+            "custom_entity_check": {
+              "field_sources": [
+                "authentication"
+              ]
+            }
+          }
+        ],
+        "type": "record",
         "fields": [
           {
             "bootstrap_servers": {
+              "description": "Set of bootstrap brokers in a `{host: host, port: port}` list format.",
+              "type": "set",
               "elements": {
                 "type": "record",
                 "fields": [
                   {
                     "host": {
-                      "required": true,
                       "description": "A string representing a host name, such as example.com.",
-                      "type": "string"
+                      "type": "string",
+                      "required": true
                     }
                   },
                   {
                     "port": {
-                      "required": true,
-                      "description": "An integer representing a port number between 0 and 65535, inclusive.",
-                      "type": "integer",
                       "between": [
                         0,
                         65535
-                      ]
+                      ],
+                      "description": "An integer representing a port number between 0 and 65535, inclusive.",
+                      "type": "integer",
+                      "required": true
                     }
                   }
                 ]
-              },
-              "type": "set",
-              "description": "Set of bootstrap brokers in a `{host: host, port: port}` list format."
+              }
             }
           },
           {
             "topic": {
-              "required": true,
+              "description": "The Kafka topic to publish to.",
               "type": "string",
-              "description": "The Kafka topic to publish to."
+              "required": true
             }
           },
           {
             "timeout": {
-              "type": "integer",
               "description": "Socket timeout in milliseconds.",
+              "type": "integer",
               "default": 10000
             }
           },
@@ -93,155 +106,155 @@
           },
           {
             "authentication": {
+              "type": "record",
               "fields": [
                 {
                   "strategy": {
-                    "required": false,
                     "type": "string",
                     "description": "The authentication strategy for the plugin, the only option for the value is `sasl`.",
                     "one_of": [
                       "sasl"
-                    ]
+                    ],
+                    "required": false
                   }
                 },
                 {
                   "mechanism": {
-                    "required": false,
                     "type": "string",
                     "description": "The SASL authentication mechanism.  Supported options: `PLAIN` or `SCRAM-SHA-256`.",
                     "one_of": [
                       "PLAIN",
                       "SCRAM-SHA-256",
                       "SCRAM-SHA-512"
-                    ]
+                    ],
+                    "required": false
                   }
                 },
                 {
                   "tokenauth": {
-                    "required": false,
+                    "description": "Enable this to indicate `DelegationToken` authentication",
                     "type": "boolean",
-                    "description": "Enable this to indicate `DelegationToken` authentication"
+                    "required": false
                   }
                 },
                 {
                   "user": {
-                    "encrypted": true,
-                    "referenceable": true,
                     "required": false,
+                    "referenceable": true,
                     "description": "Username for SASL authentication.",
-                    "type": "string"
+                    "type": "string",
+                    "encrypted": true
                   }
                 },
                 {
                   "password": {
-                    "encrypted": true,
-                    "referenceable": true,
                     "required": false,
+                    "referenceable": true,
                     "description": "Password for SASL authentication.",
-                    "type": "string"
+                    "type": "string",
+                    "encrypted": true
                   }
                 }
               ],
-              "type": "record",
               "required": true
             }
           },
           {
             "security": {
+              "type": "record",
               "fields": [
                 {
                   "certificate_id": {
                     "required": false,
-                    "type": "string",
                     "description": "UUID of certificate entity for mTLS authentication.",
+                    "type": "string",
                     "uuid": true
                   }
                 },
                 {
                   "ssl": {
-                    "required": false,
+                    "description": "Enables TLS.",
                     "type": "boolean",
-                    "description": "Enables TLS."
+                    "required": false
                   }
                 }
               ],
-              "type": "record",
               "required": true
             }
           },
           {
             "cluster_name": {
-              "required": false,
               "auto": true,
               "description": "An identifier for the Kafka cluster. By default, this field generates a random string. You can also set your own custom cluster identifier.  If more than one Kafka plugin is configured without a `cluster_name` (that is, if the default autogenerated value is removed), these plugins will use the same producer, and by extension, the same cluster. Logs will be sent to the leader of the cluster.",
-              "type": "string"
+              "type": "string",
+              "required": false
             }
           },
           {
             "producer_request_acks": {
-              "default": 1,
               "type": "integer",
               "description": "The number of acknowledgments the producer requires the leader to have received before considering a request complete. Allowed values: 0 for no acknowledgments; 1 for only the leader; and -1 for the full ISR (In-Sync Replica set).",
               "one_of": [
                 -1,
                 0,
                 1
-              ]
+              ],
+              "default": 1
             }
           },
           {
             "producer_request_timeout": {
-              "type": "integer",
               "description": "Time to wait for a Produce response in milliseconds",
+              "type": "integer",
               "default": 2000
             }
           },
           {
             "producer_request_limits_messages_per_request": {
-              "type": "integer",
               "description": "Maximum number of messages to include into a single Produce request.",
+              "type": "integer",
               "default": 200
             }
           },
           {
             "producer_request_limits_bytes_per_request": {
-              "type": "integer",
               "description": "Maximum size of a Produce request in bytes.",
+              "type": "integer",
               "default": 1048576
             }
           },
           {
             "producer_request_retries_max_attempts": {
-              "type": "integer",
               "description": "Maximum number of retry attempts per single Produce request.",
+              "type": "integer",
               "default": 10
             }
           },
           {
             "producer_request_retries_backoff_timeout": {
-              "type": "integer",
               "description": "Backoff interval between retry attempts in milliseconds.",
+              "type": "integer",
               "default": 100
             }
           },
           {
             "producer_async": {
-              "type": "boolean",
               "description": "Flag to enable asynchronous mode.",
+              "type": "boolean",
               "default": true
             }
           },
           {
             "producer_async_flush_timeout": {
-              "type": "integer",
               "description": "Maximum time interval in milliseconds between buffer flushes in asynchronous mode.",
+              "type": "integer",
               "default": 1000
             }
           },
           {
             "producer_async_buffering_limits_messages_in_memory": {
-              "type": "integer",
               "description": "Maximum number of messages that can be buffered in memory in asynchronous mode.",
+              "type": "integer",
               "default": 50000
             }
           },
@@ -251,8 +264,8 @@
                 "type": "string",
                 "len_min": 1
               },
-              "type": "map",
               "description": "Lua code as a key-value map",
+              "type": "map",
               "values": {
                 "type": "string",
                 "len_min": 1
@@ -260,21 +273,8 @@
             }
           }
         ],
-        "entity_checks": [
-          {
-            "custom_entity_check": {
-              "field_sources": [
-                "authentication"
-              ]
-            }
-          }
-        ],
-        "type": "record",
         "required": true
       }
     }
-  ],
-  "entity_checks": [
-
   ]
 }

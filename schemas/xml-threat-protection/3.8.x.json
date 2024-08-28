@@ -1,9 +1,10 @@
 {
+  "entity_checks": [
+
+  ],
   "fields": [
     {
       "protocols": {
-        "type": "set",
-        "required": true,
         "elements": {
           "type": "string",
           "one_of": [
@@ -13,54 +14,95 @@
             "https"
           ]
         },
-        "description": "A set of strings representing HTTP protocols.",
         "default": [
           "grpc",
           "grpcs",
           "http",
           "https"
-        ]
+        ],
+        "description": "A set of strings representing HTTP protocols.",
+        "type": "set",
+        "required": true
       }
     },
     {
       "consumer_group": {
+        "eq": null,
         "reference": "consumer_groups",
-        "type": "foreign",
         "description": "Custom type for representing a foreign key with a null value allowed.",
-        "eq": null
+        "type": "foreign"
       }
     },
     {
       "config": {
+        "entity_checks": [
+          {
+            "conditional": {
+              "if_field": "namespace_aware",
+              "then_field": "max_namespaces",
+              "if_match": {
+                "eq": true
+              },
+              "then_match": {
+                "required": true
+              }
+            }
+          },
+          {
+            "conditional": {
+              "if_field": "namespace_aware",
+              "then_field": "prefix",
+              "if_match": {
+                "eq": true
+              },
+              "then_match": {
+                "required": true
+              }
+            }
+          },
+          {
+            "conditional": {
+              "if_field": "namespace_aware",
+              "then_field": "namespaceuri",
+              "if_match": {
+                "eq": true
+              },
+              "then_match": {
+                "required": true
+              }
+            }
+          }
+        ],
+        "type": "record",
         "fields": [
           {
             "checked_content_types": {
-              "type": "set",
-              "required": true,
               "elements": {
-                "required": true,
+                "match": "^[^%s]+%/[^ ;]+$",
                 "type": "string",
-                "match": "^[^%s]+%/[^ ;]+$"
+                "required": true
               },
-              "description": "A list of Content-Type values with payloads that must be validated.",
               "default": [
                 "application/xml"
-              ]
+              ],
+              "description": "A list of Content-Type values with payloads that must be validated.",
+              "type": "set",
+              "required": true
             }
           },
           {
             "allowed_content_types": {
-              "type": "set",
-              "required": true,
               "elements": {
-                "required": true,
+                "match": "^[^%s]+%/[^ ;]+$",
                 "type": "string",
-                "match": "^[^%s]+%/[^ ;]+$"
+                "required": true
               },
-              "description": "A list of Content-Type values with payloads that are allowed, but aren't validated.",
               "default": [
 
-              ]
+              ],
+              "description": "A list of Content-Type values with payloads that are allowed, but aren't validated.",
+              "type": "set",
+              "required": true
             }
           },
           {
@@ -83,8 +125,8 @@
             "max_depth": {
               "gt": 0,
               "required": true,
-              "type": "integer",
               "description": "Maximum depth of tags. Child elements such as Text or Comments are not counted as another level.",
+              "type": "integer",
               "default": 50
             }
           },
@@ -92,8 +134,8 @@
             "max_children": {
               "gt": 0,
               "required": true,
-              "type": "integer",
               "description": "Maximum number of children allowed (Element, Text, Comment, ProcessingInstruction, CDATASection). Note: Adjacent text and CDATA sections are counted as one. For example, text-cdata-text-cdata is one child.",
+              "type": "integer",
               "default": 100
             }
           },
@@ -101,8 +143,8 @@
             "max_attributes": {
               "gt": 0,
               "required": true,
-              "type": "integer",
               "description": "Maximum number of attributes allowed on a tag, including default ones. Note: If namespace-aware parsing is disabled, then the namespaces definitions are counted as attributes.",
+              "type": "integer",
               "default": 100
             }
           },
@@ -110,8 +152,8 @@
             "max_namespaces": {
               "gt": 0,
               "required": false,
-              "type": "integer",
               "description": "Maximum number of namespaces defined on a tag. This value is required if parsing is namespace-aware.",
+              "type": "integer",
               "default": 20
             }
           },
@@ -236,8 +278,8 @@
             "bla_max_amplification": {
               "gt": 1,
               "required": true,
-              "type": "number",
               "description": "Sets the maximum allowed amplification. This protects against the Billion Laughs Attack.",
+              "type": "number",
               "default": 100
             }
           },
@@ -251,50 +293,8 @@
             }
           }
         ],
-        "entity_checks": [
-          {
-            "conditional": {
-              "if_field": "namespace_aware",
-              "if_match": {
-                "eq": true
-              },
-              "then_field": "max_namespaces",
-              "then_match": {
-                "required": true
-              }
-            }
-          },
-          {
-            "conditional": {
-              "if_field": "namespace_aware",
-              "if_match": {
-                "eq": true
-              },
-              "then_field": "prefix",
-              "then_match": {
-                "required": true
-              }
-            }
-          },
-          {
-            "conditional": {
-              "if_field": "namespace_aware",
-              "if_match": {
-                "eq": true
-              },
-              "then_field": "namespaceuri",
-              "then_match": {
-                "required": true
-              }
-            }
-          }
-        ],
-        "type": "record",
         "required": true
       }
     }
-  ],
-  "entity_checks": [
-
   ]
 }

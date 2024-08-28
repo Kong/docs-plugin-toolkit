@@ -1,4 +1,13 @@
 {
+  "entity_checks": [
+    {
+      "custom_entity_check": {
+        "field_sources": [
+          "config"
+        ]
+      }
+    }
+  ],
   "fields": [
     {
       "protocols": {
@@ -27,36 +36,37 @@
     },
     {
       "consumer_group": {
+        "eq": null,
         "reference": "consumer_groups",
-        "type": "foreign",
         "description": "Custom type for representing a foreign key with a null value allowed.",
-        "eq": null
+        "type": "foreign"
       }
     },
     {
       "consumer": {
+        "eq": null,
         "reference": "consumers",
-        "type": "foreign",
         "description": "Custom type for representing a foreign key with a null value allowed.",
-        "eq": null
+        "type": "foreign"
       }
     },
     {
       "config": {
+        "type": "record",
         "fields": [
           {
             "ldap_host": {
-              "required": true,
               "description": "Host on which the LDAP server is running.",
-              "type": "string"
+              "type": "string",
+              "required": true
             }
           },
           {
             "ldap_password": {
               "type": "string",
-              "encrypted": true,
+              "description": "The password to the LDAP server.",
               "referenceable": true,
-              "description": "The password to the LDAP server."
+              "encrypted": true
             }
           },
           {
@@ -68,9 +78,9 @@
           },
           {
             "bind_dn": {
+              "description": "The DN to bind to. Used to perform LDAP search of user. This `bind_dn` should have permissions to search for the user being authenticated.",
               "type": "string",
-              "referenceable": true,
-              "description": "The DN to bind to. Used to perform LDAP search of user. This `bind_dn` should have permissions to search for the user being authenticated."
+              "referenceable": true
             }
           },
           {
@@ -99,16 +109,16 @@
           },
           {
             "base_dn": {
-              "required": true,
               "description": "Base DN as the starting point for the search; e.g., 'dc=example,dc=com'.",
-              "type": "string"
+              "type": "string",
+              "required": true
             }
           },
           {
             "attribute": {
-              "required": true,
               "description": "Attribute to be used to search the user; e.g., \"cn\".",
-              "type": "string"
+              "type": "string",
+              "required": true
             }
           },
           {
@@ -142,9 +152,9 @@
           },
           {
             "anonymous": {
-              "type": "string",
-              "description": "An optional string (consumer UUID or username) value to use as an “anonymous” consumer if authentication fails. If empty (default null), the request will fail with an authentication failure `4xx`. Note that this value must refer to the consumer `id` or `username` attribute, and **not** its `custom_id`.",
               "len_min": 0,
+              "description": "An optional string (consumer UUID or username) value to use as an “anonymous” consumer if authentication fails. If empty (default null), the request will fail with an authentication failure `4xx`. Note that this value must refer to the consumer `id` or `username` attribute, and **not** its `custom_id`.",
+              "type": "string",
               "default": ""
             }
           },
@@ -165,8 +175,6 @@
           },
           {
             "consumer_by": {
-              "type": "array",
-              "required": false,
               "elements": {
                 "type": "string",
                 "one_of": [
@@ -174,7 +182,9 @@
                   "custom_id"
                 ]
               },
+              "required": false,
               "description": "Whether to authenticate consumers based on `username`, `custom_id`, or both.",
+              "type": "array",
               "default": [
                 "username",
                 "custom_id"
@@ -211,25 +221,15 @@
           {
             "groups_required": {
               "required": false,
+              "description": "The groups required to be present in the LDAP search result for successful authorization. This config parameter works in both **AND** / **OR** cases. - When `[\"group1 group2\"]` are in the same array indices, both `group1` AND `group2` need to be present in the LDAP search result. - When `[\"group1\", \"group2\"]` are in different array indices, either `group1` OR `group2` need to be present in the LDAP search result.",
+              "type": "array",
               "elements": {
                 "type": "string"
-              },
-              "description": "The groups required to be present in the LDAP search result for successful authorization. This config parameter works in both **AND** / **OR** cases. - When `[\"group1 group2\"]` are in the same array indices, both `group1` AND `group2` need to be present in the LDAP search result. - When `[\"group1\", \"group2\"]` are in different array indices, either `group1` OR `group2` need to be present in the LDAP search result.",
-              "type": "array"
+              }
             }
           }
         ],
-        "type": "record",
         "required": true
-      }
-    }
-  ],
-  "entity_checks": [
-    {
-      "custom_entity_check": {
-        "field_sources": [
-          "config"
-        ]
       }
     }
   ]

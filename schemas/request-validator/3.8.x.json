@@ -1,9 +1,16 @@
 {
+  "entity_checks": [
+    {
+      "custom_entity_check": {
+        "field_sources": [
+          "config"
+        ]
+      }
+    }
+  ],
   "fields": [
     {
       "protocols": {
-        "type": "set",
-        "required": true,
         "elements": {
           "type": "string",
           "one_of": [
@@ -13,93 +20,106 @@
             "https"
           ]
         },
-        "description": "A set of strings representing HTTP protocols.",
         "default": [
           "grpc",
           "grpcs",
           "http",
           "https"
-        ]
+        ],
+        "description": "A set of strings representing HTTP protocols.",
+        "type": "set",
+        "required": true
       }
     },
     {
       "consumer_group": {
+        "eq": null,
         "reference": "consumer_groups",
-        "type": "foreign",
         "description": "Custom type for representing a foreign key with a null value allowed.",
-        "eq": null
+        "type": "foreign"
       }
     },
     {
       "config": {
+        "entity_checks": [
+          {
+            "at_least_one_of": [
+              "body_schema",
+              "parameter_schema"
+            ]
+          }
+        ],
+        "type": "record",
         "fields": [
           {
             "body_schema": {
-              "required": false,
+              "description": "The request body schema specification. One of `body_schema` or `parameter_schema` must be specified.",
               "type": "string",
-              "description": "The request body schema specification. One of `body_schema` or `parameter_schema` must be specified."
+              "required": false
             }
           },
           {
             "allowed_content_types": {
-              "type": "set",
-              "elements": {
-                "required": true,
-                "type": "string"
-              },
-              "description": "List of allowed content types. The value can be configured with the `charset` parameter. For example, `application/json; charset=UTF-8`.",
               "default": [
                 "application/json"
-              ]
+              ],
+              "description": "List of allowed content types. The value can be configured with the `charset` parameter. For example, `application/json; charset=UTF-8`.",
+              "type": "set",
+              "elements": {
+                "type": "string",
+                "required": true
+              }
             }
           },
           {
             "version": {
+              "required": true,
+              "type": "string",
+              "description": "Which validator to use. Supported values are `kong` (default) for using Kong's own schema validator, or `draft4` for using a JSON Schema Draft 4-compliant validator.",
               "one_of": [
                 "kong",
                 "draft4"
               ],
-              "required": true,
-              "type": "string",
-              "description": "Which validator to use. Supported values are `kong` (default) for using Kong's own schema validator, or `draft4` for using a JSON Schema Draft 4-compliant validator.",
               "default": "kong"
             }
           },
           {
             "parameter_schema": {
               "required": false,
+              "description": "Array of parameter validator specification. One of `body_schema` or `parameter_schema` must be specified.",
+              "type": "array",
               "elements": {
                 "fields": [
                   {
                     "in": {
-                      "required": true,
                       "type": "string",
                       "description": "The location of the parameter.",
                       "one_of": [
                         "query",
                         "header",
                         "path"
-                      ]
+                      ],
+                      "required": true
                     }
                   },
                   {
                     "name": {
-                      "required": true,
+                      "description": "The name of the parameter. Parameter names are case-sensitive, and correspond to the parameter name used by the `in` property. If `in` is `path`, the `name` field MUST correspond to the named capture group from the configured `route`.",
                       "type": "string",
-                      "description": "The name of the parameter. Parameter names are case-sensitive, and correspond to the parameter name used by the `in` property. If `in` is `path`, the `name` field MUST correspond to the named capture group from the configured `route`."
+                      "required": true
                     }
                   },
                   {
                     "required": {
-                      "required": true,
+                      "description": "Determines whether this parameter is mandatory.",
                       "type": "boolean",
-                      "description": "Determines whether this parameter is mandatory."
+                      "required": true
                     }
                   },
                   {
                     "style": {
-                      "type": "string",
                       "description": "Required when `schema` and `explode` are set. Describes how the parameter value will be deserialized depending on the type of the parameter value.",
+                      "type": "string",
                       "one_of": [
                         "label",
                         "form",
@@ -142,39 +162,19 @@
                   }
                 ],
                 "type": "record"
-              },
-              "type": "array",
-              "description": "Array of parameter validator specification. One of `body_schema` or `parameter_schema` must be specified."
+              }
             }
           },
           {
             "verbose_response": {
-              "required": true,
-              "type": "boolean",
+              "default": false,
               "description": "If enabled, the plugin returns more verbose and detailed validation errors.",
-              "default": false
+              "type": "boolean",
+              "required": true
             }
           }
         ],
-        "entity_checks": [
-          {
-            "at_least_one_of": [
-              "body_schema",
-              "parameter_schema"
-            ]
-          }
-        ],
-        "type": "record",
         "required": true
-      }
-    }
-  ],
-  "entity_checks": [
-    {
-      "custom_entity_check": {
-        "field_sources": [
-          "config"
-        ]
       }
     }
   ]

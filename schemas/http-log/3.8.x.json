@@ -1,12 +1,13 @@
 {
+  "entity_checks": [
+
+  ],
   "fields": [
     {
       "protocols": {
-        "type": "set",
-        "required": true,
         "elements": {
-          "type": "string",
           "description": "A string representing a protocol, such as HTTP or HTTPS.",
+          "type": "string",
           "one_of": [
             "grpc",
             "grpcs",
@@ -20,21 +21,23 @@
             "wss"
           ]
         },
-        "description": "A set of strings representing protocols.",
         "default": [
           "grpc",
           "grpcs",
           "http",
           "https"
-        ]
+        ],
+        "description": "A set of strings representing protocols.",
+        "type": "set",
+        "required": true
       }
     },
     {
       "consumer_group": {
+        "eq": null,
         "reference": "consumer_groups",
-        "type": "foreign",
         "description": "Custom type for representing a foreign key with a null value allowed.",
-        "eq": null
+        "type": "foreign"
       }
     },
     {
@@ -42,79 +45,64 @@
         "fields": [
           {
             "http_endpoint": {
-              "encrypted": true,
-              "referenceable": true,
               "required": true,
               "type": "string",
-              "description": "A string representing a URL, such as https://example.com/path/to/resource?q=search."
+              "description": "A string representing a URL, such as https://example.com/path/to/resource?q=search.",
+              "referenceable": true,
+              "encrypted": true
             }
           },
           {
             "method": {
-              "default": "POST",
               "type": "string",
               "description": "An optional method used to send data to the HTTP server. Supported values are `POST` (default), `PUT`, and `PATCH`.",
               "one_of": [
                 "POST",
                 "PUT",
                 "PATCH"
-              ]
+              ],
+              "default": "POST"
             }
           },
           {
             "content_type": {
-              "default": "application/json",
               "type": "string",
               "description": "Indicates the type of data sent. The only available option is `application/json`.",
               "one_of": [
                 "application/json",
                 "application/json; charset=utf-8"
-              ]
+              ],
+              "default": "application/json"
             }
           },
           {
             "timeout": {
-              "type": "number",
               "description": "An optional timeout in milliseconds when sending data to the upstream server.",
+              "type": "number",
               "default": 10000
             }
           },
           {
             "keepalive": {
-              "type": "number",
               "description": "An optional value in milliseconds that defines how long an idle connection will live before being closed.",
+              "type": "number",
               "default": 60000
             }
           },
           {
             "retry_count": {
-              "deprecation": {
-                "old_default": 10,
-                "removal_in_version": "4.0",
-                "message": "http-log: config.retry_count no longer works, please use config.queue.max_retry_time instead"
-              },
               "type": "integer",
               "description": "Number of times to retry when sending data to the upstream server."
             }
           },
           {
             "queue_size": {
-              "deprecation": {
-                "old_default": 1,
-                "removal_in_version": "4.0",
-                "message": "http-log: config.queue_size is deprecated, please use config.queue.max_batch_size instead"
-              },
               "type": "integer",
               "description": "Maximum number of log entries to be sent on each message to the upstream server."
             }
           },
           {
             "flush_timeout": {
-              "deprecation": {
-                "old_default": 2,
-                "removal_in_version": "4.0",
-                "message": "http-log: config.flush_timeout is deprecated, please use config.queue.max_coalescing_delay instead"
-              },
               "type": "number",
               "description": "Optional time in seconds. If `queue_size` > 1, this is the max idle time before sending a log with less than `queue_size` records."
             }
@@ -122,25 +110,25 @@
           {
             "headers": {
               "keys": {
+                "description": "A string representing an HTTP header name.",
+                "type": "string",
                 "match_none": [
                   {
-                    "err": "cannot contain 'Host' header",
-                    "pattern": "^[Hh][Oo][Ss][Tt]$"
+                    "pattern": "^[Hh][Oo][Ss][Tt]$",
+                    "err": "cannot contain 'Host' header"
                   },
                   {
-                    "err": "cannot contain 'Content-Length' header",
-                    "pattern": "^[Cc][Oo][Nn][Tt][Ee][Nn][Tt]%-[Ll][Ee][nn][Gg][Tt][Hh]$"
+                    "pattern": "^[Cc][Oo][Nn][Tt][Ee][Nn][Tt]%-[Ll][Ee][nn][Gg][Tt][Hh]$",
+                    "err": "cannot contain 'Content-Length' header"
                   },
                   {
-                    "err": "cannot contain 'Content-Type' header",
-                    "pattern": "^[Cc][Oo][Nn][Tt][Ee][Nn][Tt]%-[Tt][Yy][Pp][Ee]$"
+                    "pattern": "^[Cc][Oo][Nn][Tt][Ee][Nn][Tt]%-[Tt][Yy][Pp][Ee]$",
+                    "err": "cannot contain 'Content-Type' header"
                   }
-                ],
-                "description": "A string representing an HTTP header name.",
-                "type": "string"
+                ]
               },
-              "type": "map",
               "description": "An optional table of headers included in the HTTP message to the upstream server. Values are indexed by header name, and each header name accepts a single string.",
+              "type": "map",
               "values": {
                 "type": "string",
                 "referenceable": true
@@ -149,38 +137,39 @@
           },
           {
             "queue": {
+              "type": "record",
               "fields": [
                 {
                   "max_batch_size": {
-                    "default": 1,
-                    "type": "integer",
-                    "description": "Maximum number of entries that can be processed at a time.",
                     "between": [
                       1,
                       1000000
-                    ]
+                    ],
+                    "description": "Maximum number of entries that can be processed at a time.",
+                    "type": "integer",
+                    "default": 1
                   }
                 },
                 {
                   "max_coalescing_delay": {
-                    "default": 1,
-                    "type": "number",
-                    "description": "Maximum number of (fractional) seconds to elapse after the first entry was queued before the queue starts calling the handler.",
                     "between": [
                       0,
                       3600
-                    ]
+                    ],
+                    "description": "Maximum number of (fractional) seconds to elapse after the first entry was queued before the queue starts calling the handler.",
+                    "type": "number",
+                    "default": 1
                   }
                 },
                 {
                   "max_entries": {
-                    "default": 10000,
-                    "type": "integer",
-                    "description": "Maximum number of entries that can be waiting on the queue.",
                     "between": [
                       1,
                       1000000
-                    ]
+                    ],
+                    "description": "Maximum number of entries that can be waiting on the queue.",
+                    "type": "integer",
+                    "default": 10000
                   }
                 },
                 {
@@ -191,35 +180,34 @@
                 },
                 {
                   "max_retry_time": {
-                    "type": "number",
                     "description": "Time in seconds before the queue gives up calling a failed handler for a batch.",
+                    "type": "number",
                     "default": 60
                   }
                 },
                 {
                   "initial_retry_delay": {
-                    "default": 0.01,
-                    "type": "number",
-                    "description": "Time in seconds before the initial retry is made for a failing batch.",
                     "between": [
                       0.001,
                       1000000
-                    ]
+                    ],
+                    "description": "Time in seconds before the initial retry is made for a failing batch.",
+                    "type": "number",
+                    "default": 0.01
                   }
                 },
                 {
                   "max_retry_delay": {
-                    "default": 60,
-                    "type": "number",
-                    "description": "Maximum time in seconds between retries, caps exponential backoff.",
                     "between": [
                       0.001,
                       1000000
-                    ]
+                    ],
+                    "description": "Maximum time in seconds between retries, caps exponential backoff.",
+                    "type": "number",
+                    "default": 60
                   }
                 }
               ],
-              "type": "record",
               "required": true
             }
           },
@@ -229,8 +217,8 @@
                 "type": "string",
                 "len_min": 1
               },
-              "type": "map",
               "description": "Lua code as a key-value map",
+              "type": "map",
               "values": {
                 "type": "string",
                 "len_min": 1
@@ -239,11 +227,19 @@
           }
         ],
         "type": "record",
+        "entity_checks": [
+          {
+            "custom_entity_check": {
+              "field_sources": [
+                "retry_count",
+                "queue_size",
+                "flush_timeout"
+              ]
+            }
+          }
+        ],
         "required": true
       }
     }
-  ],
-  "entity_checks": [
-
   ]
 }

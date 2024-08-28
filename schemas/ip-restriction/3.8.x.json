@@ -1,12 +1,18 @@
 {
+  "entity_checks": [
+    {
+      "at_least_one_of": [
+        "config.allow",
+        "config.deny"
+      ]
+    }
+  ],
   "fields": [
     {
       "protocols": {
-        "description": "A set of strings representing protocols.",
-        "required": true,
         "elements": {
-          "type": "string",
           "description": "A string representing a protocol, such as HTTP or HTTPS.",
+          "type": "string",
           "one_of": [
             "grpc",
             "grpcs",
@@ -20,6 +26,8 @@
             "wss"
           ]
         },
+        "required": true,
+        "description": "A set of strings representing protocols.",
         "type": "set",
         "default": [
           "http",
@@ -33,53 +41,45 @@
     },
     {
       "config": {
+        "type": "record",
         "fields": [
           {
             "allow": {
+              "description": "List of IPs or CIDR ranges to allow. One of `config.allow` or `config.deny` must be specified.",
+              "type": "array",
               "elements": {
                 "type": "string",
                 "description": "A string representing an IP address or CIDR block, such as 192.168.1.1 or 192.168.0.0/16."
-              },
-              "type": "array",
-              "description": "List of IPs or CIDR ranges to allow. One of `config.allow` or `config.deny` must be specified."
+              }
             }
           },
           {
             "deny": {
+              "description": "List of IPs or CIDR ranges to deny. One of `config.allow` or `config.deny` must be specified.",
+              "type": "array",
               "elements": {
                 "type": "string",
                 "description": "A string representing an IP address or CIDR block, such as 192.168.1.1 or 192.168.0.0/16."
-              },
-              "type": "array",
-              "description": "List of IPs or CIDR ranges to deny. One of `config.allow` or `config.deny` must be specified."
+              }
             }
           },
           {
             "status": {
-              "required": false,
+              "description": "The HTTP status of the requests that will be rejected by the plugin.",
               "type": "number",
-              "description": "The HTTP status of the requests that will be rejected by the plugin."
+              "required": false
             }
           },
           {
             "message": {
-              "required": false,
+              "description": "The message to send as a response body to rejected requests.",
               "type": "string",
-              "description": "The message to send as a response body to rejected requests."
+              "required": false
             }
           }
         ],
-        "type": "record",
         "required": true
       }
-    }
-  ],
-  "entity_checks": [
-    {
-      "at_least_one_of": [
-        "config.allow",
-        "config.deny"
-      ]
     }
   ]
 }

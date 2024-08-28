@@ -1,9 +1,15 @@
 {
+  "entity_checks": [
+    {
+      "at_least_one_of": [
+        "config.allow_patterns",
+        "config.deny_patterns"
+      ]
+    }
+  ],
   "fields": [
     {
       "protocols": {
-        "type": "set",
-        "required": true,
         "elements": {
           "type": "string",
           "one_of": [
@@ -13,68 +19,62 @@
             "https"
           ]
         },
-        "description": "A set of strings representing HTTP protocols.",
         "default": [
           "grpc",
           "grpcs",
           "http",
           "https"
-        ]
+        ],
+        "description": "A set of strings representing HTTP protocols.",
+        "type": "set",
+        "required": true
       }
     },
     {
       "config": {
+        "type": "record",
         "fields": [
           {
             "allow_patterns": {
+              "elements": {
+                "len_min": 1,
+                "type": "string",
+                "len_max": 50
+              },
+              "len_max": 10,
+              "description": "Array of valid patterns, or valid questions from the 'user' role in chat.",
+              "type": "array",
               "default": [
 
-              ],
-              "type": "array",
-              "elements": {
-                "type": "string",
-                "len_min": 1,
-                "len_max": 500
-              },
-              "description": "Array of valid patterns, or valid questions from the 'user' role in chat.",
-              "len_max": 10
+              ]
             }
           },
           {
             "deny_patterns": {
+              "elements": {
+                "len_min": 1,
+                "type": "string",
+                "len_max": 50
+              },
+              "len_max": 10,
+              "description": "Array of invalid patterns, or invalid questions from the 'user' role in chat.",
+              "type": "array",
               "default": [
 
-              ],
-              "type": "array",
-              "elements": {
-                "type": "string",
-                "len_min": 1,
-                "len_max": 500
-              },
-              "description": "Array of invalid patterns, or invalid questions from the 'user' role in chat.",
-              "len_max": 10
+              ]
             }
           },
           {
             "allow_all_conversation_history": {
-              "required": true,
+              "default": false,
               "description": "If true, will ignore all previous chat prompts from the conversation history.",
               "type": "boolean",
-              "default": false
+              "required": true
             }
           }
         ],
-        "type": "record",
         "required": true
       }
-    }
-  ],
-  "entity_checks": [
-    {
-      "at_least_one_of": [
-        "config.allow_patterns",
-        "config.deny_patterns"
-      ]
     }
   ]
 }
