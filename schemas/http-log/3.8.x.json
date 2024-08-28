@@ -1,12 +1,12 @@
 {
+  "entity_checks": [
+
+  ],
   "fields": [
     {
       "protocols": {
-        "type": "set",
         "required": true,
         "elements": {
-          "type": "string",
-          "description": "A string representing a protocol, such as HTTP or HTTPS.",
           "one_of": [
             "grpc",
             "grpcs",
@@ -18,23 +18,26 @@
             "udp",
             "ws",
             "wss"
-          ]
+          ],
+          "type": "string",
+          "description": "A string representing a protocol, such as HTTP or HTTPS."
         },
-        "description": "A set of strings representing protocols.",
+        "type": "set",
         "default": [
           "grpc",
           "grpcs",
           "http",
           "https"
-        ]
+        ],
+        "description": "A set of strings representing protocols."
       }
     },
     {
       "consumer_group": {
-        "reference": "consumer_groups",
         "type": "foreign",
-        "description": "Custom type for representing a foreign key with a null value allowed.",
-        "eq": null
+        "reference": "consumer_groups",
+        "eq": null,
+        "description": "Custom type for representing a foreign key with a null value allowed."
       }
     },
     {
@@ -42,108 +45,108 @@
         "fields": [
           {
             "http_endpoint": {
-              "encrypted": true,
-              "referenceable": true,
               "required": true,
+              "referenceable": true,
               "type": "string",
+              "encrypted": true,
               "description": "A string representing a URL, such as https://example.com/path/to/resource?q=search."
             }
           },
           {
             "method": {
-              "default": "POST",
               "type": "string",
-              "description": "An optional method used to send data to the HTTP server. Supported values are `POST` (default), `PUT`, and `PATCH`.",
+              "default": "POST",
               "one_of": [
                 "POST",
                 "PUT",
                 "PATCH"
-              ]
+              ],
+              "description": "An optional method used to send data to the HTTP server. Supported values are `POST` (default), `PUT`, and `PATCH`."
             }
           },
           {
             "content_type": {
-              "default": "application/json",
               "type": "string",
-              "description": "Indicates the type of data sent. The only available option is `application/json`.",
+              "default": "application/json",
               "one_of": [
                 "application/json",
                 "application/json; charset=utf-8"
-              ]
+              ],
+              "description": "Indicates the type of data sent. The only available option is `application/json`."
             }
           },
           {
             "timeout": {
+              "default": 10000,
               "type": "number",
-              "description": "An optional timeout in milliseconds when sending data to the upstream server.",
-              "default": 10000
+              "description": "An optional timeout in milliseconds when sending data to the upstream server."
             }
           },
           {
             "keepalive": {
+              "default": 60000,
               "type": "number",
-              "description": "An optional value in milliseconds that defines how long an idle connection will live before being closed.",
-              "default": 60000
+              "description": "An optional value in milliseconds that defines how long an idle connection will live before being closed."
             }
           },
           {
             "retry_count": {
               "deprecation": {
-                "old_default": 10,
+                "message": "http-log: config.retry_count no longer works, please use config.queue.max_retry_time instead",
                 "removal_in_version": "4.0",
-                "message": "http-log: config.retry_count no longer works, please use config.queue.max_retry_time instead"
+                "old_default": 10
               },
-              "type": "integer",
-              "description": "Number of times to retry when sending data to the upstream server."
+              "description": "Number of times to retry when sending data to the upstream server.",
+              "type": "integer"
             }
           },
           {
             "queue_size": {
               "deprecation": {
-                "old_default": 1,
+                "message": "http-log: config.queue_size is deprecated, please use config.queue.max_batch_size instead",
                 "removal_in_version": "4.0",
-                "message": "http-log: config.queue_size is deprecated, please use config.queue.max_batch_size instead"
+                "old_default": 1
               },
-              "type": "integer",
-              "description": "Maximum number of log entries to be sent on each message to the upstream server."
+              "description": "Maximum number of log entries to be sent on each message to the upstream server.",
+              "type": "integer"
             }
           },
           {
             "flush_timeout": {
               "deprecation": {
-                "old_default": 2,
+                "message": "http-log: config.flush_timeout is deprecated, please use config.queue.max_coalescing_delay instead",
                 "removal_in_version": "4.0",
-                "message": "http-log: config.flush_timeout is deprecated, please use config.queue.max_coalescing_delay instead"
+                "old_default": 2
               },
-              "type": "number",
-              "description": "Optional time in seconds. If `queue_size` > 1, this is the max idle time before sending a log with less than `queue_size` records."
+              "description": "Optional time in seconds. If `queue_size` > 1, this is the max idle time before sending a log with less than `queue_size` records.",
+              "type": "number"
             }
           },
           {
             "headers": {
-              "keys": {
-                "match_none": [
-                  {
-                    "err": "cannot contain 'Host' header",
-                    "pattern": "^[Hh][Oo][Ss][Tt]$"
-                  },
-                  {
-                    "err": "cannot contain 'Content-Length' header",
-                    "pattern": "^[Cc][Oo][Nn][Tt][Ee][Nn][Tt]%-[Ll][Ee][nn][Gg][Tt][Hh]$"
-                  },
-                  {
-                    "err": "cannot contain 'Content-Type' header",
-                    "pattern": "^[Cc][Oo][Nn][Tt][Ee][Nn][Tt]%-[Tt][Yy][Pp][Ee]$"
-                  }
-                ],
-                "description": "A string representing an HTTP header name.",
+              "description": "An optional table of headers included in the HTTP message to the upstream server. Values are indexed by header name, and each header name accepts a single string.",
+              "type": "map",
+              "values": {
+                "referenceable": true,
                 "type": "string"
               },
-              "type": "map",
-              "description": "An optional table of headers included in the HTTP message to the upstream server. Values are indexed by header name, and each header name accepts a single string.",
-              "values": {
-                "type": "string",
-                "referenceable": true
+              "keys": {
+                "description": "A string representing an HTTP header name.",
+                "match_none": [
+                  {
+                    "pattern": "^[Hh][Oo][Ss][Tt]$",
+                    "err": "cannot contain 'Host' header"
+                  },
+                  {
+                    "pattern": "^[Cc][Oo][Nn][Tt][Ee][Nn][Tt]%-[Ll][Ee][nn][Gg][Tt][Hh]$",
+                    "err": "cannot contain 'Content-Length' header"
+                  },
+                  {
+                    "pattern": "^[Cc][Oo][Nn][Tt][Ee][Nn][Tt]%-[Tt][Yy][Pp][Ee]$",
+                    "err": "cannot contain 'Content-Type' header"
+                  }
+                ],
+                "type": "string"
               }
             }
           },
@@ -152,35 +155,35 @@
               "fields": [
                 {
                   "max_batch_size": {
-                    "default": 1,
-                    "type": "integer",
-                    "description": "Maximum number of entries that can be processed at a time.",
                     "between": [
                       1,
                       1000000
-                    ]
+                    ],
+                    "default": 1,
+                    "type": "integer",
+                    "description": "Maximum number of entries that can be processed at a time."
                   }
                 },
                 {
                   "max_coalescing_delay": {
-                    "default": 1,
-                    "type": "number",
-                    "description": "Maximum number of (fractional) seconds to elapse after the first entry was queued before the queue starts calling the handler.",
                     "between": [
                       0,
                       3600
-                    ]
+                    ],
+                    "default": 1,
+                    "type": "number",
+                    "description": "Maximum number of (fractional) seconds to elapse after the first entry was queued before the queue starts calling the handler."
                   }
                 },
                 {
                   "max_entries": {
-                    "default": 10000,
-                    "type": "integer",
-                    "description": "Maximum number of entries that can be waiting on the queue.",
                     "between": [
                       1,
                       1000000
-                    ]
+                    ],
+                    "default": 10000,
+                    "type": "integer",
+                    "description": "Maximum number of entries that can be waiting on the queue."
                   }
                 },
                 {
@@ -191,36 +194,47 @@
                 },
                 {
                   "max_retry_time": {
+                    "default": 60,
                     "type": "number",
-                    "description": "Time in seconds before the queue gives up calling a failed handler for a batch.",
-                    "default": 60
+                    "description": "Time in seconds before the queue gives up calling a failed handler for a batch."
                   }
                 },
                 {
                   "initial_retry_delay": {
-                    "default": 0.01,
-                    "type": "number",
-                    "description": "Time in seconds before the initial retry is made for a failing batch.",
                     "between": [
                       0.001,
                       1000000
-                    ]
+                    ],
+                    "default": 0.01,
+                    "type": "number",
+                    "description": "Time in seconds before the initial retry is made for a failing batch."
                   }
                 },
                 {
                   "max_retry_delay": {
-                    "default": 60,
-                    "type": "number",
-                    "description": "Maximum time in seconds between retries, caps exponential backoff.",
                     "between": [
                       0.001,
                       1000000
-                    ]
+                    ],
+                    "default": 60,
+                    "type": "number",
+                    "description": "Maximum time in seconds between retries, caps exponential backoff."
+                  }
+                },
+                {
+                  "concurrency_limit": {
+                    "type": "integer",
+                    "default": 1,
+                    "one_of": [
+                      -1,
+                      1
+                    ],
+                    "description": "The number of of queue delivery timers. -1 indicates unlimited."
                   }
                 }
               ],
-              "type": "record",
-              "required": true
+              "required": true,
+              "type": "record"
             }
           },
           {
@@ -229,21 +243,18 @@
                 "type": "string",
                 "len_min": 1
               },
-              "type": "map",
               "description": "Lua code as a key-value map",
               "values": {
-                "type": "string",
-                "len_min": 1
-              }
+                "len_min": 1,
+                "type": "string"
+              },
+              "type": "map"
             }
           }
         ],
-        "type": "record",
-        "required": true
+        "required": true,
+        "type": "record"
       }
     }
-  ],
-  "entity_checks": [
-
   ]
 }
