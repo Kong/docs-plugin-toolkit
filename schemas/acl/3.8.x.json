@@ -1,37 +1,24 @@
 {
-  "entity_checks": [
-    {
-      "only_one_of": [
-        "config.allow",
-        "config.deny"
-      ]
-    },
-    {
-      "at_least_one_of": [
-        "config.allow",
-        "config.deny"
-      ]
-    }
-  ],
   "fields": [
     {
       "consumer": {
-        "type": "foreign",
         "reference": "consumers",
         "eq": null,
+        "type": "foreign",
         "description": "Custom type for representing a foreign key with a null value allowed."
       }
     },
     {
       "consumer_group": {
-        "type": "foreign",
         "reference": "consumer_groups",
         "eq": null,
+        "type": "foreign",
         "description": "Custom type for representing a foreign key with a null value allowed."
       }
     },
     {
       "protocols": {
+        "description": "A set of strings representing HTTP protocols.",
         "required": true,
         "elements": {
           "type": "string",
@@ -48,8 +35,7 @@
           "grpcs",
           "http",
           "https"
-        ],
-        "description": "A set of strings representing HTTP protocols."
+        ]
       }
     },
     {
@@ -58,48 +44,62 @@
           {
             "allow": {
               "description": "Arbitrary group names that are allowed to consume the service or route. One of `config.allow` or `config.deny` must be specified.",
+              "type": "array",
               "elements": {
                 "type": "string"
-              },
-              "type": "array"
+              }
             }
           },
           {
             "deny": {
               "description": "Arbitrary group names that are not allowed to consume the service or route. One of `config.allow` or `config.deny` must be specified.",
+              "type": "array",
               "elements": {
                 "type": "string"
-              },
-              "type": "array"
+              }
             }
           },
           {
             "hide_groups_header": {
-              "required": true,
-              "default": false,
+              "description": "If enabled (`true`), prevents the `X-Consumer-Groups` header from being sent in the request to the upstream service.",
               "type": "boolean",
-              "description": "If enabled (`true`), prevents the `X-Consumer-Groups` header from being sent in the request to the upstream service."
+              "required": true,
+              "default": false
             }
           },
           {
             "include_consumer_groups": {
               "required": false,
-              "default": false,
-              "type": "boolean"
+              "type": "boolean",
+              "default": false
             }
           },
           {
             "always_use_authenticated_groups": {
-              "required": true,
-              "default": false,
+              "description": "If enabled (`true`), the authenticated groups will always be used even when an authenticated consumer already exists. If the authenticated groups don't exist, it will fallback to use the groups associated with the consumer. By default the authenticated groups will only be used when there is no consumer or the consumer is anonymous.",
               "type": "boolean",
-              "description": "If enabled (`true`), the authenticated groups will always be used even when an authenticated consumer already exists. If the authenticated groups don't exist, it will fallback to use the groups associated with the consumer. By default the authenticated groups will only be used when there is no consumer or the consumer is anonymous."
+              "required": true,
+              "default": false
             }
           }
         ],
-        "required": true,
-        "type": "record"
+        "type": "record",
+        "required": true
       }
+    }
+  ],
+  "entity_checks": [
+    {
+      "only_one_of": [
+        "config.allow",
+        "config.deny"
+      ]
+    },
+    {
+      "at_least_one_of": [
+        "config.allow",
+        "config.deny"
+      ]
     }
   ]
 }

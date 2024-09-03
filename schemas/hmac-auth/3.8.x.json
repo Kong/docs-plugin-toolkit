@@ -1,25 +1,15 @@
 {
-  "entity_checks": [
-    {
-      "custom_entity_check": {
-        "field_sources": [
-          "config.algorithms"
-        ]
-      }
-    }
-  ],
   "fields": [
     {
       "consumer": {
-        "type": "foreign",
         "reference": "consumers",
         "eq": null,
+        "type": "foreign",
         "description": "Custom type for representing a foreign key with a null value allowed."
       }
     },
     {
       "protocols": {
-        "required": true,
         "default": [
           "grpc",
           "grpcs",
@@ -28,6 +18,8 @@
           "ws",
           "wss"
         ],
+        "required": true,
+        "type": "set",
         "elements": {
           "type": "string",
           "one_of": [
@@ -38,15 +30,14 @@
             "ws",
             "wss"
           ]
-        },
-        "type": "set"
+        }
       }
     },
     {
       "consumer_group": {
-        "type": "foreign",
         "reference": "consumer_groups",
         "eq": null,
+        "type": "foreign",
         "description": "Custom type for representing a foreign key with a null value allowed."
       }
     },
@@ -55,55 +46,50 @@
         "fields": [
           {
             "hide_credentials": {
+              "description": "An optional boolean value telling the plugin to show or hide the credential from the upstream service.",
               "required": true,
-              "default": false,
               "type": "boolean",
-              "description": "An optional boolean value telling the plugin to show or hide the credential from the upstream service."
+              "default": false
             }
           },
           {
             "clock_skew": {
-              "gt": 0,
-              "default": 300,
+              "description": "Clock skew in seconds to prevent replay attacks.",
               "type": "number",
-              "description": "Clock skew in seconds to prevent replay attacks."
+              "gt": 0,
+              "default": 300
             }
           },
           {
             "anonymous": {
-              "type": "string",
-              "description": "An optional string (Consumer UUID or username) value to use as an “anonymous” consumer if authentication fails."
+              "description": "An optional string (Consumer UUID or username) value to use as an “anonymous” consumer if authentication fails.",
+              "type": "string"
             }
           },
           {
             "validate_request_body": {
+              "description": "A boolean value telling the plugin to enable body validation.",
               "required": true,
-              "default": false,
               "type": "boolean",
-              "description": "A boolean value telling the plugin to enable body validation."
+              "default": false
             }
           },
           {
             "enforce_headers": {
               "description": "A list of headers that the client should at least use for HTTP signature creation.",
-              "default": [
-
-              ],
+              "type": "array",
               "elements": {
                 "type": "string"
               },
-              "type": "array"
+              "default": [
+
+              ]
             }
           },
           {
             "algorithms": {
               "description": "A list of HMAC digest algorithms that the user wants to support. Allowed values are `hmac-sha1`, `hmac-sha256`, `hmac-sha384`, and `hmac-sha512`",
-              "default": [
-                "hmac-sha1",
-                "hmac-sha256",
-                "hmac-sha384",
-                "hmac-sha512"
-              ],
+              "type": "array",
               "elements": {
                 "type": "string",
                 "one_of": [
@@ -113,19 +99,33 @@
                   "hmac-sha512"
                 ]
               },
-              "type": "array"
+              "default": [
+                "hmac-sha1",
+                "hmac-sha256",
+                "hmac-sha384",
+                "hmac-sha512"
+              ]
             }
           },
           {
             "realm": {
+              "description": "When authentication fails the plugin sends `WWW-Authenticate` header with `realm` attribute value.",
               "required": false,
-              "type": "string",
-              "description": "When authentication fails the plugin sends `WWW-Authenticate` header with `realm` attribute value."
+              "type": "string"
             }
           }
         ],
-        "required": true,
-        "type": "record"
+        "type": "record",
+        "required": true
+      }
+    }
+  ],
+  "entity_checks": [
+    {
+      "custom_entity_check": {
+        "field_sources": [
+          "config.algorithms"
+        ]
       }
     }
   ]

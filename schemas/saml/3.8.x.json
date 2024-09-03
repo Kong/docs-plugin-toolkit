@@ -1,24 +1,16 @@
 {
-  "entity_checks": [
-    {
-      "custom_entity_check": {
-        "field_sources": [
-          "config"
-        ]
-      }
-    }
-  ],
   "fields": [
     {
       "consumer": {
-        "type": "foreign",
         "reference": "consumers",
         "eq": null,
+        "type": "foreign",
         "description": "Custom type for representing a foreign key with a null value allowed."
       }
     },
     {
       "protocols": {
+        "description": "A set of strings representing HTTP protocols.",
         "required": true,
         "elements": {
           "type": "string",
@@ -35,20 +27,830 @@
           "grpcs",
           "http",
           "https"
-        ],
-        "description": "A set of strings representing HTTP protocols."
+        ]
       }
     },
     {
       "consumer_group": {
-        "type": "foreign",
         "reference": "consumer_groups",
         "eq": null,
+        "type": "foreign",
         "description": "Custom type for representing a foreign key with a null value allowed."
       }
     },
     {
       "config": {
+        "fields": [
+          {
+            "assertion_consumer_path": {
+              "match_none": [
+                {
+                  "pattern": "//",
+                  "err": "must not have empty segments"
+                }
+              ],
+              "required": true,
+              "starts_with": "/",
+              "type": "string",
+              "description": "A string representing a URL path, such as /path/to/resource. Must start with a forward slash (/) and must not contain empty segments (i.e., two consecutive forward slashes)."
+            }
+          },
+          {
+            "idp_sso_url": {
+              "description": "A string representing a URL, such as https://example.com/path/to/resource?q=search.",
+              "required": true,
+              "type": "string"
+            }
+          },
+          {
+            "idp_certificate": {
+              "description": "The public certificate provided by the IdP. This is used to validate responses from the IdP.  Only include the contents of the certificate. Do not include the header (`BEGIN CERTIFICATE`) and footer (`END CERTIFICATE`) lines.",
+              "required": false,
+              "type": "string",
+              "encrypted": true,
+              "referenceable": true
+            }
+          },
+          {
+            "response_encryption_key": {
+              "description": "The private encryption key required to decrypt encrypted assertions.",
+              "required": false,
+              "type": "string",
+              "encrypted": true,
+              "referenceable": true
+            }
+          },
+          {
+            "request_signing_key": {
+              "description": "The private key for signing requests.  If this parameter is set, requests sent to the IdP are signed.  The `request_signing_certificate` parameter must be set as well.",
+              "required": false,
+              "type": "string",
+              "encrypted": true,
+              "referenceable": true
+            }
+          },
+          {
+            "request_signing_certificate": {
+              "description": "The certificate for signing requests.",
+              "required": false,
+              "type": "string",
+              "encrypted": true,
+              "referenceable": true
+            }
+          },
+          {
+            "request_signature_algorithm": {
+              "description": "The signature algorithm for signing Authn requests. Options available are: - `SHA256` - `SHA384` - `SHA512`",
+              "required": false,
+              "one_of": [
+                "SHA256",
+                "SHA384",
+                "SHA512"
+              ],
+              "type": "string",
+              "default": "SHA256"
+            }
+          },
+          {
+            "request_digest_algorithm": {
+              "description": "The digest algorithm for Authn requests: - `SHA256` - `SHA1`",
+              "required": false,
+              "one_of": [
+                "SHA256",
+                "SHA1"
+              ],
+              "type": "string",
+              "default": "SHA256"
+            }
+          },
+          {
+            "response_signature_algorithm": {
+              "description": "The algorithm for validating signatures in SAML responses. Options available are: - `SHA256` - `SHA384` - `SHA512`",
+              "required": false,
+              "one_of": [
+                "SHA256",
+                "SHA384",
+                "SHA512"
+              ],
+              "type": "string",
+              "default": "SHA256"
+            }
+          },
+          {
+            "response_digest_algorithm": {
+              "description": "The algorithm for verifying digest in SAML responses: - `SHA256` - `SHA1`",
+              "required": false,
+              "one_of": [
+                "SHA256",
+                "SHA1"
+              ],
+              "type": "string",
+              "default": "SHA256"
+            }
+          },
+          {
+            "issuer": {
+              "description": "The unique identifier of the IdP application. Formatted as a URL containing information about the IdP so the SP can validate that the SAML assertions it receives are issued from the correct IdP.",
+              "required": true,
+              "type": "string"
+            }
+          },
+          {
+            "nameid_format": {
+              "description": "The requested `NameId` format. Options available are: - `Unspecified` - `EmailAddress` - `Persistent` - `Transient`",
+              "required": false,
+              "one_of": [
+                "Unspecified",
+                "EmailAddress",
+                "Persistent",
+                "Transient"
+              ],
+              "type": "string",
+              "default": "EmailAddress"
+            }
+          },
+          {
+            "validate_assertion_signature": {
+              "description": "Enable signature validation for SAML responses.",
+              "required": false,
+              "type": "boolean",
+              "default": true
+            }
+          },
+          {
+            "anonymous": {
+              "description": "An optional string (consumer UUID or username) value to use as an “anonymous” consumer. If not set, a Kong Consumer must exist for the SAML IdP user credentials, mapping the username format to the Kong Consumer username.",
+              "required": false,
+              "type": "string"
+            }
+          },
+          {
+            "session_secret": {
+              "description": "The session secret. This must be a random string of 32 characters from the base64 alphabet (letters, numbers, `/`, `_` and `+`). It is used as the secret key for encrypting session data as well as state information that is sent to the IdP in the authentication exchange.",
+              "required": true,
+              "len_max": 32,
+              "match": "^[0-9a-zA-Z/_+]+$",
+              "referenceable": true,
+              "type": "string",
+              "len_min": 32,
+              "encrypted": true
+            }
+          },
+          {
+            "session_audience": {
+              "description": "The session audience, for example \"my-application\"",
+              "required": false,
+              "type": "string",
+              "default": "default"
+            }
+          },
+          {
+            "session_cookie_name": {
+              "description": "The session cookie name.",
+              "required": false,
+              "type": "string",
+              "default": "session"
+            }
+          },
+          {
+            "session_remember": {
+              "description": "Enables or disables persistent sessions",
+              "required": false,
+              "type": "boolean",
+              "default": false
+            }
+          },
+          {
+            "session_remember_cookie_name": {
+              "description": "Persistent session cookie name",
+              "required": false,
+              "type": "string",
+              "default": "remember"
+            }
+          },
+          {
+            "session_remember_rolling_timeout": {
+              "description": "Persistent session rolling timeout in seconds.",
+              "required": false,
+              "type": "number",
+              "default": 604800
+            }
+          },
+          {
+            "session_remember_absolute_timeout": {
+              "description": "Persistent session absolute timeout in seconds.",
+              "required": false,
+              "type": "number",
+              "default": 2592000
+            }
+          },
+          {
+            "session_idling_timeout": {
+              "description": "The session cookie idle time in seconds.",
+              "required": false,
+              "type": "number",
+              "default": 900
+            }
+          },
+          {
+            "session_rolling_timeout": {
+              "description": "The session cookie absolute timeout in seconds. Specifies how long the session can be used until it is no longer valid.",
+              "required": false,
+              "type": "number",
+              "default": 3600
+            }
+          },
+          {
+            "session_absolute_timeout": {
+              "description": "The session cookie absolute timeout in seconds. Specifies how long the session can be used until it is no longer valid.",
+              "required": false,
+              "type": "number",
+              "default": 86400
+            }
+          },
+          {
+            "session_cookie_path": {
+              "match_none": [
+                {
+                  "pattern": "//",
+                  "err": "must not have empty segments"
+                }
+              ],
+              "required": false,
+              "starts_with": "/",
+              "type": "string",
+              "description": "A string representing a URL path, such as /path/to/resource. Must start with a forward slash (/) and must not contain empty segments (i.e., two consecutive forward slashes).",
+              "default": "/"
+            }
+          },
+          {
+            "session_cookie_domain": {
+              "description": "The session cookie domain flag.",
+              "required": false,
+              "type": "string"
+            }
+          },
+          {
+            "session_cookie_same_site": {
+              "description": "Controls whether a cookie is sent with cross-origin requests, providing some protection against cross-site request forgery attacks.",
+              "required": false,
+              "one_of": [
+                "Strict",
+                "Lax",
+                "None",
+                "Default"
+              ],
+              "type": "string",
+              "default": "Lax"
+            }
+          },
+          {
+            "session_cookie_http_only": {
+              "description": "Forbids JavaScript from accessing the cookie, for example, through the `Document.cookie` property.",
+              "required": false,
+              "type": "boolean",
+              "default": true
+            }
+          },
+          {
+            "session_cookie_secure": {
+              "description": "The cookie is only sent to the server when a request is made with the https:scheme (except on localhost), and therefore is more resistant to man-in-the-middle attacks.",
+              "required": false,
+              "type": "boolean"
+            }
+          },
+          {
+            "session_request_headers": {
+              "type": "set",
+              "elements": {
+                "type": "string",
+                "one_of": [
+                  "id",
+                  "audience",
+                  "subject",
+                  "timeout",
+                  "idling-timeout",
+                  "rolling-timeout",
+                  "absolute-timeout"
+                ]
+              }
+            }
+          },
+          {
+            "session_response_headers": {
+              "type": "set",
+              "elements": {
+                "type": "string",
+                "one_of": [
+                  "id",
+                  "audience",
+                  "subject",
+                  "timeout",
+                  "idling-timeout",
+                  "rolling-timeout",
+                  "absolute-timeout"
+                ]
+              }
+            }
+          },
+          {
+            "session_storage": {
+              "description": "The session storage for session data: - `cookie`: stores session data with the session cookie. The session cannot be invalidated or revoked without changing the session secret, but is stateless, and doesn't require a database. - `memcached`: stores session data in memcached - `redis`: stores session data in Redis",
+              "required": false,
+              "one_of": [
+                "cookie",
+                "memcache",
+                "memcached",
+                "redis"
+              ],
+              "type": "string",
+              "default": "cookie"
+            }
+          },
+          {
+            "session_store_metadata": {
+              "description": "Configures whether or not session metadata should be stored. This includes information about the active sessions for the `specific_audience` belonging to a specific subject.",
+              "required": false,
+              "type": "boolean",
+              "default": false
+            }
+          },
+          {
+            "session_enforce_same_subject": {
+              "description": "When set to `true`, audiences are forced to share the same subject.",
+              "required": false,
+              "type": "boolean",
+              "default": false
+            }
+          },
+          {
+            "session_hash_subject": {
+              "description": "When set to `true`, the value of subject is hashed before being stored. Only applies when `session_store_metadata` is enabled.",
+              "required": false,
+              "type": "boolean",
+              "default": false
+            }
+          },
+          {
+            "session_hash_storage_key": {
+              "description": "When set to `true`, the storage key (session ID) is hashed for extra security. Hashing the storage key means it is impossible to decrypt data from the storage without a cookie.",
+              "required": false,
+              "type": "boolean",
+              "default": false
+            }
+          },
+          {
+            "session_memcached_prefix": {
+              "description": "The memcached session key prefix.",
+              "required": false,
+              "type": "string"
+            }
+          },
+          {
+            "session_memcached_socket": {
+              "description": "The memcached unix socket path.",
+              "required": false,
+              "type": "string"
+            }
+          },
+          {
+            "session_memcached_host": {
+              "description": "The memcached host.",
+              "required": false,
+              "type": "string",
+              "default": "127.0.0.1"
+            }
+          },
+          {
+            "session_memcached_port": {
+              "description": "An integer representing a port number between 0 and 65535, inclusive.",
+              "required": false,
+              "between": [
+                0,
+                65535
+              ],
+              "type": "integer",
+              "default": 11211
+            }
+          },
+          {
+            "redis": {
+              "fields": [
+                {
+                  "host": {
+                    "description": "A string representing a host name, such as example.com.",
+                    "type": "string"
+                  }
+                },
+                {
+                  "port": {
+                    "description": "An integer representing a port number between 0 and 65535, inclusive.",
+                    "type": "integer",
+                    "between": [
+                      0,
+                      65535
+                    ]
+                  }
+                },
+                {
+                  "connect_timeout": {
+                    "description": "An integer representing a timeout in milliseconds. Must be between 0 and 2^31-2.",
+                    "type": "integer",
+                    "between": [
+                      0,
+                      2147483646
+                    ],
+                    "default": 2000
+                  }
+                },
+                {
+                  "send_timeout": {
+                    "description": "An integer representing a timeout in milliseconds. Must be between 0 and 2^31-2.",
+                    "type": "integer",
+                    "between": [
+                      0,
+                      2147483646
+                    ],
+                    "default": 2000
+                  }
+                },
+                {
+                  "read_timeout": {
+                    "description": "An integer representing a timeout in milliseconds. Must be between 0 and 2^31-2.",
+                    "type": "integer",
+                    "between": [
+                      0,
+                      2147483646
+                    ],
+                    "default": 2000
+                  }
+                },
+                {
+                  "username": {
+                    "description": "Username to use for Redis connections. If undefined, ACL authentication won't be performed. This requires Redis v6.0.0+. To be compatible with Redis v5.x.y, you can set it to `default`.",
+                    "type": "string",
+                    "referenceable": true
+                  }
+                },
+                {
+                  "password": {
+                    "description": "Password to use for Redis connections. If undefined, no AUTH commands are sent to Redis.",
+                    "type": "string",
+                    "encrypted": true,
+                    "referenceable": true
+                  }
+                },
+                {
+                  "sentinel_username": {
+                    "description": "Sentinel username to authenticate with a Redis Sentinel instance. If undefined, ACL authentication won't be performed. This requires Redis v6.2.0+.",
+                    "type": "string",
+                    "referenceable": true
+                  }
+                },
+                {
+                  "sentinel_password": {
+                    "description": "Sentinel password to authenticate with a Redis Sentinel instance. If undefined, no AUTH commands are sent to Redis Sentinels.",
+                    "type": "string",
+                    "encrypted": true,
+                    "referenceable": true
+                  }
+                },
+                {
+                  "database": {
+                    "description": "Database to use for the Redis connection when using the `redis` strategy",
+                    "type": "integer",
+                    "default": 0
+                  }
+                },
+                {
+                  "keepalive_pool_size": {
+                    "description": "The size limit for every cosocket connection pool associated with every remote server, per worker process. If neither `keepalive_pool_size` nor `keepalive_backlog` is specified, no pool is created. If `keepalive_pool_size` isn't specified but `keepalive_backlog` is specified, then the pool uses the default value. Try to increase (e.g. 512) this value if latency is high or throughput is low.",
+                    "type": "integer",
+                    "between": [
+                      1,
+                      2147483646
+                    ],
+                    "default": 256
+                  }
+                },
+                {
+                  "keepalive_backlog": {
+                    "description": "Limits the total number of opened connections for a pool. If the connection pool is full, connection queues above the limit go into the backlog queue. If the backlog queue is full, subsequent connect operations fail and return `nil`. Queued operations (subject to set timeouts) resume once the number of connections in the pool is less than `keepalive_pool_size`. If latency is high or throughput is low, try increasing this value. Empirically, this value is larger than `keepalive_pool_size`.",
+                    "type": "integer",
+                    "between": [
+                      0,
+                      2147483646
+                    ]
+                  }
+                },
+                {
+                  "sentinel_master": {
+                    "description": "Sentinel master to use for Redis connections. Defining this value implies using Redis Sentinel.",
+                    "type": "string"
+                  }
+                },
+                {
+                  "sentinel_role": {
+                    "description": "Sentinel role to use for Redis connections when the `redis` strategy is defined. Defining this value implies using Redis Sentinel.",
+                    "type": "string",
+                    "one_of": [
+                      "master",
+                      "slave",
+                      "any"
+                    ]
+                  }
+                },
+                {
+                  "sentinel_nodes": {
+                    "description": "Sentinel node addresses to use for Redis connections when the `redis` strategy is defined. Defining this field implies using a Redis Sentinel. The minimum length of the array is 1 element.",
+                    "required": false,
+                    "elements": {
+                      "fields": [
+                        {
+                          "host": {
+                            "description": "A string representing a host name, such as example.com.",
+                            "required": true,
+                            "type": "string",
+                            "default": "127.0.0.1"
+                          }
+                        },
+                        {
+                          "port": {
+                            "description": "An integer representing a port number between 0 and 65535, inclusive.",
+                            "type": "integer",
+                            "between": [
+                              0,
+                              65535
+                            ],
+                            "default": 6379
+                          }
+                        }
+                      ],
+                      "type": "record"
+                    },
+                    "type": "array",
+                    "len_min": 1
+                  }
+                },
+                {
+                  "cluster_nodes": {
+                    "description": "Cluster addresses to use for Redis connections when the `redis` strategy is defined. Defining this field implies using a Redis Cluster. The minimum length of the array is 1 element.",
+                    "required": false,
+                    "elements": {
+                      "fields": [
+                        {
+                          "ip": {
+                            "description": "A string representing a host name, such as example.com.",
+                            "required": true,
+                            "type": "string",
+                            "default": "127.0.0.1"
+                          }
+                        },
+                        {
+                          "port": {
+                            "description": "An integer representing a port number between 0 and 65535, inclusive.",
+                            "type": "integer",
+                            "between": [
+                              0,
+                              65535
+                            ],
+                            "default": 6379
+                          }
+                        }
+                      ],
+                      "type": "record"
+                    },
+                    "type": "array",
+                    "len_min": 1
+                  }
+                },
+                {
+                  "ssl": {
+                    "description": "If set to true, uses SSL to connect to Redis.",
+                    "required": false,
+                    "type": "boolean",
+                    "default": false
+                  }
+                },
+                {
+                  "ssl_verify": {
+                    "description": "If set to true, verifies the validity of the server SSL certificate. If setting this parameter, also configure `lua_ssl_trusted_certificate` in `kong.conf` to specify the CA (or server) certificate used by your Redis server. You may also need to configure `lua_ssl_verify_depth` accordingly.",
+                    "required": false,
+                    "type": "boolean",
+                    "default": false
+                  }
+                },
+                {
+                  "server_name": {
+                    "description": "A string representing an SNI (server name indication) value for TLS.",
+                    "type": "string",
+                    "required": false
+                  }
+                },
+                {
+                  "cluster_max_redirections": {
+                    "description": "Maximum retry attempts for redirection.",
+                    "required": false,
+                    "type": "integer",
+                    "default": 5
+                  }
+                },
+                {
+                  "connection_is_proxied": {
+                    "description": "If the connection to Redis is proxied (e.g. Envoy), set it `true`. Set the `host` and `port` to point to the proxy address.",
+                    "required": false,
+                    "type": "boolean",
+                    "default": false
+                  }
+                },
+                {
+                  "prefix": {
+                    "description": "The Redis session key prefix.",
+                    "required": false,
+                    "type": "string"
+                  }
+                },
+                {
+                  "socket": {
+                    "description": "The Redis unix socket path.",
+                    "required": false,
+                    "type": "string"
+                  }
+                }
+              ],
+              "entity_checks": [
+                {
+                  "mutually_exclusive_sets": {
+                    "set2": [
+                      "host",
+                      "port"
+                    ],
+                    "set1": [
+                      "sentinel_master",
+                      "sentinel_role",
+                      "sentinel_nodes"
+                    ]
+                  }
+                },
+                {
+                  "mutually_exclusive_sets": {
+                    "set2": [
+                      "cluster_nodes"
+                    ],
+                    "set1": [
+                      "sentinel_master",
+                      "sentinel_role",
+                      "sentinel_nodes"
+                    ]
+                  }
+                },
+                {
+                  "mutually_exclusive_sets": {
+                    "set2": [
+                      "host",
+                      "port"
+                    ],
+                    "set1": [
+                      "cluster_nodes"
+                    ]
+                  }
+                },
+                {
+                  "mutually_required": [
+                    "sentinel_master",
+                    "sentinel_role",
+                    "sentinel_nodes"
+                  ]
+                },
+                {
+                  "mutually_required": [
+                    "host",
+                    "port"
+                  ]
+                },
+                {
+                  "mutually_required": [
+                    "connect_timeout",
+                    "send_timeout",
+                    "read_timeout"
+                  ]
+                },
+                {
+                  "conditional": {
+                    "if_field": "connection_is_proxied",
+                    "then_match": {
+                      "required": true
+                    },
+                    "if_match": {
+                      "eq": true
+                    },
+                    "then_field": "host"
+                  }
+                },
+                {
+                  "custom_entity_check": {
+                    "run_with_missing_fields": true,
+                    "field_sources": [
+                      "database",
+                      "connection_is_proxied"
+                    ]
+                  }
+                },
+                {
+                  "custom_entity_check": {
+                    "run_with_missing_fields": true,
+                    "field_sources": [
+                      "cluster_nodes",
+                      "connection_is_proxied"
+                    ]
+                  }
+                },
+                {
+                  "custom_entity_check": {
+                    "run_with_missing_fields": true,
+                    "field_sources": [
+                      "sentinel_role",
+                      "connection_is_proxied"
+                    ]
+                  }
+                }
+              ],
+              "shorthand_fields": [
+                {
+                  "timeout": {
+                    "type": "integer",
+                    "translate_backwards": [
+                      "connect_timeout"
+                    ],
+                    "deprecation": {
+                      "replaced_with": [
+                        {
+                          "path": [
+                            "connect_timeout"
+                          ]
+                        },
+                        {
+                          "path": [
+                            "send_timeout"
+                          ]
+                        },
+                        {
+                          "path": [
+                            "read_timeout"
+                          ]
+                        }
+                      ],
+                      "message": "redis schema field `timeout` is deprecated, use `connect_timeout`, `send_timeout` and `read_timeout`",
+                      "removal_in_version": "4.0"
+                    }
+                  }
+                },
+                {
+                  "sentinel_addresses": {
+                    "deprecation": {
+                      "replaced_with": [
+                        {
+                          "path": [
+                            "sentinel_nodes"
+                          ]
+                        }
+                      ],
+                      "message": "sentinel_addresses is deprecated, please use sentinel_nodes instead",
+                      "removal_in_version": "4.0"
+                    },
+                    "len_min": 1,
+                    "type": "array",
+                    "elements": {
+                      "type": "string"
+                    }
+                  }
+                },
+                {
+                  "cluster_addresses": {
+                    "deprecation": {
+                      "replaced_with": [
+                        {
+                          "path": [
+                            "cluster_nodes"
+                          ]
+                        }
+                      ],
+                      "message": "cluster_addresses is deprecated, please use cluster_nodes instead",
+                      "removal_in_version": "4.0"
+                    },
+                    "len_min": 1,
+                    "type": "array",
+                    "elements": {
+                      "type": "string"
+                    }
+                  }
+                }
+              ],
+              "required": true,
+              "type": "record"
+            }
+          }
+        ],
         "required": true,
         "shorthand_fields": [
           {
@@ -170,1005 +972,354 @@
           },
           {
             "session_redis_prefix": {
-              "deprecation": {
-                "message": "saml: config.session_redis_prefix is deprecated, please use config.redis.prefix instead",
-                "removal_in_version": "4.0"
-              },
+              "type": "string",
               "translate_backwards": [
                 "redis",
                 "prefix"
               ],
-              "type": "string"
+              "deprecation": {
+                "replaced_with": [
+                  {
+                    "path": [
+                      "redis",
+                      "prefix"
+                    ]
+                  }
+                ],
+                "message": "saml: config.session_redis_prefix is deprecated, please use config.redis.prefix instead",
+                "removal_in_version": "4.0"
+              }
             }
           },
           {
             "session_redis_socket": {
-              "deprecation": {
-                "message": "saml: config.session_redis_socket is deprecated, please use config.redis.socket instead",
-                "removal_in_version": "4.0"
-              },
+              "type": "string",
               "translate_backwards": [
                 "redis",
                 "socket"
               ],
-              "type": "string"
+              "deprecation": {
+                "replaced_with": [
+                  {
+                    "path": [
+                      "redis",
+                      "socket"
+                    ]
+                  }
+                ],
+                "message": "saml: config.session_redis_socket is deprecated, please use config.redis.socket instead",
+                "removal_in_version": "4.0"
+              }
             }
           },
           {
             "session_redis_host": {
-              "deprecation": {
-                "message": "saml: config.session_redis_host is deprecated, please use config.redis.host instead",
-                "removal_in_version": "4.0"
-              },
+              "type": "string",
               "translate_backwards": [
                 "redis",
                 "host"
               ],
-              "type": "string"
+              "deprecation": {
+                "replaced_with": [
+                  {
+                    "path": [
+                      "redis",
+                      "host"
+                    ]
+                  }
+                ],
+                "message": "saml: config.session_redis_host is deprecated, please use config.redis.host instead",
+                "removal_in_version": "4.0"
+              }
             }
           },
           {
             "session_redis_port": {
-              "deprecation": {
-                "message": "saml: config.session_redis_port is deprecated, please use config.redis.port instead",
-                "removal_in_version": "4.0"
-              },
+              "type": "integer",
               "translate_backwards": [
                 "redis",
                 "port"
               ],
-              "type": "integer"
+              "deprecation": {
+                "replaced_with": [
+                  {
+                    "path": [
+                      "redis",
+                      "port"
+                    ]
+                  }
+                ],
+                "message": "saml: config.session_redis_port is deprecated, please use config.redis.port instead",
+                "removal_in_version": "4.0"
+              }
             }
           },
           {
             "session_redis_username": {
-              "deprecation": {
-                "message": "saml: config.redis_host is deprecated, please use config.redis.host instead",
-                "removal_in_version": "4.0"
-              },
+              "type": "string",
               "translate_backwards": [
                 "redis",
                 "username"
               ],
-              "type": "string"
+              "deprecation": {
+                "replaced_with": [
+                  {
+                    "path": [
+                      "redis",
+                      "username"
+                    ]
+                  }
+                ],
+                "message": "saml: config.redis_host is deprecated, please use config.redis.host instead",
+                "removal_in_version": "4.0"
+              }
             }
           },
           {
             "session_redis_password": {
-              "deprecation": {
-                "message": "saml: config.session_redis_password is deprecated, please use config.redis.password instead",
-                "removal_in_version": "4.0"
-              },
+              "type": "string",
               "translate_backwards": [
                 "redis",
                 "password"
               ],
-              "type": "string"
+              "deprecation": {
+                "replaced_with": [
+                  {
+                    "path": [
+                      "redis",
+                      "password"
+                    ]
+                  }
+                ],
+                "message": "saml: config.session_redis_password is deprecated, please use config.redis.password instead",
+                "removal_in_version": "4.0"
+              }
             }
           },
           {
             "session_redis_connect_timeout": {
-              "deprecation": {
-                "message": "saml: config.session_redis_connect_timeout is deprecated, please use config.redis.connect_timeout instead",
-                "removal_in_version": "4.0"
-              },
+              "type": "integer",
               "translate_backwards": [
                 "redis",
                 "connect_timeout"
               ],
-              "type": "integer"
+              "deprecation": {
+                "replaced_with": [
+                  {
+                    "path": [
+                      "redis",
+                      "connect_timeout"
+                    ]
+                  }
+                ],
+                "message": "saml: config.session_redis_connect_timeout is deprecated, please use config.redis.connect_timeout instead",
+                "removal_in_version": "4.0"
+              }
             }
           },
           {
             "session_redis_read_timeout": {
-              "deprecation": {
-                "message": "saml: config.session_redis_read_timeout is deprecated, please use config.redis.read_timeout instead",
-                "removal_in_version": "4.0"
-              },
+              "type": "integer",
               "translate_backwards": [
                 "redis",
                 "read_timeout"
               ],
-              "type": "integer"
+              "deprecation": {
+                "replaced_with": [
+                  {
+                    "path": [
+                      "redis",
+                      "read_timeout"
+                    ]
+                  }
+                ],
+                "message": "saml: config.session_redis_read_timeout is deprecated, please use config.redis.read_timeout instead",
+                "removal_in_version": "4.0"
+              }
             }
           },
           {
             "session_redis_send_timeout": {
-              "deprecation": {
-                "message": "saml: config.session_redis_send_timeout is deprecated, please use config.redis.send_timeout instead",
-                "removal_in_version": "4.0"
-              },
+              "type": "integer",
               "translate_backwards": [
                 "redis",
                 "send_timeout"
               ],
-              "type": "integer"
+              "deprecation": {
+                "replaced_with": [
+                  {
+                    "path": [
+                      "redis",
+                      "send_timeout"
+                    ]
+                  }
+                ],
+                "message": "saml: config.session_redis_send_timeout is deprecated, please use config.redis.send_timeout instead",
+                "removal_in_version": "4.0"
+              }
             }
           },
           {
             "session_redis_ssl": {
-              "deprecation": {
-                "message": "saml: config.session_redis_ssl is deprecated, please use config.redis.ssl instead",
-                "removal_in_version": "4.0"
-              },
+              "type": "boolean",
               "translate_backwards": [
                 "redis",
                 "ssl"
               ],
-              "type": "boolean"
+              "deprecation": {
+                "replaced_with": [
+                  {
+                    "path": [
+                      "redis",
+                      "ssl"
+                    ]
+                  }
+                ],
+                "message": "saml: config.session_redis_ssl is deprecated, please use config.redis.ssl instead",
+                "removal_in_version": "4.0"
+              }
             }
           },
           {
             "session_redis_ssl_verify": {
-              "deprecation": {
-                "message": "saml: config.session_redis_ssl_verify is deprecated, please use config.redis.ssl_verify instead",
-                "removal_in_version": "4.0"
-              },
+              "type": "boolean",
               "translate_backwards": [
                 "redis",
                 "ssl_verify"
               ],
-              "type": "boolean"
+              "deprecation": {
+                "replaced_with": [
+                  {
+                    "path": [
+                      "redis",
+                      "ssl_verify"
+                    ]
+                  }
+                ],
+                "message": "saml: config.session_redis_ssl_verify is deprecated, please use config.redis.ssl_verify instead",
+                "removal_in_version": "4.0"
+              }
             }
           },
           {
             "session_redis_server_name": {
-              "deprecation": {
-                "message": "saml: config.session_redis_server_name is deprecated, please use config.redis.server_name instead",
-                "removal_in_version": "4.0"
-              },
+              "type": "string",
               "translate_backwards": [
                 "redis",
                 "server_name"
               ],
-              "type": "string"
+              "deprecation": {
+                "replaced_with": [
+                  {
+                    "path": [
+                      "redis",
+                      "server_name"
+                    ]
+                  }
+                ],
+                "message": "saml: config.session_redis_server_name is deprecated, please use config.redis.server_name instead",
+                "removal_in_version": "4.0"
+              }
             }
           },
           {
             "session_redis_cluster_nodes": {
               "deprecation": {
+                "replaced_with": [
+                  {
+                    "path": [
+                      "redis",
+                      "cluster_nodes"
+                    ]
+                  }
+                ],
                 "message": "saml: config.session_redis_cluster_nodes is deprecated, please use config.redis.cluster_nodes instead",
                 "removal_in_version": "4.0"
               },
-              "elements": {
-                "fields": [
-                  {
-                    "ip": {
-                      "required": true,
-                      "default": "127.0.0.1",
-                      "description": "A string representing a host name, such as example.com.",
-                      "type": "string"
-                    }
-                  },
-                  {
-                    "port": {
-                      "between": [
-                        0,
-                        65535
-                      ],
-                      "default": 6379,
-                      "description": "An integer representing a port number between 0 and 65535, inclusive.",
-                      "type": "integer"
-                    }
-                  }
-                ],
-                "type": "record"
-              },
+              "type": "array",
               "translate_backwards": [
                 "redis",
                 "cluster_nodes"
               ],
-              "type": "array"
+              "elements": {
+                "fields": [
+                  {
+                    "ip": {
+                      "description": "A string representing a host name, such as example.com.",
+                      "required": true,
+                      "type": "string",
+                      "default": "127.0.0.1"
+                    }
+                  },
+                  {
+                    "port": {
+                      "description": "An integer representing a port number between 0 and 65535, inclusive.",
+                      "type": "integer",
+                      "between": [
+                        0,
+                        65535
+                      ],
+                      "default": 6379
+                    }
+                  }
+                ],
+                "type": "record"
+              }
             }
           },
           {
             "session_redis_cluster_max_redirections": {
-              "deprecation": {
-                "message": "saml: config.session_redis_cluster_max_redirections is deprecated, please use config.redis.cluster_max_redirections instead",
-                "removal_in_version": "4.0"
-              },
+              "type": "integer",
               "translate_backwards": [
                 "redis",
                 "cluster_max_redirections"
               ],
-              "type": "integer"
+              "deprecation": {
+                "replaced_with": [
+                  {
+                    "path": [
+                      "redis",
+                      "cluster_max_redirections"
+                    ]
+                  }
+                ],
+                "message": "saml: config.session_redis_cluster_max_redirections is deprecated, please use config.redis.cluster_max_redirections instead",
+                "removal_in_version": "4.0"
+              }
             }
           },
           {
             "session_redis_cluster_maxredirections": {
-              "deprecation": {
-                "message": "saml: config.session_redis_cluster_maxredirections is deprecated, please use config.redis.cluster_max_redirections instead",
-                "removal_in_version": "4.0"
-              },
+              "type": "integer",
               "translate_backwards": [
                 "redis",
                 "cluster_max_redirections"
               ],
-              "type": "integer"
-            }
-          }
-        ],
-        "fields": [
-          {
-            "assertion_consumer_path": {
-              "required": true,
-              "match_none": [
-                {
-                  "pattern": "//",
-                  "err": "must not have empty segments"
-                }
-              ],
-              "type": "string",
-              "starts_with": "/",
-              "description": "A string representing a URL path, such as /path/to/resource. Must start with a forward slash (/) and must not contain empty segments (i.e., two consecutive forward slashes)."
-            }
-          },
-          {
-            "idp_sso_url": {
-              "required": true,
-              "description": "A string representing a URL, such as https://example.com/path/to/resource?q=search.",
-              "type": "string"
-            }
-          },
-          {
-            "idp_certificate": {
-              "required": false,
-              "referenceable": true,
-              "type": "string",
-              "encrypted": true,
-              "description": "The public certificate provided by the IdP. This is used to validate responses from the IdP.  Only include the contents of the certificate. Do not include the header (`BEGIN CERTIFICATE`) and footer (`END CERTIFICATE`) lines."
-            }
-          },
-          {
-            "response_encryption_key": {
-              "required": false,
-              "referenceable": true,
-              "type": "string",
-              "encrypted": true,
-              "description": "The private encryption key required to decrypt encrypted assertions."
-            }
-          },
-          {
-            "request_signing_key": {
-              "required": false,
-              "referenceable": true,
-              "type": "string",
-              "encrypted": true,
-              "description": "The private key for signing requests.  If this parameter is set, requests sent to the IdP are signed.  The `request_signing_certificate` parameter must be set as well."
-            }
-          },
-          {
-            "request_signing_certificate": {
-              "required": false,
-              "referenceable": true,
-              "type": "string",
-              "encrypted": true,
-              "description": "The certificate for signing requests."
-            }
-          },
-          {
-            "request_signature_algorithm": {
-              "required": false,
-              "type": "string",
-              "default": "SHA256",
-              "one_of": [
-                "SHA256",
-                "SHA384",
-                "SHA512"
-              ],
-              "description": "The signature algorithm for signing Authn requests. Options available are: - `SHA256` - `SHA384` - `SHA512`"
-            }
-          },
-          {
-            "request_digest_algorithm": {
-              "required": false,
-              "type": "string",
-              "default": "SHA256",
-              "one_of": [
-                "SHA256",
-                "SHA1"
-              ],
-              "description": "The digest algorithm for Authn requests: - `SHA256` - `SHA1`"
-            }
-          },
-          {
-            "response_signature_algorithm": {
-              "required": false,
-              "type": "string",
-              "default": "SHA256",
-              "one_of": [
-                "SHA256",
-                "SHA384",
-                "SHA512"
-              ],
-              "description": "The algorithm for validating signatures in SAML responses. Options available are: - `SHA256` - `SHA384` - `SHA512`"
-            }
-          },
-          {
-            "response_digest_algorithm": {
-              "required": false,
-              "type": "string",
-              "default": "SHA256",
-              "one_of": [
-                "SHA256",
-                "SHA1"
-              ],
-              "description": "The algorithm for verifying digest in SAML responses: - `SHA256` - `SHA1`"
-            }
-          },
-          {
-            "issuer": {
-              "required": true,
-              "description": "The unique identifier of the IdP application. Formatted as a URL containing information about the IdP so the SP can validate that the SAML assertions it receives are issued from the correct IdP.",
-              "type": "string"
-            }
-          },
-          {
-            "nameid_format": {
-              "required": false,
-              "type": "string",
-              "default": "EmailAddress",
-              "one_of": [
-                "Unspecified",
-                "EmailAddress",
-                "Persistent",
-                "Transient"
-              ],
-              "description": "The requested `NameId` format. Options available are: - `Unspecified` - `EmailAddress` - `Persistent` - `Transient`"
-            }
-          },
-          {
-            "validate_assertion_signature": {
-              "required": false,
-              "default": true,
-              "description": "Enable signature validation for SAML responses.",
-              "type": "boolean"
-            }
-          },
-          {
-            "anonymous": {
-              "required": false,
-              "description": "An optional string (consumer UUID or username) value to use as an “anonymous” consumer. If not set, a Kong Consumer must exist for the SAML IdP user credentials, mapping the username format to the Kong Consumer username.",
-              "type": "string"
-            }
-          },
-          {
-            "session_secret": {
-              "required": true,
-              "referenceable": true,
-              "match": "^[0-9a-zA-Z/_+]+$",
-              "type": "string",
-              "len_max": 32,
-              "len_min": 32,
-              "encrypted": true,
-              "description": "The session secret. This must be a random string of 32 characters from the base64 alphabet (letters, numbers, `/`, `_` and `+`). It is used as the secret key for encrypting session data as well as state information that is sent to the IdP in the authentication exchange."
-            }
-          },
-          {
-            "session_audience": {
-              "required": false,
-              "default": "default",
-              "description": "The session audience, for example \"my-application\"",
-              "type": "string"
-            }
-          },
-          {
-            "session_cookie_name": {
-              "required": false,
-              "default": "session",
-              "description": "The session cookie name.",
-              "type": "string"
-            }
-          },
-          {
-            "session_remember": {
-              "required": false,
-              "default": false,
-              "description": "Enables or disables persistent sessions",
-              "type": "boolean"
-            }
-          },
-          {
-            "session_remember_cookie_name": {
-              "required": false,
-              "default": "remember",
-              "description": "Persistent session cookie name",
-              "type": "string"
-            }
-          },
-          {
-            "session_remember_rolling_timeout": {
-              "required": false,
-              "default": 604800,
-              "description": "Persistent session rolling timeout in seconds.",
-              "type": "number"
-            }
-          },
-          {
-            "session_remember_absolute_timeout": {
-              "required": false,
-              "default": 2592000,
-              "description": "Persistent session absolute timeout in seconds.",
-              "type": "number"
-            }
-          },
-          {
-            "session_idling_timeout": {
-              "required": false,
-              "default": 900,
-              "description": "The session cookie idle time in seconds.",
-              "type": "number"
-            }
-          },
-          {
-            "session_rolling_timeout": {
-              "required": false,
-              "default": 3600,
-              "description": "The session cookie absolute timeout in seconds. Specifies how long the session can be used until it is no longer valid.",
-              "type": "number"
-            }
-          },
-          {
-            "session_absolute_timeout": {
-              "required": false,
-              "default": 86400,
-              "description": "The session cookie absolute timeout in seconds. Specifies how long the session can be used until it is no longer valid.",
-              "type": "number"
-            }
-          },
-          {
-            "session_cookie_path": {
-              "required": false,
-              "match_none": [
-                {
-                  "pattern": "//",
-                  "err": "must not have empty segments"
-                }
-              ],
-              "type": "string",
-              "starts_with": "/",
-              "default": "/",
-              "description": "A string representing a URL path, such as /path/to/resource. Must start with a forward slash (/) and must not contain empty segments (i.e., two consecutive forward slashes)."
-            }
-          },
-          {
-            "session_cookie_domain": {
-              "required": false,
-              "description": "The session cookie domain flag.",
-              "type": "string"
-            }
-          },
-          {
-            "session_cookie_same_site": {
-              "required": false,
-              "type": "string",
-              "default": "Lax",
-              "one_of": [
-                "Strict",
-                "Lax",
-                "None",
-                "Default"
-              ],
-              "description": "Controls whether a cookie is sent with cross-origin requests, providing some protection against cross-site request forgery attacks."
-            }
-          },
-          {
-            "session_cookie_http_only": {
-              "required": false,
-              "default": true,
-              "description": "Forbids JavaScript from accessing the cookie, for example, through the `Document.cookie` property.",
-              "type": "boolean"
-            }
-          },
-          {
-            "session_cookie_secure": {
-              "required": false,
-              "description": "The cookie is only sent to the server when a request is made with the https:scheme (except on localhost), and therefore is more resistant to man-in-the-middle attacks.",
-              "type": "boolean"
-            }
-          },
-          {
-            "session_request_headers": {
-              "elements": {
-                "type": "string",
-                "one_of": [
-                  "id",
-                  "audience",
-                  "subject",
-                  "timeout",
-                  "idling-timeout",
-                  "rolling-timeout",
-                  "absolute-timeout"
-                ]
-              },
-              "type": "set"
-            }
-          },
-          {
-            "session_response_headers": {
-              "elements": {
-                "type": "string",
-                "one_of": [
-                  "id",
-                  "audience",
-                  "subject",
-                  "timeout",
-                  "idling-timeout",
-                  "rolling-timeout",
-                  "absolute-timeout"
-                ]
-              },
-              "type": "set"
-            }
-          },
-          {
-            "session_storage": {
-              "required": false,
-              "type": "string",
-              "default": "cookie",
-              "one_of": [
-                "cookie",
-                "memcache",
-                "memcached",
-                "redis"
-              ],
-              "description": "The session storage for session data: - `cookie`: stores session data with the session cookie. The session cannot be invalidated or revoked without changing the session secret, but is stateless, and doesn't require a database. - `memcached`: stores session data in memcached - `redis`: stores session data in Redis"
-            }
-          },
-          {
-            "session_store_metadata": {
-              "required": false,
-              "default": false,
-              "description": "Configures whether or not session metadata should be stored. This includes information about the active sessions for the `specific_audience` belonging to a specific subject.",
-              "type": "boolean"
-            }
-          },
-          {
-            "session_enforce_same_subject": {
-              "required": false,
-              "default": false,
-              "description": "When set to `true`, audiences are forced to share the same subject.",
-              "type": "boolean"
-            }
-          },
-          {
-            "session_hash_subject": {
-              "required": false,
-              "default": false,
-              "description": "When set to `true`, the value of subject is hashed before being stored. Only applies when `session_store_metadata` is enabled.",
-              "type": "boolean"
-            }
-          },
-          {
-            "session_hash_storage_key": {
-              "required": false,
-              "default": false,
-              "description": "When set to `true`, the storage key (session ID) is hashed for extra security. Hashing the storage key means it is impossible to decrypt data from the storage without a cookie.",
-              "type": "boolean"
-            }
-          },
-          {
-            "session_memcached_prefix": {
-              "required": false,
-              "description": "The memcached session key prefix.",
-              "type": "string"
-            }
-          },
-          {
-            "session_memcached_socket": {
-              "required": false,
-              "description": "The memcached unix socket path.",
-              "type": "string"
-            }
-          },
-          {
-            "session_memcached_host": {
-              "required": false,
-              "default": "127.0.0.1",
-              "description": "The memcached host.",
-              "type": "string"
-            }
-          },
-          {
-            "session_memcached_port": {
-              "required": false,
-              "type": "integer",
-              "between": [
-                0,
-                65535
-              ],
-              "default": 11211,
-              "description": "An integer representing a port number between 0 and 65535, inclusive."
-            }
-          },
-          {
-            "redis": {
-              "required": true,
-              "entity_checks": [
-                {
-                  "mutually_exclusive_sets": {
-                    "set2": [
-                      "host",
-                      "port"
-                    ],
-                    "set1": [
-                      "sentinel_master",
-                      "sentinel_role",
-                      "sentinel_nodes"
+              "deprecation": {
+                "replaced_with": [
+                  {
+                    "path": [
+                      "redis",
+                      "cluster_max_redirections"
                     ]
                   }
-                },
-                {
-                  "mutually_exclusive_sets": {
-                    "set2": [
-                      "cluster_nodes"
-                    ],
-                    "set1": [
-                      "sentinel_master",
-                      "sentinel_role",
-                      "sentinel_nodes"
-                    ]
-                  }
-                },
-                {
-                  "mutually_exclusive_sets": {
-                    "set2": [
-                      "host",
-                      "port"
-                    ],
-                    "set1": [
-                      "cluster_nodes"
-                    ]
-                  }
-                },
-                {
-                  "mutually_required": [
-                    "sentinel_master",
-                    "sentinel_role",
-                    "sentinel_nodes"
-                  ]
-                },
-                {
-                  "mutually_required": [
-                    "host",
-                    "port"
-                  ]
-                },
-                {
-                  "mutually_required": [
-                    "connect_timeout",
-                    "send_timeout",
-                    "read_timeout"
-                  ]
-                },
-                {
-                  "conditional": {
-                    "then_field": "host",
-                    "if_field": "connection_is_proxied",
-                    "then_match": {
-                      "required": true
-                    },
-                    "if_match": {
-                      "eq": true
-                    }
-                  }
-                },
-                {
-                  "custom_entity_check": {
-                    "run_with_missing_fields": true,
-                    "field_sources": [
-                      "database",
-                      "connection_is_proxied"
-                    ]
-                  }
-                },
-                {
-                  "custom_entity_check": {
-                    "run_with_missing_fields": true,
-                    "field_sources": [
-                      "cluster_nodes",
-                      "connection_is_proxied"
-                    ]
-                  }
-                },
-                {
-                  "custom_entity_check": {
-                    "run_with_missing_fields": true,
-                    "field_sources": [
-                      "sentinel_role",
-                      "connection_is_proxied"
-                    ]
-                  }
-                }
-              ],
-              "type": "record",
-              "fields": [
-                {
-                  "host": {
-                    "description": "A string representing a host name, such as example.com.",
-                    "type": "string"
-                  }
-                },
-                {
-                  "port": {
-                    "between": [
-                      0,
-                      65535
-                    ],
-                    "description": "An integer representing a port number between 0 and 65535, inclusive.",
-                    "type": "integer"
-                  }
-                },
-                {
-                  "connect_timeout": {
-                    "between": [
-                      0,
-                      2147483646
-                    ],
-                    "default": 2000,
-                    "type": "integer",
-                    "description": "An integer representing a timeout in milliseconds. Must be between 0 and 2^31-2."
-                  }
-                },
-                {
-                  "send_timeout": {
-                    "between": [
-                      0,
-                      2147483646
-                    ],
-                    "default": 2000,
-                    "type": "integer",
-                    "description": "An integer representing a timeout in milliseconds. Must be between 0 and 2^31-2."
-                  }
-                },
-                {
-                  "read_timeout": {
-                    "between": [
-                      0,
-                      2147483646
-                    ],
-                    "default": 2000,
-                    "type": "integer",
-                    "description": "An integer representing a timeout in milliseconds. Must be between 0 and 2^31-2."
-                  }
-                },
-                {
-                  "username": {
-                    "referenceable": true,
-                    "type": "string",
-                    "description": "Username to use for Redis connections. If undefined, ACL authentication won't be performed. This requires Redis v6.0.0+. To be compatible with Redis v5.x.y, you can set it to `default`."
-                  }
-                },
-                {
-                  "password": {
-                    "type": "string",
-                    "referenceable": true,
-                    "encrypted": true,
-                    "description": "Password to use for Redis connections. If undefined, no AUTH commands are sent to Redis."
-                  }
-                },
-                {
-                  "sentinel_username": {
-                    "referenceable": true,
-                    "type": "string",
-                    "description": "Sentinel username to authenticate with a Redis Sentinel instance. If undefined, ACL authentication won't be performed. This requires Redis v6.2.0+."
-                  }
-                },
-                {
-                  "sentinel_password": {
-                    "type": "string",
-                    "referenceable": true,
-                    "encrypted": true,
-                    "description": "Sentinel password to authenticate with a Redis Sentinel instance. If undefined, no AUTH commands are sent to Redis Sentinels."
-                  }
-                },
-                {
-                  "database": {
-                    "default": 0,
-                    "type": "integer",
-                    "description": "Database to use for the Redis connection when using the `redis` strategy"
-                  }
-                },
-                {
-                  "keepalive_pool_size": {
-                    "between": [
-                      1,
-                      2147483646
-                    ],
-                    "default": 256,
-                    "type": "integer",
-                    "description": "The size limit for every cosocket connection pool associated with every remote server, per worker process. If neither `keepalive_pool_size` nor `keepalive_backlog` is specified, no pool is created. If `keepalive_pool_size` isn't specified but `keepalive_backlog` is specified, then the pool uses the default value. Try to increase (e.g. 512) this value if latency is high or throughput is low."
-                  }
-                },
-                {
-                  "keepalive_backlog": {
-                    "between": [
-                      0,
-                      2147483646
-                    ],
-                    "description": "Limits the total number of opened connections for a pool. If the connection pool is full, connection queues above the limit go into the backlog queue. If the backlog queue is full, subsequent connect operations fail and return `nil`. Queued operations (subject to set timeouts) resume once the number of connections in the pool is less than `keepalive_pool_size`. If latency is high or throughput is low, try increasing this value. Empirically, this value is larger than `keepalive_pool_size`.",
-                    "type": "integer"
-                  }
-                },
-                {
-                  "sentinel_master": {
-                    "type": "string",
-                    "description": "Sentinel master to use for Redis connections. Defining this value implies using Redis Sentinel."
-                  }
-                },
-                {
-                  "sentinel_role": {
-                    "one_of": [
-                      "master",
-                      "slave",
-                      "any"
-                    ],
-                    "description": "Sentinel role to use for Redis connections when the `redis` strategy is defined. Defining this value implies using Redis Sentinel.",
-                    "type": "string"
-                  }
-                },
-                {
-                  "sentinel_nodes": {
-                    "required": false,
-                    "elements": {
-                      "fields": [
-                        {
-                          "host": {
-                            "required": true,
-                            "default": "127.0.0.1",
-                            "description": "A string representing a host name, such as example.com.",
-                            "type": "string"
-                          }
-                        },
-                        {
-                          "port": {
-                            "between": [
-                              0,
-                              65535
-                            ],
-                            "default": 6379,
-                            "type": "integer",
-                            "description": "An integer representing a port number between 0 and 65535, inclusive."
-                          }
-                        }
-                      ],
-                      "type": "record"
-                    },
-                    "len_min": 1,
-                    "type": "array",
-                    "description": "Sentinel node addresses to use for Redis connections when the `redis` strategy is defined. Defining this field implies using a Redis Sentinel. The minimum length of the array is 1 element."
-                  }
-                },
-                {
-                  "cluster_nodes": {
-                    "required": false,
-                    "elements": {
-                      "fields": [
-                        {
-                          "ip": {
-                            "required": true,
-                            "default": "127.0.0.1",
-                            "description": "A string representing a host name, such as example.com.",
-                            "type": "string"
-                          }
-                        },
-                        {
-                          "port": {
-                            "between": [
-                              0,
-                              65535
-                            ],
-                            "default": 6379,
-                            "type": "integer",
-                            "description": "An integer representing a port number between 0 and 65535, inclusive."
-                          }
-                        }
-                      ],
-                      "type": "record"
-                    },
-                    "len_min": 1,
-                    "type": "array",
-                    "description": "Cluster addresses to use for Redis connections when the `redis` strategy is defined. Defining this field implies using a Redis Cluster. The minimum length of the array is 1 element."
-                  }
-                },
-                {
-                  "ssl": {
-                    "required": false,
-                    "default": false,
-                    "type": "boolean",
-                    "description": "If set to true, uses SSL to connect to Redis."
-                  }
-                },
-                {
-                  "ssl_verify": {
-                    "required": false,
-                    "default": false,
-                    "type": "boolean",
-                    "description": "If set to true, verifies the validity of the server SSL certificate. If setting this parameter, also configure `lua_ssl_trusted_certificate` in `kong.conf` to specify the CA (or server) certificate used by your Redis server. You may also need to configure `lua_ssl_verify_depth` accordingly."
-                  }
-                },
-                {
-                  "server_name": {
-                    "required": false,
-                    "type": "string",
-                    "description": "A string representing an SNI (server name indication) value for TLS."
-                  }
-                },
-                {
-                  "cluster_max_redirections": {
-                    "required": false,
-                    "default": 5,
-                    "description": "Maximum retry attempts for redirection.",
-                    "type": "integer"
-                  }
-                },
-                {
-                  "connection_is_proxied": {
-                    "required": false,
-                    "default": false,
-                    "type": "boolean",
-                    "description": "If the connection to Redis is proxied (e.g. Envoy), set it `true`. Set the `host` and `port` to point to the proxy address."
-                  }
-                },
-                {
-                  "prefix": {
-                    "required": false,
-                    "description": "The Redis session key prefix.",
-                    "type": "string"
-                  }
-                },
-                {
-                  "socket": {
-                    "required": false,
-                    "description": "The Redis unix socket path.",
-                    "type": "string"
-                  }
-                }
-              ],
-              "shorthand_fields": [
-                {
-                  "timeout": {
-                    "deprecation": {
-                      "message": "redis schema field `timeout` is deprecated, use `connect_timeout`, `send_timeout` and `read_timeout`",
-                      "removal_in_version": "4.0"
-                    },
-                    "translate_backwards": [
-                      "connect_timeout"
-                    ],
-                    "type": "integer"
-                  }
-                },
-                {
-                  "sentinel_addresses": {
-                    "deprecation": {
-                      "message": "sentinel_addresses is deprecated, please use sentinel_nodes instead",
-                      "removal_in_version": "4.0"
-                    },
-                    "type": "array",
-                    "elements": {
-                      "type": "string"
-                    },
-                    "len_min": 1
-                  }
-                },
-                {
-                  "cluster_addresses": {
-                    "deprecation": {
-                      "message": "cluster_addresses is deprecated, please use cluster_nodes instead",
-                      "removal_in_version": "4.0"
-                    },
-                    "type": "array",
-                    "elements": {
-                      "type": "string"
-                    },
-                    "len_min": 1
-                  }
-                }
-              ]
+                ],
+                "message": "saml: config.session_redis_cluster_maxredirections is deprecated, please use config.redis.cluster_max_redirections instead",
+                "removal_in_version": "4.0"
+              }
             }
           }
         ],
         "type": "record"
+      }
+    }
+  ],
+  "entity_checks": [
+    {
+      "custom_entity_check": {
+        "field_sources": [
+          "config"
+        ]
       }
     }
   ]

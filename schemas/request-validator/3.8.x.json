@@ -1,16 +1,8 @@
 {
-  "entity_checks": [
-    {
-      "custom_entity_check": {
-        "field_sources": [
-          "config"
-        ]
-      }
-    }
-  ],
   "fields": [
     {
       "protocols": {
+        "description": "A set of strings representing HTTP protocols.",
         "required": true,
         "elements": {
           "type": "string",
@@ -27,15 +19,14 @@
           "grpcs",
           "http",
           "https"
-        ],
-        "description": "A set of strings representing HTTP protocols."
+        ]
       }
     },
     {
       "consumer_group": {
-        "type": "foreign",
         "reference": "consumer_groups",
         "eq": null,
+        "type": "foreign",
         "description": "Custom type for representing a foreign key with a null value allowed."
       }
     },
@@ -44,70 +35,73 @@
         "fields": [
           {
             "body_schema": {
+              "description": "The request body schema specification. One of `body_schema` or `parameter_schema` must be specified.",
               "required": false,
-              "type": "string",
-              "description": "The request body schema specification. One of `body_schema` or `parameter_schema` must be specified."
+              "type": "string"
             }
           },
           {
             "allowed_content_types": {
               "description": "List of allowed content types. The value can be configured with the `charset` parameter. For example, `application/json; charset=UTF-8`.",
+              "type": "set",
               "default": [
                 "application/json"
               ],
               "elements": {
                 "required": true,
                 "type": "string"
-              },
-              "type": "set"
+              }
             }
           },
           {
             "version": {
+              "description": "Which validator to use. Supported values are `kong` (default) for using Kong's own schema validator, or `draft4` for using a JSON Schema Draft 4-compliant validator.",
               "required": true,
-              "type": "string",
               "one_of": [
                 "kong",
                 "draft4"
               ],
-              "default": "kong",
-              "description": "Which validator to use. Supported values are `kong` (default) for using Kong's own schema validator, or `draft4` for using a JSON Schema Draft 4-compliant validator."
+              "type": "string",
+              "default": "kong"
             }
           },
           {
             "parameter_schema": {
-              "required": false,
+              "description": "Array of parameter validator specification. One of `body_schema` or `parameter_schema` must be specified.",
               "type": "array",
+              "required": false,
               "elements": {
                 "fields": [
                   {
                     "in": {
+                      "description": "The location of the parameter.",
+                      "type": "string",
                       "required": true,
                       "one_of": [
                         "query",
                         "header",
                         "path"
-                      ],
-                      "type": "string",
-                      "description": "The location of the parameter."
+                      ]
                     }
                   },
                   {
                     "name": {
+                      "description": "The name of the parameter. Parameter names are case-sensitive, and correspond to the parameter name used by the `in` property. If `in` is `path`, the `name` field MUST correspond to the named capture group from the configured `route`.",
                       "required": true,
-                      "type": "string",
-                      "description": "The name of the parameter. Parameter names are case-sensitive, and correspond to the parameter name used by the `in` property. If `in` is `path`, the `name` field MUST correspond to the named capture group from the configured `route`."
+                      "type": "string"
                     }
                   },
                   {
                     "required": {
+                      "description": "Determines whether this parameter is mandatory.",
                       "required": true,
-                      "type": "boolean",
-                      "description": "Determines whether this parameter is mandatory."
+                      "type": "boolean"
                     }
                   },
                   {
                     "style": {
+                      "description": "Required when `schema` and `explode` are set. Describes how the parameter value will be deserialized depending on the type of the parameter value.",
+                      "type": "string",
                       "one_of": [
                         "label",
                         "form",
@@ -116,15 +110,13 @@
                         "spaceDelimited",
                         "pipeDelimited",
                         "deepObject"
-                      ],
-                      "description": "Required when `schema` and `explode` are set. Describes how the parameter value will be deserialized depending on the type of the parameter value.",
-                      "type": "string"
+                      ]
                     }
                   },
                   {
                     "explode": {
-                      "type": "boolean",
-                      "description": "Required when `schema` and `style` are set. When `explode` is `true`, parameter values of type `array` or `object` generate separate parameters for each value of the array or key-value pair of the map. For other types of parameters, this property has no effect."
+                      "description": "Required when `schema` and `style` are set. When `explode` is `true`, parameter values of type `array` or `object` generate separate parameters for each value of the array or key-value pair of the map. For other types of parameters, this property has no effect.",
+                      "type": "boolean"
                     }
                   },
                   {
@@ -134,6 +126,7 @@
                     }
                   }
                 ],
+                "type": "record",
                 "entity_checks": [
                   {
                     "mutually_required": [
@@ -150,30 +143,28 @@
                       ]
                     }
                   }
-                ],
-                "type": "record"
-              },
-              "description": "Array of parameter validator specification. One of `body_schema` or `parameter_schema` must be specified."
+                ]
+              }
             }
           },
           {
             "verbose_response": {
-              "required": true,
-              "default": false,
+              "description": "If enabled, the plugin returns more verbose and detailed validation errors.",
               "type": "boolean",
-              "description": "If enabled, the plugin returns more verbose and detailed validation errors."
+              "required": true,
+              "default": false
             }
           },
           {
             "content_type_parameter_validation": {
-              "required": true,
-              "default": true,
+              "description": "Determines whether to enable parameters validation of request content-type.",
               "type": "boolean",
-              "description": "Determines whether to enable parameters validation of request content-type."
+              "required": true,
+              "default": true
             }
           }
         ],
-        "required": true,
+        "type": "record",
         "entity_checks": [
           {
             "at_least_one_of": [
@@ -182,7 +173,16 @@
             ]
           }
         ],
-        "type": "record"
+        "required": true
+      }
+    }
+  ],
+  "entity_checks": [
+    {
+      "custom_entity_check": {
+        "field_sources": [
+          "config"
+        ]
       }
     }
   ]
