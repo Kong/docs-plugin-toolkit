@@ -1,27 +1,8 @@
 {
-  "entity_checks": [
-    {
-      "at_least_one_of": [
-        "config.allow_patterns",
-        "config.deny_patterns"
-      ]
-    },
-    {
-      "conditional": {
-        "then_field": "config.allow_all_conversation_history",
-        "if_match": {
-          "eq": true
-        },
-        "then_match": {
-          "eq": false
-        },
-        "if_field": "config.match_all_roles"
-      }
-    }
-  ],
   "fields": [
     {
       "protocols": {
+        "description": "A set of strings representing HTTP protocols.",
         "required": true,
         "elements": {
           "type": "string",
@@ -38,8 +19,7 @@
           "grpcs",
           "http",
           "https"
-        ],
-        "description": "A set of strings representing HTTP protocols."
+        ]
       }
     },
     {
@@ -47,57 +27,77 @@
         "fields": [
           {
             "allow_patterns": {
+              "description": "Array of valid regex patterns, or valid questions from the 'user' role in chat.",
               "required": false,
-              "elements": {
-                "len_max": 500,
-                "type": "string",
-                "len_min": 1
-              },
-              "type": "array",
               "len_max": 10,
-              "description": "Array of valid regex patterns, or valid questions from the 'user' role in chat."
+              "elements": {
+                "len_min": 1,
+                "len_max": 500,
+                "type": "string"
+              },
+              "type": "array"
             }
           },
           {
             "deny_patterns": {
+              "description": "Array of invalid regex patterns, or invalid questions from the 'user' role in chat.",
               "required": false,
-              "elements": {
-                "len_max": 500,
-                "type": "string",
-                "len_min": 1
-              },
-              "type": "array",
               "len_max": 10,
-              "description": "Array of invalid regex patterns, or invalid questions from the 'user' role in chat."
+              "elements": {
+                "len_min": 1,
+                "len_max": 500,
+                "type": "string"
+              },
+              "type": "array"
             }
           },
           {
             "allow_all_conversation_history": {
-              "required": true,
-              "default": false,
+              "description": "If true, will ignore all previous chat prompts from the conversation history.",
               "type": "boolean",
-              "description": "If true, will ignore all previous chat prompts from the conversation history."
+              "required": true,
+              "default": false
             }
           },
           {
             "max_request_body_size": {
-              "gt": 0,
-              "default": 8192,
+              "description": "max allowed body size allowed to be introspected",
               "type": "integer",
-              "description": "max allowed body size allowed to be introspected"
+              "gt": 0,
+              "default": 8192
             }
           },
           {
             "match_all_roles": {
-              "required": true,
-              "default": false,
+              "description": "If true, will match all roles in addition to 'user' role in conversation history.",
               "type": "boolean",
-              "description": "If true, will match all roles in addition to 'user' role in conversation history."
+              "required": true,
+              "default": false
             }
           }
         ],
-        "required": true,
-        "type": "record"
+        "type": "record",
+        "required": true
+      }
+    }
+  ],
+  "entity_checks": [
+    {
+      "at_least_one_of": [
+        "config.allow_patterns",
+        "config.deny_patterns"
+      ]
+    },
+    {
+      "conditional": {
+        "if_field": "config.match_all_roles",
+        "if_match": {
+          "eq": true
+        },
+        "then_field": "config.allow_all_conversation_history",
+        "then_match": {
+          "eq": false
+        }
       }
     }
   ]
