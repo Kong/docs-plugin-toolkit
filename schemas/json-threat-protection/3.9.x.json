@@ -1,0 +1,164 @@
+{
+  "fields": [
+    {
+      "consumer": {
+        "reference": "consumers",
+        "eq": null,
+        "type": "foreign",
+        "description": "Custom type for representing a foreign key with a null value allowed."
+      }
+    },
+    {
+      "protocols": {
+        "description": "A set of strings representing HTTP protocols.",
+        "required": true,
+        "elements": {
+          "type": "string",
+          "one_of": [
+            "grpc",
+            "grpcs",
+            "http",
+            "https"
+          ]
+        },
+        "type": "set",
+        "default": [
+          "grpc",
+          "grpcs",
+          "http",
+          "https"
+        ]
+      }
+    },
+    {
+      "consumer_group": {
+        "reference": "consumer_groups",
+        "eq": null,
+        "type": "foreign",
+        "description": "Custom type for representing a foreign key with a null value allowed."
+      }
+    },
+    {
+      "config": {
+        "fields": [
+          {
+            "max_body_size": {
+              "description": "Max size of the request body. -1 means unlimited.",
+              "required": false,
+              "between": [
+                -1,
+                2147483648
+              ],
+              "type": "integer",
+              "default": 8192
+            }
+          },
+          {
+            "max_container_depth": {
+              "description": "Max nested depth of objects and arrays. -1 means unlimited.",
+              "required": false,
+              "between": [
+                -1,
+                2147483648
+              ],
+              "type": "integer",
+              "default": -1
+            }
+          },
+          {
+            "max_object_entry_count": {
+              "description": "Max number of entries in an object. -1 means unlimited.",
+              "required": false,
+              "between": [
+                -1,
+                2147483648
+              ],
+              "type": "integer",
+              "default": -1
+            }
+          },
+          {
+            "max_object_entry_name_length": {
+              "description": "Max string length of object name. -1 means unlimited.",
+              "required": false,
+              "between": [
+                -1,
+                2147483648
+              ],
+              "type": "integer",
+              "default": -1
+            }
+          },
+          {
+            "max_array_element_count": {
+              "description": "Max number of elements in an array. -1 means unlimited.",
+              "required": false,
+              "between": [
+                -1,
+                2147483648
+              ],
+              "type": "integer",
+              "default": -1
+            }
+          },
+          {
+            "max_string_value_length": {
+              "description": "Max string value length. -1 means unlimited.",
+              "required": false,
+              "between": [
+                -1,
+                2147483648
+              ],
+              "type": "integer",
+              "default": -1
+            }
+          },
+          {
+            "enforcement_mode": {
+              "description": "Enforcement mode of the security policy.",
+              "required": false,
+              "one_of": [
+                "block",
+                "log_only"
+              ],
+              "type": "string",
+              "default": "block"
+            }
+          },
+          {
+            "error_status_code": {
+              "description": "The response status code when validation fails.",
+              "required": false,
+              "between": [
+                400,
+                499
+              ],
+              "type": "integer",
+              "default": 400
+            }
+          },
+          {
+            "error_message": {
+              "description": "The response message when validation fails",
+              "required": false,
+              "type": "string",
+              "default": "Bad Request"
+            }
+          }
+        ],
+        "type": "record",
+        "required": true
+      }
+    }
+  ],
+  "entity_checks": [
+    {
+      "custom_entity_check": {
+        "field_sources": [
+          "config.max_body_size",
+          "config.max_container_depth"
+        ]
+      }
+    }
+  ]
+}
