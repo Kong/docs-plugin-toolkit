@@ -1,0 +1,167 @@
+{
+  "fields": [
+    {
+      "consumer": {
+        "reference": "consumers",
+        "eq": null,
+        "type": "foreign",
+        "description": "Custom type for representing a foreign key with a null value allowed."
+      }
+    },
+    {
+      "protocols": {
+        "description": "A set of strings representing HTTP protocols.",
+        "required": true,
+        "elements": {
+          "type": "string",
+          "one_of": [
+            "grpc",
+            "grpcs",
+            "http",
+            "https"
+          ]
+        },
+        "type": "set",
+        "default": [
+          "grpc",
+          "grpcs",
+          "http",
+          "https"
+        ]
+      }
+    },
+    {
+      "consumer_group": {
+        "reference": "consumer_groups",
+        "eq": null,
+        "type": "foreign",
+        "description": "Custom type for representing a foreign key with a null value allowed."
+      }
+    },
+    {
+      "config": {
+        "fields": [
+          {
+            "introspection_url": {
+              "description": "A string representing a URL, such as https://example.com/path/to/resource?q=search.",
+              "required": true,
+              "type": "string"
+            }
+          },
+          {
+            "ttl": {
+              "description": "The TTL in seconds for the introspection response. Set to 0 to disable the expiration.",
+              "type": "number",
+              "default": 30
+            }
+          },
+          {
+            "token_type_hint": {
+              "description": "The `token_type_hint` value to associate to introspection requests.",
+              "type": "string"
+            }
+          },
+          {
+            "authorization_value": {
+              "description": "The value to set as the `Authorization` header when querying the introspection endpoint. This depends on the OAuth 2.0 server, but usually is the `client_id` and `client_secret` as a Base64-encoded Basic Auth string (`Basic MG9hNWl...`).",
+              "required": true,
+              "type": "string",
+              "referenceable": true,
+              "encrypted": true
+            }
+          },
+          {
+            "timeout": {
+              "description": "An optional timeout in milliseconds when sending data to the upstream server.",
+              "type": "integer",
+              "default": 10000
+            }
+          },
+          {
+            "keepalive": {
+              "description": "An optional value in milliseconds that defines how long an idle connection lives before being closed.",
+              "type": "integer",
+              "default": 60000
+            }
+          },
+          {
+            "introspect_request": {
+              "description": "A boolean indicating whether to forward information about the current downstream request to the introspect endpoint. If true, headers `X-Request-Path` and `X-Request-Http-Method` will be inserted into the introspect request.",
+              "required": true,
+              "type": "boolean",
+              "default": false
+            }
+          },
+          {
+            "hide_credentials": {
+              "description": "An optional boolean value telling the plugin to hide the credential to the upstream API server. It will be removed by Kong before proxying the request.",
+              "type": "boolean",
+              "default": false
+            }
+          },
+          {
+            "run_on_preflight": {
+              "description": "A boolean value that indicates whether the plugin should run (and try to authenticate) on `OPTIONS` preflight requests. If set to `false`, then `OPTIONS` requests will always be allowed.",
+              "type": "boolean",
+              "default": true
+            }
+          },
+          {
+            "anonymous": {
+              "description": "An optional string (consumer UUID or username) value to use as an “anonymous” consumer if authentication fails. If empty (default null), the request fails with an authentication failure `4xx`. Note that this value must refer to the consumer `id` or `username` attribute, and **not** its `custom_id`.",
+              "len_min": 0,
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "consumer_by": {
+              "description": "A string indicating whether to associate OAuth2 `username` or `client_id` with the consumer's username. OAuth2 `username` is mapped to a consumer's `username` field, while an OAuth2 `client_id` maps to a consumer's `custom_id`.",
+              "required": true,
+              "one_of": [
+                "username",
+                "client_id"
+              ],
+              "type": "string",
+              "default": "username"
+            }
+          },
+          {
+            "custom_introspection_headers": {
+              "description": "A list of custom headers to be added in the introspection request.",
+              "required": true,
+              "values": {
+                "type": "string"
+              },
+              "keys": {
+                "type": "string"
+              },
+              "type": "map",
+              "default": [
+
+              ]
+            }
+          },
+          {
+            "custom_claims_forward": {
+              "description": "A list of custom claims to be forwarded from the introspection response to the upstream request. Claims are forwarded in headers with prefix `X-Credential-{claim-name}`.",
+              "required": true,
+              "elements": {
+                "type": "string"
+              },
+              "type": "set",
+              "default": [
+
+              ]
+            }
+          }
+        ],
+        "type": "record",
+        "required": true
+      }
+    }
+  ],
+  "entity_checks": [
+
+  ]
+}
