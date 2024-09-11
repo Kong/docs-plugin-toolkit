@@ -1,0 +1,171 @@
+{
+  "entity_checks": [
+
+  ],
+  "fields": [
+    {
+      "protocols": {
+        "default": [
+          "grpc",
+          "grpcs",
+          "http",
+          "https"
+        ],
+        "type": "set",
+        "required": true,
+        "elements": {
+          "type": "string",
+          "one_of": [
+            "grpc",
+            "grpcs",
+            "http",
+            "https"
+          ]
+        },
+        "description": "A set of strings representing HTTP protocols."
+      }
+    },
+    {
+      "consumer_group": {
+        "type": "foreign",
+        "description": "Custom type for representing a foreign key with a null value allowed.",
+        "reference": "consumer_groups",
+        "eq": null
+      }
+    },
+    {
+      "config": {
+        "type": "record",
+        "required": true,
+        "fields": [
+          {
+            "x_headers": {
+              "default": "append",
+              "type": "string",
+              "one_of": [
+                "append",
+                "transparent",
+                "delete"
+              ],
+              "description": "Determines how to handle headers when forwarding the request.",
+              "required": true
+            }
+          },
+          {
+            "http_proxy_host": {
+              "description": "A string representing a host name, such as example.com.",
+              "type": "string"
+            }
+          },
+          {
+            "http_proxy_port": {
+              "between": [
+                0,
+                65535
+              ],
+              "type": "integer",
+              "description": "An integer representing a port number between 0 and 65535, inclusive."
+            }
+          },
+          {
+            "https_proxy_host": {
+              "description": "A string representing a host name, such as example.com.",
+              "type": "string"
+            }
+          },
+          {
+            "https_proxy_port": {
+              "between": [
+                0,
+                65535
+              ],
+              "type": "integer",
+              "description": "An integer representing a port number between 0 and 65535, inclusive."
+            }
+          },
+          {
+            "proxy_scheme": {
+              "default": "http",
+              "type": "string",
+              "one_of": [
+                "http"
+              ],
+              "description": "The proxy scheme to use when connecting. Only `http` is supported.",
+              "required": true
+            }
+          },
+          {
+            "auth_username": {
+              "description": "The username to authenticate with, if the forward proxy is protected\nby basic authentication.",
+              "required": false,
+              "type": "string",
+              "referenceable": true
+            }
+          },
+          {
+            "auth_password": {
+              "description": "The password to authenticate with, if the forward proxy is protected\nby basic authentication.",
+              "required": false,
+              "type": "string",
+              "referenceable": true
+            }
+          },
+          {
+            "https_verify": {
+              "default": false,
+              "description": "Whether the server certificate will be verified according to the CA certificates specified in lua_ssl_trusted_certificate.",
+              "type": "boolean",
+              "required": true
+            }
+          }
+        ],
+        "entity_checks": [
+          {
+            "at_least_one_of": [
+              "http_proxy_host",
+              "https_proxy_host"
+            ]
+          },
+          {
+            "at_least_one_of": [
+              "http_proxy_port",
+              "https_proxy_port"
+            ]
+          },
+          {
+            "mutually_required": [
+              "http_proxy_host",
+              "http_proxy_port"
+            ]
+          },
+          {
+            "mutually_required": [
+              "https_proxy_host",
+              "https_proxy_port"
+            ]
+          }
+        ],
+        "shorthand_fields": [
+          {
+            "proxy_host": {
+              "type": "string",
+              "deprecation": {
+                "message": "forward-proxy: config.proxy_host is deprecated, please use config.http_proxy_host instead",
+                "removal_in_version": "4.0"
+              }
+            }
+          },
+          {
+            "proxy_port": {
+              "type": "integer",
+              "deprecation": {
+                "message": "forward-proxy: config.proxy_port is deprecated, please use config.http_proxy_port instead",
+                "removal_in_version": "4.0"
+              }
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

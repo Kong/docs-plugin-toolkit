@@ -1,0 +1,280 @@
+{
+  "entity_checks": [
+
+  ],
+  "fields": [
+    {
+      "protocols": {
+        "required": true,
+        "elements": {
+          "type": "string",
+          "one_of": [
+            "grpc",
+            "grpcs",
+            "http",
+            "https",
+            "ws",
+            "wss"
+          ]
+        },
+        "type": "set",
+        "default": [
+          "grpc",
+          "grpcs",
+          "http",
+          "https",
+          "ws",
+          "wss"
+        ]
+      }
+    },
+    {
+      "consumer_group": {
+        "reference": "consumer_groups",
+        "eq": null,
+        "type": "foreign",
+        "description": "Custom type for representing a foreign key with a null value allowed."
+      }
+    },
+    {
+      "config": {
+        "entity_checks": [
+          {
+            "custom_entity_check": {
+              "field_sources": [
+                "authentication"
+              ]
+            }
+          }
+        ],
+        "type": "record",
+        "fields": [
+          {
+            "bootstrap_servers": {
+              "elements": {
+                "type": "record",
+                "fields": [
+                  {
+                    "host": {
+                      "required": true,
+                      "type": "string",
+                      "description": "A string representing a host name, such as example.com."
+                    }
+                  },
+                  {
+                    "port": {
+                      "description": "An integer representing a port number between 0 and 65535, inclusive.",
+                      "between": [
+                        0,
+                        65535
+                      ],
+                      "type": "integer",
+                      "required": true
+                    }
+                  }
+                ]
+              },
+              "type": "set",
+              "description": "Set of bootstrap brokers in a `{host: host, port: port}` list format."
+            }
+          },
+          {
+            "topic": {
+              "required": true,
+              "type": "string",
+              "description": "The Kafka topic to publish to."
+            }
+          },
+          {
+            "timeout": {
+              "default": 10000,
+              "type": "integer",
+              "description": "Socket timeout in milliseconds."
+            }
+          },
+          {
+            "keepalive": {
+              "type": "integer",
+              "default": 60000
+            }
+          },
+          {
+            "keepalive_enabled": {
+              "type": "boolean",
+              "default": false
+            }
+          },
+          {
+            "authentication": {
+              "type": "record",
+              "fields": [
+                {
+                  "strategy": {
+                    "one_of": [
+                      "sasl"
+                    ],
+                    "required": false,
+                    "type": "string",
+                    "description": "The authentication strategy for the plugin, the only option for the value is `sasl`."
+                  }
+                },
+                {
+                  "mechanism": {
+                    "one_of": [
+                      "PLAIN",
+                      "SCRAM-SHA-256",
+                      "SCRAM-SHA-512"
+                    ],
+                    "required": false,
+                    "type": "string",
+                    "description": "The SASL authentication mechanism.  Supported options: `PLAIN` or `SCRAM-SHA-256`."
+                  }
+                },
+                {
+                  "tokenauth": {
+                    "required": false,
+                    "type": "boolean",
+                    "description": "Enable this to indicate `DelegationToken` authentication"
+                  }
+                },
+                {
+                  "user": {
+                    "referenceable": true,
+                    "encrypted": true,
+                    "required": false,
+                    "type": "string",
+                    "description": "Username for SASL authentication."
+                  }
+                },
+                {
+                  "password": {
+                    "referenceable": true,
+                    "encrypted": true,
+                    "required": false,
+                    "type": "string",
+                    "description": "Password for SASL authentication."
+                  }
+                }
+              ],
+              "required": true
+            }
+          },
+          {
+            "security": {
+              "type": "record",
+              "fields": [
+                {
+                  "certificate_id": {
+                    "uuid": true,
+                    "required": false,
+                    "type": "string",
+                    "description": "UUID of certificate entity for mTLS authentication."
+                  }
+                },
+                {
+                  "ssl": {
+                    "required": false,
+                    "type": "boolean",
+                    "description": "Enables TLS."
+                  }
+                }
+              ],
+              "required": true
+            }
+          },
+          {
+            "cluster_name": {
+              "required": false,
+              "type": "string",
+              "auto": true,
+              "description": "An identifier for the Kafka cluster. By default, this field generates a random string. You can also set your own custom cluster identifier.  If more than one Kafka plugin is configured without a `cluster_name` (that is, if the default autogenerated value is removed), these plugins will use the same producer, and by extension, the same cluster. Logs will be sent to the leader of the cluster."
+            }
+          },
+          {
+            "producer_request_acks": {
+              "one_of": [
+                -1,
+                0,
+                1
+              ],
+              "default": 1,
+              "type": "integer",
+              "description": "The number of acknowledgments the producer requires the leader to have received before considering a request complete. Allowed values: 0 for no acknowledgments; 1 for only the leader; and -1 for the full ISR (In-Sync Replica set)."
+            }
+          },
+          {
+            "producer_request_timeout": {
+              "default": 2000,
+              "type": "integer",
+              "description": "Time to wait for a Produce response in milliseconds"
+            }
+          },
+          {
+            "producer_request_limits_messages_per_request": {
+              "default": 200,
+              "type": "integer",
+              "description": "Maximum number of messages to include into a single Produce request."
+            }
+          },
+          {
+            "producer_request_limits_bytes_per_request": {
+              "default": 1048576,
+              "type": "integer",
+              "description": "Maximum size of a Produce request in bytes."
+            }
+          },
+          {
+            "producer_request_retries_max_attempts": {
+              "default": 10,
+              "type": "integer",
+              "description": "Maximum number of retry attempts per single Produce request."
+            }
+          },
+          {
+            "producer_request_retries_backoff_timeout": {
+              "default": 100,
+              "type": "integer",
+              "description": "Backoff interval between retry attempts in milliseconds."
+            }
+          },
+          {
+            "producer_async": {
+              "default": true,
+              "type": "boolean",
+              "description": "Flag to enable asynchronous mode."
+            }
+          },
+          {
+            "producer_async_flush_timeout": {
+              "default": 1000,
+              "type": "integer",
+              "description": "Maximum time interval in milliseconds between buffer flushes in asynchronous mode."
+            }
+          },
+          {
+            "producer_async_buffering_limits_messages_in_memory": {
+              "default": 50000,
+              "type": "integer",
+              "description": "Maximum number of messages that can be buffered in memory in asynchronous mode."
+            }
+          },
+          {
+            "custom_fields_by_lua": {
+              "values": {
+                "type": "string",
+                "len_min": 1
+              },
+              "keys": {
+                "type": "string",
+                "len_min": 1
+              },
+              "type": "map",
+              "description": "Lua code as a key-value map"
+            }
+          }
+        ],
+        "required": true
+      }
+    }
+  ]
+}

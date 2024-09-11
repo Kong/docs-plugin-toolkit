@@ -1,0 +1,490 @@
+{
+  "entity_checks": [
+
+  ],
+  "fields": [
+    {
+      "protocols": {
+        "default": [
+          "grpc",
+          "grpcs",
+          "http",
+          "https"
+        ],
+        "type": "set",
+        "required": true,
+        "elements": {
+          "type": "string",
+          "one_of": [
+            "grpc",
+            "grpcs",
+            "http",
+            "https"
+          ]
+        },
+        "description": "A set of strings representing HTTP protocols."
+      }
+    },
+    {
+      "consumer": {
+        "type": "foreign",
+        "description": "Custom type for representing a foreign key with a null value allowed.",
+        "reference": "consumers",
+        "eq": null
+      }
+    },
+    {
+      "service": {
+        "type": "foreign",
+        "description": "A reference to the 'services' table with a null value allowed.",
+        "reference": "services",
+        "eq": null
+      }
+    },
+    {
+      "config": {
+        "required": true,
+        "fields": [
+          {
+            "route_type": {
+              "description": "The model's operation implementation, for this provider. Set to `preserve` to pass through without transformation.",
+              "one_of": [
+                "llm/v1/chat",
+                "llm/v1/completions",
+                "preserve"
+              ],
+              "type": "string",
+              "required": true
+            }
+          },
+          {
+            "auth": {
+              "required": false,
+              "fields": [
+                {
+                  "header_name": {
+                    "description": "If AI model requires authentication via Authorization or API key header, specify its name here.",
+                    "required": false,
+                    "type": "string",
+                    "referenceable": true
+                  }
+                },
+                {
+                  "header_value": {
+                    "type": "string",
+                    "description": "Specify the full auth header value for 'header_name', for example 'Bearer key' or just 'key'.",
+                    "encrypted": true,
+                    "required": false,
+                    "referenceable": true
+                  }
+                },
+                {
+                  "param_name": {
+                    "description": "If AI model requires authentication via query parameter, specify its name here.",
+                    "required": false,
+                    "type": "string",
+                    "referenceable": true
+                  }
+                },
+                {
+                  "param_value": {
+                    "type": "string",
+                    "description": "Specify the full parameter value for 'param_name'.",
+                    "encrypted": true,
+                    "required": false,
+                    "referenceable": true
+                  }
+                },
+                {
+                  "param_location": {
+                    "description": "Specify whether the 'param_name' and 'param_value' options go in a query string, or the POST form/JSON body.",
+                    "one_of": [
+                      "query",
+                      "body"
+                    ],
+                    "type": "string",
+                    "required": false
+                  }
+                },
+                {
+                  "azure_use_managed_identity": {
+                    "description": "Set true to use the Azure Cloud Managed Identity (or user-assigned identity) to authenticate with Azure-provider models.",
+                    "default": false,
+                    "type": "boolean",
+                    "required": false
+                  }
+                },
+                {
+                  "azure_client_id": {
+                    "description": "If azure_use_managed_identity is set to true, and you need to use a different user-assigned identity for this LLM instance, set the client ID.",
+                    "required": false,
+                    "type": "string",
+                    "referenceable": true
+                  }
+                },
+                {
+                  "azure_client_secret": {
+                    "type": "string",
+                    "description": "If azure_use_managed_identity is set to true, and you need to use a different user-assigned identity for this LLM instance, set the client secret.",
+                    "encrypted": true,
+                    "required": false,
+                    "referenceable": true
+                  }
+                },
+                {
+                  "azure_tenant_id": {
+                    "description": "If azure_use_managed_identity is set to true, and you need to use a different user-assigned identity for this LLM instance, set the tenant ID.",
+                    "required": false,
+                    "type": "string",
+                    "referenceable": true
+                  }
+                }
+              ],
+              "type": "record"
+            }
+          },
+          {
+            "model": {
+              "required": true,
+              "fields": [
+                {
+                  "provider": {
+                    "description": "AI provider request format - Kong translates requests to and from the specified backend compatible formats.",
+                    "one_of": [
+                      "openai",
+                      "azure",
+                      "anthropic",
+                      "cohere",
+                      "mistral",
+                      "llama2"
+                    ],
+                    "type": "string",
+                    "required": true
+                  }
+                },
+                {
+                  "name": {
+                    "description": "Model name to execute.",
+                    "type": "string",
+                    "required": false
+                  }
+                },
+                {
+                  "options": {
+                    "description": "Key/value settings for the model",
+                    "fields": [
+                      {
+                        "max_tokens": {
+                          "description": "Defines the max_tokens, if using chat or completion models.",
+                          "default": 256,
+                          "type": "integer",
+                          "required": false
+                        }
+                      },
+                      {
+                        "temperature": {
+                          "description": "Defines the matching temperature, if using chat or completion models.",
+                          "between": [
+                            0,
+                            5
+                          ],
+                          "type": "number",
+                          "required": false
+                        }
+                      },
+                      {
+                        "top_p": {
+                          "description": "Defines the top-p probability mass, if supported.",
+                          "between": [
+                            0,
+                            1
+                          ],
+                          "type": "number",
+                          "required": false
+                        }
+                      },
+                      {
+                        "top_k": {
+                          "description": "Defines the top-k most likely tokens, if supported.",
+                          "between": [
+                            0,
+                            500
+                          ],
+                          "type": "integer",
+                          "required": false
+                        }
+                      },
+                      {
+                        "anthropic_version": {
+                          "description": "Defines the schema/API version, if using Anthropic provider.",
+                          "type": "string",
+                          "required": false
+                        }
+                      },
+                      {
+                        "azure_instance": {
+                          "description": "Instance name for Azure OpenAI hosted models.",
+                          "type": "string",
+                          "required": false
+                        }
+                      },
+                      {
+                        "azure_api_version": {
+                          "description": "'api-version' for Azure OpenAI instances.",
+                          "default": "2023-05-15",
+                          "type": "string",
+                          "required": false
+                        }
+                      },
+                      {
+                        "azure_deployment_id": {
+                          "description": "Deployment ID for Azure OpenAI instances.",
+                          "type": "string",
+                          "required": false
+                        }
+                      },
+                      {
+                        "llama2_format": {
+                          "description": "If using llama2 provider, select the upstream message format.",
+                          "one_of": [
+                            "raw",
+                            "openai",
+                            "ollama"
+                          ],
+                          "type": "string",
+                          "required": false
+                        }
+                      },
+                      {
+                        "mistral_format": {
+                          "description": "If using mistral provider, select the upstream message format.",
+                          "one_of": [
+                            "openai",
+                            "ollama"
+                          ],
+                          "type": "string",
+                          "required": false
+                        }
+                      },
+                      {
+                        "upstream_url": {
+                          "description": "Manually specify or override the full URL to the AI operation endpoints, when calling (self-)hosted models, or for running via a private endpoint.",
+                          "type": "string",
+                          "required": false
+                        }
+                      },
+                      {
+                        "upstream_path": {
+                          "description": "Manually specify or override the AI operation path, used when e.g. using the 'preserve' route_type.",
+                          "type": "string",
+                          "required": false
+                        }
+                      }
+                    ],
+                    "type": "record",
+                    "required": false
+                  }
+                }
+              ],
+              "type": "record"
+            }
+          },
+          {
+            "logging": {
+              "required": true,
+              "fields": [
+                {
+                  "log_statistics": {
+                    "description": "If enabled and supported by the driver, will add model usage and token metrics into the Kong log plugin(s) output.",
+                    "default": false,
+                    "type": "boolean",
+                    "required": true
+                  }
+                },
+                {
+                  "log_payloads": {
+                    "description": "If enabled, will log the request and response body into the Kong log plugin(s) output.",
+                    "default": false,
+                    "type": "boolean",
+                    "required": true
+                  }
+                }
+              ],
+              "type": "record"
+            }
+          },
+          {
+            "response_streaming": {
+              "default": "allow",
+              "type": "string",
+              "one_of": [
+                "allow",
+                "deny",
+                "always"
+              ],
+              "required": false,
+              "description": "Whether to 'optionally allow', 'deny', or 'always' (force) the streaming of answers via server sent events."
+            }
+          }
+        ],
+        "type": "record",
+        "entity_checks": [
+          {
+            "conditional_at_least_one_of": {
+              "then_err": "must set one of %s, and its respective options, when provider is not self-hosted",
+              "if_field": "model.provider",
+              "then_at_least_one_of": [
+                "auth.header_name",
+                "auth.param_name"
+              ],
+              "if_match": {
+                "one_of": [
+                  "openai",
+                  "anthropic",
+                  "cohere"
+                ]
+              }
+            }
+          },
+          {
+            "conditional_at_least_one_of": {
+              "then_err": "must set one of %s, and its respective options, when azure provider is set",
+              "if_field": "model.provider",
+              "then_at_least_one_of": [
+                "auth.header_name",
+                "auth.param_name",
+                "auth.azure_use_managed_identity"
+              ],
+              "if_match": {
+                "one_of": [
+                  "azure"
+                ]
+              }
+            }
+          },
+          {
+            "mutually_required": [
+              "auth.header_name",
+              "auth.header_value"
+            ]
+          },
+          {
+            "mutually_required": [
+              "auth.param_name",
+              "auth.param_value",
+              "auth.param_location"
+            ]
+          },
+          {
+            "conditional_at_least_one_of": {
+              "then_err": "must set %s for llama2 provider",
+              "if_field": "model.provider",
+              "then_at_least_one_of": [
+                "model.options.llama2_format"
+              ],
+              "if_match": {
+                "one_of": [
+                  "llama2"
+                ]
+              }
+            }
+          },
+          {
+            "conditional_at_least_one_of": {
+              "then_err": "must set %s for mistral provider",
+              "if_field": "model.provider",
+              "then_at_least_one_of": [
+                "model.options.mistral_format"
+              ],
+              "if_match": {
+                "one_of": [
+                  "mistral"
+                ]
+              }
+            }
+          },
+          {
+            "conditional_at_least_one_of": {
+              "then_err": "must set %s for anthropic provider",
+              "if_field": "model.provider",
+              "then_at_least_one_of": [
+                "model.options.anthropic_version"
+              ],
+              "if_match": {
+                "one_of": [
+                  "anthropic"
+                ]
+              }
+            }
+          },
+          {
+            "conditional_at_least_one_of": {
+              "then_err": "must set %s for azure provider",
+              "if_field": "model.provider",
+              "then_at_least_one_of": [
+                "model.options.azure_instance"
+              ],
+              "if_match": {
+                "one_of": [
+                  "azure"
+                ]
+              }
+            }
+          },
+          {
+            "conditional_at_least_one_of": {
+              "then_err": "must set %s for azure provider",
+              "if_field": "model.provider",
+              "then_at_least_one_of": [
+                "model.options.azure_api_version"
+              ],
+              "if_match": {
+                "one_of": [
+                  "azure"
+                ]
+              }
+            }
+          },
+          {
+            "conditional_at_least_one_of": {
+              "then_err": "must set %s for azure provider",
+              "if_field": "model.provider",
+              "then_at_least_one_of": [
+                "model.options.azure_deployment_id"
+              ],
+              "if_match": {
+                "one_of": [
+                  "azure"
+                ]
+              }
+            }
+          },
+          {
+            "conditional_at_least_one_of": {
+              "then_err": "must set %s for self-hosted providers/models",
+              "if_field": "model.provider",
+              "then_at_least_one_of": [
+                "model.options.upstream_url"
+              ],
+              "if_match": {
+                "one_of": [
+                  "mistral",
+                  "llama2"
+                ]
+              }
+            }
+          },
+          {
+            "custom_entity_check": {
+              "field_sources": [
+                "route_type",
+                "model",
+                "logging"
+              ]
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

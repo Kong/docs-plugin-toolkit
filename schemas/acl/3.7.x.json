@@ -1,0 +1,97 @@
+{
+  "entity_checks": [
+    {
+      "only_one_of": [
+        "config.allow",
+        "config.deny"
+      ]
+    },
+    {
+      "at_least_one_of": [
+        "config.allow",
+        "config.deny"
+      ]
+    }
+  ],
+  "fields": [
+    {
+      "consumer": {
+        "type": "foreign",
+        "description": "Custom type for representing a foreign key with a null value allowed.",
+        "reference": "consumers",
+        "eq": null
+      }
+    },
+    {
+      "consumer_group": {
+        "type": "foreign",
+        "description": "Custom type for representing a foreign key with a null value allowed.",
+        "reference": "consumer_groups",
+        "eq": null
+      }
+    },
+    {
+      "protocols": {
+        "default": [
+          "grpc",
+          "grpcs",
+          "http",
+          "https"
+        ],
+        "type": "set",
+        "required": true,
+        "elements": {
+          "type": "string",
+          "one_of": [
+            "grpc",
+            "grpcs",
+            "http",
+            "https"
+          ]
+        },
+        "description": "A set of strings representing HTTP protocols."
+      }
+    },
+    {
+      "config": {
+        "required": true,
+        "fields": [
+          {
+            "allow": {
+              "description": "Arbitrary group names that are allowed to consume the service or route. One of `config.allow` or `config.deny` must be specified.",
+              "type": "array",
+              "elements": {
+                "type": "string"
+              }
+            }
+          },
+          {
+            "deny": {
+              "description": "Arbitrary group names that are not allowed to consume the service or route. One of `config.allow` or `config.deny` must be specified.",
+              "type": "array",
+              "elements": {
+                "type": "string"
+              }
+            }
+          },
+          {
+            "hide_groups_header": {
+              "required": true,
+              "description": "If enabled (`true`), prevents the `X-Consumer-Groups` header from being sent in the request to the upstream service.",
+              "type": "boolean",
+              "default": false
+            }
+          },
+          {
+            "include_consumer_groups": {
+              "required": false,
+              "type": "boolean",
+              "default": false
+            }
+          }
+        ],
+        "type": "record"
+      }
+    }
+  ]
+}

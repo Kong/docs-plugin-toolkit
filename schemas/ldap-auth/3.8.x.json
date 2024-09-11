@@ -1,0 +1,178 @@
+{
+  "entity_checks": [
+
+  ],
+  "fields": [
+    {
+      "consumer": {
+        "reference": "consumers",
+        "eq": null,
+        "type": "foreign",
+        "description": "Custom type for representing a foreign key with a null value allowed."
+      }
+    },
+    {
+      "protocols": {
+        "required": true,
+        "elements": {
+          "type": "string",
+          "one_of": [
+            "grpc",
+            "grpcs",
+            "http",
+            "https",
+            "ws",
+            "wss"
+          ]
+        },
+        "type": "set",
+        "default": [
+          "grpc",
+          "grpcs",
+          "http",
+          "https",
+          "ws",
+          "wss"
+        ]
+      }
+    },
+    {
+      "consumer_group": {
+        "reference": "consumer_groups",
+        "eq": null,
+        "type": "foreign",
+        "description": "Custom type for representing a foreign key with a null value allowed."
+      }
+    },
+    {
+      "config": {
+        "entity_checks": [
+          {
+            "conditional": {
+              "if_match": {
+                "eq": true
+              },
+              "then_field": "start_tls",
+              "if_field": "ldaps",
+              "then_err": "'ldaps' and 'start_tls' cannot be enabled simultaneously",
+              "then_match": {
+                "eq": false
+              }
+            }
+          }
+        ],
+        "type": "record",
+        "fields": [
+          {
+            "ldap_host": {
+              "required": true,
+              "type": "string",
+              "description": "A string representing a host name, such as example.com."
+            }
+          },
+          {
+            "ldap_port": {
+              "required": true,
+              "default": 389,
+              "between": [
+                0,
+                65535
+              ],
+              "type": "integer",
+              "description": "An integer representing a port number between 0 and 65535, inclusive."
+            }
+          },
+          {
+            "ldaps": {
+              "default": false,
+              "required": true,
+              "type": "boolean",
+              "description": "Set to `true` to connect using the LDAPS protocol (LDAP over TLS).  When `ldaps` is configured, you must use port 636. If the `ldap` setting is enabled, ensure the `start_tls` setting is disabled."
+            }
+          },
+          {
+            "start_tls": {
+              "default": false,
+              "required": true,
+              "type": "boolean",
+              "description": "Set it to `true` to issue StartTLS (Transport Layer Security) extended operation over `ldap` connection. If the `start_tls` setting is enabled, ensure the `ldaps` setting is disabled."
+            }
+          },
+          {
+            "verify_ldap_host": {
+              "default": false,
+              "required": true,
+              "type": "boolean",
+              "description": "Set to `true` to authenticate LDAP server. The server certificate will be verified according to the CA certificates specified by the `lua_ssl_trusted_certificate` directive."
+            }
+          },
+          {
+            "base_dn": {
+              "description": "Base DN as the starting point for the search; e.g., dc=example,dc=com",
+              "type": "string",
+              "required": true
+            }
+          },
+          {
+            "attribute": {
+              "description": "Attribute to be used to search the user; e.g. cn",
+              "type": "string",
+              "required": true
+            }
+          },
+          {
+            "cache_ttl": {
+              "default": 60,
+              "required": true,
+              "type": "number",
+              "description": "Cache expiry time in seconds."
+            }
+          },
+          {
+            "hide_credentials": {
+              "default": false,
+              "required": true,
+              "type": "boolean",
+              "description": "An optional boolean value telling the plugin to hide the credential to the upstream server. It will be removed by Kong before proxying the request."
+            }
+          },
+          {
+            "timeout": {
+              "default": 10000,
+              "type": "number",
+              "description": "An optional timeout in milliseconds when waiting for connection with LDAP server."
+            }
+          },
+          {
+            "keepalive": {
+              "default": 60000,
+              "type": "number",
+              "description": "An optional value in milliseconds that defines how long an idle connection to LDAP server will live before being closed."
+            }
+          },
+          {
+            "anonymous": {
+              "type": "string",
+              "description": "An optional string (consumer UUID or username) value to use as an “anonymous” consumer if authentication fails. If empty (default null), the request fails with an authentication failure `4xx`."
+            }
+          },
+          {
+            "header_type": {
+              "default": "ldap",
+              "type": "string",
+              "description": "An optional string to use as part of the Authorization header"
+            }
+          },
+          {
+            "realm": {
+              "description": "When authentication fails the plugin sends `WWW-Authenticate` header with `realm` attribute value.",
+              "type": "string",
+              "required": false
+            }
+          }
+        ],
+        "required": true
+      }
+    }
+  ]
+}
