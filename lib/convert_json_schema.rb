@@ -49,7 +49,7 @@ class ConvertJsonSchema
     props.delete("required") unless props["default"].nil?
 
     # Loop through each field
-    props.each_with_object({}) do |(k, v), fields|
+    props = props.each_with_object({}) do |(k, v), fields|
       v = convert_type(v) if k == 'type'
       k = 'properties' if k == 'fields'
       k = 'minimum' if k == 'gt'
@@ -74,6 +74,7 @@ class ConvertJsonSchema
       if k == 'uuid' && fields[k]
         fields['format'] = 'uuid'
       end
+
 
       # Remove unused fields
       next if [
@@ -103,6 +104,15 @@ class ConvertJsonSchema
 
       fields[k] = v
     end
+
+    if props['type'] == "number" && props['enum']
+      allPropsAreIntegers = props['enum'].select { |e| e.is_a?(Integer) }.length == props['enum'].length
+      if allPropsAreIntegers
+        props['type'] = 'integer'
+      end
+    end
+
+    props
   end
 
   def convert_required_list(schema)
@@ -110,6 +120,14 @@ class ConvertJsonSchema
     schema['required'] = [] if !schema['required'].is_a?(Array)
 
     if schema['properties']
+
+      # Fix empty schema properties that should
+      # be additionalProperties = true
+      if schema['properties'].is_a?(Array)
+        schema['properties'] = {}
+        schema['additionalProperties'] = true
+      end
+
       schema['properties'].each do |k, v|
         if v['required']
           schema['required'].push(k)
@@ -148,14 +166,56 @@ class ConvertJsonSchema
     schema
   end
 
+  def fix_regex(schema)
+    if schema['pattern']
+       # Convert Lua pattern to regex
+       lua_patterns = {
+        '%a' => '[a-zA-Z]',
+        '%c' => '[\x00-\x1F]', # Control characters, cannot be replaced with actual characters
+        '%d' => '[0-9]',
+        '%g' => '[\x21-\x7E]', # Printable characters, cannot be replaced with actual characters
+        '%l' => '[a-z]',
+        '%p' => '[!-/:-@[-`{-~]', # Punctuation characters
+        '%s' => '[\t\n\v\f\r ]', # Whitespace characters
+        '%u' => '[A-Z]',
+        '%w' => '[a-zA-Z0-9]',
+        '%x' => '[0-9a-fA-F]'
+      }
+
+      negative_patterns = {}
+      lua_patterns.each do |lua_pattern, regex|
+        negative_patterns["[^"+lua_pattern+"]"] = "[^#{regex[1..-2]}]"
+      end
+
+      lua_patterns = negative_patterns.merge(lua_patterns)
+
+      lua_patterns.each do |lua_pattern, regex|
+        schema['pattern'] = schema['pattern'].gsub(lua_pattern, regex)
+      end
+
+      # Escape forward slashes
+      schema['pattern'] = schema['pattern'].gsub('%/', '\\/')
+    end
+    if schema['items']
+      schema['items'] = fix_regex(schema['items'])
+    end
+
+    return schema
+  end
+
   def fix_broken_defaults(schema)
     if schema['default'] && schema['type'] == 'object' && schema['default'].is_a?(Array)
       schema.delete('default')
     end
 
+    if schema['default'] && schema['type'] == 'array' && schema['default'].is_a?(Hash)
+      schema['default'] = [schema['default']]
+    end
+
     if schema['properties']
       schema['properties'].each do |k, v|
         schema['properties'][k] = fix_broken_defaults(v)
+        schema['properties'][k] = fix_regex(v)
       end
     end
 
