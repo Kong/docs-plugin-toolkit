@@ -1,8 +1,38 @@
 {
   "entity_checks": [
-
+    {
+      "custom_entity_check": {
+        "field_sources": [
+          "config"
+        ]
+      }
+    }
   ],
   "fields": [
+    {
+      "consumer": {
+        "reference": "consumers",
+        "type": "foreign",
+        "eq": null,
+        "description": "Custom type for representing a foreign key with a null value allowed."
+      }
+    },
+    {
+      "route": {
+        "reference": "routes",
+        "type": "foreign",
+        "eq": null,
+        "description": "A reference to the 'routes' table with a null value allowed."
+      }
+    },
+    {
+      "consumer_group": {
+        "reference": "consumer_groups",
+        "type": "foreign",
+        "eq": null,
+        "description": "Custom type for representing a foreign key with a null value allowed."
+      }
+    },
     {
       "protocols": {
         "required": true,
@@ -26,50 +56,94 @@
       }
     },
     {
-      "consumer_group": {
-        "reference": "consumer_groups",
-        "type": "foreign",
-        "eq": null,
-        "description": "Custom type for representing a foreign key with a null value allowed."
-      }
-    },
-    {
       "config": {
         "fields": [
           {
-            "strategy": {
+            "window_size": {
               "required": true,
-              "description": "The backing data store in which to hold cached entities. Accepted value is `memory`.",
+              "type": "array",
+              "description": "One or more window sizes to apply a limit to (defined in seconds). There must be a matching number of window limits and sizes specified.",
+              "elements": {
+                "type": "number"
+              }
+            }
+          },
+          {
+            "window_type": {
+              "description": "Sets the time window type to either `sliding` (default) or `fixed`. Sliding windows apply the rate limiting logic while taking into account previous hit rates (from the window that immediately precedes the current) using a dynamic weight. Fixed windows consist of buckets that are statically assigned to a definitive time range, each request is mapped to only one fixed window based on its timestamp and will affect only that window's counters.",
               "type": "string",
-              "default": "memory",
+              "default": "sliding",
               "one_of": [
-                "memory",
-                "redis"
+                "fixed",
+                "sliding"
               ]
             }
           },
           {
-            "cache_ttl": {
-              "gt": 0,
-              "type": "integer",
-              "default": 300,
-              "description": "TTL in seconds of cache entities. Must be a value greater than 0."
+            "limit": {
+              "required": true,
+              "type": "array",
+              "description": "One or more requests-per-window limits to apply. There must be a matching number of window limits and sizes specified.",
+              "elements": {
+                "type": "number"
+              }
             }
           },
           {
-            "memory": {
-              "fields": [
-                {
-                  "dictionary_name": {
-                    "required": true,
-                    "type": "string",
-                    "default": "kong_db_cache",
-                    "description": "The name of the shared dictionary in which to hold cache entities when the memory strategy is selected. This dictionary currently must be defined manually in the Kong Nginx template."
-                  }
-                }
-              ],
-              "type": "record",
+            "sync_rate": {
+              "description": "How often to sync counter data to the central data store. A value of 0 results in synchronous behavior; a value of -1 ignores sync behavior entirely and only stores counters in node memory. A value greater than 0 will sync the counters in the specified number of seconds. The minimum allowed interval is 0.02 seconds (20ms).",
+              "type": "number"
+            }
+          },
+          {
+            "namespace": {
+              "auto": true,
+              "type": "string",
+              "description": "The rate limiting library namespace to use for this plugin instance. Counter data and sync configuration is isolated in each namespace. NOTE: For the plugin instances sharing the same namespace, all the configurations that are required for synchronizing counters, e.g. `strategy`, `redis`, `sync_rate`, `dictionary_name`, need to be the same.",
               "required": true
+            }
+          },
+          {
+            "strategy": {
+              "required": true,
+              "description": "The rate-limiting strategy to use for retrieving and incrementing the limits. Available values are: `local` and `cluster`.",
+              "type": "string",
+              "default": "local",
+              "one_of": [
+                "cluster",
+                "redis",
+                "local"
+              ]
+            }
+          },
+          {
+            "dictionary_name": {
+              "description": "The shared dictionary where counters are stored. When the plugin is configured to synchronize counter data externally (that is `config.strategy` is `cluster` or `redis` and `config.sync_rate` isn't `-1`), this dictionary serves as a buffer to populate counters in the data store on each synchronization cycle.",
+              "type": "string",
+              "default": "kong_rate_limiting_counters",
+              "required": true
+            }
+          },
+          {
+            "lock_dictionary_name": {
+              "description": "The shared dictionary where concurrency control locks are stored. The default shared dictionary is `kong_locks`. The shared dictionary should be declared in nginx-kong.conf.",
+              "type": "string",
+              "default": "kong_locks",
+              "required": true
+            }
+          },
+          {
+            "hide_client_headers": {
+              "type": "boolean",
+              "default": false,
+              "description": "Optionally hide informative response headers that would otherwise provide information about the current status of limits and counters."
+            }
+          },
+          {
+            "retry_after_jitter_max": {
+              "type": "number",
+              "default": 0,
+              "description": "The upper bound of a jitter (random delay) in seconds to be added to the `Retry-After` header of denied requests (status = `429`) in order to prevent all the clients from coming back at the same time. The lower bound of the jitter is `0`; in this case, the `Retry-After` header is equal to the `RateLimit-Reset` header."
             }
           },
           {
@@ -439,19 +513,25 @@
             }
           },
           {
-            "bypass_on_err": {
+            "disable_penalty": {
               "type": "boolean",
               "default": false,
-              "description": "Unhandled errors while trying to retrieve a cache entry (such as redis down) are resolved with `Bypass`, with the request going upstream."
+              "description": "If set to `true`, this doesn't count denied requests (status = `429`). If set to `false`, all requests, including denied ones, are counted. This parameter only affects the `sliding` window_type."
             }
           },
           {
-            "vary_headers": {
-              "type": "array",
-              "description": "Relevant headers considered for the cache key. If undefined, none of the headers are taken into consideration.",
-              "elements": {
-                "type": "string"
-              }
+            "error_code": {
+              "gt": 0,
+              "type": "number",
+              "default": 429,
+              "description": "Set a custom error code to return when the rate limit is exceeded."
+            }
+          },
+          {
+            "error_message": {
+              "type": "string",
+              "default": "API rate limit exceeded",
+              "description": "Set a custom error message to return when the rate limit is exceeded."
             }
           }
         ],
