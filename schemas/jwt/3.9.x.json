@@ -1,16 +1,29 @@
 {
+  "entity_checks": [
+    {
+      "conditional": {
+        "if_match": {
+          "gt": 0
+        },
+        "then_field": "config.claims_to_verify",
+        "if_field": "config.maximum_expiration",
+        "then_match": {
+          "contains": "exp"
+        }
+      }
+    }
+  ],
   "fields": [
     {
       "consumer": {
         "reference": "consumers",
-        "eq": null,
         "type": "foreign",
+        "eq": null,
         "description": "Custom type for representing a foreign key with a null value allowed."
       }
     },
     {
       "protocols": {
-        "description": "A set of strings representing HTTP protocols.",
         "required": true,
         "elements": {
           "type": "string",
@@ -27,14 +40,15 @@
           "grpcs",
           "http",
           "https"
-        ]
+        ],
+        "description": "A set of strings representing HTTP protocols."
       }
     },
     {
       "consumer_group": {
         "reference": "consumer_groups",
-        "eq": null,
         "type": "foreign",
+        "eq": null,
         "description": "Custom type for representing a foreign key with a null value allowed."
       }
     },
@@ -45,39 +59,39 @@
             "uri_param_names": {
               "description": "A list of querystring parameters that Kong will inspect to retrieve JWTs.",
               "type": "set",
-              "elements": {
-                "type": "string"
-              },
               "default": [
                 "jwt"
-              ]
+              ],
+              "elements": {
+                "type": "string"
+              }
             }
           },
           {
             "cookie_names": {
               "description": "A list of cookie names that Kong will inspect to retrieve JWTs.",
               "type": "set",
-              "elements": {
-                "type": "string"
-              },
               "default": [
 
-              ]
+              ],
+              "elements": {
+                "type": "string"
+              }
             }
           },
           {
             "key_claim_name": {
               "description": "The name of the claim in which the key identifying the secret must be passed. The plugin will attempt to read this claim from the JWT payload and the header, in that order.",
-              "type": "string",
-              "default": "iss"
+              "default": "iss",
+              "type": "string"
             }
           },
           {
             "secret_is_base64": {
-              "description": "If true, the plugin assumes the credential’s secret to be base64 encoded. You will need to create a base64-encoded secret for your Consumer, and sign your JWT with the original secret.",
-              "type": "boolean",
               "required": true,
-              "default": false
+              "description": "If true, the plugin assumes the credential’s secret to be base64 encoded. You will need to create a base64-encoded secret for your Consumer, and sign your JWT with the original secret.",
+              "default": false,
+              "type": "boolean"
             }
           },
           {
@@ -101,59 +115,45 @@
           },
           {
             "run_on_preflight": {
-              "description": "A boolean value that indicates whether the plugin should run (and try to authenticate) on OPTIONS preflight requests. If set to false, then OPTIONS requests will always be allowed.",
-              "type": "boolean",
               "required": true,
-              "default": true
+              "description": "A boolean value that indicates whether the plugin should run (and try to authenticate) on OPTIONS preflight requests. If set to false, then OPTIONS requests will always be allowed.",
+              "default": true,
+              "type": "boolean"
             }
           },
           {
             "maximum_expiration": {
-              "description": "A value between 0 and 31536000 (365 days) limiting the lifetime of the JWT to maximum_expiration seconds in the future.",
-              "type": "number",
               "between": [
                 0,
                 31536000
               ],
-              "default": 0
+              "description": "A value between 0 and 31536000 (365 days) limiting the lifetime of the JWT to maximum_expiration seconds in the future.",
+              "default": 0,
+              "type": "number"
             }
           },
           {
             "header_names": {
               "description": "A list of HTTP header names that Kong will inspect to retrieve JWTs.",
               "type": "set",
-              "elements": {
-                "type": "string"
-              },
               "default": [
                 "authorization"
-              ]
+              ],
+              "elements": {
+                "type": "string"
+              }
             }
           },
           {
             "realm": {
-              "description": "When authentication fails the plugin sends `WWW-Authenticate` header with `realm` attribute value.",
               "type": "string",
-              "required": false
+              "required": false,
+              "description": "When authentication fails the plugin sends `WWW-Authenticate` header with `realm` attribute value."
             }
           }
         ],
         "type": "record",
         "required": true
-      }
-    }
-  ],
-  "entity_checks": [
-    {
-      "conditional": {
-        "if_field": "config.maximum_expiration",
-        "if_match": {
-          "gt": 0
-        },
-        "then_field": "config.claims_to_verify",
-        "then_match": {
-          "contains": "exp"
-        }
       }
     }
   ]

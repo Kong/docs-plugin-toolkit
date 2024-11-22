@@ -1,8 +1,27 @@
 {
+  "entity_checks": [
+    {
+      "at_least_one_of": [
+        "config.allow_patterns",
+        "config.deny_patterns"
+      ]
+    },
+    {
+      "conditional": {
+        "if_match": {
+          "eq": true
+        },
+        "then_field": "config.allow_all_conversation_history",
+        "if_field": "config.match_all_roles",
+        "then_match": {
+          "eq": false
+        }
+      }
+    }
+  ],
   "fields": [
     {
       "protocols": {
-        "description": "A set of strings representing HTTP protocols.",
         "required": true,
         "elements": {
           "type": "string",
@@ -19,7 +38,8 @@
           "grpcs",
           "http",
           "https"
-        ]
+        ],
+        "description": "A set of strings representing HTTP protocols."
       }
     },
     {
@@ -28,76 +48,56 @@
           {
             "allow_patterns": {
               "description": "Array of valid regex patterns, or valid questions from the 'user' role in chat.",
-              "required": false,
-              "len_max": 10,
               "elements": {
-                "len_min": 1,
                 "len_max": 500,
-                "type": "string"
+                "type": "string",
+                "len_min": 1
               },
-              "type": "array"
+              "len_max": 10,
+              "type": "array",
+              "required": false
             }
           },
           {
             "deny_patterns": {
               "description": "Array of invalid regex patterns, or invalid questions from the 'user' role in chat.",
-              "required": false,
-              "len_max": 10,
               "elements": {
-                "len_min": 1,
                 "len_max": 500,
-                "type": "string"
+                "type": "string",
+                "len_min": 1
               },
-              "type": "array"
+              "len_max": 10,
+              "type": "array",
+              "required": false
             }
           },
           {
             "allow_all_conversation_history": {
-              "description": "If true, will ignore all previous chat prompts from the conversation history.",
               "type": "boolean",
-              "required": true,
-              "default": false
+              "description": "If true, will ignore all previous chat prompts from the conversation history.",
+              "default": false,
+              "required": true
             }
           },
           {
             "max_request_body_size": {
-              "description": "max allowed body size allowed to be introspected",
-              "type": "integer",
               "gt": 0,
-              "default": 8192
+              "description": "max allowed body size allowed to be introspected",
+              "default": 8192,
+              "type": "integer"
             }
           },
           {
             "match_all_roles": {
-              "description": "If true, will match all roles in addition to 'user' role in conversation history.",
               "type": "boolean",
-              "required": true,
-              "default": false
+              "description": "If true, will match all roles in addition to 'user' role in conversation history.",
+              "default": false,
+              "required": true
             }
           }
         ],
         "type": "record",
         "required": true
-      }
-    }
-  ],
-  "entity_checks": [
-    {
-      "at_least_one_of": [
-        "config.allow_patterns",
-        "config.deny_patterns"
-      ]
-    },
-    {
-      "conditional": {
-        "if_field": "config.match_all_roles",
-        "if_match": {
-          "eq": true
-        },
-        "then_field": "config.allow_all_conversation_history",
-        "then_match": {
-          "eq": false
-        }
       }
     }
   ]

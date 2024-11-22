@@ -1,8 +1,10 @@
 {
+  "entity_checks": [
+
+  ],
   "fields": [
     {
       "protocols": {
-        "description": "A set of strings representing HTTP protocols.",
         "required": true,
         "elements": {
           "type": "string",
@@ -19,14 +21,15 @@
           "grpcs",
           "http",
           "https"
-        ]
+        ],
+        "description": "A set of strings representing HTTP protocols."
       }
     },
     {
       "consumer_group": {
         "reference": "consumer_groups",
-        "eq": null,
         "type": "foreign",
+        "eq": null,
         "description": "Custom type for representing a foreign key with a null value allowed."
       }
     },
@@ -35,28 +38,28 @@
         "fields": [
           {
             "traces_endpoint": {
-              "description": "A string representing a URL, such as https://example.com/path/to/resource?q=search.",
               "type": "string",
-              "referenceable": true
+              "referenceable": true,
+              "description": "A string representing a URL, such as https://example.com/path/to/resource?q=search."
             }
           },
           {
             "logs_endpoint": {
-              "description": "A string representing a URL, such as https://example.com/path/to/resource?q=search.",
               "type": "string",
-              "referenceable": true
+              "referenceable": true,
+              "description": "A string representing a URL, such as https://example.com/path/to/resource?q=search."
             }
           },
           {
             "headers": {
+              "keys": {
+                "description": "A string representing an HTTP header name.",
+                "type": "string"
+              },
               "description": "The custom headers to be added in the HTTP request sent to the OTLP server. This setting is useful for adding the authentication headers (token) for the APM backend.",
               "type": "map",
               "values": {
                 "referenceable": true,
-                "type": "string"
-              },
-              "keys": {
-                "description": "A string representing an HTTP header name.",
                 "type": "string"
               }
             }
@@ -64,13 +67,13 @@
           {
             "resource_attributes": {
               "keys": {
-                "required": true,
-                "type": "string"
+                "type": "string",
+                "required": true
               },
               "type": "map",
               "values": {
-                "required": true,
-                "type": "string"
+                "type": "string",
+                "required": true
               }
             }
           },
@@ -79,144 +82,144 @@
               "fields": [
                 {
                   "max_batch_size": {
-                    "description": "Maximum number of entries that can be processed at a time.",
-                    "type": "integer",
                     "between": [
                       1,
                       1000000
                     ],
-                    "default": 1
+                    "type": "integer",
+                    "default": 1,
+                    "description": "Maximum number of entries that can be processed at a time."
                   }
                 },
                 {
                   "max_coalescing_delay": {
-                    "description": "Maximum number of (fractional) seconds to elapse after the first entry was queued before the queue starts calling the handler.",
-                    "type": "number",
                     "between": [
                       0,
                       3600
                     ],
-                    "default": 1
+                    "type": "number",
+                    "default": 1,
+                    "description": "Maximum number of (fractional) seconds to elapse after the first entry was queued before the queue starts calling the handler."
                   }
                 },
                 {
                   "max_entries": {
-                    "description": "Maximum number of entries that can be waiting on the queue.",
-                    "type": "integer",
                     "between": [
                       1,
                       1000000
                     ],
-                    "default": 10000
+                    "type": "integer",
+                    "default": 10000,
+                    "description": "Maximum number of entries that can be waiting on the queue."
                   }
                 },
                 {
                   "max_bytes": {
-                    "description": "Maximum number of bytes that can be waiting on a queue, requires string content.",
-                    "type": "integer"
+                    "type": "integer",
+                    "description": "Maximum number of bytes that can be waiting on a queue, requires string content."
                   }
                 },
                 {
                   "max_retry_time": {
-                    "description": "Time in seconds before the queue gives up calling a failed handler for a batch.",
                     "type": "number",
-                    "default": 60
+                    "default": 60,
+                    "description": "Time in seconds before the queue gives up calling a failed handler for a batch."
                   }
                 },
                 {
                   "initial_retry_delay": {
-                    "description": "Time in seconds before the initial retry is made for a failing batch.",
-                    "type": "number",
                     "between": [
                       0.001,
                       1000000
                     ],
-                    "default": 0.01
+                    "type": "number",
+                    "default": 0.01,
+                    "description": "Time in seconds before the initial retry is made for a failing batch."
                   }
                 },
                 {
                   "max_retry_delay": {
-                    "description": "Maximum time in seconds between retries, caps exponential backoff.",
-                    "type": "number",
                     "between": [
                       0.001,
                       1000000
                     ],
-                    "default": 60
+                    "type": "number",
+                    "default": 60,
+                    "description": "Maximum time in seconds between retries, caps exponential backoff."
                   }
                 },
                 {
                   "concurrency_limit": {
-                    "description": "The number of of queue delivery timers. -1 indicates unlimited.",
-                    "type": "integer",
-                    "default": 1,
                     "one_of": [
                       -1,
                       1
-                    ]
+                    ],
+                    "type": "integer",
+                    "default": 1,
+                    "description": "The number of of queue delivery timers. -1 indicates unlimited."
                   }
                 }
               ],
               "type": "record",
-              "required": true,
               "default": {
                 "max_batch_size": 200
-              }
+              },
+              "required": true
             }
           },
           {
             "batch_span_count": {
-              "description": "The number of spans to be sent in a single batch.",
-              "type": "integer",
               "deprecation": {
                 "old_default": 200,
                 "message": "opentelemetry: config.batch_span_count is deprecated, please use config.queue.max_batch_size instead",
                 "removal_in_version": "4.0"
-              }
+              },
+              "description": "The number of spans to be sent in a single batch.",
+              "type": "integer"
             }
           },
           {
             "batch_flush_delay": {
-              "description": "The delay, in seconds, between two consecutive batches.",
-              "type": "integer",
               "deprecation": {
                 "old_default": 3,
                 "message": "opentelemetry: config.batch_flush_delay is deprecated, please use config.queue.max_coalescing_delay instead",
                 "removal_in_version": "4.0"
-              }
+              },
+              "description": "The delay, in seconds, between two consecutive batches.",
+              "type": "integer"
             }
           },
           {
             "connect_timeout": {
-              "description": "An integer representing a timeout in milliseconds. Must be between 0 and 2^31-2.",
-              "type": "integer",
               "between": [
                 0,
                 2147483646
               ],
-              "default": 1000
+              "type": "integer",
+              "default": 1000,
+              "description": "An integer representing a timeout in milliseconds. Must be between 0 and 2^31-2."
             }
           },
           {
             "send_timeout": {
-              "description": "An integer representing a timeout in milliseconds. Must be between 0 and 2^31-2.",
-              "type": "integer",
               "between": [
                 0,
                 2147483646
               ],
-              "default": 5000
+              "type": "integer",
+              "default": 5000,
+              "description": "An integer representing a timeout in milliseconds. Must be between 0 and 2^31-2."
             }
           },
           {
             "read_timeout": {
-              "description": "An integer representing a timeout in milliseconds. Must be between 0 and 2^31-2.",
-              "type": "integer",
               "between": [
                 0,
                 2147483646
               ],
-              "default": 5000
+              "type": "integer",
+              "default": 5000,
+              "description": "An integer representing a timeout in milliseconds. Must be between 0 and 2^31-2."
             }
           },
           {
@@ -227,6 +230,13 @@
           {
             "header_type": {
               "required": false,
+              "deprecation": {
+                "old_default": "preserve",
+                "message": "opentelemetry: config.header_type is deprecated, please use config.propagation options instead",
+                "removal_in_version": "4.0"
+              },
+              "type": "string",
+              "default": "preserve",
               "one_of": [
                 "preserve",
                 "ignore",
@@ -238,24 +248,17 @@
                 "aws",
                 "gcp",
                 "datadog"
-              ],
-              "type": "string",
-              "deprecation": {
-                "old_default": "preserve",
-                "message": "opentelemetry: config.header_type is deprecated, please use config.propagation options instead",
-                "removal_in_version": "4.0"
-              },
-              "default": "preserve"
+              ]
             }
           },
           {
             "sampling_rate": {
-              "description": "Tracing sampling rate for configuring the probability-based sampler. When set, this value supersedes the global `tracing_sampling_rate` setting from kong.conf.",
-              "type": "number",
               "between": [
                 0,
                 1
               ],
+              "description": "Tracing sampling rate for configuring the probability-based sampler. When set, this value supersedes the global `tracing_sampling_rate` setting from kong.conf.",
+              "type": "number",
               "required": false
             }
           },
@@ -269,13 +272,13 @@
                     "elements": {
                       "type": "string",
                       "one_of": [
+                        "b3",
                         "gcp",
                         "jaeger",
                         "aws",
                         "ot",
                         "w3c",
-                        "datadog",
-                        "b3"
+                        "datadog"
                       ]
                     }
                   }
@@ -297,14 +300,14 @@
                       "type": "string",
                       "one_of": [
                         "preserve",
+                        "b3",
                         "gcp",
                         "b3-single",
                         "jaeger",
                         "aws",
                         "ot",
                         "w3c",
-                        "datadog",
-                        "b3"
+                        "datadog"
                       ]
                     }
                   }
@@ -313,28 +316,29 @@
                   "default_format": {
                     "description": "The default header format to use when extractors did not match any format in the incoming headers and `inject` is configured with the value: `preserve`. This can happen when no tracing header was found in the request, or the incoming tracing header formats were not included in `extract`.",
                     "type": "string",
-                    "required": true,
                     "one_of": [
+                      "b3",
                       "gcp",
                       "b3-single",
                       "jaeger",
                       "aws",
                       "ot",
                       "w3c",
-                      "datadog",
-                      "b3"
-                    ]
+                      "datadog"
+                    ],
+                    "required": true
                   }
                 }
               ],
               "type": "record",
-              "required": true,
               "default": {
                 "default_format": "w3c"
-              }
+              },
+              "required": true
             }
           }
         ],
+        "required": true,
         "entity_checks": [
           {
             "at_least_one_of": [
@@ -347,21 +351,17 @@
         "shorthand_fields": [
           {
             "endpoint": {
-              "description": "A string representing a URL, such as https://example.com/path/to/resource?q=search.",
-              "type": "string",
-              "referenceable": true,
               "deprecation": {
-                "message": "OpenTelemetry: config.endpoint is deprecated, please use config.traces_endpoint instead",
-                "removal_in_version": "4.0"
-              }
+                "removal_in_version": "4.0",
+                "message": "OpenTelemetry: config.endpoint is deprecated, please use config.traces_endpoint instead"
+              },
+              "description": "A string representing a URL, such as https://example.com/path/to/resource?q=search.",
+              "referenceable": true,
+              "type": "string"
             }
           }
-        ],
-        "required": true
+        ]
       }
     }
-  ],
-  "entity_checks": [
-
   ]
 }
