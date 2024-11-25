@@ -1,8 +1,22 @@
 {
+  "entity_checks": [
+    {
+      "mutually_required": [
+        "config.aws_key",
+        "config.aws_secret"
+      ]
+    },
+    {
+      "custom_entity_check": {
+        "field_sources": [
+          "config.proxy_url"
+        ]
+      }
+    }
+  ],
   "fields": [
     {
       "protocols": {
-        "description": "A set of strings representing HTTP protocols.",
         "required": true,
         "elements": {
           "type": "string",
@@ -19,14 +33,15 @@
           "grpcs",
           "http",
           "https"
-        ]
+        ],
+        "description": "A set of strings representing HTTP protocols."
       }
     },
     {
       "consumer_group": {
         "reference": "consumer_groups",
-        "eq": null,
         "type": "foreign",
+        "eq": null,
         "description": "Custom type for representing a foreign key with a null value allowed."
       }
     },
@@ -35,49 +50,49 @@
         "fields": [
           {
             "timeout": {
-              "description": "An optional timeout in milliseconds when invoking the function.",
               "required": true,
               "type": "number",
-              "default": 60000
+              "default": 60000,
+              "description": "An optional timeout in milliseconds when invoking the function."
             }
           },
           {
             "keepalive": {
-              "description": "An optional value in milliseconds that defines how long an idle connection lives before being closed.",
               "required": true,
               "type": "number",
-              "default": 60000
+              "default": 60000,
+              "description": "An optional value in milliseconds that defines how long an idle connection lives before being closed."
             }
           },
           {
             "aws_key": {
               "description": "The AWS key credential to be used when invoking the function.",
               "type": "string",
-              "encrypted": true,
-              "referenceable": true
+              "referenceable": true,
+              "encrypted": true
             }
           },
           {
             "aws_secret": {
               "description": "The AWS secret credential to be used when invoking the function. ",
               "type": "string",
-              "encrypted": true,
-              "referenceable": true
+              "referenceable": true,
+              "encrypted": true
             }
           },
           {
             "aws_assume_role_arn": {
               "description": "The target AWS IAM role ARN used to invoke the Lambda function.",
               "type": "string",
-              "encrypted": true,
-              "referenceable": true
+              "referenceable": true,
+              "encrypted": true
             }
           },
           {
             "aws_role_session_name": {
-              "description": "The identifier of the assumed role session.",
               "type": "string",
-              "default": "kong"
+              "default": "kong",
+              "description": "The identifier of the assumed role session."
             }
           },
           {
@@ -94,40 +109,40 @@
           },
           {
             "function_name": {
-              "description": "The AWS Lambda function to invoke. Both function name and function ARN (including partial) are supported.",
               "required": false,
+              "description": "The AWS Lambda function to invoke. Both function name and function ARN (including partial) are supported.",
               "type": "string"
             }
           },
           {
             "qualifier": {
-              "description": "The qualifier to use when invoking the function.",
-              "type": "string"
+              "type": "string",
+              "description": "The qualifier to use when invoking the function."
             }
           },
           {
             "invocation_type": {
-              "description": "The InvocationType to use when invoking the function. Available types are RequestResponse, Event, DryRun.",
               "required": true,
+              "description": "The InvocationType to use when invoking the function. Available types are RequestResponse, Event, DryRun.",
+              "type": "string",
+              "default": "RequestResponse",
               "one_of": [
                 "RequestResponse",
                 "Event",
                 "DryRun"
-              ],
-              "type": "string",
-              "default": "RequestResponse"
+              ]
             }
           },
           {
             "log_type": {
-              "description": "The LogType to use when invoking the function. By default, None and Tail are supported.",
               "required": true,
+              "description": "The LogType to use when invoking the function. By default, None and Tail are supported.",
+              "type": "string",
+              "default": "Tail",
               "one_of": [
                 "Tail",
                 "None"
-              ],
-              "type": "string",
-              "default": "Tail"
+              ]
             }
           },
           {
@@ -138,13 +153,13 @@
           },
           {
             "port": {
-              "description": "An integer representing a port number between 0 and 65535, inclusive.",
-              "type": "integer",
               "between": [
                 0,
                 65535
               ],
-              "default": 443
+              "type": "integer",
+              "default": 443,
+              "description": "An integer representing a port number between 0 and 65535, inclusive."
             }
           },
           {
@@ -155,54 +170,54 @@
           },
           {
             "unhandled_status": {
-              "description": "The response status code to use (instead of the default 200, 202, or 204) in the case of an Unhandled Function Error.",
-              "type": "integer",
               "between": [
                 100,
                 999
-              ]
+              ],
+              "description": "The response status code to use (instead of the default 200, 202, or 204) in the case of an Unhandled Function Error.",
+              "type": "integer"
             }
           },
           {
             "forward_request_method": {
-              "description": "An optional value that defines whether the original HTTP request method verb is sent in the request_method field of the JSON-encoded request.",
               "type": "boolean",
-              "default": false
+              "default": false,
+              "description": "An optional value that defines whether the original HTTP request method verb is sent in the request_method field of the JSON-encoded request."
             }
           },
           {
             "forward_request_uri": {
-              "description": "An optional value that defines whether the original HTTP request URI is sent in the request_uri field of the JSON-encoded request.",
               "type": "boolean",
-              "default": false
+              "default": false,
+              "description": "An optional value that defines whether the original HTTP request URI is sent in the request_uri field of the JSON-encoded request."
             }
           },
           {
             "forward_request_headers": {
-              "description": "An optional value that defines whether the original HTTP request headers are sent as a map in the request_headers field of the JSON-encoded request.",
               "type": "boolean",
-              "default": false
+              "default": false,
+              "description": "An optional value that defines whether the original HTTP request headers are sent as a map in the request_headers field of the JSON-encoded request."
             }
           },
           {
             "forward_request_body": {
-              "description": "An optional value that defines whether the request body is sent in the request_body field of the JSON-encoded request. If the body arguments can be parsed, they are sent in the separate request_body_args field of the request. ",
               "type": "boolean",
-              "default": false
+              "default": false,
+              "description": "An optional value that defines whether the request body is sent in the request_body field of the JSON-encoded request. If the body arguments can be parsed, they are sent in the separate request_body_args field of the request. "
             }
           },
           {
             "is_proxy_integration": {
-              "description": "An optional value that defines whether the response format to receive from the Lambda to this format.",
               "type": "boolean",
-              "default": false
+              "default": false,
+              "description": "An optional value that defines whether the response format to receive from the Lambda to this format."
             }
           },
           {
             "awsgateway_compatible": {
-              "description": "An optional value that defines whether the plugin should wrap requests into the Amazon API gateway.",
               "type": "boolean",
-              "default": false
+              "default": false,
+              "description": "An optional value that defines whether the plugin should wrap requests into the Amazon API gateway."
             }
           },
           {
@@ -213,60 +228,45 @@
           },
           {
             "skip_large_bodies": {
-              "description": "An optional value that defines whether Kong should send large bodies that are buffered to disk",
               "type": "boolean",
-              "default": true
+              "default": true,
+              "description": "An optional value that defines whether Kong should send large bodies that are buffered to disk"
             }
           },
           {
             "base64_encode_body": {
-              "description": "An optional value that Base64-encodes the request body.",
               "type": "boolean",
-              "default": true
+              "default": true,
+              "description": "An optional value that Base64-encodes the request body."
             }
           },
           {
             "aws_imds_protocol_version": {
-              "description": "Identifier to select the IMDS protocol version to use: `v1` or `v2`.",
               "required": true,
+              "description": "Identifier to select the IMDS protocol version to use: `v1` or `v2`.",
+              "type": "string",
+              "default": "v1",
               "one_of": [
                 "v1",
                 "v2"
-              ],
-              "type": "string",
-              "default": "v1"
+              ]
             }
           },
           {
             "empty_arrays_mode": {
-              "description": "An optional value that defines whether Kong should send empty arrays (returned by Lambda function) as `[]` arrays or `{}` objects in JSON responses. The value `legacy` means Kong will send empty arrays as `{}` objects in response",
               "required": true,
+              "description": "An optional value that defines whether Kong should send empty arrays (returned by Lambda function) as `[]` arrays or `{}` objects in JSON responses. The value `legacy` means Kong will send empty arrays as `{}` objects in response",
+              "type": "string",
+              "default": "legacy",
               "one_of": [
                 "legacy",
                 "correct"
-              ],
-              "type": "string",
-              "default": "legacy"
+              ]
             }
           }
         ],
         "type": "record",
         "required": true
-      }
-    }
-  ],
-  "entity_checks": [
-    {
-      "mutually_required": [
-        "config.aws_key",
-        "config.aws_secret"
-      ]
-    },
-    {
-      "custom_entity_check": {
-        "field_sources": [
-          "config.proxy_url"
-        ]
       }
     }
   ]

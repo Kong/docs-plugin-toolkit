@@ -1,8 +1,10 @@
 {
+  "entity_checks": [
+
+  ],
   "fields": [
     {
       "protocols": {
-        "description": "A set of strings representing protocols.",
         "required": true,
         "elements": {
           "description": "A string representing a protocol, such as HTTP or HTTPS.",
@@ -26,14 +28,15 @@
           "grpcs",
           "http",
           "https"
-        ]
+        ],
+        "description": "A set of strings representing protocols."
       }
     },
     {
       "consumer_group": {
         "reference": "consumer_groups",
-        "eq": null,
         "type": "foreign",
+        "eq": null,
         "description": "Custom type for representing a foreign key with a null value allowed."
       }
     },
@@ -43,9 +46,9 @@
           {
             "local_service_name": {
               "description": "The name of the service as displayed in Zipkin.",
-              "required": true,
               "type": "string",
-              "default": "kong"
+              "default": "kong",
+              "required": true
             }
           },
           {
@@ -56,45 +59,50 @@
           },
           {
             "sample_ratio": {
-              "description": "How often to sample requests that do not contain trace IDs. Set to `0` to turn sampling off, or to `1` to sample **all** requests. ",
-              "type": "number",
               "between": [
                 0,
                 1
               ],
-              "default": 0.001
+              "type": "number",
+              "default": 0.001,
+              "description": "How often to sample requests that do not contain trace IDs. Set to `0` to turn sampling off, or to `1` to sample **all** requests. "
             }
           },
           {
             "default_service_name": {
-              "description": "Set a default service name to override `unknown-service-name` in the Zipkin spans.",
-              "type": "string"
+              "type": "string",
+              "description": "Set a default service name to override `unknown-service-name` in the Zipkin spans."
             }
           },
           {
             "include_credential": {
               "description": "Specify whether the credential of the currently authenticated consumer should be included in metadata sent to the Zipkin server.",
-              "required": true,
               "type": "boolean",
-              "default": true
+              "default": true,
+              "required": true
             }
           },
           {
             "traceid_byte_count": {
-              "description": "The length in bytes of each request's Trace ID.",
               "required": true,
+              "description": "The length in bytes of each request's Trace ID.",
+              "type": "integer",
+              "default": 16,
               "one_of": [
                 8,
                 16
-              ],
-              "type": "integer",
-              "default": 16
+              ]
             }
           },
           {
             "header_type": {
-              "description": "All HTTP requests going through the plugin are tagged with a tracing HTTP request. This property codifies what kind of tracing header the plugin expects on incoming requests",
               "required": true,
+              "description": "All HTTP requests going through the plugin are tagged with a tracing HTTP request. This property codifies what kind of tracing header the plugin expects on incoming requests",
+              "deprecation": {
+                "old_default": "preserve",
+                "message": "zipkin: config.header_type is deprecated, please use config.propagation options instead",
+                "removal_in_version": "4.0"
+              },
               "one_of": [
                 "preserve",
                 "ignore",
@@ -107,19 +115,19 @@
                 "datadog",
                 "gcp"
               ],
-              "type": "string",
               "default": "preserve",
-              "deprecation": {
-                "old_default": "preserve",
-                "message": "zipkin: config.header_type is deprecated, please use config.propagation options instead",
-                "removal_in_version": "4.0"
-              }
+              "type": "string"
             }
           },
           {
             "default_header_type": {
-              "description": "Allows specifying the type of header to be added to requests with no pre-existing tracing headers and when `config.header_type` is set to `\"preserve\"`. When `header_type` is set to any other value, `default_header_type` is ignored.",
               "required": true,
+              "description": "Allows specifying the type of header to be added to requests with no pre-existing tracing headers and when `config.header_type` is set to `\"preserve\"`. When `header_type` is set to any other value, `default_header_type` is ignored.",
+              "deprecation": {
+                "old_default": "b3",
+                "message": "zipkin: config.default_header_type is deprecated, please use config.propagation.default_format instead",
+                "removal_in_version": "4.0"
+              },
               "one_of": [
                 "b3",
                 "b3-single",
@@ -130,21 +138,16 @@
                 "datadog",
                 "gcp"
               ],
-              "type": "string",
               "default": "b3",
-              "deprecation": {
-                "old_default": "b3",
-                "message": "zipkin: config.default_header_type is deprecated, please use config.propagation.default_format instead",
-                "removal_in_version": "4.0"
-              }
+              "type": "string"
             }
           },
           {
             "tags_header": {
               "description": "The Zipkin plugin will add extra headers to the tags associated with any HTTP requests that come with a header named as configured by this property.",
-              "required": true,
               "type": "string",
-              "default": "Zipkin-Tags"
+              "default": "Zipkin-Tags",
+              "required": true
             }
           },
           {
@@ -155,6 +158,7 @@
                 "fields": [
                   {
                     "name": {
+                      "required": true,
                       "not_one_of": [
                         "error",
                         "http.method",
@@ -170,7 +174,6 @@
                         "lc",
                         "peer.hostname"
                       ],
-                      "required": true,
                       "type": "string"
                     }
                   },
@@ -187,47 +190,47 @@
           },
           {
             "http_span_name": {
-              "description": "Specify whether to include the HTTP path in the span name.",
               "required": true,
+              "description": "Specify whether to include the HTTP path in the span name.",
+              "type": "string",
+              "default": "method",
               "one_of": [
                 "method",
                 "method_path"
-              ],
-              "type": "string",
-              "default": "method"
+              ]
             }
           },
           {
             "connect_timeout": {
-              "description": "An integer representing a timeout in milliseconds. Must be between 0 and 2^31-2.",
-              "type": "integer",
               "between": [
                 0,
                 2147483646
               ],
-              "default": 2000
+              "type": "integer",
+              "default": 2000,
+              "description": "An integer representing a timeout in milliseconds. Must be between 0 and 2^31-2."
             }
           },
           {
             "send_timeout": {
-              "description": "An integer representing a timeout in milliseconds. Must be between 0 and 2^31-2.",
-              "type": "integer",
               "between": [
                 0,
                 2147483646
               ],
-              "default": 5000
+              "type": "integer",
+              "default": 5000,
+              "description": "An integer representing a timeout in milliseconds. Must be between 0 and 2^31-2."
             }
           },
           {
             "read_timeout": {
-              "description": "An integer representing a timeout in milliseconds. Must be between 0 and 2^31-2.",
-              "type": "integer",
               "between": [
                 0,
                 2147483646
               ],
-              "default": 5000
+              "type": "integer",
+              "default": 5000,
+              "description": "An integer representing a timeout in milliseconds. Must be between 0 and 2^31-2."
             }
           },
           {
@@ -237,14 +240,14 @@
           },
           {
             "phase_duration_flavor": {
-              "description": "Specify whether to include the duration of each phase as an annotation or a tag.",
               "required": true,
+              "description": "Specify whether to include the duration of each phase as an annotation or a tag.",
+              "type": "string",
+              "default": "annotations",
               "one_of": [
                 "annotations",
                 "tags"
-              ],
-              "type": "string",
-              "default": "annotations"
+              ]
             }
           },
           {
@@ -252,81 +255,81 @@
               "fields": [
                 {
                   "max_batch_size": {
-                    "description": "Maximum number of entries that can be processed at a time.",
-                    "type": "integer",
                     "between": [
                       1,
                       1000000
                     ],
-                    "default": 1
+                    "type": "integer",
+                    "default": 1,
+                    "description": "Maximum number of entries that can be processed at a time."
                   }
                 },
                 {
                   "max_coalescing_delay": {
-                    "description": "Maximum number of (fractional) seconds to elapse after the first entry was queued before the queue starts calling the handler.",
-                    "type": "number",
                     "between": [
                       0,
                       3600
                     ],
-                    "default": 1
+                    "type": "number",
+                    "default": 1,
+                    "description": "Maximum number of (fractional) seconds to elapse after the first entry was queued before the queue starts calling the handler."
                   }
                 },
                 {
                   "max_entries": {
-                    "description": "Maximum number of entries that can be waiting on the queue.",
-                    "type": "integer",
                     "between": [
                       1,
                       1000000
                     ],
-                    "default": 10000
+                    "type": "integer",
+                    "default": 10000,
+                    "description": "Maximum number of entries that can be waiting on the queue."
                   }
                 },
                 {
                   "max_bytes": {
-                    "description": "Maximum number of bytes that can be waiting on a queue, requires string content.",
-                    "type": "integer"
+                    "type": "integer",
+                    "description": "Maximum number of bytes that can be waiting on a queue, requires string content."
                   }
                 },
                 {
                   "max_retry_time": {
-                    "description": "Time in seconds before the queue gives up calling a failed handler for a batch.",
                     "type": "number",
-                    "default": 60
+                    "default": 60,
+                    "description": "Time in seconds before the queue gives up calling a failed handler for a batch."
                   }
                 },
                 {
                   "initial_retry_delay": {
-                    "description": "Time in seconds before the initial retry is made for a failing batch.",
-                    "type": "number",
                     "between": [
                       0.001,
                       1000000
                     ],
-                    "default": 0.01
+                    "type": "number",
+                    "default": 0.01,
+                    "description": "Time in seconds before the initial retry is made for a failing batch."
                   }
                 },
                 {
                   "max_retry_delay": {
-                    "description": "Maximum time in seconds between retries, caps exponential backoff.",
-                    "type": "number",
                     "between": [
                       0.001,
                       1000000
                     ],
-                    "default": 60
+                    "type": "number",
+                    "default": 60,
+                    "description": "Maximum time in seconds between retries, caps exponential backoff."
                   }
                 },
                 {
                   "concurrency_limit": {
-                    "description": "The number of of queue delivery timers. -1 indicates unlimited.",
-                    "type": "integer",
-                    "default": 1,
                     "one_of": [
                       -1,
                       1
-                    ]
+                    ],
+                    "type": "integer",
+                    "default": 1,
+                    "description": "The number of of queue delivery timers. -1 indicates unlimited."
                   }
                 }
               ],
@@ -344,13 +347,13 @@
                     "elements": {
                       "type": "string",
                       "one_of": [
+                        "b3",
                         "gcp",
                         "jaeger",
                         "aws",
                         "ot",
                         "w3c",
-                        "datadog",
-                        "b3"
+                        "datadog"
                       ]
                     }
                   }
@@ -372,14 +375,14 @@
                       "type": "string",
                       "one_of": [
                         "preserve",
+                        "b3",
                         "gcp",
                         "b3-single",
                         "jaeger",
                         "aws",
                         "ot",
                         "w3c",
-                        "datadog",
-                        "b3"
+                        "datadog"
                       ]
                     }
                   }
@@ -388,25 +391,25 @@
                   "default_format": {
                     "description": "The default header format to use when extractors did not match any format in the incoming headers and `inject` is configured with the value: `preserve`. This can happen when no tracing header was found in the request, or the incoming tracing header formats were not included in `extract`.",
                     "type": "string",
-                    "required": true,
                     "one_of": [
+                      "b3",
                       "gcp",
                       "b3-single",
                       "jaeger",
                       "aws",
                       "ot",
                       "w3c",
-                      "datadog",
-                      "b3"
-                    ]
+                      "datadog"
+                    ],
+                    "required": true
                   }
                 }
               ],
               "type": "record",
-              "required": true,
               "default": {
                 "default_format": "b3"
-              }
+              },
+              "required": true
             }
           }
         ],
@@ -414,8 +417,5 @@
         "required": true
       }
     }
-  ],
-  "entity_checks": [
-
   ]
 }

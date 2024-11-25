@@ -1,16 +1,18 @@
 {
+  "entity_checks": [
+
+  ],
   "fields": [
     {
       "consumer": {
         "reference": "consumers",
-        "eq": null,
         "type": "foreign",
+        "eq": null,
         "description": "Custom type for representing a foreign key with a null value allowed."
       }
     },
     {
       "protocols": {
-        "description": "A set of strings representing HTTP protocols.",
         "required": true,
         "elements": {
           "type": "string",
@@ -27,14 +29,15 @@
           "grpcs",
           "http",
           "https"
-        ]
+        ],
+        "description": "A set of strings representing HTTP protocols."
       }
     },
     {
       "consumer_group": {
         "reference": "consumer_groups",
-        "eq": null,
         "type": "foreign",
+        "eq": null,
         "description": "Custom type for representing a foreign key with a null value allowed."
       }
     },
@@ -44,15 +47,15 @@
           {
             "certificate_header_name": {
               "description": "Name of the header that contains the certificate, received from the WAF or other L7 downstream proxy.",
-              "required": true,
-              "type": "string"
+              "type": "string",
+              "required": true
             }
           },
           {
             "certificate_header_format": {
-              "description": "Format of the certificate header. Supported formats: `base64_encoded`, `url_encoded`.",
-              "required": true,
               "type": "string",
+              "required": true,
+              "description": "Format of the certificate header. Supported formats: `base64_encoded`, `url_encoded`.",
               "one_of": [
                 "base64_encoded",
                 "url_encoded"
@@ -63,8 +66,8 @@
             "secure_source": {
               "description": "Whether to secure the source of the request. If set to `true`, the plugin will only allow requests from trusted IPs (configured by the `trusted_ips` config option).",
               "type": "boolean",
-              "required": true,
-              "default": true
+              "default": true,
+              "required": true
             }
           },
           {
@@ -76,7 +79,6 @@
           {
             "consumer_by": {
               "description": "Whether to match the subject name of the client-supplied certificate against consumer's `username` and/or `custom_id` attribute. If set to `[]` (the empty array), then auto-matching is disabled.",
-              "required": false,
               "elements": {
                 "type": "string",
                 "one_of": [
@@ -88,7 +90,8 @@
               "default": [
                 "username",
                 "custom_id"
-              ]
+              ],
+              "required": false
             }
           },
           {
@@ -97,8 +100,8 @@
               "type": "array",
               "required": true,
               "elements": {
-                "type": "string",
-                "uuid": true
+                "uuid": true,
+                "type": "string"
               }
             }
           },
@@ -106,63 +109,63 @@
             "cache_ttl": {
               "description": "Cache expiry time in seconds.",
               "type": "number",
-              "required": true,
-              "default": 60
+              "default": 60,
+              "required": true
             }
           },
           {
             "skip_consumer_lookup": {
               "description": "Skip consumer lookup once certificate is trusted against the configured CA list.",
               "type": "boolean",
-              "required": true,
-              "default": false
+              "default": false,
+              "required": true
             }
           },
           {
             "allow_partial_chain": {
               "description": "Allow certificate verification with only an intermediate certificate. When this is enabled, you don't need to upload the full chain to Kong Certificates.",
               "type": "boolean",
-              "required": true,
-              "default": false
+              "default": false,
+              "required": true
             }
           },
           {
             "authenticated_group_by": {
-              "description": "Certificate property to use as the authenticated group. Valid values are `CN` (Common Name) or `DN` (Distinguished Name). Once `skip_consumer_lookup` is applied, any client with a valid certificate can access the Service/API. To restrict usage to only some of the authenticated users, also add the ACL plugin (not covered here) and create allowed or denied groups of users.",
               "required": false,
+              "description": "Certificate property to use as the authenticated group. Valid values are `CN` (Common Name) or `DN` (Distinguished Name). Once `skip_consumer_lookup` is applied, any client with a valid certificate can access the Service/API. To restrict usage to only some of the authenticated users, also add the ACL plugin (not covered here) and create allowed or denied groups of users.",
+              "type": "string",
+              "default": "CN",
               "one_of": [
                 "CN",
                 "DN"
-              ],
-              "type": "string",
-              "default": "CN"
+              ]
             }
           },
           {
             "revocation_check_mode": {
-              "description": "Controls client certificate revocation check behavior. If set to `SKIP`, no revocation check is performed. If set to `IGNORE_CA_ERROR`, the plugin respects the revocation status when either OCSP or CRL URL is set, and doesn't fail on network issues. If set to `STRICT`, the plugin only treats the certificate as valid when it's able to verify the revocation status.",
               "required": false,
+              "description": "Controls client certificate revocation check behavior. If set to `SKIP`, no revocation check is performed. If set to `IGNORE_CA_ERROR`, the plugin respects the revocation status when either OCSP or CRL URL is set, and doesn't fail on network issues. If set to `STRICT`, the plugin only treats the certificate as valid when it's able to verify the revocation status.",
+              "type": "string",
+              "default": "IGNORE_CA_ERROR",
               "one_of": [
                 "SKIP",
                 "IGNORE_CA_ERROR",
                 "STRICT"
-              ],
-              "type": "string",
-              "default": "IGNORE_CA_ERROR"
+              ]
             }
           },
           {
             "http_timeout": {
-              "description": "HTTP timeout threshold in milliseconds when communicating with the OCSP server or downloading CRL.",
               "type": "number",
-              "default": 30000
+              "default": 30000,
+              "description": "HTTP timeout threshold in milliseconds when communicating with the OCSP server or downloading CRL."
             }
           },
           {
             "cert_cache_ttl": {
-              "description": "The length of time in milliseconds between refreshes of the revocation check status cache.",
               "type": "number",
-              "default": 60000
+              "default": 60000,
+              "description": "The length of time in milliseconds between refreshes of the revocation check status cache."
             }
           },
           {
@@ -179,12 +182,12 @@
           },
           {
             "http_proxy_port": {
-              "description": "An integer representing a port number between 0 and 65535, inclusive.",
-              "type": "integer",
               "between": [
                 0,
                 65535
-              ]
+              ],
+              "type": "integer",
+              "description": "An integer representing a port number between 0 and 65535, inclusive."
             }
           },
           {
@@ -195,12 +198,12 @@
           },
           {
             "https_proxy_port": {
-              "description": "An integer representing a port number between 0 and 65535, inclusive.",
-              "type": "integer",
               "between": [
                 0,
                 65535
-              ]
+              ],
+              "type": "integer",
+              "description": "An integer representing a port number between 0 and 65535, inclusive."
             }
           }
         ],
@@ -222,8 +225,5 @@
         "required": true
       }
     }
-  ],
-  "entity_checks": [
-
   ]
 }
