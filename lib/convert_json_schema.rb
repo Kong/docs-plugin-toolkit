@@ -5,6 +5,8 @@ class ConvertJsonSchema
     new(plugins:, options:).run!
   end
 
+  FIELDS = %w[config protocols].freeze
+
   def initialize(plugins:, options:)
     @plugins = plugins
     @options = options
@@ -40,7 +42,7 @@ class ConvertJsonSchema
 
   def get_config_fields(schema)
     {
-      'properties' => schema['fields'].select { |f| f.key?('config') }.first
+      'properties' => schema.fetch('fields', []).select { |f| FIELDS.any? { |k| f.key?(k) } }
     }
   end
 
