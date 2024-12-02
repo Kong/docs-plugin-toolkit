@@ -143,6 +143,22 @@ Example:
 ./plugins copy_data_files --version 3.5.x
 ```
 
+### Generate JSON Schemas
+
+Converts schemas into JSON schemas.
+
+| Options | Descriptions  |
+|--------------------------- |-----|
+| `version` |  **Required**. Kong Gateway release version, e.g. `3.3.x`. The new example file is named after it.  |
+| `plugins` | **Required**. Space separated list of plugins to use, .e.g. `acme acl`.  |
+| `source`  | Path to the root folder containing the exisiting schemas. Default: `./schemas`. |
+
+For example, running:
+```bash
+./plugins convert_json_schema --version 3.9.x --plugins acme
+```
+converts `./schemas/acme/3.4.x.json` into a valid JSON schema and writes it to `./schemas/acme/3.5.x.json`.
+
 ## Updating the repo after a new release
 
 Whenever a new version of Kong Gateway is released, we need run the following commands in order. For all of them, specify all the plugins `--plugins $(ls ./schemas)`
