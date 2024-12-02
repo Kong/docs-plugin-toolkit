@@ -1,0 +1,53 @@
+name: Generate json schemas
+on:
+  workflow_dispatch:
+    inputs:
+      kong-image-tag:
+        required: true
+        type: string
+        description: |
+          Kong Docker image tag to run, 3.6.1.4.
+      version:
+        required: true
+        type: string
+        description: |
+          Kong Gateway release, e.x. 3.4.x.
+          Used by some commands for storing files in the corresponding folder.
+      kong-image-name:
+        type: choice
+        description: |
+          Kong Docker image name to use, e.g. kong-gateway, kong-gateway-dev.
+        options:
+          - kong-gateway
+          - kong-gateway-dev
+
+jobs:
+  generate-json-schemas:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repo
+        uses: actions/checkout@v4
+      - name: Install dependencies
+        uses: ./.github/reusable-steps/install-deps
+      - name: Run Kong EE
+        uses: ./.github/reusable-steps/run-kong-ee
+        with:
+          op-token: ${{ secrets.OP_SERVICE_ACCOUNT_TOKEN }}
+          kong-image-tag: ${{ github.event.inputs.kong-image-tag }}
+          kong-image-name: ${{ github.event.inputs.kong-image-name }}
+      - name: Run convert_json_schema
+        run: |
+          bundle exec ./plugins convert_json_schema --version=${{ github.event.inputs.version }} --plugins $(ls ./schemas) --verbose
+      - name: Create Pull Request
+        uses: peter-evans/create-pull-request@v7
+        with:
+          token: ${{ secrets.PAT }}
+          title: "Generate JSON Schemas for ${{ github.event.inputs.version }}"
+          branch: generate-json-schemas
+          commit-message: "JSON Schemas for ${{ github.event.inputs.version }}"
+          delete-branch: true
+          add-paths: |
+            ./json_schemas/*
+      - name: Cleanup
+        if: always()
+        uses: ./.github/reusable-steps/cleanup
