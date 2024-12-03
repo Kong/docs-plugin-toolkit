@@ -20,6 +20,14 @@ on:
           - oss
           - ee
         description: Whether the API running is the OSS or Enterprise version
+      kong-image-name:
+        type: choice
+        description: |
+          Kong Docker image name to use, e.g. kong-gateway, kong-gateway-dev.
+        options:
+          - kong-gateway
+          - kong-gateway-dev
+          - kong
 
 jobs:
   generate-plugin-priorities:
@@ -35,11 +43,13 @@ jobs:
         with:
           op-token: ${{ secrets.OP_SERVICE_ACCOUNT_TOKEN }}
           kong-image-tag: ${{ github.event.inputs.kong-image-tag }}
+          kong-image-name: ${{ github.event.inputs.kong-image-name }}
       - name: Run Kong OSS
         if: ${{ github.event.inputs.kong-edition == 'oss' }}
         uses: ./.github/reusable-steps/run-kong-oss
         with:
           kong-image-tag: ${{ github.event.inputs.kong-image-tag }}
+          kong-image-name: ${{ github.event.inputs.kong-image-name }}
       - name: Run generate_plugin_priorities
         run: |
           bundle exec ./plugins generate_plugin_priorities --type=${{ github.event.inputs.kong-edition }} --version=${{ github.event.inputs.version }} --verbose
