@@ -36,22 +36,30 @@
     {
       "consumer": {
         "reference": "consumers",
-        "type": "foreign",
         "eq": null,
+        "type": "foreign",
         "description": "Custom type for representing a foreign key with a null value allowed."
       }
     },
     {
       "consumer_group": {
         "reference": "consumer_groups",
-        "type": "foreign",
         "eq": null,
+        "type": "foreign",
         "description": "Custom type for representing a foreign key with a null value allowed."
       }
     },
     {
       "protocols": {
         "required": true,
+        "type": "set",
+        "default": [
+          "grpc",
+          "grpcs",
+          "http",
+          "https"
+        ],
+        "description": "A set of strings representing HTTP protocols.",
         "elements": {
           "type": "string",
           "one_of": [
@@ -60,19 +68,21 @@
             "http",
             "https"
           ]
-        },
-        "type": "set",
-        "default": [
-          "grpc",
-          "grpcs",
-          "http",
-          "https"
-        ],
-        "description": "A set of strings representing HTTP protocols."
+        }
       }
     },
     {
       "config": {
+        "type": "record",
+        "shorthand_fields": [
+          {
+            "hash": {
+              "type": "string",
+              "description": "Hash algorithm to be used for canary release. `whitelist` is deprecated. Use `allow` instead `blacklist` is deprecated. Use `deny` instead."
+            }
+          }
+        ],
+        "required": true,
         "fields": [
           {
             "start": {
@@ -82,9 +92,9 @@
           },
           {
             "hash": {
+              "default": "consumer",
               "description": "Hash algorithm to be used for canary release.\n\n* `consumer`: The hash will be based on the consumer.\n* `ip`: The hash will be based on the client IP address.\n* `none`: No hash will be applied.\n* `allow`: Allows the specified groups to access the canary release.\n* `deny`: Denies the specified groups from accessing the canary release.\n* `header`: The hash will be based on the specified header value.",
               "type": "string",
-              "default": "consumer",
               "one_of": [
                 "consumer",
                 "ip",
@@ -97,24 +107,24 @@
           },
           {
             "hash_header": {
-              "description": "A string representing an HTTP header name.",
-              "type": "string"
+              "type": "string",
+              "description": "A string representing an HTTP header name."
             }
           },
           {
             "duration": {
-              "gt": 0,
-              "type": "number",
               "default": 3600,
-              "description": "The duration of the canary release in seconds."
+              "description": "The duration of the canary release in seconds.",
+              "gt": 0,
+              "type": "number"
             }
           },
           {
             "steps": {
-              "gt": 1,
-              "type": "number",
               "default": 1000,
-              "description": "The number of steps for the canary release."
+              "description": "The number of steps for the canary release.",
+              "gt": 1,
+              "type": "number"
             }
           },
           {
@@ -129,8 +139,8 @@
           },
           {
             "upstream_host": {
-              "description": "A string representing a host name, such as example.com.",
-              "type": "string"
+              "type": "string",
+              "description": "A string representing a host name, such as example.com."
             }
           },
           {
@@ -139,8 +149,8 @@
                 0,
                 65535
               ],
-              "type": "integer",
-              "description": "An integer representing a port number between 0 and 65535, inclusive."
+              "description": "An integer representing a port number between 0 and 65535, inclusive.",
+              "type": "integer"
             }
           },
           {
@@ -152,38 +162,28 @@
           },
           {
             "upstream_fallback": {
-              "description": "Specifies whether to fallback to the upstream server if the canary release fails.",
-              "type": "boolean",
               "default": false,
-              "required": true
+              "description": "Specifies whether to fallback to the upstream server if the canary release fails.",
+              "required": true,
+              "type": "boolean"
             }
           },
           {
             "groups": {
-              "type": "array",
-              "description": "The groups allowed to access the canary release.",
               "elements": {
                 "type": "string"
-              }
+              },
+              "description": "The groups allowed to access the canary release.",
+              "type": "array"
             }
           },
           {
             "canary_by_header_name": {
-              "description": "A string representing an HTTP header name.",
-              "type": "string"
-            }
-          }
-        ],
-        "required": true,
-        "shorthand_fields": [
-          {
-            "hash": {
               "type": "string",
-              "description": "Hash algorithm to be used for canary release. `whitelist` is deprecated. Use `allow` instead `blacklist` is deprecated. Use `deny` instead."
+              "description": "A string representing an HTTP header name."
             }
           }
-        ],
-        "type": "record"
+        ]
       }
     }
   ]
