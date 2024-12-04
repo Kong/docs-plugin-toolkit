@@ -1,11 +1,15 @@
 require 'json'
+require_relative './json_schema/foreign_keys'
+require_relative './json_schema/missing_descriptions'
 
 class ConvertJsonSchema
   def self.run!(plugins:, options:)
     new(plugins:, options:).run!
   end
 
-  FIELDS = %w[config protocols].freeze
+  FOREIGN_KEYS = %w[consumer consumer_group route service].freeze
+  BASE_FIELDS = %w[config protocols].freeze
+  FIELDS = (BASE_FIELDS + FOREIGN_KEYS)
 
   def initialize(plugins:, options:)
     @plugins = plugins
@@ -20,9 +24,12 @@ class ConvertJsonSchema
 
       # TODO: Process all fields.
       # @mheap only needs config, so that's all that's implemented
-      config = get_config_fields(json_schema)
-      json_schema = convert_to_json_schema(config)
-      json_schema =  convert_required_list(json_schema)
+      fields = get_fields(json_schema)
+      JSONSchema::ForeignKeys.run!(fields)
+      JSONSchema::MissingDescriptions.run!(fields)
+
+      json_schema = convert_to_json_schema(fields)
+      json_schema = convert_required_list(json_schema)
 
       # If an entity is required, but no children are required
       # it's not actually required
@@ -40,7 +47,7 @@ class ConvertJsonSchema
 
   private
 
-  def get_config_fields(schema)
+  def get_fields(schema)
     {
       'properties' => schema.fetch('fields', []).select { |f| FIELDS.any? { |k| f.key?(k) } }
     }
