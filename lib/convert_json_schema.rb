@@ -1,6 +1,7 @@
 require 'json'
 require_relative './json_schema/foreign_keys'
 require_relative './json_schema/missing_descriptions'
+require 'deepsort'
 
 class ConvertJsonSchema
   def self.run!(plugins:, options:)
@@ -41,7 +42,7 @@ class ConvertJsonSchema
       # Write the schema to the destination
       FileUtils.mkdir_p("#{@options[:destination]}/#{plugin_name}")
       dest = File.join(@options[:destination], plugin_name, "#{@options['version']}.json")
-      File.write(dest, JSON.pretty_generate(json_schema))
+      File.write(dest, JSON.pretty_generate(json_schema.deep_sort))
     end
   end
 
