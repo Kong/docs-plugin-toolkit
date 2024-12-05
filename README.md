@@ -129,6 +129,20 @@ For example, running:
 ```
 copies the previous schema (assuming the previous version is `3.4.x`,  it copies `./schemas/acme/3.4.x.json`) and generates a new file `./schemas/acme/3.5.x.json`
 
+### Copy Data files
+
+Copies the last  (ordered by version) data files file stored in `./<source>/**/*/` and writes it to `./<source>/**/*/<version>`.
+
+| Options | Descriptions  |
+|--------------------------- |-----|
+| `version` |  **Required**. Kong Gateway release version, e.g. `3.3.x`. The new data file is named after it.  |
+| `source` | Path to the root folder containing the exisitng examples. Default: `./data`. |
+
+Example:
+```bash
+./plugins copy_data_files --version 3.5.x
+```
+
 ## Updating the repo after a new release
 
 Whenever a new version of Kong Gateway is released, we need run the following commands in order. For all of them, specify all the plugins `--plugins $(ls ./schemas)`
