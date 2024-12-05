@@ -1,0 +1,302 @@
+{
+  "entity_checks": [
+
+  ],
+  "fields": [
+    {
+      "consumer": {
+        "reference": "consumers",
+        "eq": null,
+        "type": "foreign",
+        "description": "Custom type for representing a foreign key with a null value allowed."
+      }
+    },
+    {
+      "protocols": {
+        "required": true,
+        "type": "set",
+        "default": [
+          "grpc",
+          "grpcs",
+          "http",
+          "https"
+        ],
+        "description": "A set of strings representing protocols.",
+        "elements": {
+          "description": "A string representing a protocol, such as HTTP or HTTPS.",
+          "one_of": [
+            "grpc",
+            "grpcs",
+            "http",
+            "https",
+            "tcp",
+            "tls",
+            "tls_passthrough",
+            "udp",
+            "ws",
+            "wss"
+          ],
+          "type": "string"
+        }
+      }
+    },
+    {
+      "consumer_group": {
+        "reference": "consumer_groups",
+        "eq": null,
+        "type": "foreign",
+        "description": "Custom type for representing a foreign key with a null value allowed."
+      }
+    },
+    {
+      "config": {
+        "fields": [
+          {
+            "secret": {
+              "encrypted": true,
+              "referenceable": true,
+              "type": "string",
+              "default": "lt9BJW1n5RfhCxTbNIKqsj8THW7YNdXTA0VW6KQwBUwg",
+              "description": "The secret that is used in keyed HMAC generation.",
+              "required": false
+            }
+          },
+          {
+            "storage": {
+              "default": "cookie",
+              "description": "Determines where the session data is stored. `kong`: Stores encrypted session data into Kong's current database strategy; the cookie will not contain any session data. `cookie`: Stores encrypted session data within the cookie itself.",
+              "type": "string",
+              "one_of": [
+                "cookie",
+                "kong"
+              ]
+            }
+          },
+          {
+            "audience": {
+              "default": "default",
+              "description": "The session audience, which is the intended target application. For example `\"my-application\"`.",
+              "type": "string"
+            }
+          },
+          {
+            "idling_timeout": {
+              "default": 900,
+              "description": "The session cookie idle time, in seconds.",
+              "type": "number"
+            }
+          },
+          {
+            "rolling_timeout": {
+              "default": 3600,
+              "description": "The session cookie rolling timeout, in seconds. Specifies how long the session can be used until it needs to be renewed.",
+              "type": "number"
+            }
+          },
+          {
+            "absolute_timeout": {
+              "default": 86400,
+              "description": "The session cookie absolute timeout, in seconds. Specifies how long the session can be used until it is no longer valid.",
+              "type": "number"
+            }
+          },
+          {
+            "stale_ttl": {
+              "default": 10,
+              "description": "The duration, in seconds, after which an old cookie is discarded, starting from the moment when the session becomes outdated and is replaced by a new one.",
+              "type": "number"
+            }
+          },
+          {
+            "cookie_name": {
+              "default": "session",
+              "description": "The name of the cookie.",
+              "type": "string"
+            }
+          },
+          {
+            "cookie_path": {
+              "default": "/",
+              "description": "The resource in the host where the cookie is available.",
+              "type": "string"
+            }
+          },
+          {
+            "cookie_domain": {
+              "description": "The domain with which the cookie is intended to be exchanged.",
+              "type": "string"
+            }
+          },
+          {
+            "cookie_same_site": {
+              "default": "Strict",
+              "description": "Determines whether and how a cookie may be sent with cross-site requests.",
+              "type": "string",
+              "one_of": [
+                "Strict",
+                "Lax",
+                "None",
+                "Default"
+              ]
+            }
+          },
+          {
+            "cookie_http_only": {
+              "default": true,
+              "description": "Applies the `HttpOnly` tag so that the cookie is sent only to a server.",
+              "type": "boolean"
+            }
+          },
+          {
+            "cookie_secure": {
+              "default": true,
+              "description": "Applies the Secure directive so that the cookie may be sent to the server only with an encrypted request over the HTTPS protocol.",
+              "type": "boolean"
+            }
+          },
+          {
+            "remember": {
+              "default": false,
+              "description": "Enables or disables persistent sessions.",
+              "type": "boolean"
+            }
+          },
+          {
+            "remember_cookie_name": {
+              "default": "remember",
+              "description": "Persistent session cookie name. Use with the `remember` configuration parameter.",
+              "type": "string"
+            }
+          },
+          {
+            "remember_rolling_timeout": {
+              "default": 604800,
+              "description": "The persistent session rolling timeout window, in seconds.",
+              "type": "number"
+            }
+          },
+          {
+            "remember_absolute_timeout": {
+              "default": 2592000,
+              "description": "The persistent session absolute timeout limit, in seconds.",
+              "type": "number"
+            }
+          },
+          {
+            "response_headers": {
+              "elements": {
+                "type": "string",
+                "one_of": [
+                  "id",
+                  "audience",
+                  "subject",
+                  "timeout",
+                  "idling-timeout",
+                  "rolling-timeout",
+                  "absolute-timeout"
+                ]
+              },
+              "description": "List of information to include, as headers, in the response to the downstream.",
+              "type": "set"
+            }
+          },
+          {
+            "request_headers": {
+              "elements": {
+                "type": "string",
+                "one_of": [
+                  "id",
+                  "audience",
+                  "subject",
+                  "timeout",
+                  "idling-timeout",
+                  "rolling-timeout",
+                  "absolute-timeout"
+                ]
+              },
+              "description": "List of information to include, as headers, in the response to the downstream.",
+              "type": "set"
+            }
+          },
+          {
+            "read_body_for_logout": {
+              "default": false,
+              "type": "boolean"
+            }
+          },
+          {
+            "logout_methods": {
+              "elements": {
+                "type": "string",
+                "one_of": [
+                  "GET",
+                  "POST",
+                  "DELETE"
+                ]
+              },
+              "description": "A set of HTTP methods that the plugin will respond to.",
+              "default": [
+                "POST",
+                "DELETE"
+              ],
+              "type": "set"
+            }
+          },
+          {
+            "logout_query_arg": {
+              "default": "session_logout",
+              "description": "The query argument passed to logout requests.",
+              "type": "string"
+            }
+          },
+          {
+            "logout_post_arg": {
+              "default": "session_logout",
+              "description": "The POST argument passed to logout requests. Do not change this property.",
+              "type": "string"
+            }
+          }
+        ],
+        "shorthand_fields": [
+          {
+            "cookie_lifetime": {
+              "type": "number"
+            }
+          },
+          {
+            "cookie_idletime": {
+              "type": "number"
+            }
+          },
+          {
+            "cookie_renew": {
+              "type": "number"
+            }
+          },
+          {
+            "cookie_discard": {
+              "type": "number"
+            }
+          },
+          {
+            "cookie_samesite": {
+              "type": "string"
+            }
+          },
+          {
+            "cookie_httponly": {
+              "type": "boolean"
+            }
+          },
+          {
+            "cookie_persistent": {
+              "type": "boolean"
+            }
+          }
+        ],
+        "required": true,
+        "type": "record"
+      }
+    }
+  ]
+}

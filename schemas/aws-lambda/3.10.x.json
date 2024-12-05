@@ -1,0 +1,273 @@
+{
+  "entity_checks": [
+    {
+      "mutually_required": [
+        "config.aws_key",
+        "config.aws_secret"
+      ]
+    },
+    {
+      "custom_entity_check": {
+        "field_sources": [
+          "config.proxy_url"
+        ]
+      }
+    }
+  ],
+  "fields": [
+    {
+      "protocols": {
+        "required": true,
+        "type": "set",
+        "default": [
+          "grpc",
+          "grpcs",
+          "http",
+          "https"
+        ],
+        "description": "A set of strings representing HTTP protocols.",
+        "elements": {
+          "type": "string",
+          "one_of": [
+            "grpc",
+            "grpcs",
+            "http",
+            "https"
+          ]
+        }
+      }
+    },
+    {
+      "consumer_group": {
+        "reference": "consumer_groups",
+        "eq": null,
+        "type": "foreign",
+        "description": "Custom type for representing a foreign key with a null value allowed."
+      }
+    },
+    {
+      "config": {
+        "fields": [
+          {
+            "timeout": {
+              "default": 60000,
+              "description": "An optional timeout in milliseconds when invoking the function.",
+              "required": true,
+              "type": "number"
+            }
+          },
+          {
+            "keepalive": {
+              "default": 60000,
+              "description": "An optional value in milliseconds that defines how long an idle connection lives before being closed.",
+              "required": true,
+              "type": "number"
+            }
+          },
+          {
+            "aws_key": {
+              "encrypted": true,
+              "description": "The AWS key credential to be used when invoking the function.",
+              "referenceable": true,
+              "type": "string"
+            }
+          },
+          {
+            "aws_secret": {
+              "encrypted": true,
+              "description": "The AWS secret credential to be used when invoking the function. ",
+              "referenceable": true,
+              "type": "string"
+            }
+          },
+          {
+            "aws_assume_role_arn": {
+              "encrypted": true,
+              "description": "The target AWS IAM role ARN used to invoke the Lambda function.",
+              "referenceable": true,
+              "type": "string"
+            }
+          },
+          {
+            "aws_role_session_name": {
+              "default": "kong",
+              "description": "The identifier of the assumed role session.",
+              "type": "string"
+            }
+          },
+          {
+            "aws_sts_endpoint_url": {
+              "type": "string",
+              "description": "A string representing a URL, such as https://example.com/path/to/resource?q=search."
+            }
+          },
+          {
+            "aws_region": {
+              "type": "string",
+              "description": "A string representing a host name, such as example.com."
+            }
+          },
+          {
+            "function_name": {
+              "description": "The AWS Lambda function to invoke. Both function name and function ARN (including partial) are supported.",
+              "required": false,
+              "type": "string"
+            }
+          },
+          {
+            "qualifier": {
+              "description": "The qualifier to use when invoking the function.",
+              "type": "string"
+            }
+          },
+          {
+            "invocation_type": {
+              "required": true,
+              "type": "string",
+              "default": "RequestResponse",
+              "description": "The InvocationType to use when invoking the function. Available types are RequestResponse, Event, DryRun.",
+              "one_of": [
+                "RequestResponse",
+                "Event",
+                "DryRun"
+              ]
+            }
+          },
+          {
+            "log_type": {
+              "required": true,
+              "type": "string",
+              "default": "Tail",
+              "description": "The LogType to use when invoking the function. By default, None and Tail are supported.",
+              "one_of": [
+                "Tail",
+                "None"
+              ]
+            }
+          },
+          {
+            "host": {
+              "type": "string",
+              "description": "A string representing a host name, such as example.com."
+            }
+          },
+          {
+            "port": {
+              "default": 443,
+              "description": "An integer representing a port number between 0 and 65535, inclusive.",
+              "between": [
+                0,
+                65535
+              ],
+              "type": "integer"
+            }
+          },
+          {
+            "disable_https": {
+              "default": false,
+              "type": "boolean"
+            }
+          },
+          {
+            "unhandled_status": {
+              "between": [
+                100,
+                999
+              ],
+              "description": "The response status code to use (instead of the default 200, 202, or 204) in the case of an Unhandled Function Error.",
+              "type": "integer"
+            }
+          },
+          {
+            "forward_request_method": {
+              "default": false,
+              "description": "An optional value that defines whether the original HTTP request method verb is sent in the request_method field of the JSON-encoded request.",
+              "type": "boolean"
+            }
+          },
+          {
+            "forward_request_uri": {
+              "default": false,
+              "description": "An optional value that defines whether the original HTTP request URI is sent in the request_uri field of the JSON-encoded request.",
+              "type": "boolean"
+            }
+          },
+          {
+            "forward_request_headers": {
+              "default": false,
+              "description": "An optional value that defines whether the original HTTP request headers are sent as a map in the request_headers field of the JSON-encoded request.",
+              "type": "boolean"
+            }
+          },
+          {
+            "forward_request_body": {
+              "default": false,
+              "description": "An optional value that defines whether the request body is sent in the request_body field of the JSON-encoded request. If the body arguments can be parsed, they are sent in the separate request_body_args field of the request. ",
+              "type": "boolean"
+            }
+          },
+          {
+            "is_proxy_integration": {
+              "default": false,
+              "description": "An optional value that defines whether the response format to receive from the Lambda to this format.",
+              "type": "boolean"
+            }
+          },
+          {
+            "awsgateway_compatible": {
+              "default": false,
+              "description": "An optional value that defines whether the plugin should wrap requests into the Amazon API gateway.",
+              "type": "boolean"
+            }
+          },
+          {
+            "proxy_url": {
+              "type": "string",
+              "description": "A string representing a URL, such as https://example.com/path/to/resource?q=search."
+            }
+          },
+          {
+            "skip_large_bodies": {
+              "default": true,
+              "description": "An optional value that defines whether Kong should send large bodies that are buffered to disk",
+              "type": "boolean"
+            }
+          },
+          {
+            "base64_encode_body": {
+              "default": true,
+              "description": "An optional value that Base64-encodes the request body.",
+              "type": "boolean"
+            }
+          },
+          {
+            "aws_imds_protocol_version": {
+              "required": true,
+              "type": "string",
+              "default": "v1",
+              "description": "Identifier to select the IMDS protocol version to use: `v1` or `v2`.",
+              "one_of": [
+                "v1",
+                "v2"
+              ]
+            }
+          },
+          {
+            "empty_arrays_mode": {
+              "required": true,
+              "type": "string",
+              "default": "legacy",
+              "description": "An optional value that defines whether Kong should send empty arrays (returned by Lambda function) as `[]` arrays or `{}` objects in JSON responses. The value `legacy` means Kong will send empty arrays as `{}` objects in response",
+              "one_of": [
+                "legacy",
+                "correct"
+              ]
+            }
+          }
+        ],
+        "required": true,
+        "type": "record"
+      }
+    }
+  ]
+}

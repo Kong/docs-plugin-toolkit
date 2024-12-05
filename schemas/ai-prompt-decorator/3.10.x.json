@@ -1,0 +1,126 @@
+{
+  "entity_checks": [
+    {
+      "at_least_one_of": [
+        "config.prompts.prepend",
+        "config.prompts.append"
+      ]
+    }
+  ],
+  "fields": [
+    {
+      "protocols": {
+        "required": true,
+        "type": "set",
+        "default": [
+          "grpc",
+          "grpcs",
+          "http",
+          "https"
+        ],
+        "description": "A set of strings representing HTTP protocols.",
+        "elements": {
+          "type": "string",
+          "one_of": [
+            "grpc",
+            "grpcs",
+            "http",
+            "https"
+          ]
+        }
+      }
+    },
+    {
+      "config": {
+        "fields": [
+          {
+            "prompts": {
+              "type": "record",
+              "required": false,
+              "fields": [
+                {
+                  "prepend": {
+                    "len_max": 15,
+                    "required": false,
+                    "type": "array",
+                    "elements": {
+                      "type": "record",
+                      "required": false,
+                      "fields": [
+                        {
+                          "role": {
+                            "default": "system",
+                            "type": "string",
+                            "required": true,
+                            "one_of": [
+                              "system",
+                              "assistant",
+                              "user"
+                            ]
+                          }
+                        },
+                        {
+                          "content": {
+                            "len_max": 500,
+                            "type": "string",
+                            "required": true,
+                            "len_min": 1
+                          }
+                        }
+                      ]
+                    },
+                    "description": "Insert chat messages at the beginning of the chat message array. This array preserves exact order when adding messages."
+                  }
+                },
+                {
+                  "append": {
+                    "len_max": 15,
+                    "required": false,
+                    "type": "array",
+                    "elements": {
+                      "type": "record",
+                      "required": false,
+                      "fields": [
+                        {
+                          "role": {
+                            "default": "system",
+                            "type": "string",
+                            "required": true,
+                            "one_of": [
+                              "system",
+                              "assistant",
+                              "user"
+                            ]
+                          }
+                        },
+                        {
+                          "content": {
+                            "len_max": 500,
+                            "type": "string",
+                            "required": true,
+                            "len_min": 1
+                          }
+                        }
+                      ]
+                    },
+                    "description": "Insert chat messages at the end of the chat message array. This array preserves exact order when adding messages."
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "max_request_body_size": {
+              "default": 8192,
+              "description": "max allowed body size allowed to be introspected",
+              "gt": 0,
+              "type": "integer"
+            }
+          }
+        ],
+        "required": true,
+        "type": "record"
+      }
+    }
+  ]
+}
