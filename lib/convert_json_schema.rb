@@ -41,7 +41,7 @@ class ConvertJsonSchema
 
       # Write the schema to the destination
       FileUtils.mkdir_p("#{@options[:destination]}/#{plugin_name}")
-      dest = File.join(@options[:destination], plugin_name, "#{@options['version']}.json")
+      dest = File.join(@options[:destination], plugin_name, "#{@options['version'].gsub('.x', '')}.json")
       File.write(dest, JSON.pretty_generate(json_schema.deep_sort))
     end
   end
