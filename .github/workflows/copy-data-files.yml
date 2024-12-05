@@ -1,0 +1,32 @@
+name: Copy Latest Data Files
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        required: true
+        type: string
+        description: |
+          Kong Gateway release, e.x. 3.4.x.
+          Used by some commands for storing files in the corresponding folder.
+
+jobs:
+  copy-data-files:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repo
+        uses: actions/checkout@v4
+      - name: Install dependencies
+        uses: ./.github/reusable-steps/install-deps
+      - name: Run copy_data_files
+        run: |
+          bundle exec ./plugins copy_data_files --version=${{ github.event.inputs.version }}
+      - name: Create Pull Request
+        uses: peter-evans/create-pull-request@v7
+        with:
+          token: ${{ secrets.PAT }}
+          title: "Copy latest data files to ${{ github.event.inputs.version }}"
+          branch: copy-latest-data-files
+          commit-message: "Copy latest data files to ${{ github.event.inputs.version }}"
+          delete-branch: true
+          add-paths: |
+            ./data/*
