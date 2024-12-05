@@ -157,7 +157,7 @@ For example, running:
 ```bash
 ./plugins convert_json_schema --version 3.9.x --plugins acme
 ```
-converts `./schemas/acme/3.4.x.json` into a valid JSON schema and writes it to `./schemas/acme/3.5.x.json`.
+converts `./schemas/acme/3.9.x.json` into a valid JSON schema and writes it to `./json_schemas/acme/3.9.json`.
 
 ## Updating the repo after a new release
 
