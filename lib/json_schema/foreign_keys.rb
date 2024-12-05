@@ -28,9 +28,9 @@ module JSONSchema
     end
 
     def supported_entities
-      @supported_entities ||= [
-        foreign_keys.except(*unsupported_entities.flat_map(&:keys))
-      ]
+      @supported_entities ||= foreign_keys
+        .except(*unsupported_entities.flat_map(&:keys))
+        .map { |k, v| { k => v } }
     end
 
     def foreign_keys
