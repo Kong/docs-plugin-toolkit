@@ -168,3 +168,5 @@ Whenever a new version of Kong Gateway is released, we need run the following co
 1. Validate Examples  - specify the new version `x.x.x`
 1. Generate Referenceable Fields List - specify the new version `x.x.x`
 1. Generate Priorities List - for `oss` and `ee` and specify the new version `x.x.x`
+1. Copy Data files
+1. Generate JSON Schemas
