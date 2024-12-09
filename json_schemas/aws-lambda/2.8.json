@@ -1,0 +1,235 @@
+{
+  "properties": {
+    "config": {
+      "properties": {
+        "aws_assume_role_arn": {
+          "description": "The target AWS IAM role ARN used to invoke the Lambda function. Typically this is\nused for a cross-account Lambda function invocation.",
+          "examples": [
+            "<AWS_ASSUME_ROLE_ARN>"
+          ],
+          "type": "string"
+        },
+        "aws_key": {
+          "description": "The AWS key credential to be used when invoking the function. The `aws_key` value is required\nif `aws_secret` is defined. If `aws_key` and `aws_secret` are not set, the plugin uses an\nIAM role inherited from the instance running Kong to authenticate. Can be symmetrically encrypted\nif using Kong Gateway and [data encryption](/gateway/latest/kong-production/db-encryption/)\nis configured.",
+          "examples": [
+            "<AWS_KEY>"
+          ],
+          "type": "string"
+        },
+        "aws_region": {
+          "description": "The AWS region where the Lambda function is located. The plugin does not\nattempt to validate the supplied region name. If an invalid region name\nis provided, the plugin responds with an HTTP `500 Internal Server Error`\nat runtime and logs a DNS resolution failure.\n\nThe plugin will automatically\ndetect the AWS region on runtime via `AWS_REGION` or `AWS_DEFAULT_REGION` environment\nvariables when neither `aws_region` nor `host` is specified in plugin configuration.\nUsing environment variables enables regionally distributed Kong cluster nodes\nto connect to the closest AWS region. If `aws_region`, `host` and environment\nvariables have not been specified, the plugin responds with an HTTP\n`500 Internal Server Error` at run-time.",
+          "examples": [
+            "<AWS_REGION>"
+          ],
+          "type": "string"
+        },
+        "aws_role_session_name": {
+          "default": "kong",
+          "description": "The identifier of the assumed role session. It is used for uniquely identifying\na session when the same target role is assumed by different principals or\nfor different reasons. The role session name is also used in the ARN of the assumed role principle.",
+          "examples": [
+            "<AWS_ROLE_SESSION_NAME>"
+          ],
+          "type": "string"
+        },
+        "aws_secret": {
+          "description": "The AWS secret credential to be used when invoking the function. The `aws_secret` value is required\nif `aws_key` is defined. If `aws_key` and `aws_secret` are not set, the plugin uses an\nIAM role inherited from the instance running Kong to authenticate. Can be symmetrically encrypted\nif using Kong Gateway and [data encryption](/gateway/latest/kong-production/db-encryption/)\nis configured.",
+          "examples": [
+            "<AWS_SECRET>"
+          ],
+          "type": "string"
+        },
+        "awsgateway_compatible": {
+          "default": false,
+          "description": "An optional value that defines whether the plugin should wrap requests into the Amazon API gateway.",
+          "type": "boolean"
+        },
+        "base64_encode_body": {
+          "default": true,
+          "type": "boolean"
+        },
+        "forward_request_body": {
+          "default": false,
+          "description": "An optional value that defines whether the request body is sent in the `request_body` field of the JSON-encoded request.\nIf the body arguments can be parsed, they are sent in the separate `request_body_args` field of the request.\nThe body arguments can be parsed for `application/json`, `application/x-www-form-urlencoded`, and `multipart/form-data` content types.",
+          "type": "boolean"
+        },
+        "forward_request_headers": {
+          "default": false,
+          "description": "An optional value that defines whether the original HTTP request headers are\nsent as a map in the `request_headers` field of the JSON-encoded request.",
+          "type": "boolean"
+        },
+        "forward_request_method": {
+          "default": false,
+          "description": "An optional value that defines whether the original HTTP request method verb is\nsent in the `request_method` field of the JSON-encoded request.",
+          "type": "boolean"
+        },
+        "forward_request_uri": {
+          "default": false,
+          "description": "An optional value that defines whether the original HTTP request URI is sent in\nthe `request_uri` field of the JSON-encoded request. Request URI arguments (if any) are sent in\nthe separate `request_uri_args` field of the JSON body.",
+          "type": "boolean"
+        },
+        "function_name": {
+          "description": "The AWS Lambda function name to invoke. This may contain\nthe function name only (`my-function`), the full ARN\n(arn:aws:lambda:us-west-2:123456789012:function:my-function) or a\npartial ARN (123456789012:function:my-function). You can also append a version\nnumber or alias to any of the formats.",
+          "examples": [
+            "<LAMBDA_FUNCTION_NAME>"
+          ],
+          "type": "string"
+        },
+        "host": {
+          "description": "The host where the Lambda function is located. This value can point to a\nlocal Lambda server, allowing for easier debugging.\n\nEither `aws_region` or `host` must be provided.",
+          "type": "string"
+        },
+        "invocation_type": {
+          "default": "RequestResponse",
+          "description": "The [`InvocationType`](http://docs.aws.amazon.com/lambda/latest/dg/API_Invoke.html#API_Invoke_RequestSyntax) to use when invoking the function. Available types are `RequestResponse`, `Event`, `DryRun`.",
+          "enum": [
+            "DryRun",
+            "Event",
+            "RequestResponse"
+          ],
+          "type": "string"
+        },
+        "is_proxy_integration": {
+          "default": false,
+          "description": "An optional value that defines whether the response format to receive from the Lambda to\n[this format](https://docs.aws.amazon.com/apigateway/latest/developerguide/set-up-lambda-proxy-integrations.html#api-gateway-simple-proxy-for-lambda-output-format).",
+          "type": "boolean"
+        },
+        "keepalive": {
+          "default": 60000,
+          "description": "An optional value in milliseconds that defines how long an idle connection lives before being closed.",
+          "type": "number"
+        },
+        "log_type": {
+          "default": "Tail",
+          "enum": [
+            "None",
+            "Tail"
+          ],
+          "type": "string"
+        },
+        "port": {
+          "default": 443,
+          "description": "The TCP port that the plugin uses to connect to the server.",
+          "maximum": 65535,
+          "minimum": 0,
+          "type": "integer"
+        },
+        "proxy_scheme": {
+          "description": "{:.important}\n> As of Kong Gateway 2.8.0.0, this parameter is deprecated.\n> <br><br>\n> If running Kong Gateway 2.7.x or earlier, the\n`proxy_scheme` value is required if `proxy_url` is defined. In 2.8.x or\nlater versions, `proxy_scheme` is not required.\n\nAn optional value that defines which HTTP scheme to use for connecting through the proxy server. The\nsupported schemes are `http` and `https`.",
+          "enum": [
+            "http",
+            "https"
+          ],
+          "type": "string"
+        },
+        "proxy_url": {
+          "description": "An optional value that defines whether the plugin should connect through\nthe given proxy server URL. Include the request scheme in the URL, which\nmust be `http`. For example: `http://my-proxy-server:3128`.\n\nKong Gateway uses HTTP tunneling via the [CONNECT HTTP](https://httpwg.org/specs/rfc7231.html#CONNECT)\nmethod so that no details of the AWS Lambda request are leaked to the proxy server.",
+          "examples": [
+            "http://my-proxy-server:3128"
+          ],
+          "type": "string"
+        },
+        "qualifier": {
+          "description": "The [`Qualifier`](http://docs.aws.amazon.com/lambda/latest/dg/API_Invoke.html#API_Invoke_RequestSyntax) to use when invoking the function.",
+          "type": "string"
+        },
+        "skip_large_bodies": {
+          "default": true,
+          "description": "An optional value that defines whether Kong should send large\nbodies that are buffered to disk. Note that enabling this option will have an impact\non system memory depending on the number of requests simultaneously in flight at any given point in time\nand on the maximum size of each request. Also this option blocks all requests being handled by the\nnginx workers. That could be tens of thousands of other transactions that are not being processed. For small I/O\noperations, such a delay would generally not be problematic. In cases where the body size is in the order of MB,\nsuch a delay would cause notable interruptions in request processing. Given all of the potential\ndownsides resulting from enabling this option, consider increasing the\n[client_body_buffer_size](http://nginx.org/en/docs/http/ngx_http_core_module.html#client_body_buffer_size)\nvalue instead.",
+          "type": "boolean"
+        },
+        "timeout": {
+          "default": 60000,
+          "description": "An optional timeout in milliseconds when invoking the function.",
+          "type": "number"
+        },
+        "unhandled_status": {
+          "description": "The response status code to use (instead of the default `200`, `202`, or `204`) in the case of an\n[`Unhandled` Function Error](https://docs.aws.amazon.com/lambda/latest/dg/API_Invoke.html#API_Invoke_ResponseSyntax).",
+          "maximum": 999,
+          "minimum": 100,
+          "type": "integer"
+        }
+      },
+      "required": [
+
+      ],
+      "type": "object"
+    },
+    "consumer": {
+      "additionalProperties": false,
+      "description": "If set, the plugin will activate only for requests where the specified has been authenticated. (Note that some plugins can not be restricted to consumers this way.). Leave unset for the plugin to activate regardless of the authenticated Consumer.",
+      "properties": {
+        "id": {
+          "type": "string"
+        }
+      },
+      "required": [
+
+      ],
+      "type": "object"
+    },
+    "consumer_group": {
+      "additionalProperties": false,
+      "description": "If set, the plugin will activate only for requests where the specified consumer group has been authenticated. (Note that some plugins can not be restricted to consumers groups this way.). Leave unset for the plugin to activate regardless of the authenticated Consumer Groups",
+      "properties": {
+        "id": {
+          "type": "string"
+        }
+      },
+      "required": [
+
+      ],
+      "type": "object"
+    },
+    "protocols": {
+      "default": [
+        "grpc",
+        "grpcs",
+        "http",
+        "https"
+      ],
+      "description": "A list of the request protocols that will trigger this plugin. The default value, as well as the possible values allowed on this field, may change depending on the plugin type. For example, plugins that only work in stream mode will only support tcp and tls.",
+      "items": {
+        "enum": [
+          "grpc",
+          "grpcs",
+          "http",
+          "https"
+        ],
+        "required": [
+
+        ],
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "route": {
+      "additionalProperties": false,
+      "description": "If set, the plugin will only activate when receiving requests via the specified route. Leave unset for the plugin to activate regardless of the route being used.",
+      "properties": {
+        "id": {
+          "type": "string"
+        }
+      },
+      "required": [
+
+      ],
+      "type": "object"
+    },
+    "service": {
+      "additionalProperties": false,
+      "description": "If set, the plugin will only activate when receiving requests via one of the routes belonging to the specified Service. Leave unset for the plugin to activate regardless of the Service being matched.",
+      "properties": {
+        "id": {
+          "type": "string"
+        }
+      },
+      "required": [
+
+      ],
+      "type": "object"
+    }
+  },
+  "required": [
+
+  ]
+}
