@@ -1,0 +1,324 @@
+{
+  "properties": {
+    "config": {
+      "properties": {
+        "consumer_groups": {
+          "description": "List of consumer groups allowed to override the rate limiting\nsettings for the given Route or Service. Required if\n`enforce_consumer_groups` is set to `true`.\nFlipping `enforce_consumer_groups` from `true` to `false` disables the\ngroup override, but does not clear the list of consumer groups.\nYou can then flip `enforce_consumer_groups` to `true` to re-enforce the\ngroups.",
+          "examples": [
+            [
+              "group1",
+              "group2"
+            ]
+          ],
+          "items": {
+            "required": [
+
+            ],
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "dictionary_name": {
+          "default": "kong_rate_limiting_counters",
+          "description": "The shared dictionary where counters are stored. When the plugin is\nconfigured to synchronize counter data externally (that is \n`config.strategy` is `cluster` or `redis` and `config.sync_rate` isn't\n`-1`), this dictionary serves as a buffer to populate counters in the\ndata store on each synchronization cycle.",
+          "type": "string"
+        },
+        "enforce_consumer_groups": {
+          "default": false,
+          "description": "Set to `true` to enable `consumer_groups`, which allows the settings\nfrom one of the allowed consumer groups to override the given plugin\nconfiguration.",
+          "examples": [
+            true
+          ],
+          "type": "boolean"
+        },
+        "header_name": {
+          "description": "Header name to use as the rate limit key when `config.identifier` is\nconfigured with the value `header`. Ignored when `config.identifier` is not `header`.",
+          "type": "string"
+        },
+        "hide_client_headers": {
+          "default": false,
+          "description": "Optionally hide informative response headers that would otherwise\nprovide information about the current status of limits and counters as\ndescribed in the paragraph [Headers sent to the client](#headers-sent-to-the-client).\nAvailable options: `true` or `false`.",
+          "examples": [
+            false
+          ],
+          "type": "boolean"
+        },
+        "identifier": {
+          "default": "consumer",
+          "description": "The type of identifier used to generate the rate limit key.\nDefines the scope used to increment the rate limiting counters.\nCan be `ip`, `credential`, `consumer`, `service`, `header`, or `path`.",
+          "enum": [
+            "consumer",
+            "credential",
+            "header",
+            "ip",
+            "path",
+            "service"
+          ],
+          "examples": [
+            "consumer"
+          ],
+          "type": "string"
+        },
+        "limit": {
+          "description": "One or more requests-per-window limits to apply. There must be a matching\nnumber of window limits and sizes specified.",
+          "examples": [
+            [
+              5
+            ]
+          ],
+          "items": {
+            "required": [
+
+            ],
+            "type": "number"
+          },
+          "type": "array"
+        },
+        "namespace": {
+          "description": "The rate limiting library namespace to use for this plugin instance. Counter\ndata and sync configuration is isolated in each namespace.\n{:.important}\n> **Important**: If managing Kong Gateway with **declarative configuration** or running\nKong Gateway in **DB-less mode**, set the `namespace` explicitly in your declarative configuration.\n> <br><br>\n> If not set, you will run into the following issues:\n* In DB-less mode, this field will be regenerated automatically on every configuration change.\n* If applying declarative configuration with decK, decK will automatically fail the update and require a \n`namespace` value.",
+          "examples": [
+            "example_namespace"
+          ],
+          "type": "string"
+        },
+        "path": {
+          "type": "string"
+        },
+        "redis": {
+          "properties": {
+            "cluster_addresses": {
+              "description": "Cluster addresses to use for Redis connections when the `redis` strategy is defined.\nDefining this value implies using Redis cluster. Each string element must\nconsist of a hostname (or IP address) and port. The minimum length of the array is 1 element.",
+              "items": {
+                "required": [
+
+                ],
+                "type": "string"
+              },
+              "minLength": 1,
+              "type": "array"
+            },
+            "connect_timeout": {
+              "description": "Connection timeout to use for Redis connection when the `redis` strategy is defined.",
+              "maximum": 2147483646,
+              "minimum": 0,
+              "type": "integer"
+            },
+            "database": {
+              "default": 0,
+              "description": "Database to use for Redis connection when the `redis` strategy is defined.",
+              "type": "integer"
+            },
+            "host": {
+              "description": "Host to use for Redis connection when the `redis` strategy is defined.\nThis parameter accepts a hostname or an IP address as a value.",
+              "type": "string"
+            },
+            "keepalive_backlog": {
+              "description": "If specified, limits the total number of opened connections for a pool. If the\nconnection pool is full, all connection queues beyond the maximum limit go into\nthe backlog queue. Once the backlog queue is full, subsequent connect operations\nwill fail and return `nil`. Queued connect operations resume once the number of\nconnections in the pool is less than `keepalive_pool_size`. Note that queued\nconnect operations are subject to set timeouts.",
+              "maximum": 2147483646,
+              "minimum": 0,
+              "type": "integer"
+            },
+            "keepalive_pool_size": {
+              "default": 30,
+              "description": "The size limit for every cosocket connection pool associated with every remote\nserver, per worker process. If no `keepalive_pool_size` is specified and no `keepalive_backlog`\nis specified, no pool is created. If no `keepalive_pool_size` is specified and `keepalive_backlog`\nis specified, then the pool uses the default value `30`.",
+              "maximum": 2147483646,
+              "minimum": 1,
+              "type": "integer"
+            },
+            "password": {
+              "description": "Password to use for Redis connection when the `redis` strategy is defined.\nIf undefined, no AUTH commands are sent to Redis.",
+              "type": "string"
+            },
+            "port": {
+              "description": "Specifies the Redis server port when using the `redis` strategy. Must be a\nvalue between 0 and 65535. Default: 6379.",
+              "maximum": 65535,
+              "minimum": 0,
+              "type": "integer"
+            },
+            "read_timeout": {
+              "description": "Read timeout to use for Redis connection when the `redis` strategy is defined.",
+              "maximum": 2147483646,
+              "minimum": 0,
+              "type": "integer"
+            },
+            "send_timeout": {
+              "description": "Send timeout to use for Redis connection when the `redis` strategy is defined.",
+              "maximum": 2147483646,
+              "minimum": 0,
+              "type": "integer"
+            },
+            "sentinel_addresses": {
+              "description": "Sentinel addresses to use for Redis connections when the `redis` strategy is defined.\nDefining this value implies using Redis Sentinel. Each string element must\nconsist of a hostname (or IP address) and port. The minimum length of the array is 1 element.",
+              "items": {
+                "required": [
+
+                ],
+                "type": "string"
+              },
+              "minLength": 1,
+              "type": "array"
+            },
+            "sentinel_master": {
+              "description": "Sentinel master to use for Redis connections when the `redis` strategy is defined.\nDefining this value implies using Redis Sentinel.",
+              "type": "string"
+            },
+            "sentinel_password": {
+              "description": "Sentinel password to authenticate with a Redis Sentinel instance.\nIf undefined, no AUTH commands are sent to Redis Sentinels.",
+              "type": "string"
+            },
+            "sentinel_role": {
+              "description": "Sentinel role to use for Redis connections when the `redis` strategy is defined.\nDefining this value implies using Redis Sentinel. Available options:  `master`, `slave`, `any`.",
+              "enum": [
+                "any",
+                "master",
+                "slave"
+              ],
+              "type": "string"
+            },
+            "sentinel_username": {
+              "description": "Sentinel username to authenticate with a Redis Sentinel instance.\nIf undefined, ACL authentication will not be performed. This requires Redis v6.2.0+.",
+              "type": "string"
+            },
+            "server_name": {
+              "description": "Specifies the server name for the new TLS extension Server Name Indication (SNI) when connecting over SSL.",
+              "type": "string"
+            },
+            "ssl": {
+              "default": false,
+              "description": "If set to true, then uses SSL to connect to Redis.",
+              "type": "boolean"
+            },
+            "ssl_verify": {
+              "default": false,
+              "description": "If set to true, then verifies the validity of the server SSL certificate. Note that you need to configure the\n[lua_ssl_trusted_certificate](/gateway/latest/reference/configuration/#lua_ssl_trusted_certificate)\nto specify the CA (or server) certificate used by your redis server. You may also need to configure\n[lua_ssl_verify_depth](/gateway/latest/reference/configuration/#lua_ssl_verify_depth) accordingly.",
+              "type": "boolean"
+            },
+            "timeout": {
+              "default": 2000,
+              "description": "Connection timeout (in milliseconds) to use for Redis connection when the `redis` strategy is defined.",
+              "maximum": 2147483646,
+              "minimum": 0,
+              "type": "integer"
+            },
+            "username": {
+              "description": "Username to use for Redis connection when the `redis` strategy is defined and ACL authentication is desired.\nIf undefined, ACL authentication will not be performed.\nThis requires Redis v6.0.0+. The username **cannot** be set to `default`.",
+              "type": "string"
+            }
+          },
+          "required": [
+
+          ],
+          "type": "object"
+        },
+        "retry_after_jitter_max": {
+          "default": 0,
+          "description": "The upper bound of a jitter (random delay) in seconds to be added to the `Retry-After`\nheader of denied requests (status = `429`) in order to prevent all the clients\nfrom coming back at the same time. The lower bound of the jitter is `0`; in this case,\nthe `Retry-After` header is equal to the `RateLimit-Reset` header.",
+          "type": "number"
+        },
+        "strategy": {
+          "default": "cluster",
+          "description": "The rate-limiting strategy to use for retrieving and incrementing the\nlimits. Available values are:\n- `cluster`: Counters are stored in the Kong datastore and shared across\n   the nodes.\n- `redis`: Counters are stored on a Redis server and shared\n   across the nodes.\n- `local`: Counters are stored locally in-memory on the node (same effect\n   as setting `sync_rate` to `-1`).\n\nIn DB-less, hybrid mode, and Konnect, the `cluster` config strategy\nis not supported.\n\nFor details on which strategy should be used, refer to the\n[implementation considerations](/hub/kong-inc/rate-limiting/#implementation-considerations).",
+          "enum": [
+            "cluster",
+            "local",
+            "redis"
+          ],
+          "examples": [
+            "local"
+          ],
+          "type": "string"
+        },
+        "sync_rate": {
+          "description": "How often to sync counter data to the central data store. A value of 0\nresults in synchronous behavior; a value of -1 ignores sync behavior\nentirely and only stores counters in node memory. A value greater than\n0 will sync the counters in the specified number of seconds. The minimum\nallowed interval is 0.02 seconds (20ms).",
+          "examples": [
+            -1
+          ],
+          "type": "number"
+        },
+        "window_size": {
+          "description": "One or more window sizes to apply a limit to (defined in seconds). There\nmust be a matching number of window limits and sizes specified.",
+          "examples": [
+            [
+              30
+            ]
+          ],
+          "items": {
+            "required": [
+
+            ],
+            "type": "number"
+          },
+          "type": "array"
+        },
+        "window_type": {
+          "default": "sliding",
+          "description": "Sets the time window type to either `sliding` (default) or `fixed`.\nSliding windows apply the rate limiting logic while taking into account\nprevious hit rates (from the window that immediately precedes the current)\nusing a dynamic weight.\nFixed windows consist of buckets that are statically assigned to a\ndefinitive time range, each request is mapped to only one fixed window\nbased on its timestamp and will affect only that window's counters.\nFor more information refer to the\n[Enterprise Rate Limiting Library Overview](/gateway/latest/reference/rate-limiting/#overview).",
+          "enum": [
+            "fixed",
+            "sliding"
+          ],
+          "type": "string"
+        }
+      },
+      "required": [
+
+      ],
+      "type": "object"
+    },
+    "consumer": {
+      "additionalProperties": false,
+      "description": "If set, the plugin will activate only for requests where the specified has been authenticated. (Note that some plugins can not be restricted to consumers this way.). Leave unset for the plugin to activate regardless of the authenticated Consumer.",
+      "properties": {
+        "id": {
+          "type": "string"
+        }
+      },
+      "required": [
+
+      ],
+      "type": "object"
+    },
+    "consumer_group": {
+      "additionalProperties": false,
+      "description": "If set, the plugin will activate only for requests where the specified consumer group has been authenticated. (Note that some plugins can not be restricted to consumers groups this way.). Leave unset for the plugin to activate regardless of the authenticated Consumer Groups",
+      "properties": {
+        "id": {
+          "type": "string"
+        }
+      },
+      "required": [
+
+      ],
+      "type": "object"
+    },
+    "route": {
+      "additionalProperties": false,
+      "description": "If set, the plugin will only activate when receiving requests via the specified route. Leave unset for the plugin to activate regardless of the route being used.",
+      "properties": {
+        "id": {
+          "type": "string"
+        }
+      },
+      "required": [
+
+      ],
+      "type": "object"
+    },
+    "service": {
+      "additionalProperties": false,
+      "description": "If set, the plugin will only activate when receiving requests via one of the routes belonging to the specified Service. Leave unset for the plugin to activate regardless of the Service being matched.",
+      "properties": {
+        "id": {
+          "type": "string"
+        }
+      },
+      "required": [
+
+      ],
+      "type": "object"
+    }
+  },
+  "required": [
+
+  ]
+}
