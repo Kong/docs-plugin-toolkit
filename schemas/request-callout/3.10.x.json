@@ -1,0 +1,534 @@
+{
+  "fields": [
+    {
+      "consumer": {
+        "reference": "consumers",
+        "eq": null,
+        "description": "Custom type for representing a foreign key with a null value allowed.",
+        "type": "foreign"
+      }
+    },
+    {
+      "protocols": {
+        "type": "set",
+        "description": "A set of strings representing HTTP protocols.",
+        "required": true,
+        "elements": {
+          "type": "string",
+          "one_of": [
+            "grpc",
+            "grpcs",
+            "http",
+            "https"
+          ]
+        },
+        "default": [
+          "grpc",
+          "grpcs",
+          "http",
+          "https"
+        ]
+      }
+    },
+    {
+      "config": {
+        "fields": [
+          {
+            "callouts": {
+              "required": false,
+              "elements": {
+                "type": "record",
+                "fields": [
+                  {
+                    "name": {
+                      "type": "string",
+                      "required": true
+                    }
+                  },
+                  {
+                    "depends_on": {
+                      "required": false,
+                      "elements": {
+                        "type": "string"
+                      },
+                      "type": "array",
+                      "default": []
+                    }
+                  },
+                  {
+                    "request": {
+                      "type": "record",
+                      "fields": [
+                        {
+                          "url": {
+                            "required": true,
+                            "type": "string",
+                            "description": "A string representing a URL, such as https://example.com/path/to/resource?q=search."
+                          }
+                        },
+                        {
+                          "method": {
+                            "default": "GET",
+                            "description": "A string representing an HTTP method, such as GET, POST, PUT, or DELETE. The string must contain only uppercase letters.",
+                            "type": "string",
+                            "match": "^%u+$"
+                          }
+                        },
+                        {
+                          "http_opts": {
+                            "default": [],
+                            "type": "record",
+                            "fields": [
+                              {
+                                "ssl_verify": {
+                                  "type": "boolean",
+                                  "default": true
+                                }
+                              },
+                              {
+                                "ssl_server_name": {
+                                  "type": "string",
+                                  "required": false
+                                }
+                              },
+                              {
+                                "timeouts": {
+                                  "default": [],
+                                  "type": "record",
+                                  "fields": [
+                                    {
+                                      "connect": {
+                                        "description": "An integer representing a timeout in milliseconds. Must be between 0 and 2^31-2.",
+                                        "type": "integer",
+                                        "between": [
+                                          0,
+                                          2147483646
+                                        ]
+                                      }
+                                    },
+                                    {
+                                      "write": {
+                                        "description": "An integer representing a timeout in milliseconds. Must be between 0 and 2^31-2.",
+                                        "type": "integer",
+                                        "between": [
+                                          0,
+                                          2147483646
+                                        ]
+                                      }
+                                    },
+                                    {
+                                      "read": {
+                                        "description": "An integer representing a timeout in milliseconds. Must be between 0 and 2^31-2.",
+                                        "type": "integer",
+                                        "between": [
+                                          0,
+                                          2147483646
+                                        ]
+                                      }
+                                    }
+                                  ]
+                                }
+                              },
+                              {
+                                "proxy": {
+                                  "default": [],
+                                  "type": "record",
+                                  "fields": [
+                                    {
+                                      "auth_username": {
+                                        "required": false,
+                                        "referenceable": true,
+                                        "type": "string"
+                                      }
+                                    },
+                                    {
+                                      "auth_password": {
+                                        "required": false,
+                                        "referenceable": true,
+                                        "type": "string"
+                                      }
+                                    },
+                                    {
+                                      "http_proxy": {
+                                        "description": "A string representing a URL, such as https://example.com/path/to/resource?q=search.",
+                                        "type": "string"
+                                      }
+                                    },
+                                    {
+                                      "https_proxy": {
+                                        "description": "A string representing a URL, such as https://example.com/path/to/resource?q=search.",
+                                        "type": "string"
+                                      }
+                                    }
+                                  ]
+                                }
+                              }
+                            ]
+                          }
+                        },
+                        {
+                          "query": {
+                            "default": [],
+                            "type": "record",
+                            "fields": [
+                              {
+                                "forward": {
+                                  "type": "boolean",
+                                  "default": false
+                                }
+                              },
+                              {
+                                "custom": {
+                                  "required": false,
+                                  "keys": {
+                                    "type": "string"
+                                  },
+                                  "type": "map",
+                                  "values": {
+                                    "type": "string",
+                                    "required": false
+                                  }
+                                }
+                              }
+                            ]
+                          }
+                        },
+                        {
+                          "headers": {
+                            "default": [],
+                            "type": "record",
+                            "fields": [
+                              {
+                                "forward": {
+                                  "type": "boolean",
+                                  "default": false
+                                }
+                              },
+                              {
+                                "custom": {
+                                  "required": false,
+                                  "keys": {
+                                    "type": "string"
+                                  },
+                                  "type": "map",
+                                  "values": {
+                                    "type": "string",
+                                    "required": false
+                                  }
+                                }
+                              }
+                            ]
+                          }
+                        },
+                        {
+                          "body": {
+                            "default": [],
+                            "type": "record",
+                            "fields": [
+                              {
+                                "forward": {
+                                  "type": "boolean",
+                                  "default": false
+                                }
+                              },
+                              {
+                                "decode": {
+                                  "type": "boolean",
+                                  "default": false
+                                }
+                              },
+                              {
+                                "custom": {
+                                  "required": false,
+                                  "keys": {
+                                    "type": "string"
+                                  },
+                                  "type": "map",
+                                  "values": {
+                                    "type": "string",
+                                    "required": false
+                                  }
+                                }
+                              }
+                            ]
+                          }
+                        },
+                        {
+                          "error": {
+                            "default": [],
+                            "type": "record",
+                            "fields": [
+                              {
+                                "on_error": {
+                                  "default": "retry",
+                                  "type": "string",
+                                  "one_of": [
+                                    "retry",
+                                    "fail",
+                                    "ignore"
+                                  ]
+                                }
+                              },
+                              {
+                                "retry": {
+                                  "type": "integer",
+                                  "default": 2
+                                }
+                              },
+                              {
+                                "codes": {
+                                  "type": "array",
+                                  "elements": {
+                                    "type": "string",
+                                    "default": "400-599"
+                                  }
+                                }
+                              },
+                              {
+                                "error_response_code": {
+                                  "type": "integer",
+                                  "default": 400
+                                }
+                              },
+                              {
+                                "error_response_msg": {
+                                  "type": "string",
+                                  "default": "service callout error"
+                                }
+                              }
+                            ]
+                          }
+                        },
+                        {
+                          "redirect": {
+                            "default": [],
+                            "type": "record",
+                            "fields": [
+                              {
+                                "on_redirect": {
+                                  "default": "continue",
+                                  "type": "string",
+                                  "one_of": [
+                                    "follow",
+                                    "continue"
+                                  ]
+                                }
+                              },
+                              {
+                                "codes": {
+                                  "type": "array",
+                                  "elements": {
+                                    "type": "string",
+                                    "default": "400-599"
+                                  }
+                                }
+                              }
+                            ]
+                          }
+                        },
+                        {
+                          "by_lua": {
+                            "type": "string",
+                            "required": false
+                          }
+                        }
+                      ]
+                    }
+                  },
+                  {
+                    "response": {
+                      "required": true,
+                      "type": "record",
+                      "fields": [
+                        {
+                          "headers": {
+                            "default": [],
+                            "type": "record",
+                            "fields": [
+                              {
+                                "store": {
+                                  "type": "boolean",
+                                  "default": true
+                                }
+                              }
+                            ]
+                          }
+                        },
+                        {
+                          "body": {
+                            "default": [],
+                            "type": "record",
+                            "fields": [
+                              {
+                                "store": {
+                                  "type": "boolean",
+                                  "default": true
+                                }
+                              },
+                              {
+                                "decode": {
+                                  "type": "boolean",
+                                  "default": false
+                                }
+                              }
+                            ]
+                          }
+                        },
+                        {
+                          "by_lua": {
+                            "type": "string",
+                            "required": false
+                          }
+                        }
+                      ]
+                    }
+                  },
+                  {
+                    "cache": {
+                      "default": [],
+                      "type": "record",
+                      "fields": [
+                        {
+                          "bypass": {
+                            "type": "boolean",
+                            "default": false
+                          }
+                        }
+                      ]
+                    }
+                  }
+                ]
+              },
+              "type": "array"
+            }
+          },
+          {
+            "cache": {
+              "fields": [
+                {
+                  "strategy": {
+                    "default": "memory",
+                    "type": "string",
+                    "one_of": [
+                      "memory",
+                      "disk"
+                    ]
+                  }
+                }
+              ],
+              "type": "record",
+              "required": true
+            }
+          },
+          {
+            "upstream": {
+              "fields": [
+                {
+                  "by_lua": {
+                    "type": "string",
+                    "required": false
+                  }
+                },
+                {
+                  "query": {
+                    "default": [],
+                    "fields": [
+                      {
+                        "forward": {
+                          "type": "boolean",
+                          "default": true
+                        }
+                      },
+                      {
+                        "custom": {
+                          "required": false,
+                          "keys": {
+                            "type": "string"
+                          },
+                          "type": "map",
+                          "values": {
+                            "type": "string",
+                            "required": false
+                          }
+                        }
+                      }
+                    ],
+                    "type": "record",
+                    "required": true
+                  }
+                },
+                {
+                  "headers": {
+                    "default": [],
+                    "fields": [
+                      {
+                        "forward": {
+                          "type": "boolean",
+                          "default": true
+                        }
+                      },
+                      {
+                        "custom": {
+                          "required": false,
+                          "keys": {
+                            "type": "string"
+                          },
+                          "type": "map",
+                          "values": {
+                            "type": "string",
+                            "required": false
+                          }
+                        }
+                      }
+                    ],
+                    "type": "record",
+                    "required": true
+                  }
+                },
+                {
+                  "body": {
+                    "default": [],
+                    "fields": [
+                      {
+                        "forward": {
+                          "type": "boolean",
+                          "default": true
+                        }
+                      },
+                      {
+                        "decode": {
+                          "type": "boolean",
+                          "default": true
+                        }
+                      },
+                      {
+                        "custom": {
+                          "required": false,
+                          "keys": {
+                            "type": "string"
+                          },
+                          "type": "map",
+                          "values": {
+                            "type": "string",
+                            "required": false
+                          }
+                        }
+                      }
+                    ],
+                    "type": "record",
+                    "required": true
+                  }
+                }
+              ],
+              "type": "record",
+              "required": true
+            }
+          }
+        ],
+        "type": "record",
+        "required": true
+      }
+    }
+  ],
+  "entity_checks": []
+}
