@@ -1,0 +1,200 @@
+{
+  "entity_checks": [],
+  "fields": [
+    {
+      "protocols": {
+        "description": "A set of strings representing HTTP protocols.",
+        "type": "set",
+        "required": true,
+        "default": [
+          "grpc",
+          "grpcs",
+          "http",
+          "https"
+        ],
+        "elements": {
+          "one_of": [
+            "grpc",
+            "grpcs",
+            "http",
+            "https"
+          ],
+          "type": "string"
+        }
+      }
+    },
+    {
+      "consumer_group": {
+        "description": "Custom type for representing a foreign key with a null value allowed.",
+        "eq": null,
+        "reference": "consumer_groups",
+        "type": "foreign"
+      }
+    },
+    {
+      "config": {
+        "entity_checks": [],
+        "type": "record",
+        "fields": [
+          {
+            "bootstrap_servers": {
+              "description": "Set of bootstrap brokers in a `{host: host, port: port}` list format.",
+              "type": "set",
+              "elements": {
+                "type": "record",
+                "fields": [
+                  {
+                    "host": {
+                      "description": "A string representing a host name, such as example.com.",
+                      "required": true,
+                      "type": "string"
+                    }
+                  },
+                  {
+                    "port": {
+                      "description": "An integer representing a port number between 0 and 65535, inclusive.",
+                      "required": true,
+                      "type": "integer",
+                      "between": [
+                        0,
+                        65535
+                      ]
+                    }
+                  }
+                ]
+              }
+            }
+          },
+          {
+            "topics": {
+              "description": "The Kafka topics and their configuration you want to consume from.",
+              "type": "array",
+              "required": true,
+              "len_min": 1,
+              "elements": {
+                "type": "record",
+                "fields": [
+                  {
+                    "name": {
+                      "required": true,
+                      "type": "string"
+                    }
+                  }
+                ]
+              }
+            }
+          },
+          {
+            "mode": {
+              "description": "The mode of operation for the plugin.",
+              "type": "string",
+              "default": "http-get",
+              "one_of": [
+                "server-sent-events",
+                "http-get"
+              ]
+            }
+          },
+          {
+            "message_deserializer": {
+              "description": "The deserializer to use for the consumed messages.",
+              "type": "string",
+              "default": "noop",
+              "one_of": [
+                "json",
+                "noop"
+              ]
+            }
+          },
+          {
+            "auto_offset_reset": {
+              "description": "The offset to start from when there is no initial offset in the consumer group.",
+              "type": "string",
+              "default": "latest",
+              "one_of": [
+                "earliest",
+                "latest"
+              ]
+            }
+          },
+          {
+            "commit_strategy": {
+              "description": "The strategy to use for committing offsets.",
+              "type": "string",
+              "default": "auto",
+              "one_of": [
+                "auto",
+                "off"
+              ]
+            }
+          },
+          {
+            "timeout": {
+              "description": "Socket timeout in milliseconds.",
+              "type": "integer",
+              "default": 10000
+            }
+          },
+          {
+            "keepalive": {
+              "description": "Keepalive timeout in milliseconds.",
+              "type": "integer",
+              "default": 60000
+            }
+          },
+          {
+            "keepalive_enabled": {
+              "default": false,
+              "type": "boolean"
+            }
+          },
+          {
+            "cluster_api_key": {
+              "description": "Username/Apikey for SASL authentication.",
+              "referenceable": true,
+              "encrypted": true,
+              "type": "string",
+              "required": true
+            }
+          },
+          {
+            "cluster_api_secret": {
+              "description": "Password/ApiSecret for SASL authentication.",
+              "referenceable": true,
+              "encrypted": true,
+              "type": "string",
+              "required": true
+            }
+          },
+          {
+            "confluent_cloud_api_key": {
+              "description": "Apikey for authentication with Confluent Cloud. This allows for management tasks such as creating topics, ACLs, etc.",
+              "referenceable": true,
+              "encrypted": true,
+              "type": "string",
+              "required": false
+            }
+          },
+          {
+            "confluent_cloud_api_secret": {
+              "description": "The corresponding secret for the Confluent Cloud API key.",
+              "referenceable": true,
+              "encrypted": true,
+              "type": "string",
+              "required": false
+            }
+          },
+          {
+            "cluster_name": {
+              "description": "An identifier for the Kafka cluster. By default, this field generates a random string. You can also set your own custom cluster identifier.  If more than one Kafka plugin is configured without a `cluster_name` (that is, if the default autogenerated value is removed), these plugins will use the same producer, and by extension, the same cluster. Logs will be sent to the leader of the cluster.",
+              "required": false,
+              "auto": true,
+              "type": "string"
+            }
+          }
+        ],
+        "required": true
+      }
+    }
+  ]
+}
