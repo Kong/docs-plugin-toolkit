@@ -1,0 +1,175 @@
+{
+  "properties": {
+    "config": {
+      "properties": {
+        "default_header_type": {
+          "default": "b3",
+          "description": "Allows specifying the type of header to be added to requests with no pre-existing tracing headers\nand when `config.header_type` is set to `\"preserve\"`.\nWhen `header_type` is set to any other value, `default_header_type` is ignored.\n\nPossible values are `b3`, `b3-single`, `w3c`, `jaeger`, or `ot`.\nSee the entry for `header_type` for value definitions.",
+          "enum": [
+            "b3",
+            "b3-single",
+            "jaeger",
+            "ot",
+            "w3c"
+          ],
+          "type": "string"
+        },
+        "default_service_name": {
+          "description": "Set a default service name to override `unknown-service-name` in the \nZipkin spans.",
+          "type": "string"
+        },
+        "header_type": {
+          "default": "preserve",
+          "description": "All HTTP requests going through the plugin are tagged with a tracing HTTP request.\nThis property codifies what kind of tracing header the plugin expects on incoming requests.\n\nPossible values: `b3`, `b3-single`, `w3c`, `preserve`, `jaeger`, `ot`, or `ignore`.\n* `b3`: Expects [Zipkin's B3 multiple headers](https://github.com/openzipkin/b3-propagation#multiple-headers)\non incoming requests, and will add them to the transmitted requests if the headers are missing from those requests.\n* `b3-single`: Expects or adds Zipkin's B3 single-header tracing headers.\n* `w3c`: Expects or adds W3C's traceparent tracing header.\n* `preserve`: Does not expect any format, and will transmit whatever header is recognized or present,\nwith a default of `b3` if none is found. In case of a mismatch between the expected and incoming\ntracing headers (for example, when `header_type` is set to `b3` but a w3c-style tracing header is\nfound in the incoming request), then the plugin will add both kinds of tracing headers\nto the request and generate a mismatch warning in the logs.\n* `jaeger`: Expects or adds\n[Jaeger-style tracing headers](https://www.jaegertracing.io/docs/1.22/client-libraries/#propagation-format) (`uber-trace-id`).\n* `ot`: Expects or adds [OpenTelemetry tracing headers](https://github.com/open-telemetry/opentelemetry-java/blob/96e8523544f04c305da5382854eee06218599075/extensions/trace_propagators/src/main/java/io/opentelemetry/extensions/trace/propagation/OtTracerPropagator.java) of the form `ot-tracer-*`.\n* `ignore`: Does not read any tracing headers from the incoming request.\nStarts a new request using the `default_header_type` value, or falls back to\n`b3` if there is no `default_header_type` value set.",
+          "enum": [
+            "b3",
+            "b3-single",
+            "ignore",
+            "jaeger",
+            "ot",
+            "preserve",
+            "w3c"
+          ],
+          "type": "string"
+        },
+        "http_endpoint": {
+          "description": "The full HTTP(S) endpoint to which Zipkin spans should be sent by Kong.\nIf not specified, the Zipkin plugin will only act as a tracing header\ngenerator/transmitter.",
+          "examples": [
+            "http://your.zipkin.collector:9411/api/v2/spans"
+          ],
+          "type": "string"
+        },
+        "include_credential": {
+          "default": true,
+          "description": "Specify whether the credential of the currently authenticated consumer\nshould be included in metadata sent to the Zipkin server.",
+          "examples": [
+            true
+          ],
+          "type": "boolean"
+        },
+        "local_service_name": {
+          "default": "kong",
+          "description": "The name of the service as displayed in Zipkin. Customize this name to\ntell your Kong Gateway services apart in Zipkin request traces.",
+          "type": "string"
+        },
+        "sample_ratio": {
+          "default": 0.001,
+          "description": "How often to sample requests that do not contain trace IDs.\nSet to `0` to turn sampling off, or to `1` to sample **all** requests. The\nvalue must be between zero (0) and one (1), inclusive.",
+          "examples": [
+            0.001
+          ],
+          "maximum": 1,
+          "minimum": 0,
+          "type": "number"
+        },
+        "static_tags": {
+          "description": "The tags specified on this property will be added to the generated request traces. For example:\n`[ { \"name\": \"color\", \"value\": \"red\" } ]`.",
+          "items": {
+            "properties": {
+              "name": {
+                "not_one_of": [
+                  "error",
+                  "http.method",
+                  "http.path",
+                  "http.status_code",
+                  "kong.balancer.state",
+                  "kong.balancer.try",
+                  "kong.consumer",
+                  "kong.credential",
+                  "kong.node.id",
+                  "kong.route",
+                  "kong.service",
+                  "lc",
+                  "peer.hostname"
+                ],
+                "type": "string"
+              },
+              "value": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "name",
+              "value"
+            ],
+            "type": "object"
+          },
+          "type": "array"
+        },
+        "tags_header": {
+          "default": "Zipkin-Tags",
+          "description": "The Zipkin plugin will add extra headers to the tags associated with any HTTP\nrequests that come with a header named as configured by this property. The\nformat is `name_of_tag=value_of_tag`, separated by semicolons (`;`).\n\nFor example: with the default value, a request with the header\n`Zipkin-Tags: fg=blue; bg=red` will generate a trace with the tag `fg` with\nvalue `blue`, and another tag called `bg` with value `red`.",
+          "type": "string"
+        },
+        "traceid_byte_count": {
+          "default": 16,
+          "description": "The length in bytes of each request's Trace ID. The value can be either `8` or `16`.",
+          "enum": [
+            8,
+            16
+          ],
+          "type": "integer"
+        }
+      },
+      "required": [
+
+      ],
+      "type": "object"
+    },
+    "consumer": {
+      "additionalProperties": false,
+      "description": "If set, the plugin will activate only for requests where the specified has been authenticated. (Note that some plugins can not be restricted to consumers this way.). Leave unset for the plugin to activate regardless of the authenticated Consumer.",
+      "properties": {
+        "id": {
+          "type": "string"
+        }
+      },
+      "required": [
+
+      ],
+      "type": "object"
+    },
+    "consumer_group": {
+      "additionalProperties": false,
+      "description": "If set, the plugin will activate only for requests where the specified consumer group has been authenticated. (Note that some plugins can not be restricted to consumers groups this way.). Leave unset for the plugin to activate regardless of the authenticated Consumer Groups",
+      "properties": {
+        "id": {
+          "type": "string"
+        }
+      },
+      "required": [
+
+      ],
+      "type": "object"
+    },
+    "route": {
+      "additionalProperties": false,
+      "description": "If set, the plugin will only activate when receiving requests via the specified route. Leave unset for the plugin to activate regardless of the route being used.",
+      "properties": {
+        "id": {
+          "type": "string"
+        }
+      },
+      "required": [
+
+      ],
+      "type": "object"
+    },
+    "service": {
+      "additionalProperties": false,
+      "description": "If set, the plugin will only activate when receiving requests via one of the routes belonging to the specified Service. Leave unset for the plugin to activate regardless of the Service being matched.",
+      "properties": {
+        "id": {
+          "type": "string"
+        }
+      },
+      "required": [
+
+      ],
+      "type": "object"
+    }
+  },
+  "required": [
+
+  ]
+}
