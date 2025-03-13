@@ -1,26 +1,16 @@
 {
-  "entity_checks": [
-
-  ],
   "fields": [
     {
       "consumer": {
-        "reference": "consumers",
-        "eq": null,
+        "description": "Custom type for representing a foreign key with a null value allowed.",
         "type": "foreign",
-        "description": "Custom type for representing a foreign key with a null value allowed."
+        "eq": null,
+        "reference": "consumers"
       }
     },
     {
       "protocols": {
-        "default": [
-          "grpc",
-          "grpcs",
-          "http",
-          "https",
-          "ws",
-          "wss"
-        ],
+        "type": "set",
         "elements": {
           "type": "string",
           "one_of": [
@@ -32,30 +22,38 @@
             "wss"
           ]
         },
-        "required": true,
-        "type": "set"
+        "default": [
+          "grpc",
+          "grpcs",
+          "http",
+          "https",
+          "ws",
+          "wss"
+        ],
+        "required": true
       }
     },
     {
       "consumer_group": {
-        "reference": "consumer_groups",
-        "eq": null,
+        "description": "Custom type for representing a foreign key with a null value allowed.",
         "type": "foreign",
-        "description": "Custom type for representing a foreign key with a null value allowed."
+        "eq": null,
+        "reference": "consumer_groups"
       }
     },
     {
       "config": {
+        "type": "record",
         "fields": [
           {
             "key_names": {
-              "required": true,
+              "description": "Describes an array of parameter names where the plugin will look for a key. The key names may only contain [a-z], [A-Z], [0-9], [_] underscore, and [-] hyphen.",
               "type": "array",
+              "required": true,
               "elements": {
                 "type": "string",
                 "description": "A string representing an HTTP header name."
               },
-              "description": "Describes an array of parameter names where the plugin will look for a key. The key names may only contain [a-z], [A-Z], [0-9], [_] underscore, and [-] hyphen.",
               "default": [
                 "apikey"
               ]
@@ -63,61 +61,159 @@
           },
           {
             "hide_credentials": {
-              "default": false,
+              "type": "boolean",
               "description": "An optional boolean value telling the plugin to show or hide the credential from the upstream service. If `true`, the plugin strips the credential from the request.",
-              "required": true,
-              "type": "boolean"
+              "default": false,
+              "required": true
             }
           },
           {
             "anonymous": {
-              "description": "An optional string (consumer UUID or username) value to use as an “anonymous” consumer if authentication fails. If empty (default null), the request will fail with an authentication failure `4xx`.",
-              "type": "string"
+              "type": "string",
+              "description": "An optional string (consumer UUID or username) value to use as an “anonymous” consumer if authentication fails. If empty (default null), the request will fail with an authentication failure `4xx`."
             }
           },
           {
             "key_in_header": {
-              "default": true,
+              "type": "boolean",
               "description": "If enabled (default), the plugin reads the request header and tries to find the key in it.",
-              "required": true,
-              "type": "boolean"
+              "default": true,
+              "required": true
             }
           },
           {
             "key_in_query": {
-              "default": true,
+              "type": "boolean",
               "description": "If enabled (default), the plugin reads the query parameter in the request and tries to find the key in it.",
-              "required": true,
-              "type": "boolean"
+              "default": true,
+              "required": true
             }
           },
           {
             "key_in_body": {
-              "default": false,
+              "type": "boolean",
               "description": "If enabled, the plugin reads the request body. Supported MIME types: `application/www-form-urlencoded`, `application/json`, and `multipart/form-data`.",
-              "required": true,
-              "type": "boolean"
+              "default": false,
+              "required": true
             }
           },
           {
             "run_on_preflight": {
-              "default": true,
+              "type": "boolean",
               "description": "A boolean value that indicates whether the plugin should run (and try to authenticate) on `OPTIONS` preflight requests. If set to `false`, then `OPTIONS` requests are always allowed.",
-              "required": true,
-              "type": "boolean"
+              "default": true,
+              "required": true
             }
           },
           {
             "realm": {
               "description": "When authentication fails the plugin sends `WWW-Authenticate` header with `realm` attribute value.",
-              "required": false,
-              "type": "string"
+              "type": "string",
+              "required": false
+            }
+          },
+          {
+            "identity_realms": {
+              "default": [
+                {
+                  "region": null,
+                  "id": null,
+                  "scope": "cp"
+                }
+              ],
+              "description": "A configuration of Konnect Identity Realms that indicate where to source a consumer from.",
+              "type": "set",
+              "elements": {
+                "type": "record",
+                "fields": [
+                  {
+                    "scope": {
+                      "type": "string",
+                      "one_of": [
+                        "cp",
+                        "realm"
+                      ]
+                    }
+                  },
+                  {
+                    "id": {
+                      "uuid": true,
+                      "description": "A string representing a UUID (universally unique identifier).",
+                      "type": "string",
+                      "auto": false
+                    }
+                  },
+                  {
+                    "region": {
+                      "type": "string"
+                    }
+                  }
+                ],
+                "entity_checks": [
+                  {
+                    "conditional": {
+                      "if_match": {
+                        "eq": "realm"
+                      },
+                      "then_field": "id",
+                      "if_field": "scope",
+                      "then_match": {
+                        "required": true
+                      }
+                    }
+                  },
+                  {
+                    "conditional": {
+                      "if_match": {
+                        "eq": "realm"
+                      },
+                      "then_field": "region",
+                      "if_field": "scope",
+                      "then_match": {
+                        "one_of": [
+                          "us",
+                          "eu",
+                          "au"
+                        ]
+                      }
+                    }
+                  },
+                  {
+                    "conditional": {
+                      "if_match": {
+                        "eq": "cp"
+                      },
+                      "then_field": "id",
+                      "if_field": "scope",
+                      "then_match": {
+                        "eq": null,
+                        "required": false
+                      }
+                    }
+                  },
+                  {
+                    "conditional": {
+                      "if_match": {
+                        "eq": "cp"
+                      },
+                      "then_field": "region",
+                      "if_field": "scope",
+                      "then_match": {
+                        "eq": null,
+                        "required": false
+                      }
+                    }
+                  }
+                ]
+              }
             }
           }
         ],
-        "required": true,
-        "type": "record"
+        "required": true
       }
     }
+  ],
+  "entity_checks": [
+
   ]
 }

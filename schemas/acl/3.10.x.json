@@ -1,4 +1,94 @@
 {
+  "fields": [
+    {
+      "consumer": {
+        "description": "Custom type for representing a foreign key with a null value allowed.",
+        "type": "foreign",
+        "eq": null,
+        "reference": "consumers"
+      }
+    },
+    {
+      "consumer_group": {
+        "description": "Custom type for representing a foreign key with a null value allowed.",
+        "type": "foreign",
+        "eq": null,
+        "reference": "consumer_groups"
+      }
+    },
+    {
+      "protocols": {
+        "description": "A set of strings representing HTTP protocols.",
+        "type": "set",
+        "required": true,
+        "elements": {
+          "type": "string",
+          "one_of": [
+            "grpc",
+            "grpcs",
+            "http",
+            "https"
+          ]
+        },
+        "default": [
+          "grpc",
+          "grpcs",
+          "http",
+          "https"
+        ]
+      }
+    },
+    {
+      "config": {
+        "type": "record",
+        "fields": [
+          {
+            "allow": {
+              "description": "Arbitrary group names that are allowed to consume the service or route. One of `config.allow` or `config.deny` must be specified.",
+              "type": "array",
+              "elements": {
+                "type": "string"
+              }
+            }
+          },
+          {
+            "deny": {
+              "description": "Arbitrary group names that are not allowed to consume the service or route. One of `config.allow` or `config.deny` must be specified.",
+              "type": "array",
+              "elements": {
+                "type": "string"
+              }
+            }
+          },
+          {
+            "hide_groups_header": {
+              "default": false,
+              "description": "If enabled (`true`), prevents the `X-Consumer-Groups` header from being sent in the request to the upstream service.",
+              "type": "boolean",
+              "required": true
+            }
+          },
+          {
+            "include_consumer_groups": {
+              "default": false,
+              "description": "If enabled (`true`), allows the consumer-groups to be used in the `allow|deny` fields",
+              "type": "boolean",
+              "required": false
+            }
+          },
+          {
+            "always_use_authenticated_groups": {
+              "default": false,
+              "description": "If enabled (`true`), the authenticated groups will always be used even when an authenticated consumer already exists. If the authenticated groups don't exist, it will fallback to use the groups associated with the consumer. By default the authenticated groups will only be used when there is no consumer or the consumer is anonymous.",
+              "type": "boolean",
+              "required": true
+            }
+          }
+        ],
+        "required": true
+      }
+    }
+  ],
   "entity_checks": [
     {
       "only_one_of": [
@@ -11,96 +101,6 @@
         "config.allow",
         "config.deny"
       ]
-    }
-  ],
-  "fields": [
-    {
-      "consumer": {
-        "reference": "consumers",
-        "eq": null,
-        "type": "foreign",
-        "description": "Custom type for representing a foreign key with a null value allowed."
-      }
-    },
-    {
-      "consumer_group": {
-        "reference": "consumer_groups",
-        "eq": null,
-        "type": "foreign",
-        "description": "Custom type for representing a foreign key with a null value allowed."
-      }
-    },
-    {
-      "protocols": {
-        "required": true,
-        "type": "set",
-        "default": [
-          "grpc",
-          "grpcs",
-          "http",
-          "https"
-        ],
-        "description": "A set of strings representing HTTP protocols.",
-        "elements": {
-          "type": "string",
-          "one_of": [
-            "grpc",
-            "grpcs",
-            "http",
-            "https"
-          ]
-        }
-      }
-    },
-    {
-      "config": {
-        "fields": [
-          {
-            "allow": {
-              "elements": {
-                "type": "string"
-              },
-              "description": "Arbitrary group names that are allowed to consume the service or route. One of `config.allow` or `config.deny` must be specified.",
-              "type": "array"
-            }
-          },
-          {
-            "deny": {
-              "elements": {
-                "type": "string"
-              },
-              "description": "Arbitrary group names that are not allowed to consume the service or route. One of `config.allow` or `config.deny` must be specified.",
-              "type": "array"
-            }
-          },
-          {
-            "hide_groups_header": {
-              "default": false,
-              "description": "If enabled (`true`), prevents the `X-Consumer-Groups` header from being sent in the request to the upstream service.",
-              "required": true,
-              "type": "boolean"
-            }
-          },
-          {
-            "include_consumer_groups": {
-              "default": false,
-              "description": "If enabled (`true`), allows the consumer-groups to be used in the `allow|deny` fields",
-              "required": false,
-              "type": "boolean"
-            }
-          },
-          {
-            "always_use_authenticated_groups": {
-              "default": false,
-              "description": "If enabled (`true`), the authenticated groups will always be used even when an authenticated consumer already exists. If the authenticated groups don't exist, it will fallback to use the groups associated with the consumer. By default the authenticated groups will only be used when there is no consumer or the consumer is anonymous.",
-              "required": true,
-              "type": "boolean"
-            }
-          }
-        ],
-        "required": true,
-        "type": "record"
-      }
     }
   ]
 }
