@@ -2,17 +2,6 @@
   "properties": {
     "config": {
       "properties": {
-        "cache_control": {
-          "default": false,
-          "description": "When enabled, respect the Cache-Control behaviors defined in RFC7234.",
-          "type": "boolean"
-        },
-        "cache_ttl": {
-          "default": 300,
-          "description": "TTL in seconds of cache entities. Must be a value greater than 0.",
-          "minimum": 0,
-          "type": "integer"
-        },
         "embeddings": {
           "properties": {
             "auth": {
@@ -210,46 +199,27 @@
           ],
           "type": "object"
         },
-        "exact_caching": {
-          "default": false,
-          "description": "When enabled, a first check for exact query will be done. It will impact DB size",
-          "type": "boolean"
+        "fetch_chunks_count": {
+          "default": 5,
+          "description": "The maximum number of chunks to fetch from vectordb",
+          "type": "number"
         },
-        "ignore_assistant_prompts": {
-          "default": false,
-          "description": "Ignore and discard any assistant prompts when Vectorizing the request",
-          "type": "boolean"
-        },
-        "ignore_system_prompts": {
-          "default": false,
-          "description": "Ignore and discard any system prompts when Vectorizing the request",
-          "type": "boolean"
-        },
-        "ignore_tool_prompts": {
-          "default": false,
-          "description": "Ignore and discard any tool prompts when Vectorizing the request",
-          "type": "boolean"
-        },
-        "llm_format": {
-          "default": "openai",
-          "description": "LLM input and output format and schema to use",
+        "inject_as_role": {
+          "default": "user",
           "enum": [
-            "bedrock",
-            "gemini",
-            "openai"
+            "assistant",
+            "system",
+            "user"
           ],
           "type": "string"
         },
-        "message_countback": {
-          "default": 1,
-          "description": "Number of messages in the chat history to Vectorize/Cache",
-          "maximum": 1000,
-          "minimum": 1,
-          "type": "number"
+        "inject_template": {
+          "default": "<CONTEXT>\n<PROMPT>",
+          "type": "string"
         },
         "stop_on_failure": {
           "default": false,
-          "description": "Halt the LLM request process in case of a caching system failure",
+          "description": "Halt the LLM request process in case of a vectordb or embeddings service failure",
           "type": "boolean"
         },
         "vectordb": {
@@ -524,16 +494,17 @@
                 "redis"
               ],
               "type": "string"
-            },
-            "threshold": {
-              "description": "the default similarity threshold for accepting semantic search results (float)",
-              "type": "number"
             }
           },
           "required": [
 
           ],
           "type": "object"
+        },
+        "vectordb_namespace": {
+          "default": "kong_rag_injector",
+          "description": "The namespace of the vectordb to use for embeddings lookup",
+          "type": "string"
         }
       },
       "required": [

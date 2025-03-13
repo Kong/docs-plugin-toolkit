@@ -11,6 +11,7 @@
                 "consistent-hashing",
                 "lowest-latency",
                 "lowest-usage",
+                "priority",
                 "round-robin",
                 "semantic"
               ],
@@ -21,6 +22,33 @@
               "maximum": 2147483646,
               "minimum": 1,
               "type": "integer"
+            },
+            "failover_criteria": {
+              "default": [
+                "error",
+                "timeout"
+              ],
+              "description": "Specifies in which cases an upstream response should be failover to the next target. Each option in the array is equivalent to the function of http://nginx.org/en/docs/http/ngx_http_proxy_module.html#proxy_next_upstream",
+              "items": {
+                "enum": [
+                  "error",
+                  "http_403",
+                  "http_404",
+                  "http_429",
+                  "http_500",
+                  "http_502",
+                  "http_503",
+                  "http_504",
+                  "invalid_header",
+                  "non_idempotent",
+                  "timeout"
+                ],
+                "required": [
+
+                ],
+                "type": "string"
+              },
+              "type": "array"
             },
             "hash_on_header": {
               "default": "X-Kong-LLM-Request-ID",
@@ -58,9 +86,10 @@
             },
             "tokens_count_strategy": {
               "default": "total-tokens",
-              "description": "What tokens to use for usage calculation. Available values are: `total_tokens` `prompt_tokens`, and `completion_tokens`.",
+              "description": "What tokens to use for usage calculation. Available values are: `total_tokens` `prompt_tokens`, `completion_tokens` and `cost`.",
               "enum": [
                 "completion-tokens",
+                "cost",
                 "prompt-tokens",
                 "total-tokens"
               ],
@@ -160,19 +189,104 @@
                 "options": {
                   "description": "Key/value settings for the model",
                   "properties": {
+                    "azure": {
+                      "properties": {
+                        "api_version": {
+                          "default": "2023-05-15",
+                          "description": "'api-version' for Azure OpenAI instances.",
+                          "type": "string"
+                        },
+                        "deployment_id": {
+                          "description": "Deployment ID for Azure OpenAI instances.",
+                          "type": "string"
+                        },
+                        "instance": {
+                          "description": "Instance name for Azure OpenAI hosted models.",
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+
+                      ],
+                      "type": "object"
+                    },
+                    "bedrock": {
+                      "properties": {
+                        "aws_assume_role_arn": {
+                          "description": "If using AWS providers (Bedrock) you can assume a different role after authentication with the current IAM context is successful.",
+                          "type": "string"
+                        },
+                        "aws_region": {
+                          "description": "If using AWS providers (Bedrock) you can override the `AWS_REGION` environment variable by setting this option.",
+                          "type": "string"
+                        },
+                        "aws_role_session_name": {
+                          "description": "If using AWS providers (Bedrock), set the identifier of the assumed role session.",
+                          "type": "string"
+                        },
+                        "aws_sts_endpoint_url": {
+                          "description": "If using AWS providers (Bedrock), override the STS endpoint URL when assuming a different role.",
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+
+                      ],
+                      "type": "object"
+                    },
+                    "gemini": {
+                      "properties": {
+                        "api_endpoint": {
+                          "description": "If running Gemini on Vertex, specify the regional API endpoint (hostname only).",
+                          "type": "string"
+                        },
+                        "location_id": {
+                          "description": "If running Gemini on Vertex, specify the location ID.",
+                          "type": "string"
+                        },
+                        "project_id": {
+                          "description": "If running Gemini on Vertex, specify the project ID.",
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+
+                      ],
+                      "type": "object"
+                    },
+                    "huggingface": {
+                      "properties": {
+                        "use_cache": {
+                          "description": "Use the cache layer on the inference API",
+                          "type": "boolean"
+                        },
+                        "wait_for_model": {
+                          "description": "Wait for the model if it is not ready",
+                          "type": "boolean"
+                        }
+                      },
+                      "required": [
+
+                      ],
+                      "type": "object"
+                    },
                     "upstream_url": {
                       "description": "upstream url for the embeddings",
                       "type": "string"
                     }
                   },
                   "required": [
-
+                    "azure"
                   ],
                   "type": "object"
                 },
                 "provider": {
                   "description": "AI provider format to use for embeddings API",
                   "enum": [
+                    "azure",
+                    "bedrock",
+                    "gemini",
+                    "huggingface",
                     "mistral",
                     "openai"
                   ],
@@ -190,6 +304,16 @@
             "model"
           ],
           "type": "object"
+        },
+        "llm_format": {
+          "default": "openai",
+          "description": "LLM input and output format and schema to use",
+          "enum": [
+            "bedrock",
+            "gemini",
+            "openai"
+          ],
+          "type": "string"
         },
         "max_request_body_size": {
           "default": 8192,
@@ -287,7 +411,7 @@
                 "type": "object"
               },
               "description": {
-                "description": "The semantic description of the target, required if using semantic load balancing.",
+                "description": "The semantic description of the target, required if using semantic load balancing. Specially, setting this to 'CATCHALL' will indicate such target to be used when no other targets match the semantic threshold.",
                 "type": "string"
               },
               "logging": {
@@ -336,8 +460,20 @@
                       },
                       "bedrock": {
                         "properties": {
+                          "aws_assume_role_arn": {
+                            "description": "If using AWS providers (Bedrock) you can assume a different role after authentication with the current IAM context is successful.",
+                            "type": "string"
+                          },
                           "aws_region": {
                             "description": "If using AWS providers (Bedrock) you can override the `AWS_REGION` environment variable by setting this option.",
+                            "type": "string"
+                          },
+                          "aws_role_session_name": {
+                            "description": "If using AWS providers (Bedrock), set the identifier of the assumed role session.",
+                            "type": "string"
+                          },
+                          "aws_sts_endpoint_url": {
+                            "description": "If using AWS providers (Bedrock), override the STS endpoint URL when assuming a different role.",
                             "type": "string"
                           }
                         },
@@ -397,7 +533,6 @@
                         "type": "string"
                       },
                       "max_tokens": {
-                        "default": 256,
                         "description": "Defines the max_tokens, if using chat or completion models.",
                         "type": "integer"
                       },
@@ -506,6 +641,76 @@
                 "euclidean"
               ],
               "type": "string"
+            },
+            "pgvector": {
+              "properties": {
+                "database": {
+                  "default": "kong-pgvector",
+                  "description": "the database of the pgvector database",
+                  "type": "string"
+                },
+                "host": {
+                  "default": "127.0.0.1",
+                  "description": "the host of the pgvector database",
+                  "type": "string"
+                },
+                "password": {
+                  "description": "the password of the pgvector database",
+                  "type": "string"
+                },
+                "port": {
+                  "default": 5432,
+                  "description": "the port of the pgvector database",
+                  "type": "integer"
+                },
+                "ssl": {
+                  "default": false,
+                  "description": "whether to use ssl for the pgvector database",
+                  "type": "boolean"
+                },
+                "ssl_cert": {
+                  "description": "the path of ssl cert to use for the pgvector database",
+                  "type": "string"
+                },
+                "ssl_cert_key": {
+                  "description": "the path of ssl cert key to use for the pgvector database",
+                  "type": "string"
+                },
+                "ssl_required": {
+                  "default": false,
+                  "description": "whether ssl is required for the pgvector database",
+                  "type": "boolean"
+                },
+                "ssl_verify": {
+                  "default": false,
+                  "description": "whether to verify ssl for the pgvector database",
+                  "type": "boolean"
+                },
+                "ssl_version": {
+                  "default": "tlsv1_2",
+                  "description": "the ssl version to use for the pgvector database",
+                  "enum": [
+                    "any",
+                    "tlsv1_2",
+                    "tlsv1_3"
+                  ],
+                  "type": "string"
+                },
+                "timeout": {
+                  "default": 5000,
+                  "description": "the timeout of the pgvector database",
+                  "type": "number"
+                },
+                "user": {
+                  "default": "postgres",
+                  "description": "the user of the pgvector database",
+                  "type": "string"
+                }
+              },
+              "required": [
+
+              ],
+              "type": "object"
             },
             "redis": {
               "properties": {
@@ -691,6 +896,7 @@
             "strategy": {
               "description": "which vector database driver to use",
               "enum": [
+                "pgvector",
                 "redis"
               ],
               "type": "string"
@@ -703,6 +909,7 @@
           "required": [
             "dimensions",
             "distance_metric",
+            "pgvector",
             "redis",
             "strategy",
             "threshold"
