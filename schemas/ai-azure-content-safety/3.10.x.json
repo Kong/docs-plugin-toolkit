@@ -1,19 +1,10 @@
 {
-  "entity_checks": [
-
-  ],
   "fields": [
     {
       "protocols": {
-        "required": true,
-        "type": "set",
-        "default": [
-          "grpc",
-          "grpcs",
-          "http",
-          "https"
-        ],
         "description": "A set of strings representing HTTP protocols.",
+        "type": "set",
+        "required": true,
         "elements": {
           "type": "string",
           "one_of": [
@@ -22,78 +13,85 @@
             "http",
             "https"
           ]
-        }
+        },
+        "default": [
+          "grpc",
+          "grpcs",
+          "http",
+          "https"
+        ]
       }
     },
     {
       "consumer": {
-        "reference": "consumers",
-        "eq": null,
+        "description": "Custom type for representing a foreign key with a null value allowed.",
         "type": "foreign",
-        "description": "Custom type for representing a foreign key with a null value allowed."
+        "eq": null,
+        "reference": "consumers"
       }
     },
     {
       "consumer_group": {
-        "reference": "consumer_groups",
-        "eq": null,
+        "description": "Custom type for representing a foreign key with a null value allowed.",
         "type": "foreign",
-        "description": "Custom type for representing a foreign key with a null value allowed."
+        "eq": null,
+        "reference": "consumer_groups"
       }
     },
     {
       "config": {
+        "type": "record",
         "fields": [
           {
             "content_safety_url": {
               "referenceable": true,
               "description": "Full URL, inc protocol, of the Azure Content Safety instance.",
-              "required": true,
-              "type": "string"
+              "type": "string",
+              "required": true
             }
           },
           {
             "azure_api_version": {
-              "required": true,
+              "len_min": 1,
               "type": "string",
+              "required": true,
               "default": "2023-10-01",
-              "description": "Sets the ?api-version URL parameter, used for defining the Azure Content Services interchange format.",
-              "len_min": 1
+              "description": "Sets the ?api-version URL parameter, used for defining the Azure Content Services interchange format."
             }
           },
           {
             "azure_use_managed_identity": {
-              "default": false,
               "description": "If checked, uses (if set) `azure_client_id`, `azure_client_secret`, and/or `azure_tenant_id` for Azure authentication, via Managed or User-assigned identity",
+              "default": false,
               "type": "boolean"
             }
           },
           {
             "azure_client_id": {
               "description": "If `azure_use_managed_identity` is true, set the client ID if required.",
-              "required": false,
-              "type": "string"
+              "type": "string",
+              "required": false
             }
           },
           {
             "azure_client_secret": {
               "description": "If `azure_use_managed_identity` is true, set the client secret if required.",
-              "required": false,
-              "type": "string"
+              "type": "string",
+              "required": false
             }
           },
           {
             "azure_tenant_id": {
               "description": "If `azure_use_managed_identity` is true, set the tenant ID if required.",
-              "required": false,
-              "type": "string"
+              "type": "string",
+              "required": false
             }
           },
           {
             "content_safety_key": {
               "encrypted": true,
-              "required": false,
               "type": "string",
+              "required": false,
               "description": "If `azure_use_managed_identity` is true, set the API key to call Content Safety.",
               "referenceable": true
             }
@@ -111,32 +109,32 @@
           },
           {
             "categories": {
+              "description": "Array of categories, and their thresholds, to measure on.",
+              "type": "array",
               "elements": {
                 "type": "record",
-                "required": true,
                 "fields": [
                   {
                     "name": {
-                      "required": true,
-                      "type": "string"
+                      "type": "string",
+                      "required": true
                     }
                   },
                   {
                     "rejection_level": {
-                      "required": true,
-                      "type": "integer"
+                      "type": "integer",
+                      "required": true
                     }
                   }
-                ]
-              },
-              "description": "Array of categories, and their thresholds, to measure on.",
-              "type": "array"
+                ],
+                "required": true
+              }
             }
           },
           {
             "reveal_failure_reason": {
-              "default": true,
               "description": "Set true to tell the caller why their request was rejected, if so.",
+              "default": true,
               "type": "boolean"
             }
           },
@@ -153,24 +151,26 @@
           },
           {
             "blocklist_names": {
+              "description": "Use these configured blocklists (in Azure Content Services) when inspecting content.",
+              "type": "array",
               "elements": {
                 "type": "string"
-              },
-              "description": "Use these configured blocklists (in Azure Content Services) when inspecting content.",
-              "type": "array"
+              }
             }
           },
           {
             "halt_on_blocklist_hit": {
-              "default": true,
               "description": "Tells Azure to reject the request if any blocklist filter is hit.",
+              "default": true,
               "type": "boolean"
             }
           }
         ],
-        "required": true,
-        "type": "record"
+        "required": true
       }
     }
+  ],
+  "entity_checks": [
+
   ]
 }

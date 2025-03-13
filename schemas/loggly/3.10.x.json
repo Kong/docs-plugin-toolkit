@@ -1,21 +1,13 @@
 {
-  "entity_checks": [
-
-  ],
   "fields": [
     {
       "protocols": {
-        "required": true,
-        "type": "set",
-        "default": [
-          "grpc",
-          "grpcs",
-          "http",
-          "https"
-        ],
         "description": "A set of strings representing protocols.",
+        "type": "set",
+        "required": true,
         "elements": {
           "description": "A string representing a protocol, such as HTTP or HTTPS.",
+          "type": "string",
           "one_of": [
             "grpc",
             "grpcs",
@@ -27,57 +19,63 @@
             "udp",
             "ws",
             "wss"
-          ],
-          "type": "string"
-        }
+          ]
+        },
+        "default": [
+          "grpc",
+          "grpcs",
+          "http",
+          "https"
+        ]
       }
     },
     {
       "consumer_group": {
-        "reference": "consumer_groups",
-        "eq": null,
+        "description": "Custom type for representing a foreign key with a null value allowed.",
         "type": "foreign",
-        "description": "Custom type for representing a foreign key with a null value allowed."
+        "eq": null,
+        "reference": "consumer_groups"
       }
     },
     {
       "config": {
+        "type": "record",
         "fields": [
           {
             "host": {
-              "default": "logs-01.loggly.com",
               "description": "A string representing a host name, such as example.com.",
+              "default": "logs-01.loggly.com",
               "type": "string"
             }
           },
           {
             "port": {
-              "default": 514,
+              "type": "integer",
               "description": "An integer representing a port number between 0 and 65535, inclusive.",
               "between": [
                 0,
                 65535
               ],
-              "type": "integer"
+              "default": 514
             }
           },
           {
             "key": {
-              "encrypted": true,
               "referenceable": true,
-              "required": true,
-              "type": "string"
+              "encrypted": true,
+              "type": "string",
+              "required": true
             }
           },
           {
             "tags": {
-              "default": [
-                "kong"
-              ],
               "elements": {
                 "type": "string"
               },
-              "type": "set"
+              "type": "set",
+              "default": [
+                "kong"
+              ]
             }
           },
           {
@@ -146,28 +144,30 @@
           },
           {
             "timeout": {
-              "default": 10000,
-              "type": "number"
+              "type": "number",
+              "default": 10000
             }
           },
           {
             "custom_fields_by_lua": {
-              "description": "Lua code as a key-value map",
               "values": {
-                "len_min": 1,
-                "type": "string"
-              },
-              "keys": {
                 "type": "string",
                 "len_min": 1
               },
-              "type": "map"
+              "description": "Lua code as a key-value map",
+              "type": "map",
+              "keys": {
+                "type": "string",
+                "len_min": 1
+              }
             }
           }
         ],
-        "required": true,
-        "type": "record"
+        "required": true
       }
     }
+  ],
+  "entity_checks": [
+
   ]
 }

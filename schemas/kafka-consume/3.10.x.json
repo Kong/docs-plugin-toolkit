@@ -2,6 +2,7 @@
   "fields": [
     {
       "protocols": {
+        "type": "set",
         "elements": {
           "type": "string",
           "one_of": [
@@ -13,7 +14,6 @@
             "wss"
           ]
         },
-        "type": "set",
         "default": [
           "grpc",
           "grpcs",
@@ -27,14 +27,24 @@
     },
     {
       "consumer_group": {
-        "reference": "consumer_groups",
         "description": "Custom type for representing a foreign key with a null value allowed.",
         "type": "foreign",
-        "eq": null
+        "eq": null,
+        "reference": "consumer_groups"
       }
     },
     {
       "config": {
+        "entity_checks": [
+          {
+            "custom_entity_check": {
+              "field_sources": [
+                "authentication"
+              ]
+            }
+          }
+        ],
+        "type": "record",
         "fields": [
           {
             "bootstrap_servers": {
@@ -43,54 +53,54 @@
                 "fields": [
                   {
                     "host": {
-                      "type": "string",
                       "description": "A string representing a host name, such as example.com.",
+                      "type": "string",
                       "required": true
                     }
                   },
                   {
                     "port": {
+                      "type": "integer",
+                      "description": "An integer representing a port number between 0 and 65535, inclusive.",
                       "between": [
                         0,
                         65535
                       ],
-                      "type": "integer",
-                      "description": "An integer representing a port number between 0 and 65535, inclusive.",
                       "required": true
                     }
                   }
                 ]
               },
-              "type": "set",
               "description": "Set of bootstrap brokers in a `{host: host, port: port}` list format.",
+              "type": "set",
               "required": true
             }
           },
           {
             "topics": {
-              "description": "The Kafka topics and their configuration you want to consume from.",
+              "len_min": 1,
+              "type": "array",
               "required": true,
               "elements": {
                 "type": "record",
                 "fields": [
                   {
                     "name": {
-                      "required": true,
-                      "type": "string"
+                      "type": "string",
+                      "required": true
                     }
                   }
                 ]
               },
-              "type": "array",
-              "len_min": 1
+              "description": "The Kafka topics and their configuration you want to consume from."
             }
           },
           {
             "mode": {
-              "default": "http-get",
               "description": "The mode of operation for the plugin.",
-              "required": true,
               "type": "string",
+              "required": true,
+              "default": "http-get",
               "one_of": [
                 "server-sent-events",
                 "http-get"
@@ -99,10 +109,10 @@
           },
           {
             "message_deserializer": {
-              "default": "noop",
               "description": "The deserializer to use for the consumed messages.",
-              "required": true,
               "type": "string",
+              "required": true,
+              "default": "noop",
               "one_of": [
                 "json",
                 "noop"
@@ -111,10 +121,10 @@
           },
           {
             "auto_offset_reset": {
-              "default": "latest",
               "description": "The offset to start from when there is no initial offset in the consumer group.",
-              "required": true,
               "type": "string",
+              "required": true,
+              "default": "latest",
               "one_of": [
                 "earliest",
                 "latest"
@@ -123,10 +133,10 @@
           },
           {
             "commit_strategy": {
-              "default": "auto",
               "description": "The strategy to use for committing offsets.",
-              "required": true,
               "type": "string",
+              "required": true,
+              "default": "auto",
               "one_of": [
                 "auto",
                 "off"
@@ -139,48 +149,48 @@
               "fields": [
                 {
                   "strategy": {
+                    "required": false,
+                    "description": "The authentication strategy for the plugin, the only option for the value is `sasl`.",
+                    "type": "string",
                     "one_of": [
                       "sasl"
-                    ],
-                    "type": "string",
-                    "description": "The authentication strategy for the plugin, the only option for the value is `sasl`.",
-                    "required": false
+                    ]
                   }
                 },
                 {
                   "mechanism": {
+                    "required": false,
+                    "description": "The SASL authentication mechanism.  Supported options: `PLAIN` or `SCRAM-SHA-256`.",
+                    "type": "string",
                     "one_of": [
                       "PLAIN",
                       "SCRAM-SHA-256",
                       "SCRAM-SHA-512"
-                    ],
-                    "type": "string",
-                    "description": "The SASL authentication mechanism.  Supported options: `PLAIN` or `SCRAM-SHA-256`.",
-                    "required": false
+                    ]
                   }
                 },
                 {
                   "tokenauth": {
-                    "type": "boolean",
                     "description": "Enable this to indicate `DelegationToken` authentication",
+                    "type": "boolean",
                     "required": false
                   }
                 },
                 {
                   "user": {
-                    "encrypted": true,
                     "description": "Username for SASL authentication.",
-                    "required": false,
                     "type": "string",
+                    "required": false,
+                    "encrypted": true,
                     "referenceable": true
                   }
                 },
                 {
                   "password": {
-                    "encrypted": true,
                     "description": "Password for SASL authentication.",
-                    "required": false,
                     "type": "string",
+                    "required": false,
+                    "encrypted": true,
                     "referenceable": true
                   }
                 }
@@ -194,16 +204,16 @@
               "fields": [
                 {
                   "certificate_id": {
+                    "description": "UUID of certificate entity for mTLS authentication.",
                     "uuid": true,
                     "type": "string",
-                    "description": "UUID of certificate entity for mTLS authentication.",
                     "required": false
                   }
                 },
                 {
                   "ssl": {
-                    "type": "boolean",
                     "description": "Enables TLS.",
+                    "type": "boolean",
                     "required": false
                   }
                 }
@@ -213,19 +223,9 @@
           },
           {
             "cluster_name": {
-              "type": "string",
               "description": "An identifier for the Kafka cluster.",
+              "type": "string",
               "required": false
-            }
-          }
-        ],
-        "type": "record",
-        "entity_checks": [
-          {
-            "custom_entity_check": {
-              "field_sources": [
-                "authentication"
-              ]
             }
           }
         ],
@@ -233,5 +233,7 @@
       }
     }
   ],
-  "entity_checks": []
+  "entity_checks": [
+
+  ]
 }

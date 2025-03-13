@@ -1,38 +1,18 @@
 {
-  "entity_checks": [
-    {
-      "conditional": {
-        "if_match": {
-          "gt": 0
-        },
-        "then_field": "config.claims_to_verify",
-        "if_field": "config.maximum_expiration",
-        "then_match": {
-          "contains": "exp"
-        }
-      }
-    }
-  ],
   "fields": [
     {
       "consumer": {
-        "reference": "consumers",
-        "eq": null,
+        "description": "Custom type for representing a foreign key with a null value allowed.",
         "type": "foreign",
-        "description": "Custom type for representing a foreign key with a null value allowed."
+        "eq": null,
+        "reference": "consumers"
       }
     },
     {
       "protocols": {
-        "required": true,
-        "type": "set",
-        "default": [
-          "grpc",
-          "grpcs",
-          "http",
-          "https"
-        ],
         "description": "A set of strings representing HTTP protocols.",
+        "type": "set",
+        "required": true,
         "elements": {
           "type": "string",
           "one_of": [
@@ -41,19 +21,26 @@
             "http",
             "https"
           ]
-        }
+        },
+        "default": [
+          "grpc",
+          "grpcs",
+          "http",
+          "https"
+        ]
       }
     },
     {
       "consumer_group": {
-        "reference": "consumer_groups",
-        "eq": null,
+        "description": "Custom type for representing a foreign key with a null value allowed.",
         "type": "foreign",
-        "description": "Custom type for representing a foreign key with a null value allowed."
+        "eq": null,
+        "reference": "consumer_groups"
       }
     },
     {
       "config": {
+        "type": "record",
         "fields": [
           {
             "uri_param_names": {
@@ -81,44 +68,44 @@
           },
           {
             "key_claim_name": {
-              "default": "iss",
               "description": "The name of the claim in which the key identifying the secret must be passed. The plugin will attempt to read this claim from the JWT payload and the header, in that order.",
-              "type": "string"
+              "type": "string",
+              "default": "iss"
             }
           },
           {
             "secret_is_base64": {
-              "default": false,
+              "type": "boolean",
               "description": "If true, the plugin assumes the credential’s secret to be base64 encoded. You will need to create a base64-encoded secret for your Consumer, and sign your JWT with the original secret.",
-              "required": true,
-              "type": "boolean"
+              "default": false,
+              "required": true
             }
           },
           {
             "claims_to_verify": {
+              "description": "A list of registered claims (according to RFC 7519) that Kong can verify as well. Accepted values: one of exp or nbf.",
+              "type": "set",
               "elements": {
                 "type": "string",
                 "one_of": [
                   "exp",
                   "nbf"
                 ]
-              },
-              "description": "A list of registered claims (according to RFC 7519) that Kong can verify as well. Accepted values: one of exp or nbf.",
-              "type": "set"
+              }
             }
           },
           {
             "anonymous": {
-              "description": "An optional string (consumer UUID or username) value to use as an “anonymous” consumer if authentication fails.",
-              "type": "string"
+              "type": "string",
+              "description": "An optional string (consumer UUID or username) value to use as an “anonymous” consumer if authentication fails."
             }
           },
           {
             "run_on_preflight": {
-              "default": true,
+              "type": "boolean",
               "description": "A boolean value that indicates whether the plugin should run (and try to authenticate) on OPTIONS preflight requests. If set to false, then OPTIONS requests will always be allowed.",
-              "required": true,
-              "type": "boolean"
+              "default": true,
+              "required": true
             }
           },
           {
@@ -147,13 +134,26 @@
           {
             "realm": {
               "description": "When authentication fails the plugin sends `WWW-Authenticate` header with `realm` attribute value.",
-              "required": false,
-              "type": "string"
+              "type": "string",
+              "required": false
             }
           }
         ],
-        "required": true,
-        "type": "record"
+        "required": true
+      }
+    }
+  ],
+  "entity_checks": [
+    {
+      "conditional": {
+        "if_match": {
+          "gt": 0
+        },
+        "then_field": "config.claims_to_verify",
+        "if_field": "config.maximum_expiration",
+        "then_match": {
+          "contains": "exp"
+        }
       }
     }
   ]

@@ -1,19 +1,10 @@
 {
-  "entity_checks": [
-
-  ],
   "fields": [
     {
       "protocols": {
-        "required": true,
-        "type": "set",
-        "default": [
-          "grpc",
-          "grpcs",
-          "http",
-          "https"
-        ],
         "description": "A set of strings representing HTTP protocols.",
+        "type": "set",
+        "required": true,
         "elements": {
           "type": "string",
           "one_of": [
@@ -22,19 +13,26 @@
             "http",
             "https"
           ]
-        }
+        },
+        "default": [
+          "grpc",
+          "grpcs",
+          "http",
+          "https"
+        ]
       }
     },
     {
       "consumer_group": {
-        "reference": "consumer_groups",
-        "eq": null,
+        "description": "Custom type for representing a foreign key with a null value allowed.",
         "type": "foreign",
-        "description": "Custom type for representing a foreign key with a null value allowed."
+        "eq": null,
+        "reference": "consumer_groups"
       }
     },
     {
       "config": {
+        "type": "record",
         "fields": [
           {
             "rules": {
@@ -42,37 +40,39 @@
 
               ],
               "description": "Route by header rules.",
+              "type": "array",
               "elements": {
                 "type": "record",
                 "fields": [
                   {
                     "upstream_name": {
-                      "required": true,
-                      "type": "string"
+                      "type": "string",
+                      "required": true
                     }
                   },
                   {
                     "condition": {
+                      "len_min": 1,
+                      "type": "map",
+                      "required": true,
                       "values": {
                         "type": "string"
                       },
-                      "required": true,
-                      "type": "map",
                       "keys": {
                         "type": "string"
-                      },
-                      "len_min": 1
+                      }
                     }
                   }
                 ]
-              },
-              "type": "array"
+              }
             }
           }
         ],
-        "required": true,
-        "type": "record"
+        "required": true
       }
     }
+  ],
+  "entity_checks": [
+
   ]
 }

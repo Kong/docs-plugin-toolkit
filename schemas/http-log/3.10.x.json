@@ -1,21 +1,13 @@
 {
-  "entity_checks": [
-
-  ],
   "fields": [
     {
       "protocols": {
-        "required": true,
-        "type": "set",
-        "default": [
-          "grpc",
-          "grpcs",
-          "http",
-          "https"
-        ],
         "description": "A set of strings representing protocols.",
+        "type": "set",
+        "required": true,
         "elements": {
           "description": "A string representing a protocol, such as HTTP or HTTPS.",
+          "type": "string",
           "one_of": [
             "grpc",
             "grpcs",
@@ -27,36 +19,42 @@
             "udp",
             "ws",
             "wss"
-          ],
-          "type": "string"
-        }
+          ]
+        },
+        "default": [
+          "grpc",
+          "grpcs",
+          "http",
+          "https"
+        ]
       }
     },
     {
       "consumer_group": {
-        "reference": "consumer_groups",
-        "eq": null,
+        "description": "Custom type for representing a foreign key with a null value allowed.",
         "type": "foreign",
-        "description": "Custom type for representing a foreign key with a null value allowed."
+        "eq": null,
+        "reference": "consumer_groups"
       }
     },
     {
       "config": {
+        "type": "record",
         "fields": [
           {
             "http_endpoint": {
-              "encrypted": true,
-              "referenceable": true,
-              "type": "string",
               "description": "A string representing a URL, such as https://example.com/path/to/resource?q=search.",
-              "required": true
+              "type": "string",
+              "required": true,
+              "encrypted": true,
+              "referenceable": true
             }
           },
           {
             "method": {
-              "default": "POST",
-              "description": "An optional method used to send data to the HTTP server. Supported values are `POST` (default), `PUT`, and `PATCH`.",
               "type": "string",
+              "description": "An optional method used to send data to the HTTP server. Supported values are `POST` (default), `PUT`, and `PATCH`.",
+              "default": "POST",
               "one_of": [
                 "POST",
                 "PUT",
@@ -66,9 +64,9 @@
           },
           {
             "content_type": {
-              "default": "application/json",
-              "description": "Indicates the type of data sent. The only available option is `application/json`.",
               "type": "string",
+              "description": "Indicates the type of data sent. The only available option is `application/json`.",
+              "default": "application/json",
               "one_of": [
                 "application/json",
                 "application/json; charset=utf-8"
@@ -77,16 +75,16 @@
           },
           {
             "timeout": {
-              "default": 10000,
               "description": "An optional timeout in milliseconds when sending data to the upstream server.",
-              "type": "number"
+              "type": "number",
+              "default": 10000
             }
           },
           {
             "keepalive": {
-              "default": 60000,
               "description": "An optional value in milliseconds that defines how long an idle connection will live before being closed.",
-              "type": "number"
+              "type": "number",
+              "default": 60000
             }
           },
           {
@@ -94,9 +92,9 @@
               "description": "Number of times to retry when sending data to the upstream server.",
               "type": "integer",
               "deprecation": {
+                "removal_in_version": "4.0",
                 "old_default": 10,
-                "message": "http-log: config.retry_count no longer works, please use config.queue.max_retry_time instead",
-                "removal_in_version": "4.0"
+                "message": "http-log: config.retry_count no longer works, please use config.queue.max_retry_time instead"
               }
             }
           },
@@ -105,9 +103,9 @@
               "description": "Maximum number of log entries to be sent on each message to the upstream server.",
               "type": "integer",
               "deprecation": {
+                "removal_in_version": "4.0",
                 "old_default": 1,
-                "message": "http-log: config.queue_size is deprecated, please use config.queue.max_batch_size instead",
-                "removal_in_version": "4.0"
+                "message": "http-log: config.queue_size is deprecated, please use config.queue.max_batch_size instead"
               }
             }
           },
@@ -116,42 +114,43 @@
               "description": "Optional time in seconds. If `queue_size` > 1, this is the max idle time before sending a log with less than `queue_size` records.",
               "type": "number",
               "deprecation": {
+                "removal_in_version": "4.0",
                 "old_default": 2,
-                "message": "http-log: config.flush_timeout is deprecated, please use config.queue.max_coalescing_delay instead",
-                "removal_in_version": "4.0"
+                "message": "http-log: config.flush_timeout is deprecated, please use config.queue.max_coalescing_delay instead"
               }
             }
           },
           {
             "headers": {
               "values": {
-                "referenceable": true,
-                "type": "string"
+                "type": "string",
+                "referenceable": true
               },
               "description": "An optional table of headers included in the HTTP message to the upstream server. Values are indexed by header name, and each header name accepts a single string.",
+              "type": "map",
               "keys": {
-                "description": "A string representing an HTTP header name.",
                 "match_none": [
                   {
-                    "err": "cannot contain 'Host' header",
-                    "pattern": "^[Hh][Oo][Ss][Tt]$"
+                    "pattern": "^[Hh][Oo][Ss][Tt]$",
+                    "err": "cannot contain 'Host' header"
                   },
                   {
-                    "err": "cannot contain 'Content-Length' header",
-                    "pattern": "^[Cc][Oo][Nn][Tt][Ee][Nn][Tt]%-[Ll][Ee][nn][Gg][Tt][Hh]$"
+                    "pattern": "^[Cc][Oo][Nn][Tt][Ee][Nn][Tt]%-[Ll][Ee][nn][Gg][Tt][Hh]$",
+                    "err": "cannot contain 'Content-Length' header"
                   },
                   {
-                    "err": "cannot contain 'Content-Type' header",
-                    "pattern": "^[Cc][Oo][Nn][Tt][Ee][Nn][Tt]%-[Tt][Yy][Pp][Ee]$"
+                    "pattern": "^[Cc][Oo][Nn][Tt][Ee][Nn][Tt]%-[Tt][Yy][Pp][Ee]$",
+                    "err": "cannot contain 'Content-Type' header"
                   }
                 ],
+                "description": "A string representing an HTTP header name.",
                 "type": "string"
-              },
-              "type": "map"
+              }
             }
           },
           {
             "queue": {
+              "type": "record",
               "fields": [
                 {
                   "max_batch_size": {
@@ -194,9 +193,9 @@
                 },
                 {
                   "max_retry_time": {
-                    "default": 60,
                     "description": "Time in seconds before the queue gives up calling a failed handler for a batch.",
-                    "type": "number"
+                    "type": "number",
+                    "default": 60
                   }
                 },
                 {
@@ -223,9 +222,9 @@
                 },
                 {
                   "concurrency_limit": {
-                    "default": 1,
-                    "description": "The number of of queue delivery timers. -1 indicates unlimited.",
                     "type": "integer",
+                    "description": "The number of of queue delivery timers. -1 indicates unlimited.",
+                    "default": 1,
                     "one_of": [
                       -1,
                       1
@@ -233,28 +232,29 @@
                   }
                 }
               ],
-              "required": true,
-              "type": "record"
+              "required": true
             }
           },
           {
             "custom_fields_by_lua": {
-              "description": "Lua code as a key-value map",
               "values": {
-                "len_min": 1,
-                "type": "string"
-              },
-              "keys": {
                 "type": "string",
                 "len_min": 1
               },
-              "type": "map"
+              "description": "Lua code as a key-value map",
+              "type": "map",
+              "keys": {
+                "type": "string",
+                "len_min": 1
+              }
             }
           }
         ],
-        "required": true,
-        "type": "record"
+        "required": true
       }
     }
+  ],
+  "entity_checks": [
+
   ]
 }

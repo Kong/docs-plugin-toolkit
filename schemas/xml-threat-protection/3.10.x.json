@@ -1,19 +1,10 @@
 {
-  "entity_checks": [
-
-  ],
   "fields": [
     {
       "protocols": {
-        "required": true,
-        "type": "set",
-        "default": [
-          "grpc",
-          "grpcs",
-          "http",
-          "https"
-        ],
         "description": "A set of strings representing HTTP protocols.",
+        "type": "set",
+        "required": true,
         "elements": {
           "type": "string",
           "one_of": [
@@ -22,15 +13,21 @@
             "http",
             "https"
           ]
-        }
+        },
+        "default": [
+          "grpc",
+          "grpcs",
+          "http",
+          "https"
+        ]
       }
     },
     {
       "consumer_group": {
-        "reference": "consumer_groups",
-        "eq": null,
+        "description": "Custom type for representing a foreign key with a null value allowed.",
         "type": "foreign",
-        "description": "Custom type for representing a foreign key with a null value allowed."
+        "eq": null,
+        "reference": "consumer_groups"
       }
     },
     {
@@ -73,228 +70,231 @@
             }
           }
         ],
+        "type": "record",
         "fields": [
           {
             "checked_content_types": {
-              "required": true,
+              "description": "A list of Content-Type values with payloads that must be validated.",
               "type": "set",
+              "required": true,
+              "elements": {
+                "required": true,
+                "type": "string",
+                "match": "^[^%s]+%/[^ ;]+$"
+              },
               "default": [
                 "application/xml"
-              ],
-              "description": "A list of Content-Type values with payloads that must be validated.",
-              "elements": {
-                "match": "^[^%s]+%/[^ ;]+$",
-                "required": true,
-                "type": "string"
-              }
+              ]
             }
           },
           {
             "allowed_content_types": {
-              "required": true,
+              "description": "A list of Content-Type values with payloads that are allowed, but aren't validated.",
               "type": "set",
+              "required": true,
+              "elements": {
+                "required": true,
+                "type": "string",
+                "match": "^[^%s]+%/[^ ;]+$"
+              },
               "default": [
 
-              ],
-              "description": "A list of Content-Type values with payloads that are allowed, but aren't validated.",
-              "elements": {
-                "match": "^[^%s]+%/[^ ;]+$",
-                "required": true,
-                "type": "string"
-              }
+              ]
             }
           },
           {
             "allow_dtd": {
               "default": false,
               "description": "Indicates whether an XML Document Type Definition (DTD) section is allowed.",
-              "required": true,
-              "type": "boolean"
+              "type": "boolean",
+              "required": true
             }
           },
           {
             "namespace_aware": {
               "default": true,
               "description": "If not parsing namespace aware, all prefixes and namespace attributes will be counted as regular attributes and element names, and validated as such.",
-              "required": true,
-              "type": "boolean"
+              "type": "boolean",
+              "required": true
             }
           },
           {
             "max_depth": {
-              "required": true,
-              "type": "integer",
-              "gt": 0,
               "description": "Maximum depth of tags. Child elements such as Text or Comments are not counted as another level.",
+              "type": "integer",
+              "required": true,
+              "gt": 0,
               "default": 50
             }
           },
           {
             "max_children": {
-              "required": true,
-              "type": "integer",
-              "gt": 0,
               "description": "Maximum number of children allowed (Element, Text, Comment, ProcessingInstruction, CDATASection). Note: Adjacent text and CDATA sections are counted as one. For example, text-cdata-text-cdata is one child.",
+              "type": "integer",
+              "required": true,
+              "gt": 0,
               "default": 100
             }
           },
           {
             "max_attributes": {
-              "required": true,
-              "type": "integer",
-              "gt": 0,
               "description": "Maximum number of attributes allowed on a tag, including default ones. Note: If namespace-aware parsing is disabled, then the namespaces definitions are counted as attributes.",
+              "type": "integer",
+              "required": true,
+              "gt": 0,
               "default": 100
             }
           },
           {
             "max_namespaces": {
-              "required": false,
-              "type": "integer",
-              "gt": 0,
               "description": "Maximum number of namespaces defined on a tag. This value is required if parsing is namespace-aware.",
+              "type": "integer",
+              "required": false,
+              "gt": 0,
               "default": 20
             }
           },
           {
             "document": {
-              "required": true,
-              "type": "integer",
-              "gt": 0,
               "description": "Maximum size of the entire document.",
+              "type": "integer",
+              "required": true,
+              "gt": 0,
               "default": 10485760
             }
           },
           {
             "buffer": {
-              "required": true,
-              "type": "integer",
-              "gt": 0,
               "description": "Maximum size of the unparsed buffer (see below).",
+              "type": "integer",
+              "required": true,
+              "gt": 0,
               "default": 1048576
             }
           },
           {
             "comment": {
-              "required": true,
-              "type": "integer",
-              "gt": 0,
               "description": "Maximum size of comments.",
+              "type": "integer",
+              "required": true,
+              "gt": 0,
               "default": 1024
             }
           },
           {
             "localname": {
-              "required": true,
-              "type": "integer",
-              "gt": 0,
               "description": "Maximum size of the localname. This applies to tags and attributes.",
+              "type": "integer",
+              "required": true,
+              "gt": 0,
               "default": 1024
             }
           },
           {
             "prefix": {
-              "required": false,
-              "type": "integer",
-              "gt": 0,
               "description": "Maximum size of the prefix. This applies to tags and attributes. This value is required if parsing is namespace-aware.",
+              "type": "integer",
+              "required": false,
+              "gt": 0,
               "default": 1024
             }
           },
           {
             "namespaceuri": {
-              "required": false,
-              "type": "integer",
-              "gt": 0,
               "description": "Maximum size of the namespace URI. This value is required if parsing is namespace-aware.",
+              "type": "integer",
+              "required": false,
+              "gt": 0,
               "default": 1024
             }
           },
           {
             "attribute": {
-              "required": true,
-              "type": "integer",
-              "gt": 0,
               "description": "Maximum size of the attribute value.",
+              "type": "integer",
+              "required": true,
+              "gt": 0,
               "default": 1048576
             }
           },
           {
             "text": {
-              "required": true,
-              "type": "integer",
-              "gt": 0,
               "description": "Maximum text inside tags (counted over all adjacent text/CDATA elements combined).",
+              "type": "integer",
+              "required": true,
+              "gt": 0,
               "default": 1048576
             }
           },
           {
             "pitarget": {
-              "required": true,
-              "type": "integer",
-              "gt": 0,
               "description": "Maximum size of processing instruction targets.",
+              "type": "integer",
+              "required": true,
+              "gt": 0,
               "default": 1024
             }
           },
           {
             "pidata": {
-              "required": true,
-              "type": "integer",
-              "gt": 0,
               "description": "Maximum size of processing instruction data.",
+              "type": "integer",
+              "required": true,
+              "gt": 0,
               "default": 1024
             }
           },
           {
             "entityname": {
-              "required": true,
-              "type": "integer",
-              "gt": 0,
               "description": "Maximum size of entity names in EntityDecl.",
+              "type": "integer",
+              "required": true,
+              "gt": 0,
               "default": 1024
             }
           },
           {
             "entity": {
-              "required": true,
-              "type": "integer",
-              "gt": 0,
               "description": "Maximum size of entity values in EntityDecl.",
+              "type": "integer",
+              "required": true,
+              "gt": 0,
               "default": 1024
             }
           },
           {
             "entityproperty": {
-              "required": true,
-              "type": "integer",
-              "gt": 0,
               "description": "Maximum size of systemId, publicId, or notationName in EntityDecl.",
+              "type": "integer",
+              "required": true,
+              "gt": 0,
               "default": 1024
             }
           },
           {
             "bla_max_amplification": {
-              "required": true,
-              "type": "number",
-              "gt": 1,
               "description": "Sets the maximum allowed amplification. This protects against the Billion Laughs Attack.",
+              "type": "number",
+              "required": true,
+              "gt": 1,
               "default": 100
             }
           },
           {
             "bla_threshold": {
-              "required": true,
-              "type": "integer",
-              "gt": 1024,
               "description": "Sets the threshold after which the protection starts. This protects against the Billion Laughs Attack.",
+              "type": "integer",
+              "required": true,
+              "gt": 1024,
               "default": 8388608
             }
           }
         ],
-        "required": true,
-        "type": "record"
+        "required": true
       }
     }
+  ],
+  "entity_checks": [
+
   ]
 }
