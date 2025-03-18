@@ -1,0 +1,272 @@
+{
+  "properties": {
+    "config": {
+      "properties": {
+        "account_email": {
+          "description": "The account identifier. Can be reused in a different plugin instance.",
+          "examples": [
+            "example@example.com"
+          ],
+          "pattern": "[a-zA-Z0-9]*[!-/:-@[-`{-~]*@+[a-zA-Z0-9]*%.?[a-zA-Z0-9]*",
+          "type": "string"
+        },
+        "allow_any_domain": {
+          "default": false,
+          "type": "boolean"
+        },
+        "api_uri": {
+          "default": "https://acme-v02.api.letsencrypt.org/directory",
+          "description": "The ACMEv2 API endpoint to use. You can specify the [Let's Encrypt staging environment](https://letsencrypt.org/docs/staging-environment/) for testing. Kong doesn't automatically delete staging certificates. If you use the same domain in test and production environments, you need to manually delete those certificates after testing.",
+          "type": "string"
+        },
+        "cert_type": {
+          "default": "rsa",
+          "description": "The certificate type to create. The possible values are `'rsa'` for RSA certificate or `'ecc'` for EC certificate.",
+          "enum": [
+            "ecc",
+            "rsa"
+          ],
+          "type": "string"
+        },
+        "domains": {
+          "description": "The list of domains to create certificates for. To match subdomains under `example.com`, use `*.example.com`.\nRegex pattern is not supported.\n\nThis parameter is only used to match domains, not to specify the Common Name\nor Subject Alternative Name to create certificates. Each domain must have its own certificate.\nThe ACME plugin checks this configuration before checking any certificate in `storage` when serving the certificate of a request.\n\nIf this field is left empty, all top-level domains (TLDs) are allowed.",
+          "items": {
+            "match_all": {
+              "pattern": "^[^*]*%*?[^*]*$"
+            },
+            "match_any": {
+              "patterns": [
+                "%.%*$",
+                "^%*%.",
+                "^[^*]*$"
+              ]
+            },
+            "required": [
+
+            ],
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "eab_hmac_key": {
+          "description": "External account binding (EAB) base64-encoded URL string of the HMAC key. You usually don't need to set this unless it is explicitly required by the CA.",
+          "type": "string"
+        },
+        "eab_kid": {
+          "description": "External account binding (EAB) key id. You usually don't need to set this unless it is explicitly required by the CA.",
+          "type": "string"
+        },
+        "fail_backoff_minutes": {
+          "default": 5,
+          "description": "Minutes to wait for each domain that fails to create a certificate. This applies to both a\nnew certificate and a renewal certificate.",
+          "type": "number"
+        },
+        "preferred_chain": {
+          "type": "string"
+        },
+        "renew_threshold_days": {
+          "default": 14,
+          "description": " Days remaining to renew the certificate before it expires.",
+          "type": "number"
+        },
+        "rsa_key_size": {
+          "default": 4096,
+          "description": "RSA private key size for the certificate. The possible values are 2048, 3072, or 4096.",
+          "enum": [
+            2048,
+            3072,
+            4096
+          ],
+          "type": "integer"
+        },
+        "storage": {
+          "default": "shm",
+          "description": "The backend storage type to use. The possible values are `'kong'`, `'shm'`, `'redis'`, `'consul'`, or `'vault'`. In DB-less mode, `'kong'` storage is unavailable. Note that `'shm'` storage does not persist during Kong restarts and does not work for Kong running on different machines, so consider using one of `'kong'`, `'redis'`, `'consul'`, or `'vault'` in production. Please refer to the Hybrid Mode sections below as well.",
+          "enum": [
+            "consul",
+            "kong",
+            "redis",
+            "shm",
+            "vault"
+          ],
+          "type": "string"
+        },
+        "storage_config": {
+          "properties": {
+            "consul": {
+              "properties": {
+                "host": {
+                  "type": "string"
+                },
+                "https": {
+                  "default": false,
+                  "type": "boolean"
+                },
+                "kv_path": {
+                  "type": "string"
+                },
+                "port": {
+                  "maximum": 65535,
+                  "minimum": 0,
+                  "type": "integer"
+                },
+                "timeout": {
+                  "type": "number"
+                },
+                "token": {
+                  "type": "string"
+                }
+              },
+              "required": [
+
+              ],
+              "type": "object"
+            },
+            "kong": {
+              "additionalProperties": true,
+              "properties": {
+              },
+              "required": [
+
+              ],
+              "type": "object"
+            },
+            "redis": {
+              "properties": {
+                "auth": {
+                  "type": "string"
+                },
+                "database": {
+                  "type": "number"
+                },
+                "host": {
+                  "type": "string"
+                },
+                "port": {
+                  "maximum": 65535,
+                  "minimum": 0,
+                  "type": "integer"
+                }
+              },
+              "required": [
+
+              ],
+              "type": "object"
+            },
+            "shm": {
+              "properties": {
+                "shm_name": {
+                  "default": "kong",
+                  "type": "string"
+                }
+              },
+              "required": [
+
+              ],
+              "type": "object"
+            },
+            "vault": {
+              "properties": {
+                "auth_method": {
+                  "type": "string"
+                },
+                "auth_path": {
+                  "type": "string"
+                },
+                "auth_role": {
+                  "type": "string"
+                },
+                "host": {
+                  "type": "string"
+                },
+                "https": {
+                  "default": false,
+                  "type": "boolean"
+                },
+                "jwt_path": {
+                  "type": "string"
+                },
+                "kv_path": {
+                  "type": "string"
+                },
+                "port": {
+                  "maximum": 65535,
+                  "minimum": 0,
+                  "type": "integer"
+                },
+                "timeout": {
+                  "type": "number"
+                },
+                "tls_server_name": {
+                  "type": "string"
+                },
+                "tls_verify": {
+                  "default": true,
+                  "type": "boolean"
+                },
+                "token": {
+                  "type": "string"
+                }
+              },
+              "required": [
+
+              ],
+              "type": "object"
+            }
+          },
+          "required": [
+
+          ],
+          "type": "object"
+        },
+        "tos_accepted": {
+          "default": false,
+          "description": "If you are using Let's Encrypt, you must set this to `true` to agree the [Terms of Service](https://letsencrypt.org/repository/).",
+          "type": "boolean"
+        }
+      },
+      "required": [
+
+      ],
+      "type": "object"
+    },
+    "consumer_group": {
+      "additionalProperties": false,
+      "description": "If set, the plugin will activate only for requests where the specified consumer group has been authenticated. (Note that some plugins can not be restricted to consumers groups this way.). Leave unset for the plugin to activate regardless of the authenticated Consumer Groups",
+      "properties": {
+        "id": {
+          "type": "string"
+        }
+      },
+      "required": [
+
+      ],
+      "type": "object"
+    },
+    "protocols": {
+      "default": [
+        "grpc",
+        "grpcs",
+        "http",
+        "https"
+      ],
+      "description": "A list of the request protocols that will trigger this plugin. The default value, as well as the possible values allowed on this field, may change depending on the plugin type. For example, plugins that only work in stream mode will only support tcp and tls.",
+      "items": {
+        "enum": [
+          "grpc",
+          "grpcs",
+          "http",
+          "https"
+        ],
+        "required": [
+
+        ],
+        "type": "string"
+      },
+      "type": "array"
+    }
+  },
+  "required": [
+
+  ]
+}
