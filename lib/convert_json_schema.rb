@@ -85,6 +85,14 @@ class ConvertJsonSchema
         fields['format'] = 'uuid'
       end
 
+      if  k =='referenceable'
+        note = 'This field is *referenceable*.'
+        if fields.key?('description')
+          fields['description'] << "\n#{note}"
+        else
+          fields['description'] = note
+        end
+      end
 
       # Remove unused fields
       next if [
