@@ -86,7 +86,7 @@ class ConvertJsonSchema
       end
 
       if  k =='referenceable'
-        note = 'This field is *referenceable*.'
+        note = 'This field is [referenceable](/gateway/entities/vault/#how-do-i-reference-secrets-stored-in-a-vault).'
         if fields.key?('description')
           fields['description'] << "\n#{note}"
         else
