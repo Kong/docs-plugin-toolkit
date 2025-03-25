@@ -1,10 +1,15 @@
 {
+  "entity_checks": [
+    {
+      "at_least_one_of": [
+        "config.prompts.prepend",
+        "config.prompts.append"
+      ]
+    }
+  ],
   "fields": [
     {
       "protocols": {
-        "description": "A set of strings representing HTTP protocols.",
-        "type": "set",
-        "required": true,
         "elements": {
           "type": "string",
           "one_of": [
@@ -14,12 +19,15 @@
             "https"
           ]
         },
+        "description": "A set of strings representing HTTP protocols.",
         "default": [
           "grpc",
           "grpcs",
           "http",
           "https"
-        ]
+        ],
+        "type": "set",
+        "required": true
       }
     },
     {
@@ -29,111 +37,103 @@
           {
             "prompts": {
               "type": "record",
+              "required": false,
               "fields": [
                 {
                   "prepend": {
-                    "description": "Insert chat messages at the beginning of the chat message array. This array preserves exact order when adding messages.",
+                    "type": "array",
                     "len_max": 15,
-                    "required": false,
+                    "description": "Insert chat messages at the beginning of the chat message array. This array preserves exact order when adding messages.",
                     "elements": {
                       "type": "record",
+                      "required": false,
                       "fields": [
                         {
                           "role": {
-                            "required": true,
-                            "type": "string",
                             "default": "system",
+                            "type": "string",
                             "one_of": [
                               "system",
                               "assistant",
                               "user"
-                            ]
+                            ],
+                            "required": true
                           }
                         },
                         {
                           "content": {
+                            "len_max": 500,
                             "type": "string",
                             "len_min": 1,
-                            "len_max": 500,
                             "required": true
                           }
                         }
-                      ],
-                      "required": false
+                      ]
                     },
-                    "type": "array"
+                    "required": false
                   }
                 },
                 {
                   "append": {
-                    "description": "Insert chat messages at the end of the chat message array. This array preserves exact order when adding messages.",
+                    "type": "array",
                     "len_max": 15,
-                    "required": false,
+                    "description": "Insert chat messages at the end of the chat message array. This array preserves exact order when adding messages.",
                     "elements": {
                       "type": "record",
+                      "required": false,
                       "fields": [
                         {
                           "role": {
-                            "required": true,
-                            "type": "string",
                             "default": "system",
+                            "type": "string",
                             "one_of": [
                               "system",
                               "assistant",
                               "user"
-                            ]
+                            ],
+                            "required": true
                           }
                         },
                         {
                           "content": {
+                            "len_max": 500,
                             "type": "string",
                             "len_min": 1,
-                            "len_max": 500,
                             "required": true
                           }
                         }
-                      ],
-                      "required": false
+                      ]
                     },
-                    "type": "array"
+                    "required": false
                   }
                 }
-              ],
-              "required": false
+              ]
             }
           },
           {
             "max_request_body_size": {
-              "type": "integer",
               "description": "max allowed body size allowed to be introspected",
-              "gt": 0,
-              "default": 8192
+              "type": "integer",
+              "default": 8192,
+              "gt": 0
             }
           },
           {
             "llm_format": {
-              "description": "LLM input and output format and schema to use",
               "type": "string",
-              "required": false,
-              "default": "openai",
+              "description": "LLM input and output format and schema to use",
               "one_of": [
                 "openai",
                 "bedrock",
                 "gemini"
-              ]
+              ],
+              "default": "openai",
+              "required": false
             }
           }
         ],
         "required": true
       }
-    }
-  ],
-  "entity_checks": [
-    {
-      "at_least_one_of": [
-        "config.prompts.prepend",
-        "config.prompts.append"
-      ]
     }
   ]
 }

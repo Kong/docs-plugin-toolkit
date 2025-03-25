@@ -1,13 +1,12 @@
 {
+  "entity_checks": [
+
+  ],
   "fields": [
     {
       "protocols": {
-        "description": "A set of strings representing protocols.",
-        "type": "set",
-        "required": true,
         "elements": {
           "description": "A string representing a protocol, such as HTTP or HTTPS.",
-          "type": "string",
           "one_of": [
             "grpc",
             "grpcs",
@@ -19,22 +18,26 @@
             "udp",
             "ws",
             "wss"
-          ]
+          ],
+          "type": "string"
         },
+        "description": "A set of strings representing protocols.",
         "default": [
           "grpc",
           "grpcs",
           "http",
           "https"
-        ]
+        ],
+        "type": "set",
+        "required": true
       }
     },
     {
       "consumer_group": {
+        "reference": "consumer_groups",
         "description": "Custom type for representing a foreign key with a null value allowed.",
         "type": "foreign",
-        "eq": null,
-        "reference": "consumer_groups"
+        "eq": null
       }
     },
     {
@@ -43,21 +46,21 @@
         "fields": [
           {
             "host": {
-              "default": "localhost",
               "description": "A string representing a host name, such as example.com.",
               "type": "string",
+              "default": "localhost",
               "referenceable": true
             }
           },
           {
             "port": {
-              "type": "integer",
-              "description": "An integer representing a port number between 0 and 65535, inclusive.",
               "between": [
                 0,
                 65535
               ],
-              "default": 8125
+              "default": 8125,
+              "type": "integer",
+              "description": "An integer representing a port number between 0 and 65535, inclusive."
             }
           },
           {
@@ -93,9 +96,9 @@
               "description": "Number of times to retry when sending data to the upstream server.",
               "type": "integer",
               "deprecation": {
-                "removal_in_version": "4.0",
+                "message": "datadog: config.retry_count no longer works, please use config.queue.max_retry_time instead",
                 "old_default": 10,
-                "message": "datadog: config.retry_count no longer works, please use config.queue.max_retry_time instead"
+                "removal_in_version": "4.0"
               }
             }
           },
@@ -104,9 +107,9 @@
               "description": "Maximum number of log entries to be sent on each message to the upstream server.",
               "type": "integer",
               "deprecation": {
-                "removal_in_version": "4.0",
+                "message": "datadog: config.queue_size is deprecated, please use config.queue.max_batch_size instead",
                 "old_default": 1,
-                "message": "datadog: config.queue_size is deprecated, please use config.queue.max_batch_size instead"
+                "removal_in_version": "4.0"
               }
             }
           },
@@ -115,9 +118,9 @@
               "description": "Optional time in seconds. If `queue_size` > 1, this is the max idle time before sending a log with less than `queue_size` records.",
               "type": "number",
               "deprecation": {
-                "removal_in_version": "4.0",
+                "message": "datadog: config.flush_timeout is deprecated, please use config.queue.max_coalescing_delay instead",
                 "old_default": 2,
-                "message": "datadog: config.flush_timeout is deprecated, please use config.queue.max_coalescing_delay instead"
+                "removal_in_version": "4.0"
               }
             }
           },
@@ -127,77 +130,77 @@
               "fields": [
                 {
                   "max_batch_size": {
-                    "default": 1,
-                    "description": "Maximum number of entries that can be processed at a time.",
                     "between": [
                       1,
                       1000000
                     ],
-                    "type": "integer"
+                    "default": 1,
+                    "type": "integer",
+                    "description": "Maximum number of entries that can be processed at a time."
                   }
                 },
                 {
                   "max_coalescing_delay": {
-                    "default": 1,
-                    "description": "Maximum number of (fractional) seconds to elapse after the first entry was queued before the queue starts calling the handler.",
                     "between": [
                       0,
                       3600
                     ],
-                    "type": "number"
+                    "default": 1,
+                    "type": "number",
+                    "description": "Maximum number of (fractional) seconds to elapse after the first entry was queued before the queue starts calling the handler."
                   }
                 },
                 {
                   "max_entries": {
-                    "default": 10000,
-                    "description": "Maximum number of entries that can be waiting on the queue.",
                     "between": [
                       1,
                       1000000
                     ],
-                    "type": "integer"
+                    "default": 10000,
+                    "type": "integer",
+                    "description": "Maximum number of entries that can be waiting on the queue."
                   }
                 },
                 {
                   "max_bytes": {
-                    "type": "integer",
-                    "description": "Maximum number of bytes that can be waiting on a queue, requires string content."
+                    "description": "Maximum number of bytes that can be waiting on a queue, requires string content.",
+                    "type": "integer"
                   }
                 },
                 {
                   "max_retry_time": {
                     "description": "Time in seconds before the queue gives up calling a failed handler for a batch.",
-                    "type": "number",
-                    "default": 60
+                    "default": 60,
+                    "type": "number"
                   }
                 },
                 {
                   "initial_retry_delay": {
-                    "default": 0.01,
-                    "description": "Time in seconds before the initial retry is made for a failing batch.",
                     "between": [
                       0.001,
                       1000000
                     ],
-                    "type": "number"
+                    "default": 0.01,
+                    "type": "number",
+                    "description": "Time in seconds before the initial retry is made for a failing batch."
                   }
                 },
                 {
                   "max_retry_delay": {
-                    "default": 60,
                     "description": "Maximum time in seconds between retries, caps exponential backoff.",
+                    "default": 60,
+                    "type": "number",
                     "between": [
                       0.001,
                       1000000
-                    ],
-                    "type": "number"
+                    ]
                   }
                 },
                 {
                   "concurrency_limit": {
-                    "type": "integer",
                     "description": "The number of of queue delivery timers. -1 indicates unlimited.",
                     "default": 1,
+                    "type": "integer",
                     "one_of": [
                       -1,
                       1
@@ -210,15 +213,81 @@
           },
           {
             "metrics": {
-              "description": "List of metrics to be logged.",
               "type": "array",
-              "required": true,
+              "description": "List of metrics to be logged.",
+              "default": [
+                {
+                  "name": "request_count",
+                  "consumer_identifier": "custom_id",
+                  "sample_rate": 1,
+                  "stat_type": "counter",
+                  "tags": [
+                    "app:kong"
+                  ]
+                },
+                {
+                  "stat_type": "timer",
+                  "name": "latency",
+                  "tags": [
+                    "app:kong"
+                  ],
+                  "consumer_identifier": "custom_id"
+                },
+                {
+                  "stat_type": "timer",
+                  "name": "request_size",
+                  "tags": [
+                    "app:kong"
+                  ],
+                  "consumer_identifier": "custom_id"
+                },
+                {
+                  "stat_type": "timer",
+                  "name": "response_size",
+                  "tags": [
+                    "app:kong"
+                  ],
+                  "consumer_identifier": "custom_id"
+                },
+                {
+                  "stat_type": "timer",
+                  "name": "upstream_latency",
+                  "tags": [
+                    "app:kong"
+                  ],
+                  "consumer_identifier": "custom_id"
+                },
+                {
+                  "stat_type": "timer",
+                  "name": "kong_latency",
+                  "tags": [
+                    "app:kong"
+                  ],
+                  "consumer_identifier": "custom_id"
+                }
+              ],
               "elements": {
+                "entity_checks": [
+                  {
+                    "conditional": {
+                      "if_match": {
+                        "one_of": [
+                          "counter",
+                          "gauge"
+                        ]
+                      },
+                      "then_field": "sample_rate",
+                      "if_field": "stat_type",
+                      "then_match": {
+                        "required": true
+                      }
+                    }
+                  }
+                ],
                 "type": "record",
                 "fields": [
                   {
                     "name": {
-                      "required": true,
                       "description": "Datadog metric’s name",
                       "type": "string",
                       "one_of": [
@@ -228,12 +297,12 @@
                         "request_size",
                         "response_size",
                         "upstream_latency"
-                      ]
+                      ],
+                      "required": true
                     }
                   },
                   {
                     "stat_type": {
-                      "required": true,
                       "description": "Determines what sort of event the metric represents",
                       "type": "string",
                       "one_of": [
@@ -244,7 +313,8 @@
                         "set",
                         "timer",
                         "distribution"
-                      ]
+                      ],
+                      "required": true
                     }
                   },
                   {
@@ -252,8 +322,8 @@
                       "description": "List of tags",
                       "type": "array",
                       "elements": {
-                        "type": "string",
-                        "match": "^.*[^:]$"
+                        "match": "^.*[^:]$",
+                        "type": "string"
                       }
                     }
                   },
@@ -278,84 +348,14 @@
                       ]
                     }
                   }
-                ],
-                "entity_checks": [
-                  {
-                    "conditional": {
-                      "if_match": {
-                        "one_of": [
-                          "counter",
-                          "gauge"
-                        ]
-                      },
-                      "then_field": "sample_rate",
-                      "if_field": "stat_type",
-                      "then_match": {
-                        "required": true
-                      }
-                    }
-                  }
                 ]
               },
-              "default": [
-                {
-                  "stat_type": "counter",
-                  "name": "request_count",
-                  "tags": [
-                    "app:kong"
-                  ],
-                  "consumer_identifier": "custom_id",
-                  "sample_rate": 1
-                },
-                {
-                  "tags": [
-                    "app:kong"
-                  ],
-                  "consumer_identifier": "custom_id",
-                  "name": "latency",
-                  "stat_type": "timer"
-                },
-                {
-                  "tags": [
-                    "app:kong"
-                  ],
-                  "consumer_identifier": "custom_id",
-                  "name": "request_size",
-                  "stat_type": "timer"
-                },
-                {
-                  "tags": [
-                    "app:kong"
-                  ],
-                  "consumer_identifier": "custom_id",
-                  "name": "response_size",
-                  "stat_type": "timer"
-                },
-                {
-                  "tags": [
-                    "app:kong"
-                  ],
-                  "consumer_identifier": "custom_id",
-                  "name": "upstream_latency",
-                  "stat_type": "timer"
-                },
-                {
-                  "tags": [
-                    "app:kong"
-                  ],
-                  "consumer_identifier": "custom_id",
-                  "name": "kong_latency",
-                  "stat_type": "timer"
-                }
-              ]
+              "required": true
             }
           }
         ],
         "required": true
       }
     }
-  ],
-  "entity_checks": [
-
   ]
 }

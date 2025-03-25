@@ -1,10 +1,33 @@
 {
+  "entity_checks": [
+    {
+      "custom_entity_check": {
+        "field_sources": [
+          "config.targets",
+          "config.balancer"
+        ]
+      }
+    },
+    {
+      "custom_entity_check": {
+        "field_sources": [
+          "config.targets",
+          "config.balancer"
+        ]
+      }
+    },
+    {
+      "custom_entity_check": {
+        "field_sources": [
+          "config.targets",
+          "config.llm_format"
+        ]
+      }
+    }
+  ],
   "fields": [
     {
       "protocols": {
-        "description": "A set of strings representing HTTP protocols.",
-        "type": "set",
-        "required": true,
         "elements": {
           "type": "string",
           "one_of": [
@@ -14,12 +37,15 @@
             "https"
           ]
         },
+        "description": "A set of strings representing HTTP protocols.",
         "default": [
           "grpc",
           "grpcs",
           "http",
           "https"
-        ]
+        ],
+        "type": "set",
+        "required": true
       }
     },
     {
@@ -29,12 +55,13 @@
           {
             "balancer": {
               "type": "record",
+              "required": true,
               "fields": [
                 {
                   "algorithm": {
-                    "type": "string",
                     "description": "Which load balancing algorithm to use.",
                     "default": "round-robin",
+                    "type": "string",
                     "one_of": [
                       "round-robin",
                       "lowest-latency",
@@ -47,9 +74,9 @@
                 },
                 {
                   "tokens_count_strategy": {
-                    "type": "string",
                     "description": "What tokens to use for usage calculation. Available values are: `total_tokens` `prompt_tokens`, `completion_tokens` and `cost`.",
                     "default": "total-tokens",
+                    "type": "string",
                     "one_of": [
                       "total-tokens",
                       "prompt-tokens",
@@ -60,9 +87,9 @@
                 },
                 {
                   "latency_strategy": {
-                    "type": "string",
                     "description": "What metrics to use for latency. Available values are: `tpot` (time-per-output-token) and `e2e`.",
                     "default": "tpot",
+                    "type": "string",
                     "one_of": [
                       "tpot",
                       "e2e"
@@ -72,68 +99,64 @@
                 {
                   "hash_on_header": {
                     "description": "The header to use for consistent-hashing.",
-                    "type": "string",
-                    "default": "X-Kong-LLM-Request-ID"
+                    "default": "X-Kong-LLM-Request-ID",
+                    "type": "string"
                   }
                 },
                 {
                   "slots": {
-                    "default": 10000,
                     "description": "The number of slots in the load balancer algorithm.",
+                    "default": 10000,
+                    "type": "integer",
                     "between": [
                       10,
                       65536
-                    ],
-                    "type": "integer"
+                    ]
                   }
                 },
                 {
                   "retries": {
-                    "default": 5,
                     "description": "The number of retries to execute upon failure to proxy.",
+                    "default": 5,
+                    "type": "integer",
                     "between": [
                       0,
                       32767
-                    ],
-                    "type": "integer"
+                    ]
                   }
                 },
                 {
                   "connect_timeout": {
-                    "type": "integer",
                     "between": [
                       1,
                       2147483646
                     ],
-                    "default": 60000
+                    "default": 60000,
+                    "type": "integer"
                   }
                 },
                 {
                   "write_timeout": {
-                    "type": "integer",
                     "between": [
                       1,
                       2147483646
                     ],
-                    "default": 60000
+                    "default": 60000,
+                    "type": "integer"
                   }
                 },
                 {
                   "read_timeout": {
-                    "type": "integer",
                     "between": [
                       1,
                       2147483646
                     ],
-                    "default": 60000
+                    "default": 60000,
+                    "type": "integer"
                   }
                 },
                 {
                   "failover_criteria": {
-                    "default": [
-                      "error",
-                      "timeout"
-                    ],
                     "description": "Specifies in which cases an upstream response should be failover to the next target. Each option in the array is equivalent to the function of http://nginx.org/en/docs/http/ngx_http_proxy_module.html#proxy_next_upstream",
                     "type": "array",
                     "elements": {
@@ -151,11 +174,14 @@
                         "http_429",
                         "non_idempotent"
                       ]
-                    }
+                    },
+                    "default": [
+                      "error",
+                      "timeout"
+                    ]
                   }
                 }
-              ],
-              "required": true
+              ]
             }
           },
           {
@@ -204,141 +230,145 @@
                   }
                 }
               ],
+              "type": "record",
               "fields": [
                 {
                   "auth": {
+                    "type": "record",
                     "fields": [
                       {
                         "header_name": {
-                          "referenceable": true,
                           "description": "If AI model requires authentication via Authorization or API key header, specify its name here.",
                           "type": "string",
+                          "referenceable": true,
                           "required": false
                         }
                       },
                       {
                         "header_value": {
-                          "encrypted": true,
                           "type": "string",
-                          "required": false,
+                          "referenceable": true,
                           "description": "Specify the full auth header value for 'header_name', for example 'Bearer key' or just 'key'.",
-                          "referenceable": true
+                          "encrypted": true,
+                          "required": false
                         }
                       },
                       {
                         "param_name": {
-                          "referenceable": true,
                           "description": "If AI model requires authentication via query parameter, specify its name here.",
                           "type": "string",
+                          "referenceable": true,
                           "required": false
                         }
                       },
                       {
                         "param_value": {
-                          "encrypted": true,
                           "type": "string",
-                          "required": false,
+                          "referenceable": true,
                           "description": "Specify the full parameter value for 'param_name'.",
-                          "referenceable": true
+                          "encrypted": true,
+                          "required": false
                         }
                       },
                       {
                         "param_location": {
+                          "description": "Specify whether the 'param_name' and 'param_value' options go in a query string, or the POST form/JSON body.",
+                          "type": "string",
                           "one_of": [
                             "query",
                             "body"
                           ],
-                          "description": "Specify whether the 'param_name' and 'param_value' options go in a query string, or the POST form/JSON body.",
-                          "type": "string",
                           "required": false
                         }
                       },
                       {
                         "azure_use_managed_identity": {
-                          "default": false,
                           "description": "Set true to use the Azure Cloud Managed Identity (or user-assigned identity) to authenticate with Azure-provider models.",
                           "type": "boolean",
+                          "default": false,
                           "required": false
                         }
                       },
                       {
                         "azure_client_id": {
-                          "referenceable": true,
                           "description": "If azure_use_managed_identity is set to true, and you need to use a different user-assigned identity for this LLM instance, set the client ID.",
                           "type": "string",
+                          "referenceable": true,
                           "required": false
                         }
                       },
                       {
                         "azure_client_secret": {
-                          "encrypted": true,
                           "type": "string",
-                          "required": false,
+                          "referenceable": true,
                           "description": "If azure_use_managed_identity is set to true, and you need to use a different user-assigned identity for this LLM instance, set the client secret.",
-                          "referenceable": true
+                          "encrypted": true,
+                          "required": false
                         }
                       },
                       {
                         "azure_tenant_id": {
-                          "referenceable": true,
                           "description": "If azure_use_managed_identity is set to true, and you need to use a different user-assigned identity for this LLM instance, set the tenant ID.",
                           "type": "string",
+                          "referenceable": true,
                           "required": false
                         }
                       },
                       {
                         "gcp_use_service_account": {
-                          "default": false,
                           "description": "Use service account auth for GCP-based providers and models.",
                           "type": "boolean",
+                          "default": false,
                           "required": false
                         }
                       },
                       {
                         "gcp_service_account_json": {
-                          "encrypted": true,
                           "type": "string",
-                          "required": false,
+                          "referenceable": true,
                           "description": "Set this field to the full JSON of the GCP service account to authenticate, if required. If null (and gcp_use_service_account is true), Kong will attempt to read from environment variable `GCP_SERVICE_ACCOUNT`.",
-                          "referenceable": true
+                          "encrypted": true,
+                          "required": false
                         }
                       },
                       {
                         "aws_access_key_id": {
-                          "encrypted": true,
                           "type": "string",
-                          "required": false,
+                          "referenceable": true,
                           "description": "Set this if you are using an AWS provider (Bedrock) and you are authenticating using static IAM User credentials. Setting this will override the AWS_ACCESS_KEY_ID environment variable for this plugin instance.",
-                          "referenceable": true
+                          "encrypted": true,
+                          "required": false
                         }
                       },
                       {
                         "aws_secret_access_key": {
-                          "encrypted": true,
                           "type": "string",
-                          "required": false,
+                          "referenceable": true,
                           "description": "Set this if you are using an AWS provider (Bedrock) and you are authenticating using static IAM User credentials. Setting this will override the AWS_SECRET_ACCESS_KEY environment variable for this plugin instance.",
-                          "referenceable": true
+                          "encrypted": true,
+                          "required": false
                         }
                       },
                       {
                         "allow_override": {
-                          "default": false,
                           "description": "If enabled, the authorization header or parameter can be overridden in the request by the value configured in the plugin.",
                           "type": "boolean",
+                          "default": false,
                           "required": false
                         }
                       }
                     ],
-                    "type": "record",
                     "required": false
                   }
                 },
                 {
                   "model": {
+                    "type": "record",
                     "fields": [
                       {
                         "provider": {
+                          "description": "AI provider format to use for embeddings API",
+                          "type": "string",
                           "one_of": [
                             "openai",
                             "mistral",
@@ -347,8 +377,6 @@
                             "bedrock",
                             "gemini"
                           ],
-                          "description": "AI provider format to use for embeddings API",
-                          "type": "string",
                           "required": true
                         }
                       },
@@ -361,6 +389,8 @@
                       },
                       {
                         "options": {
+                          "description": "Key/value settings for the model",
+                          "type": "record",
                           "fields": [
                             {
                               "upstream_url": {
@@ -371,6 +401,7 @@
                             },
                             {
                               "azure": {
+                                "type": "record",
                                 "fields": [
                                   {
                                     "instance": {
@@ -381,9 +412,9 @@
                                   },
                                   {
                                     "api_version": {
-                                      "default": "2023-05-15",
                                       "description": "'api-version' for Azure OpenAI instances.",
                                       "type": "string",
+                                      "default": "2023-05-15",
                                       "required": false
                                     }
                                   },
@@ -395,7 +426,6 @@
                                     }
                                   }
                                 ],
-                                "type": "record",
                                 "required": true
                               }
                             },
@@ -409,6 +439,7 @@
                                     ]
                                   }
                                 ],
+                                "type": "record",
                                 "fields": [
                                   {
                                     "aws_region": {
@@ -426,18 +457,17 @@
                                   },
                                   {
                                     "aws_role_session_name": {
-                                      "type": "string",
-                                      "description": "If using AWS providers (Bedrock), set the identifier of the assumed role session."
+                                      "description": "If using AWS providers (Bedrock), set the identifier of the assumed role session.",
+                                      "type": "string"
                                     }
                                   },
                                   {
                                     "aws_sts_endpoint_url": {
-                                      "type": "string",
-                                      "description": "If using AWS providers (Bedrock), override the STS endpoint URL when assuming a different role."
+                                      "description": "If using AWS providers (Bedrock), override the STS endpoint URL when assuming a different role.",
+                                      "type": "string"
                                     }
                                   }
                                 ],
-                                "type": "record",
                                 "required": false
                               }
                             },
@@ -452,6 +482,7 @@
                                     ]
                                   }
                                 ],
+                                "type": "record",
                                 "fields": [
                                   {
                                     "api_endpoint": {
@@ -475,12 +506,12 @@
                                     }
                                   }
                                 ],
-                                "type": "record",
                                 "required": false
                               }
                             },
                             {
                               "huggingface": {
+                                "type": "record",
                                 "fields": [
                                   {
                                     "use_cache": {
@@ -497,37 +528,33 @@
                                     }
                                   }
                                 ],
-                                "type": "record",
                                 "required": false
                               }
                             }
                           ],
-                          "description": "Key/value settings for the model",
-                          "type": "record",
                           "required": false
                         }
                       }
                     ],
-                    "type": "record",
                     "required": true
                   }
                 }
               ],
-              "type": "record",
               "required": false
             }
           },
           {
             "vectordb": {
+              "type": "record",
               "fields": [
                 {
                   "strategy": {
+                    "description": "which vector database driver to use",
+                    "type": "string",
                     "one_of": [
                       "redis",
                       "pgvector"
                     ],
-                    "description": "which vector database driver to use",
-                    "type": "string",
                     "required": true
                   }
                 },
@@ -547,248 +574,17 @@
                 },
                 {
                   "distance_metric": {
+                    "description": "the distance metric to use for vector searches",
+                    "type": "string",
                     "one_of": [
                       "cosine",
                       "euclidean"
                     ],
-                    "description": "the distance metric to use for vector searches",
-                    "type": "string",
                     "required": true
                   }
                 },
                 {
                   "redis": {
-                    "fields": [
-                      {
-                        "host": {
-                          "description": "A string representing a host name, such as example.com.",
-                          "default": "127.0.0.1",
-                          "type": "string"
-                        }
-                      },
-                      {
-                        "port": {
-                          "default": 6379,
-                          "description": "An integer representing a port number between 0 and 65535, inclusive.",
-                          "type": "integer",
-                          "between": [
-                            0,
-                            65535
-                          ]
-                        }
-                      },
-                      {
-                        "connect_timeout": {
-                          "default": 2000,
-                          "description": "An integer representing a timeout in milliseconds. Must be between 0 and 2^31-2.",
-                          "type": "integer",
-                          "between": [
-                            0,
-                            2147483646
-                          ]
-                        }
-                      },
-                      {
-                        "send_timeout": {
-                          "default": 2000,
-                          "description": "An integer representing a timeout in milliseconds. Must be between 0 and 2^31-2.",
-                          "type": "integer",
-                          "between": [
-                            0,
-                            2147483646
-                          ]
-                        }
-                      },
-                      {
-                        "read_timeout": {
-                          "default": 2000,
-                          "description": "An integer representing a timeout in milliseconds. Must be between 0 and 2^31-2.",
-                          "type": "integer",
-                          "between": [
-                            0,
-                            2147483646
-                          ]
-                        }
-                      },
-                      {
-                        "username": {
-                          "description": "Username to use for Redis connections. If undefined, ACL authentication won't be performed. This requires Redis v6.0.0+. To be compatible with Redis v5.x.y, you can set it to `default`.",
-                          "type": "string",
-                          "referenceable": true
-                        }
-                      },
-                      {
-                        "password": {
-                          "description": "Password to use for Redis connections. If undefined, no AUTH commands are sent to Redis.",
-                          "encrypted": true,
-                          "type": "string",
-                          "referenceable": true
-                        }
-                      },
-                      {
-                        "sentinel_username": {
-                          "description": "Sentinel username to authenticate with a Redis Sentinel instance. If undefined, ACL authentication won't be performed. This requires Redis v6.2.0+.",
-                          "type": "string",
-                          "referenceable": true
-                        }
-                      },
-                      {
-                        "sentinel_password": {
-                          "description": "Sentinel password to authenticate with a Redis Sentinel instance. If undefined, no AUTH commands are sent to Redis Sentinels.",
-                          "encrypted": true,
-                          "type": "string",
-                          "referenceable": true
-                        }
-                      },
-                      {
-                        "database": {
-                          "description": "Database to use for the Redis connection when using the `redis` strategy",
-                          "default": 0,
-                          "type": "integer"
-                        }
-                      },
-                      {
-                        "keepalive_pool_size": {
-                          "type": "integer",
-                          "description": "The size limit for every cosocket connection pool associated with every remote server, per worker process. If neither `keepalive_pool_size` nor `keepalive_backlog` is specified, no pool is created. If `keepalive_pool_size` isn't specified but `keepalive_backlog` is specified, then the pool uses the default value. Try to increase (e.g. 512) this value if latency is high or throughput is low.",
-                          "default": 256,
-                          "between": [
-                            1,
-                            2147483646
-                          ]
-                        }
-                      },
-                      {
-                        "keepalive_backlog": {
-                          "description": "Limits the total number of opened connections for a pool. If the connection pool is full, connection queues above the limit go into the backlog queue. If the backlog queue is full, subsequent connect operations fail and return `nil`. Queued operations (subject to set timeouts) resume once the number of connections in the pool is less than `keepalive_pool_size`. If latency is high or throughput is low, try increasing this value. Empirically, this value is larger than `keepalive_pool_size`.",
-                          "type": "integer",
-                          "between": [
-                            0,
-                            2147483646
-                          ]
-                        }
-                      },
-                      {
-                        "sentinel_master": {
-                          "type": "string",
-                          "description": "Sentinel master to use for Redis connections. Defining this value implies using Redis Sentinel."
-                        }
-                      },
-                      {
-                        "sentinel_role": {
-                          "description": "Sentinel role to use for Redis connections when the `redis` strategy is defined. Defining this value implies using Redis Sentinel.",
-                          "type": "string",
-                          "one_of": [
-                            "master",
-                            "slave",
-                            "any"
-                          ]
-                        }
-                      },
-                      {
-                        "sentinel_nodes": {
-                          "description": "Sentinel node addresses to use for Redis connections when the `redis` strategy is defined. Defining this field implies using a Redis Sentinel. The minimum length of the array is 1 element.",
-                          "type": "array",
-                          "required": false,
-                          "elements": {
-                            "type": "record",
-                            "fields": [
-                              {
-                                "host": {
-                                  "default": "127.0.0.1",
-                                  "description": "A string representing a host name, such as example.com.",
-                                  "type": "string",
-                                  "required": true
-                                }
-                              },
-                              {
-                                "port": {
-                                  "default": 6379,
-                                  "description": "An integer representing a port number between 0 and 65535, inclusive.",
-                                  "type": "integer",
-                                  "between": [
-                                    0,
-                                    65535
-                                  ]
-                                }
-                              }
-                            ]
-                          },
-                          "len_min": 1
-                        }
-                      },
-                      {
-                        "cluster_nodes": {
-                          "description": "Cluster addresses to use for Redis connections when the `redis` strategy is defined. Defining this field implies using a Redis Cluster. The minimum length of the array is 1 element.",
-                          "type": "array",
-                          "required": false,
-                          "elements": {
-                            "type": "record",
-                            "fields": [
-                              {
-                                "ip": {
-                                  "default": "127.0.0.1",
-                                  "description": "A string representing a host name, such as example.com.",
-                                  "type": "string",
-                                  "required": true
-                                }
-                              },
-                              {
-                                "port": {
-                                  "default": 6379,
-                                  "description": "An integer representing a port number between 0 and 65535, inclusive.",
-                                  "type": "integer",
-                                  "between": [
-                                    0,
-                                    65535
-                                  ]
-                                }
-                              }
-                            ]
-                          },
-                          "len_min": 1
-                        }
-                      },
-                      {
-                        "ssl": {
-                          "default": false,
-                          "description": "If set to true, uses SSL to connect to Redis.",
-                          "type": "boolean",
-                          "required": false
-                        }
-                      },
-                      {
-                        "ssl_verify": {
-                          "default": false,
-                          "description": "If set to true, verifies the validity of the server SSL certificate. If setting this parameter, also configure `lua_ssl_trusted_certificate` in `kong.conf` to specify the CA (or server) certificate used by your Redis server. You may also need to configure `lua_ssl_verify_depth` accordingly.",
-                          "type": "boolean",
-                          "required": false
-                        }
-                      },
-                      {
-                        "server_name": {
-                          "description": "A string representing an SNI (server name indication) value for TLS.",
-                          "type": "string",
-                          "required": false
-                        }
-                      },
-                      {
-                        "cluster_max_redirections": {
-                          "default": 5,
-                          "description": "Maximum retry attempts for redirection.",
-                          "type": "integer",
-                          "required": false
-                        }
-                      },
-                      {
-                        "connection_is_proxied": {
-                          "default": false,
-                          "description": "If the connection to Redis is proxied (e.g. Envoy), set it `true`. Set the `host` and `port` to point to the proxy address.",
-                          "type": "boolean",
-                          "required": false
-                        }
-                      }
-                    ],
                     "entity_checks": [
                       {
                         "mutually_required": [
@@ -851,11 +647,240 @@
                       }
                     ],
                     "type": "record",
-                    "required": true,
+                    "fields": [
+                      {
+                        "host": {
+                          "description": "A string representing a host name, such as example.com.",
+                          "default": "127.0.0.1",
+                          "type": "string"
+                        }
+                      },
+                      {
+                        "port": {
+                          "between": [
+                            0,
+                            65535
+                          ],
+                          "default": 6379,
+                          "description": "An integer representing a port number between 0 and 65535, inclusive.",
+                          "type": "integer"
+                        }
+                      },
+                      {
+                        "connect_timeout": {
+                          "between": [
+                            0,
+                            2147483646
+                          ],
+                          "default": 2000,
+                          "description": "An integer representing a timeout in milliseconds. Must be between 0 and 2^31-2.",
+                          "type": "integer"
+                        }
+                      },
+                      {
+                        "send_timeout": {
+                          "between": [
+                            0,
+                            2147483646
+                          ],
+                          "default": 2000,
+                          "description": "An integer representing a timeout in milliseconds. Must be between 0 and 2^31-2.",
+                          "type": "integer"
+                        }
+                      },
+                      {
+                        "read_timeout": {
+                          "between": [
+                            0,
+                            2147483646
+                          ],
+                          "default": 2000,
+                          "description": "An integer representing a timeout in milliseconds. Must be between 0 and 2^31-2.",
+                          "type": "integer"
+                        }
+                      },
+                      {
+                        "username": {
+                          "description": "Username to use for Redis connections. If undefined, ACL authentication won't be performed. This requires Redis v6.0.0+. To be compatible with Redis v5.x.y, you can set it to `default`.",
+                          "type": "string",
+                          "referenceable": true
+                        }
+                      },
+                      {
+                        "password": {
+                          "description": "Password to use for Redis connections. If undefined, no AUTH commands are sent to Redis.",
+                          "encrypted": true,
+                          "type": "string",
+                          "referenceable": true
+                        }
+                      },
+                      {
+                        "sentinel_username": {
+                          "description": "Sentinel username to authenticate with a Redis Sentinel instance. If undefined, ACL authentication won't be performed. This requires Redis v6.2.0+.",
+                          "type": "string",
+                          "referenceable": true
+                        }
+                      },
+                      {
+                        "sentinel_password": {
+                          "description": "Sentinel password to authenticate with a Redis Sentinel instance. If undefined, no AUTH commands are sent to Redis Sentinels.",
+                          "encrypted": true,
+                          "type": "string",
+                          "referenceable": true
+                        }
+                      },
+                      {
+                        "database": {
+                          "description": "Database to use for the Redis connection when using the `redis` strategy",
+                          "default": 0,
+                          "type": "integer"
+                        }
+                      },
+                      {
+                        "keepalive_pool_size": {
+                          "description": "The size limit for every cosocket connection pool associated with every remote server, per worker process. If neither `keepalive_pool_size` nor `keepalive_backlog` is specified, no pool is created. If `keepalive_pool_size` isn't specified but `keepalive_backlog` is specified, then the pool uses the default value. Try to increase (e.g. 512) this value if latency is high or throughput is low.",
+                          "default": 256,
+                          "between": [
+                            1,
+                            2147483646
+                          ],
+                          "type": "integer"
+                        }
+                      },
+                      {
+                        "keepalive_backlog": {
+                          "description": "Limits the total number of opened connections for a pool. If the connection pool is full, connection queues above the limit go into the backlog queue. If the backlog queue is full, subsequent connect operations fail and return `nil`. Queued operations (subject to set timeouts) resume once the number of connections in the pool is less than `keepalive_pool_size`. If latency is high or throughput is low, try increasing this value. Empirically, this value is larger than `keepalive_pool_size`.",
+                          "type": "integer",
+                          "between": [
+                            0,
+                            2147483646
+                          ]
+                        }
+                      },
+                      {
+                        "sentinel_master": {
+                          "description": "Sentinel master to use for Redis connections. Defining this value implies using Redis Sentinel.",
+                          "type": "string"
+                        }
+                      },
+                      {
+                        "sentinel_role": {
+                          "description": "Sentinel role to use for Redis connections when the `redis` strategy is defined. Defining this value implies using Redis Sentinel.",
+                          "type": "string",
+                          "one_of": [
+                            "master",
+                            "slave",
+                            "any"
+                          ]
+                        }
+                      },
+                      {
+                        "sentinel_nodes": {
+                          "type": "array",
+                          "len_min": 1,
+                          "description": "Sentinel node addresses to use for Redis connections when the `redis` strategy is defined. Defining this field implies using a Redis Sentinel. The minimum length of the array is 1 element.",
+                          "elements": {
+                            "fields": [
+                              {
+                                "host": {
+                                  "description": "A string representing a host name, such as example.com.",
+                                  "type": "string",
+                                  "default": "127.0.0.1",
+                                  "required": true
+                                }
+                              },
+                              {
+                                "port": {
+                                  "between": [
+                                    0,
+                                    65535
+                                  ],
+                                  "default": 6379,
+                                  "description": "An integer representing a port number between 0 and 65535, inclusive.",
+                                  "type": "integer"
+                                }
+                              }
+                            ],
+                            "type": "record"
+                          },
+                          "required": false
+                        }
+                      },
+                      {
+                        "cluster_nodes": {
+                          "type": "array",
+                          "len_min": 1,
+                          "description": "Cluster addresses to use for Redis connections when the `redis` strategy is defined. Defining this field implies using a Redis Cluster. The minimum length of the array is 1 element.",
+                          "elements": {
+                            "fields": [
+                              {
+                                "ip": {
+                                  "description": "A string representing a host name, such as example.com.",
+                                  "type": "string",
+                                  "default": "127.0.0.1",
+                                  "required": true
+                                }
+                              },
+                              {
+                                "port": {
+                                  "between": [
+                                    0,
+                                    65535
+                                  ],
+                                  "default": 6379,
+                                  "description": "An integer representing a port number between 0 and 65535, inclusive.",
+                                  "type": "integer"
+                                }
+                              }
+                            ],
+                            "type": "record"
+                          },
+                          "required": false
+                        }
+                      },
+                      {
+                        "ssl": {
+                          "description": "If set to true, uses SSL to connect to Redis.",
+                          "default": false,
+                          "type": "boolean",
+                          "required": false
+                        }
+                      },
+                      {
+                        "ssl_verify": {
+                          "description": "If set to true, verifies the validity of the server SSL certificate. If setting this parameter, also configure `lua_ssl_trusted_certificate` in `kong.conf` to specify the CA (or server) certificate used by your Redis server. You may also need to configure `lua_ssl_verify_depth` accordingly.",
+                          "default": false,
+                          "type": "boolean",
+                          "required": false
+                        }
+                      },
+                      {
+                        "server_name": {
+                          "description": "A string representing an SNI (server name indication) value for TLS.",
+                          "type": "string",
+                          "required": false
+                        }
+                      },
+                      {
+                        "cluster_max_redirections": {
+                          "description": "Maximum retry attempts for redirection.",
+                          "default": 5,
+                          "type": "integer",
+                          "required": false
+                        }
+                      },
+                      {
+                        "connection_is_proxied": {
+                          "description": "If the connection to Redis is proxied (e.g. Envoy), set it `true`. Set the `host` and `port` to point to the proxy address.",
+                          "default": false,
+                          "type": "boolean",
+                          "required": false
+                        }
+                      }
+                    ],
                     "shorthand_fields": [
                       {
                         "timeout": {
-                          "type": "integer",
                           "deprecation": {
                             "removal_in_version": "4.0",
                             "replaced_with": [
@@ -876,16 +901,16 @@
                               }
                             ],
                             "message": "redis schema field `timeout` is deprecated, use `connect_timeout`, `send_timeout` and `read_timeout`"
-                          }
+                          },
+                          "type": "integer"
                         }
                       },
                       {
                         "sentinel_addresses": {
+                          "type": "array",
                           "elements": {
                             "type": "string"
                           },
-                          "len_min": 1,
-                          "type": "array",
                           "deprecation": {
                             "removal_in_version": "4.0",
                             "replaced_with": [
@@ -896,16 +921,16 @@
                               }
                             ],
                             "message": "sentinel_addresses is deprecated, please use sentinel_nodes instead"
-                          }
+                          },
+                          "len_min": 1
                         }
                       },
                       {
                         "cluster_addresses": {
+                          "type": "array",
                           "elements": {
                             "type": "string"
                           },
-                          "len_min": 1,
-                          "type": "array",
                           "deprecation": {
                             "removal_in_version": "4.0",
                             "replaced_with": [
@@ -916,14 +941,17 @@
                               }
                             ],
                             "message": "cluster_addresses is deprecated, please use cluster_nodes instead"
-                          }
+                          },
+                          "len_min": 1
                         }
                       }
-                    ]
+                    ],
+                    "required": true
                   }
                 },
                 {
                   "pgvector": {
+                    "type": "record",
                     "fields": [
                       {
                         "host": {
@@ -941,17 +969,17 @@
                       },
                       {
                         "user": {
-                          "default": "postgres",
                           "description": "the user of the pgvector database",
                           "type": "string",
+                          "default": "postgres",
                           "referenceable": true
                         }
                       },
                       {
                         "password": {
-                          "encrypted": true,
                           "description": "the password of the pgvector database",
                           "type": "string",
+                          "encrypted": true,
                           "referenceable": true
                         }
                       },
@@ -992,529 +1020,71 @@
                       },
                       {
                         "ssl_version": {
-                          "default": "tlsv1_2",
                           "description": "the ssl version to use for the pgvector database",
                           "type": "string",
                           "one_of": [
                             "tlsv1_2",
                             "tlsv1_3",
                             "any"
-                          ]
+                          ],
+                          "default": "tlsv1_2"
                         }
                       },
                       {
                         "ssl_cert": {
-                          "type": "string",
-                          "description": "the path of ssl cert to use for the pgvector database"
+                          "description": "the path of ssl cert to use for the pgvector database",
+                          "type": "string"
                         }
                       },
                       {
                         "ssl_cert_key": {
-                          "type": "string",
-                          "description": "the path of ssl cert key to use for the pgvector database"
+                          "description": "the path of ssl cert key to use for the pgvector database",
+                          "type": "string"
                         }
                       }
                     ],
-                    "type": "record",
                     "required": true
                   }
                 }
               ],
-              "type": "record",
               "required": false
             }
           },
           {
             "response_streaming": {
-              "description": "Whether to 'optionally allow', 'deny', or 'always' (force) the streaming of answers via server sent events.",
               "type": "string",
-              "required": false,
-              "default": "allow",
+              "description": "Whether to 'optionally allow', 'deny', or 'always' (force) the streaming of answers via server sent events.",
               "one_of": [
                 "allow",
                 "deny",
                 "always"
-              ]
+              ],
+              "default": "allow",
+              "required": false
             }
           },
           {
             "max_request_body_size": {
-              "default": 8192,
               "description": "max allowed body size allowed to be introspected",
-              "gt": 0,
-              "type": "integer"
+              "default": 8192,
+              "type": "integer",
+              "gt": 0
             }
           },
           {
             "model_name_header": {
               "description": "Display the model name selected in the X-Kong-LLM-Model response header",
-              "type": "boolean",
-              "default": true
+              "default": true,
+              "type": "boolean"
             }
           },
           {
             "targets": {
               "elements": {
-                "required": true,
-                "fields": [
-                  {
-                    "route_type": {
-                      "one_of": [
-                        "llm/v1/chat",
-                        "llm/v1/completions",
-                        "preserve"
-                      ],
-                      "description": "The model's operation implementation, for this provider. Set to `preserve` to pass through without transformation.",
-                      "type": "string",
-                      "required": true
-                    }
-                  },
-                  {
-                    "auth": {
-                      "fields": [
-                        {
-                          "header_name": {
-                            "referenceable": true,
-                            "description": "If AI model requires authentication via Authorization or API key header, specify its name here.",
-                            "type": "string",
-                            "required": false
-                          }
-                        },
-                        {
-                          "header_value": {
-                            "encrypted": true,
-                            "type": "string",
-                            "required": false,
-                            "description": "Specify the full auth header value for 'header_name', for example 'Bearer key' or just 'key'.",
-                            "referenceable": true
-                          }
-                        },
-                        {
-                          "param_name": {
-                            "referenceable": true,
-                            "description": "If AI model requires authentication via query parameter, specify its name here.",
-                            "type": "string",
-                            "required": false
-                          }
-                        },
-                        {
-                          "param_value": {
-                            "encrypted": true,
-                            "type": "string",
-                            "required": false,
-                            "description": "Specify the full parameter value for 'param_name'.",
-                            "referenceable": true
-                          }
-                        },
-                        {
-                          "param_location": {
-                            "one_of": [
-                              "query",
-                              "body"
-                            ],
-                            "description": "Specify whether the 'param_name' and 'param_value' options go in a query string, or the POST form/JSON body.",
-                            "type": "string",
-                            "required": false
-                          }
-                        },
-                        {
-                          "azure_use_managed_identity": {
-                            "default": false,
-                            "description": "Set true to use the Azure Cloud Managed Identity (or user-assigned identity) to authenticate with Azure-provider models.",
-                            "type": "boolean",
-                            "required": false
-                          }
-                        },
-                        {
-                          "azure_client_id": {
-                            "referenceable": true,
-                            "description": "If azure_use_managed_identity is set to true, and you need to use a different user-assigned identity for this LLM instance, set the client ID.",
-                            "type": "string",
-                            "required": false
-                          }
-                        },
-                        {
-                          "azure_client_secret": {
-                            "encrypted": true,
-                            "type": "string",
-                            "required": false,
-                            "description": "If azure_use_managed_identity is set to true, and you need to use a different user-assigned identity for this LLM instance, set the client secret.",
-                            "referenceable": true
-                          }
-                        },
-                        {
-                          "azure_tenant_id": {
-                            "referenceable": true,
-                            "description": "If azure_use_managed_identity is set to true, and you need to use a different user-assigned identity for this LLM instance, set the tenant ID.",
-                            "type": "string",
-                            "required": false
-                          }
-                        },
-                        {
-                          "gcp_use_service_account": {
-                            "default": false,
-                            "description": "Use service account auth for GCP-based providers and models.",
-                            "type": "boolean",
-                            "required": false
-                          }
-                        },
-                        {
-                          "gcp_service_account_json": {
-                            "encrypted": true,
-                            "type": "string",
-                            "required": false,
-                            "description": "Set this field to the full JSON of the GCP service account to authenticate, if required. If null (and gcp_use_service_account is true), Kong will attempt to read from environment variable `GCP_SERVICE_ACCOUNT`.",
-                            "referenceable": true
-                          }
-                        },
-                        {
-                          "aws_access_key_id": {
-                            "encrypted": true,
-                            "type": "string",
-                            "required": false,
-                            "description": "Set this if you are using an AWS provider (Bedrock) and you are authenticating using static IAM User credentials. Setting this will override the AWS_ACCESS_KEY_ID environment variable for this plugin instance.",
-                            "referenceable": true
-                          }
-                        },
-                        {
-                          "aws_secret_access_key": {
-                            "encrypted": true,
-                            "type": "string",
-                            "required": false,
-                            "description": "Set this if you are using an AWS provider (Bedrock) and you are authenticating using static IAM User credentials. Setting this will override the AWS_SECRET_ACCESS_KEY environment variable for this plugin instance.",
-                            "referenceable": true
-                          }
-                        },
-                        {
-                          "allow_override": {
-                            "default": false,
-                            "description": "If enabled, the authorization header or parameter can be overridden in the request by the value configured in the plugin.",
-                            "type": "boolean",
-                            "required": false
-                          }
-                        }
-                      ],
-                      "type": "record",
-                      "required": false
-                    }
-                  },
-                  {
-                    "model": {
-                      "fields": [
-                        {
-                          "provider": {
-                            "one_of": [
-                              "openai",
-                              "azure",
-                              "anthropic",
-                              "cohere",
-                              "mistral",
-                              "llama2",
-                              "gemini",
-                              "bedrock",
-                              "huggingface"
-                            ],
-                            "description": "AI provider request format - Kong translates requests to and from the specified backend compatible formats.",
-                            "type": "string",
-                            "required": true
-                          }
-                        },
-                        {
-                          "name": {
-                            "description": "Model name to execute.",
-                            "type": "string",
-                            "required": false
-                          }
-                        },
-                        {
-                          "options": {
-                            "fields": [
-                              {
-                                "max_tokens": {
-                                  "description": "Defines the max_tokens, if using chat or completion models.",
-                                  "type": "integer",
-                                  "required": false
-                                }
-                              },
-                              {
-                                "input_cost": {
-                                  "gt": 0,
-                                  "description": "Defines the cost per 1M tokens in your prompt.",
-                                  "type": "number",
-                                  "required": false
-                                }
-                              },
-                              {
-                                "output_cost": {
-                                  "gt": 0,
-                                  "description": "Defines the cost per 1M tokens in the output of the AI.",
-                                  "type": "number",
-                                  "required": false
-                                }
-                              },
-                              {
-                                "temperature": {
-                                  "between": [
-                                    0,
-                                    5
-                                  ],
-                                  "description": "Defines the matching temperature, if using chat or completion models.",
-                                  "type": "number",
-                                  "required": false
-                                }
-                              },
-                              {
-                                "top_p": {
-                                  "between": [
-                                    0,
-                                    1
-                                  ],
-                                  "description": "Defines the top-p probability mass, if supported.",
-                                  "type": "number",
-                                  "required": false
-                                }
-                              },
-                              {
-                                "top_k": {
-                                  "between": [
-                                    0,
-                                    500
-                                  ],
-                                  "description": "Defines the top-k most likely tokens, if supported.",
-                                  "type": "integer",
-                                  "required": false
-                                }
-                              },
-                              {
-                                "anthropic_version": {
-                                  "description": "Defines the schema/API version, if using Anthropic provider.",
-                                  "type": "string",
-                                  "required": false
-                                }
-                              },
-                              {
-                                "azure_instance": {
-                                  "description": "Instance name for Azure OpenAI hosted models.",
-                                  "type": "string",
-                                  "required": false
-                                }
-                              },
-                              {
-                                "azure_api_version": {
-                                  "default": "2023-05-15",
-                                  "description": "'api-version' for Azure OpenAI instances.",
-                                  "type": "string",
-                                  "required": false
-                                }
-                              },
-                              {
-                                "azure_deployment_id": {
-                                  "description": "Deployment ID for Azure OpenAI instances.",
-                                  "type": "string",
-                                  "required": false
-                                }
-                              },
-                              {
-                                "llama2_format": {
-                                  "one_of": [
-                                    "raw",
-                                    "openai",
-                                    "ollama"
-                                  ],
-                                  "description": "If using llama2 provider, select the upstream message format.",
-                                  "type": "string",
-                                  "required": false
-                                }
-                              },
-                              {
-                                "mistral_format": {
-                                  "one_of": [
-                                    "openai",
-                                    "ollama"
-                                  ],
-                                  "description": "If using mistral provider, select the upstream message format.",
-                                  "type": "string",
-                                  "required": false
-                                }
-                              },
-                              {
-                                "upstream_url": {
-                                  "description": "Manually specify or override the full URL to the AI operation endpoints, when calling (self-)hosted models, or for running via a private endpoint.",
-                                  "type": "string",
-                                  "required": false
-                                }
-                              },
-                              {
-                                "upstream_path": {
-                                  "deprecation": {
-                                    "removal_in_version": "4.0",
-                                    "message": "llm: config.model.options.upstream_path is deprecated, please use config.model.options.upstream_url instead"
-                                  },
-                                  "description": "Manually specify or override the AI operation path, used when e.g. using the 'preserve' route_type.",
-                                  "type": "string",
-                                  "required": false
-                                }
-                              },
-                              {
-                                "gemini": {
-                                  "entity_checks": [
-                                    {
-                                      "mutually_required": [
-                                        "api_endpoint",
-                                        "project_id",
-                                        "location_id"
-                                      ]
-                                    }
-                                  ],
-                                  "fields": [
-                                    {
-                                      "api_endpoint": {
-                                        "description": "If running Gemini on Vertex, specify the regional API endpoint (hostname only).",
-                                        "type": "string",
-                                        "required": false
-                                      }
-                                    },
-                                    {
-                                      "project_id": {
-                                        "description": "If running Gemini on Vertex, specify the project ID.",
-                                        "type": "string",
-                                        "required": false
-                                      }
-                                    },
-                                    {
-                                      "location_id": {
-                                        "description": "If running Gemini on Vertex, specify the location ID.",
-                                        "type": "string",
-                                        "required": false
-                                      }
-                                    }
-                                  ],
-                                  "type": "record",
-                                  "required": false
-                                }
-                              },
-                              {
-                                "bedrock": {
-                                  "entity_checks": [
-                                    {
-                                      "mutually_required": [
-                                        "aws_assume_role_arn",
-                                        "aws_role_session_name"
-                                      ]
-                                    }
-                                  ],
-                                  "fields": [
-                                    {
-                                      "aws_region": {
-                                        "description": "If using AWS providers (Bedrock) you can override the `AWS_REGION` environment variable by setting this option.",
-                                        "type": "string",
-                                        "required": false
-                                      }
-                                    },
-                                    {
-                                      "aws_assume_role_arn": {
-                                        "description": "If using AWS providers (Bedrock) you can assume a different role after authentication with the current IAM context is successful.",
-                                        "type": "string",
-                                        "required": false
-                                      }
-                                    },
-                                    {
-                                      "aws_role_session_name": {
-                                        "type": "string",
-                                        "description": "If using AWS providers (Bedrock), set the identifier of the assumed role session."
-                                      }
-                                    },
-                                    {
-                                      "aws_sts_endpoint_url": {
-                                        "type": "string",
-                                        "description": "If using AWS providers (Bedrock), override the STS endpoint URL when assuming a different role."
-                                      }
-                                    }
-                                  ],
-                                  "type": "record",
-                                  "required": false
-                                }
-                              },
-                              {
-                                "huggingface": {
-                                  "fields": [
-                                    {
-                                      "use_cache": {
-                                        "description": "Use the cache layer on the inference API",
-                                        "type": "boolean",
-                                        "required": false
-                                      }
-                                    },
-                                    {
-                                      "wait_for_model": {
-                                        "description": "Wait for the model if it is not ready",
-                                        "type": "boolean",
-                                        "required": false
-                                      }
-                                    }
-                                  ],
-                                  "type": "record",
-                                  "required": false
-                                }
-                              }
-                            ],
-                            "description": "Key/value settings for the model",
-                            "type": "record",
-                            "required": false
-                          }
-                        }
-                      ],
-                      "type": "record",
-                      "required": true
-                    }
-                  },
-                  {
-                    "weight": {
-                      "default": 100,
-                      "description": "The weight this target gets within the upstream loadbalancer (1-65535).",
-                      "between": [
-                        1,
-                        65535
-                      ],
-                      "type": "integer"
-                    }
-                  },
-                  {
-                    "description": {
-                      "description": "The semantic description of the target, required if using semantic load balancing. Specially, setting this to 'CATCHALL' will indicate such target to be used when no other targets match the semantic threshold.",
-                      "type": "string",
-                      "required": false
-                    }
-                  },
-                  {
-                    "logging": {
-                      "fields": [
-                        {
-                          "log_statistics": {
-                            "default": false,
-                            "description": "If enabled and supported by the driver, will add model usage and token metrics into the Kong log plugin(s) output.",
-                            "type": "boolean",
-                            "required": true
-                          }
-                        },
-                        {
-                          "log_payloads": {
-                            "default": false,
-                            "description": "If enabled, will log the request and response body into the Kong log plugin(s) output.",
-                            "type": "boolean",
-                            "required": true
-                          }
-                        }
-                      ],
-                      "type": "record",
-                      "required": true
-                    }
-                  }
-                ],
-                "type": "record",
                 "entity_checks": [
                   {
                     "conditional": {
+                      "then_err": "bedrock and gemini only support auth.allow_override = false",
                       "if_match": {
                         "one_of": [
                           "bedrock",
@@ -1525,8 +1095,7 @@
                       "if_field": "model.provider",
                       "then_match": {
                         "eq": false
-                      },
-                      "then_err": "bedrock and gemini only support auth.allow_override = false"
+                      }
                     }
                   },
                   {
@@ -1649,6 +1218,462 @@
                       ]
                     }
                   }
+                ],
+                "type": "record",
+                "fields": [
+                  {
+                    "route_type": {
+                      "description": "The model's operation implementation, for this provider. Set to `preserve` to pass through without transformation.",
+                      "type": "string",
+                      "one_of": [
+                        "llm/v1/chat",
+                        "llm/v1/completions",
+                        "preserve"
+                      ],
+                      "required": true
+                    }
+                  },
+                  {
+                    "auth": {
+                      "type": "record",
+                      "fields": [
+                        {
+                          "header_name": {
+                            "description": "If AI model requires authentication via Authorization or API key header, specify its name here.",
+                            "type": "string",
+                            "referenceable": true,
+                            "required": false
+                          }
+                        },
+                        {
+                          "header_value": {
+                            "type": "string",
+                            "referenceable": true,
+                            "description": "Specify the full auth header value for 'header_name', for example 'Bearer key' or just 'key'.",
+                            "encrypted": true,
+                            "required": false
+                          }
+                        },
+                        {
+                          "param_name": {
+                            "description": "If AI model requires authentication via query parameter, specify its name here.",
+                            "type": "string",
+                            "referenceable": true,
+                            "required": false
+                          }
+                        },
+                        {
+                          "param_value": {
+                            "type": "string",
+                            "referenceable": true,
+                            "description": "Specify the full parameter value for 'param_name'.",
+                            "encrypted": true,
+                            "required": false
+                          }
+                        },
+                        {
+                          "param_location": {
+                            "description": "Specify whether the 'param_name' and 'param_value' options go in a query string, or the POST form/JSON body.",
+                            "type": "string",
+                            "one_of": [
+                              "query",
+                              "body"
+                            ],
+                            "required": false
+                          }
+                        },
+                        {
+                          "azure_use_managed_identity": {
+                            "description": "Set true to use the Azure Cloud Managed Identity (or user-assigned identity) to authenticate with Azure-provider models.",
+                            "type": "boolean",
+                            "default": false,
+                            "required": false
+                          }
+                        },
+                        {
+                          "azure_client_id": {
+                            "description": "If azure_use_managed_identity is set to true, and you need to use a different user-assigned identity for this LLM instance, set the client ID.",
+                            "type": "string",
+                            "referenceable": true,
+                            "required": false
+                          }
+                        },
+                        {
+                          "azure_client_secret": {
+                            "type": "string",
+                            "referenceable": true,
+                            "description": "If azure_use_managed_identity is set to true, and you need to use a different user-assigned identity for this LLM instance, set the client secret.",
+                            "encrypted": true,
+                            "required": false
+                          }
+                        },
+                        {
+                          "azure_tenant_id": {
+                            "description": "If azure_use_managed_identity is set to true, and you need to use a different user-assigned identity for this LLM instance, set the tenant ID.",
+                            "type": "string",
+                            "referenceable": true,
+                            "required": false
+                          }
+                        },
+                        {
+                          "gcp_use_service_account": {
+                            "description": "Use service account auth for GCP-based providers and models.",
+                            "type": "boolean",
+                            "default": false,
+                            "required": false
+                          }
+                        },
+                        {
+                          "gcp_service_account_json": {
+                            "type": "string",
+                            "referenceable": true,
+                            "description": "Set this field to the full JSON of the GCP service account to authenticate, if required. If null (and gcp_use_service_account is true), Kong will attempt to read from environment variable `GCP_SERVICE_ACCOUNT`.",
+                            "encrypted": true,
+                            "required": false
+                          }
+                        },
+                        {
+                          "aws_access_key_id": {
+                            "type": "string",
+                            "referenceable": true,
+                            "description": "Set this if you are using an AWS provider (Bedrock) and you are authenticating using static IAM User credentials. Setting this will override the AWS_ACCESS_KEY_ID environment variable for this plugin instance.",
+                            "encrypted": true,
+                            "required": false
+                          }
+                        },
+                        {
+                          "aws_secret_access_key": {
+                            "type": "string",
+                            "referenceable": true,
+                            "description": "Set this if you are using an AWS provider (Bedrock) and you are authenticating using static IAM User credentials. Setting this will override the AWS_SECRET_ACCESS_KEY environment variable for this plugin instance.",
+                            "encrypted": true,
+                            "required": false
+                          }
+                        },
+                        {
+                          "allow_override": {
+                            "description": "If enabled, the authorization header or parameter can be overridden in the request by the value configured in the plugin.",
+                            "type": "boolean",
+                            "default": false,
+                            "required": false
+                          }
+                        }
+                      ],
+                      "required": false
+                    }
+                  },
+                  {
+                    "model": {
+                      "type": "record",
+                      "fields": [
+                        {
+                          "provider": {
+                            "description": "AI provider request format - Kong translates requests to and from the specified backend compatible formats.",
+                            "type": "string",
+                            "one_of": [
+                              "openai",
+                              "azure",
+                              "anthropic",
+                              "cohere",
+                              "mistral",
+                              "llama2",
+                              "gemini",
+                              "bedrock",
+                              "huggingface"
+                            ],
+                            "required": true
+                          }
+                        },
+                        {
+                          "name": {
+                            "description": "Model name to execute.",
+                            "type": "string",
+                            "required": false
+                          }
+                        },
+                        {
+                          "options": {
+                            "description": "Key/value settings for the model",
+                            "type": "record",
+                            "fields": [
+                              {
+                                "max_tokens": {
+                                  "description": "Defines the max_tokens, if using chat or completion models.",
+                                  "type": "integer",
+                                  "required": false
+                                }
+                              },
+                              {
+                                "input_cost": {
+                                  "description": "Defines the cost per 1M tokens in your prompt.",
+                                  "type": "number",
+                                  "gt": 0,
+                                  "required": false
+                                }
+                              },
+                              {
+                                "output_cost": {
+                                  "description": "Defines the cost per 1M tokens in the output of the AI.",
+                                  "type": "number",
+                                  "gt": 0,
+                                  "required": false
+                                }
+                              },
+                              {
+                                "temperature": {
+                                  "description": "Defines the matching temperature, if using chat or completion models.",
+                                  "type": "number",
+                                  "between": [
+                                    0,
+                                    5
+                                  ],
+                                  "required": false
+                                }
+                              },
+                              {
+                                "top_p": {
+                                  "description": "Defines the top-p probability mass, if supported.",
+                                  "type": "number",
+                                  "between": [
+                                    0,
+                                    1
+                                  ],
+                                  "required": false
+                                }
+                              },
+                              {
+                                "top_k": {
+                                  "description": "Defines the top-k most likely tokens, if supported.",
+                                  "type": "integer",
+                                  "between": [
+                                    0,
+                                    500
+                                  ],
+                                  "required": false
+                                }
+                              },
+                              {
+                                "anthropic_version": {
+                                  "description": "Defines the schema/API version, if using Anthropic provider.",
+                                  "type": "string",
+                                  "required": false
+                                }
+                              },
+                              {
+                                "azure_instance": {
+                                  "description": "Instance name for Azure OpenAI hosted models.",
+                                  "type": "string",
+                                  "required": false
+                                }
+                              },
+                              {
+                                "azure_api_version": {
+                                  "description": "'api-version' for Azure OpenAI instances.",
+                                  "type": "string",
+                                  "default": "2023-05-15",
+                                  "required": false
+                                }
+                              },
+                              {
+                                "azure_deployment_id": {
+                                  "description": "Deployment ID for Azure OpenAI instances.",
+                                  "type": "string",
+                                  "required": false
+                                }
+                              },
+                              {
+                                "llama2_format": {
+                                  "description": "If using llama2 provider, select the upstream message format.",
+                                  "type": "string",
+                                  "one_of": [
+                                    "raw",
+                                    "openai",
+                                    "ollama"
+                                  ],
+                                  "required": false
+                                }
+                              },
+                              {
+                                "mistral_format": {
+                                  "description": "If using mistral provider, select the upstream message format.",
+                                  "type": "string",
+                                  "one_of": [
+                                    "openai",
+                                    "ollama"
+                                  ],
+                                  "required": false
+                                }
+                              },
+                              {
+                                "upstream_url": {
+                                  "description": "Manually specify or override the full URL to the AI operation endpoints, when calling (self-)hosted models, or for running via a private endpoint.",
+                                  "type": "string",
+                                  "required": false
+                                }
+                              },
+                              {
+                                "upstream_path": {
+                                  "description": "Manually specify or override the AI operation path, used when e.g. using the 'preserve' route_type.",
+                                  "type": "string",
+                                  "deprecation": {
+                                    "message": "llm: config.model.options.upstream_path is deprecated, please use config.model.options.upstream_url instead",
+                                    "removal_in_version": "4.0"
+                                  },
+                                  "required": false
+                                }
+                              },
+                              {
+                                "gemini": {
+                                  "entity_checks": [
+                                    {
+                                      "mutually_required": [
+                                        "api_endpoint",
+                                        "project_id",
+                                        "location_id"
+                                      ]
+                                    }
+                                  ],
+                                  "type": "record",
+                                  "fields": [
+                                    {
+                                      "api_endpoint": {
+                                        "description": "If running Gemini on Vertex, specify the regional API endpoint (hostname only).",
+                                        "type": "string",
+                                        "required": false
+                                      }
+                                    },
+                                    {
+                                      "project_id": {
+                                        "description": "If running Gemini on Vertex, specify the project ID.",
+                                        "type": "string",
+                                        "required": false
+                                      }
+                                    },
+                                    {
+                                      "location_id": {
+                                        "description": "If running Gemini on Vertex, specify the location ID.",
+                                        "type": "string",
+                                        "required": false
+                                      }
+                                    }
+                                  ],
+                                  "required": false
+                                }
+                              },
+                              {
+                                "bedrock": {
+                                  "entity_checks": [
+                                    {
+                                      "mutually_required": [
+                                        "aws_assume_role_arn",
+                                        "aws_role_session_name"
+                                      ]
+                                    }
+                                  ],
+                                  "type": "record",
+                                  "fields": [
+                                    {
+                                      "aws_region": {
+                                        "description": "If using AWS providers (Bedrock) you can override the `AWS_REGION` environment variable by setting this option.",
+                                        "type": "string",
+                                        "required": false
+                                      }
+                                    },
+                                    {
+                                      "aws_assume_role_arn": {
+                                        "description": "If using AWS providers (Bedrock) you can assume a different role after authentication with the current IAM context is successful.",
+                                        "type": "string",
+                                        "required": false
+                                      }
+                                    },
+                                    {
+                                      "aws_role_session_name": {
+                                        "description": "If using AWS providers (Bedrock), set the identifier of the assumed role session.",
+                                        "type": "string"
+                                      }
+                                    },
+                                    {
+                                      "aws_sts_endpoint_url": {
+                                        "description": "If using AWS providers (Bedrock), override the STS endpoint URL when assuming a different role.",
+                                        "type": "string"
+                                      }
+                                    }
+                                  ],
+                                  "required": false
+                                }
+                              },
+                              {
+                                "huggingface": {
+                                  "type": "record",
+                                  "fields": [
+                                    {
+                                      "use_cache": {
+                                        "description": "Use the cache layer on the inference API",
+                                        "type": "boolean",
+                                        "required": false
+                                      }
+                                    },
+                                    {
+                                      "wait_for_model": {
+                                        "description": "Wait for the model if it is not ready",
+                                        "type": "boolean",
+                                        "required": false
+                                      }
+                                    }
+                                  ],
+                                  "required": false
+                                }
+                              }
+                            ],
+                            "required": false
+                          }
+                        }
+                      ],
+                      "required": true
+                    }
+                  },
+                  {
+                    "weight": {
+                      "description": "The weight this target gets within the upstream loadbalancer (1-65535).",
+                      "default": 100,
+                      "type": "integer",
+                      "between": [
+                        1,
+                        65535
+                      ]
+                    }
+                  },
+                  {
+                    "description": {
+                      "description": "The semantic description of the target, required if using semantic load balancing. Specially, setting this to 'CATCHALL' will indicate such target to be used when no other targets match the semantic threshold.",
+                      "type": "string",
+                      "required": false
+                    }
+                  },
+                  {
+                    "logging": {
+                      "type": "record",
+                      "fields": [
+                        {
+                          "log_statistics": {
+                            "description": "If enabled and supported by the driver, will add model usage and token metrics into the Kong log plugin(s) output.",
+                            "type": "boolean",
+                            "default": false,
+                            "required": true
+                          }
+                        },
+                        {
+                          "log_payloads": {
+                            "description": "If enabled, will log the request and response body into the Kong log plugin(s) output.",
+                            "type": "boolean",
+                            "default": false,
+                            "required": true
+                          }
+                        }
+                      ],
+                      "required": true
+                    }
+                  }
                 ]
               },
               "type": "array",
@@ -1657,45 +1682,19 @@
           },
           {
             "llm_format": {
-              "description": "LLM input and output format and schema to use",
               "type": "string",
-              "required": false,
-              "default": "openai",
+              "description": "LLM input and output format and schema to use",
               "one_of": [
                 "openai",
                 "bedrock",
                 "gemini"
-              ]
+              ],
+              "default": "openai",
+              "required": false
             }
           }
         ],
         "required": true
-      }
-    }
-  ],
-  "entity_checks": [
-    {
-      "custom_entity_check": {
-        "field_sources": [
-          "config.targets",
-          "config.balancer"
-        ]
-      }
-    },
-    {
-      "custom_entity_check": {
-        "field_sources": [
-          "config.targets",
-          "config.balancer"
-        ]
-      }
-    },
-    {
-      "custom_entity_check": {
-        "field_sources": [
-          "config.targets",
-          "config.llm_format"
-        ]
       }
     }
   ]

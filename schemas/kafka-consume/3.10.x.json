@@ -1,8 +1,10 @@
 {
+  "entity_checks": [
+
+  ],
   "fields": [
     {
       "protocols": {
-        "type": "set",
         "elements": {
           "type": "string",
           "one_of": [
@@ -14,6 +16,7 @@
             "wss"
           ]
         },
+        "type": "set",
         "default": [
           "grpc",
           "grpcs",
@@ -27,10 +30,10 @@
     },
     {
       "consumer_group": {
+        "reference": "consumer_groups",
         "description": "Custom type for representing a foreign key with a null value allowed.",
         "type": "foreign",
-        "eq": null,
-        "reference": "consumer_groups"
+        "eq": null
       }
     },
     {
@@ -48,6 +51,8 @@
         "fields": [
           {
             "bootstrap_servers": {
+              "description": "Set of bootstrap brokers in a `{host: host, port: port}` list format.",
+              "type": "set",
               "elements": {
                 "type": "record",
                 "fields": [
@@ -60,87 +65,85 @@
                   },
                   {
                     "port": {
-                      "type": "integer",
-                      "description": "An integer representing a port number between 0 and 65535, inclusive.",
                       "between": [
                         0,
                         65535
                       ],
+                      "type": "integer",
+                      "description": "An integer representing a port number between 0 and 65535, inclusive.",
                       "required": true
                     }
                   }
                 ]
               },
-              "description": "Set of bootstrap brokers in a `{host: host, port: port}` list format.",
-              "type": "set",
               "required": true
             }
           },
           {
             "topics": {
-              "len_min": 1,
               "type": "array",
-              "required": true,
+              "len_min": 1,
+              "description": "The Kafka topics and their configuration you want to consume from.",
               "elements": {
                 "type": "record",
                 "fields": [
                   {
                     "name": {
-                      "type": "string",
-                      "required": true
+                      "required": true,
+                      "type": "string"
                     }
                   }
                 ]
               },
-              "description": "The Kafka topics and their configuration you want to consume from."
+              "required": true
             }
           },
           {
             "mode": {
-              "description": "The mode of operation for the plugin.",
               "type": "string",
-              "required": true,
-              "default": "http-get",
+              "description": "The mode of operation for the plugin.",
               "one_of": [
                 "server-sent-events",
                 "http-get"
-              ]
+              ],
+              "default": "http-get",
+              "required": true
             }
           },
           {
             "message_deserializer": {
-              "description": "The deserializer to use for the consumed messages.",
               "type": "string",
-              "required": true,
-              "default": "noop",
+              "description": "The deserializer to use for the consumed messages.",
               "one_of": [
                 "json",
                 "noop"
-              ]
+              ],
+              "default": "noop",
+              "required": true
             }
           },
           {
             "auto_offset_reset": {
-              "description": "The offset to start from when there is no initial offset in the consumer group.",
               "type": "string",
-              "required": true,
-              "default": "latest",
+              "description": "The offset to start from when there is no initial offset in the consumer group.",
               "one_of": [
                 "earliest",
                 "latest"
-              ]
+              ],
+              "default": "latest",
+              "required": true
             }
           },
           {
             "commit_strategy": {
-              "description": "The strategy to use for committing offsets.",
               "type": "string",
-              "required": true,
-              "default": "auto",
+              "description": "The strategy to use for committing offsets.",
               "one_of": [
                 "auto",
                 "off"
-              ]
+              ],
+              "default": "auto",
+              "required": true
             }
           },
           {
@@ -149,24 +152,24 @@
               "fields": [
                 {
                   "strategy": {
-                    "required": false,
                     "description": "The authentication strategy for the plugin, the only option for the value is `sasl`.",
                     "type": "string",
                     "one_of": [
                       "sasl"
-                    ]
+                    ],
+                    "required": false
                   }
                 },
                 {
                   "mechanism": {
-                    "required": false,
                     "description": "The SASL authentication mechanism.  Supported options: `PLAIN` or `SCRAM-SHA-256`.",
                     "type": "string",
                     "one_of": [
                       "PLAIN",
                       "SCRAM-SHA-256",
                       "SCRAM-SHA-512"
-                    ]
+                    ],
+                    "required": false
                   }
                 },
                 {
@@ -178,20 +181,20 @@
                 },
                 {
                   "user": {
-                    "description": "Username for SASL authentication.",
                     "type": "string",
-                    "required": false,
+                    "referenceable": true,
+                    "description": "Username for SASL authentication.",
                     "encrypted": true,
-                    "referenceable": true
+                    "required": false
                   }
                 },
                 {
                   "password": {
-                    "description": "Password for SASL authentication.",
                     "type": "string",
-                    "required": false,
+                    "referenceable": true,
+                    "description": "Password for SASL authentication.",
                     "encrypted": true,
-                    "referenceable": true
+                    "required": false
                   }
                 }
               ],
@@ -205,9 +208,9 @@
                 {
                   "certificate_id": {
                     "description": "UUID of certificate entity for mTLS authentication.",
-                    "uuid": true,
                     "type": "string",
-                    "required": false
+                    "required": false,
+                    "uuid": true
                   }
                 },
                 {
@@ -232,8 +235,5 @@
         "required": true
       }
     }
-  ],
-  "entity_checks": [
-
   ]
 }

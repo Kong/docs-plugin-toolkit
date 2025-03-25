@@ -1,10 +1,10 @@
 {
+  "entity_checks": [
+
+  ],
   "fields": [
     {
       "protocols": {
-        "description": "A set of strings representing HTTP protocols.",
-        "type": "set",
-        "required": true,
         "elements": {
           "type": "string",
           "one_of": [
@@ -14,20 +14,23 @@
             "https"
           ]
         },
+        "description": "A set of strings representing HTTP protocols.",
         "default": [
           "grpc",
           "grpcs",
           "http",
           "https"
-        ]
+        ],
+        "type": "set",
+        "required": true
       }
     },
     {
       "consumer_group": {
+        "reference": "consumer_groups",
         "description": "Custom type for representing a foreign key with a null value allowed.",
         "type": "foreign",
-        "eq": null,
-        "reference": "consumer_groups"
+        "eq": null
       }
     },
     {
@@ -69,12 +72,12 @@
                   },
                   {
                     "port": {
-                      "type": "integer",
-                      "description": "An integer representing a port number between 0 and 65535, inclusive.",
                       "between": [
                         0,
                         65535
                       ],
+                      "type": "integer",
+                      "description": "An integer representing a port number between 0 and 65535, inclusive.",
                       "required": true
                     }
                   }
@@ -91,11 +94,11 @@
           },
           {
             "allowed_topics": {
+              "description": "The list of allowed topic names to which messages can be sent. The default topic configured in the `topic` field is always allowed, regardless of its inclusion in `allowed_topics`.",
+              "type": "array",
               "elements": {
                 "type": "string"
               },
-              "description": "The list of allowed topic names to which messages can be sent. The default topic configured in the `topic` field is always allowed, regardless of its inclusion in `allowed_topics`.",
-              "type": "array",
               "required": false
             }
           },
@@ -132,24 +135,24 @@
               "fields": [
                 {
                   "strategy": {
-                    "required": false,
                     "description": "The authentication strategy for the plugin, the only option for the value is `sasl`.",
                     "type": "string",
                     "one_of": [
                       "sasl"
-                    ]
+                    ],
+                    "required": false
                   }
                 },
                 {
                   "mechanism": {
-                    "required": false,
                     "description": "The SASL authentication mechanism.  Supported options: `PLAIN`, `SCRAM-SHA-256`, or `SCRAM-SHA-512`.",
                     "type": "string",
                     "one_of": [
                       "PLAIN",
                       "SCRAM-SHA-256",
                       "SCRAM-SHA-512"
-                    ]
+                    ],
+                    "required": false
                   }
                 },
                 {
@@ -161,20 +164,20 @@
                 },
                 {
                   "user": {
-                    "description": "Username for SASL authentication.",
                     "type": "string",
-                    "required": false,
+                    "referenceable": true,
+                    "description": "Username for SASL authentication.",
                     "encrypted": true,
-                    "referenceable": true
+                    "required": false
                   }
                 },
                 {
                   "password": {
-                    "description": "Password for SASL authentication.",
                     "type": "string",
-                    "required": false,
+                    "referenceable": true,
+                    "description": "Password for SASL authentication.",
                     "encrypted": true,
-                    "referenceable": true
+                    "required": false
                   }
                 }
               ],
@@ -188,8 +191,8 @@
                 {
                   "certificate_id": {
                     "description": "UUID of certificate entity for mTLS authentication.",
-                    "uuid": true,
                     "type": "string",
+                    "uuid": true,
                     "required": false
                   }
                 },
@@ -234,26 +237,26 @@
           },
           {
             "message_by_lua_functions": {
+              "description": "The Lua functions that manipulates the message being sent to the Kafka topic.",
+              "type": "array",
               "elements": {
                 "type": "string"
               },
-              "description": "The Lua functions that manipulates the message being sent to the Kafka topic.",
-              "type": "array",
               "required": false
             }
           },
           {
             "cluster_name": {
-              "auto": true,
               "description": "An identifier for the Kafka cluster. By default, this field generates a random string. You can also set your own custom cluster identifier.  If more than one Kafka plugin is configured without a `cluster_name` (that is, if the default autogenerated value is removed), these plugins will use the same producer, and by extension, the same cluster. Logs will be sent to the leader of the cluster.",
               "type": "string",
-              "required": false
+              "required": false,
+              "auto": true
             }
           },
           {
             "producer_request_acks": {
-              "default": 1,
               "description": "The number of acknowledgments the producer requires the leader to have received before considering a request complete. Allowed values: 0 for no acknowledgments; 1 for only the leader; and -1 for the full ISR (In-Sync Replica set).",
+              "default": 1,
               "type": "integer",
               "one_of": [
                 -1,
@@ -322,8 +325,5 @@
         "required": true
       }
     }
-  ],
-  "entity_checks": [
-
   ]
 }

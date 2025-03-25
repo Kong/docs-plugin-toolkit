@@ -1,26 +1,37 @@
 {
+  "entity_checks": [
+    {
+      "only_one_of": [
+        "config.allow",
+        "config.deny"
+      ]
+    },
+    {
+      "at_least_one_of": [
+        "config.allow",
+        "config.deny"
+      ]
+    }
+  ],
   "fields": [
     {
       "consumer": {
+        "reference": "consumers",
         "description": "Custom type for representing a foreign key with a null value allowed.",
         "type": "foreign",
-        "eq": null,
-        "reference": "consumers"
+        "eq": null
       }
     },
     {
       "consumer_group": {
+        "reference": "consumer_groups",
         "description": "Custom type for representing a foreign key with a null value allowed.",
         "type": "foreign",
-        "eq": null,
-        "reference": "consumer_groups"
+        "eq": null
       }
     },
     {
       "protocols": {
-        "description": "A set of strings representing HTTP protocols.",
-        "type": "set",
-        "required": true,
         "elements": {
           "type": "string",
           "one_of": [
@@ -30,12 +41,15 @@
             "https"
           ]
         },
+        "description": "A set of strings representing HTTP protocols.",
         "default": [
           "grpc",
           "grpcs",
           "http",
           "https"
-        ]
+        ],
+        "type": "set",
+        "required": true
       }
     },
     {
@@ -62,45 +76,31 @@
           },
           {
             "hide_groups_header": {
-              "default": false,
               "description": "If enabled (`true`), prevents the `X-Consumer-Groups` header from being sent in the request to the upstream service.",
               "type": "boolean",
+              "default": false,
               "required": true
             }
           },
           {
             "include_consumer_groups": {
-              "default": false,
               "description": "If enabled (`true`), allows the consumer-groups to be used in the `allow|deny` fields",
               "type": "boolean",
+              "default": false,
               "required": false
             }
           },
           {
             "always_use_authenticated_groups": {
-              "default": false,
               "description": "If enabled (`true`), the authenticated groups will always be used even when an authenticated consumer already exists. If the authenticated groups don't exist, it will fallback to use the groups associated with the consumer. By default the authenticated groups will only be used when there is no consumer or the consumer is anonymous.",
               "type": "boolean",
+              "default": false,
               "required": true
             }
           }
         ],
         "required": true
       }
-    }
-  ],
-  "entity_checks": [
-    {
-      "only_one_of": [
-        "config.allow",
-        "config.deny"
-      ]
-    },
-    {
-      "at_least_one_of": [
-        "config.allow",
-        "config.deny"
-      ]
     }
   ]
 }

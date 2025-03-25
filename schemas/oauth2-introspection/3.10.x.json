@@ -1,18 +1,18 @@
 {
+  "entity_checks": [
+
+  ],
   "fields": [
     {
       "consumer": {
+        "reference": "consumers",
         "description": "Custom type for representing a foreign key with a null value allowed.",
         "type": "foreign",
-        "eq": null,
-        "reference": "consumers"
+        "eq": null
       }
     },
     {
       "protocols": {
-        "description": "A set of strings representing HTTP protocols.",
-        "type": "set",
-        "required": true,
         "elements": {
           "type": "string",
           "one_of": [
@@ -22,20 +22,23 @@
             "https"
           ]
         },
+        "description": "A set of strings representing HTTP protocols.",
         "default": [
           "grpc",
           "grpcs",
           "http",
           "https"
-        ]
+        ],
+        "type": "set",
+        "required": true
       }
     },
     {
       "consumer_group": {
+        "reference": "consumer_groups",
         "description": "Custom type for representing a foreign key with a null value allowed.",
         "type": "foreign",
-        "eq": null,
-        "reference": "consumer_groups"
+        "eq": null
       }
     },
     {
@@ -58,17 +61,17 @@
           },
           {
             "token_type_hint": {
-              "type": "string",
-              "description": "The `token_type_hint` value to associate to introspection requests."
+              "description": "The `token_type_hint` value to associate to introspection requests.",
+              "type": "string"
             }
           },
           {
             "authorization_value": {
-              "encrypted": true,
               "type": "string",
-              "required": true,
+              "referenceable": true,
               "description": "The value to set as the `Authorization` header when querying the introspection endpoint. This depends on the OAuth 2.0 server, but usually is the `client_id` and `client_secret` as a Base64-encoded Basic Auth string (`Basic MG9hNWl...`).",
-              "referenceable": true
+              "encrypted": true,
+              "required": true
             }
           },
           {
@@ -87,8 +90,8 @@
           },
           {
             "introspect_request": {
-              "type": "boolean",
               "description": "A boolean indicating whether to forward information about the current downstream request to the introspect endpoint. If true, headers `X-Request-Path` and `X-Request-Http-Method` will be inserted into the introspect request.",
+              "type": "boolean",
               "default": false,
               "required": true
             }
@@ -109,59 +112,56 @@
           },
           {
             "anonymous": {
-              "len_min": 0,
               "description": "An optional string (consumer UUID or username) value to use as an “anonymous” consumer if authentication fails. If empty (default null), the request fails with an authentication failure `4xx`. Note that this value must refer to the consumer `id` or `username` attribute, and **not** its `custom_id`.",
+              "type": "string",
               "default": "",
-              "type": "string"
+              "len_min": 0
             }
           },
           {
             "consumer_by": {
-              "description": "A string indicating whether to associate OAuth2 `username` or `client_id` with the consumer's username. OAuth2 `username` is mapped to a consumer's `username` field, while an OAuth2 `client_id` maps to a consumer's `custom_id`.",
               "type": "string",
-              "required": true,
-              "default": "username",
+              "description": "A string indicating whether to associate OAuth2 `username` or `client_id` with the consumer's username. OAuth2 `username` is mapped to a consumer's `username` field, while an OAuth2 `client_id` maps to a consumer's `custom_id`.",
               "one_of": [
                 "username",
                 "client_id"
-              ]
+              ],
+              "default": "username",
+              "required": true
             }
           },
           {
             "custom_introspection_headers": {
-              "description": "A list of custom headers to be added in the introspection request.",
               "type": "map",
-              "required": true,
+              "keys": {
+                "type": "string"
+              },
+              "description": "A list of custom headers to be added in the introspection request.",
               "values": {
                 "type": "string"
               },
               "default": [
 
               ],
-              "keys": {
-                "type": "string"
-              }
+              "required": true
             }
           },
           {
             "custom_claims_forward": {
-              "description": "A list of custom claims to be forwarded from the introspection response to the upstream request. Claims are forwarded in headers with prefix `X-Credential-{claim-name}`.",
               "type": "set",
-              "required": true,
+              "description": "A list of custom claims to be forwarded from the introspection response to the upstream request. Claims are forwarded in headers with prefix `X-Credential-{claim-name}`.",
+              "default": [
+
+              ],
               "elements": {
                 "type": "string"
               },
-              "default": [
-
-              ]
+              "required": true
             }
           }
         ],
         "required": true
       }
     }
-  ],
-  "entity_checks": [
-
   ]
 }
