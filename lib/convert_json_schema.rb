@@ -85,12 +85,29 @@ class ConvertJsonSchema
         fields['format'] = 'uuid'
       end
 
-      if  k =='referenceable'
+      if k == 'encrypted'
+        note = 'This field is [encrypted](/gateway/keyring/).'
+        if fields.key?('description')
+          fields['description'] << "\n#{note}"
+        else
+          fields['description'] = note
+        end
+      end
+
+      if k == 'referenceable'
         note = 'This field is [referenceable](/gateway/entities/vault/#how-do-i-reference-secrets-stored-in-a-vault).'
         if fields.key?('description')
           fields['description'] << "\n#{note}"
         else
           fields['description'] = note
+        end
+      end
+
+      if k == 'description'
+        if fields.key?('description')
+          fields['description'] = "#{v}\n#{fields['description']}"
+        else
+          fields['description'] = v
         end
       end
 
@@ -105,7 +122,8 @@ class ConvertJsonSchema
         'auto',
         'match_none',
         'starts_with',
-        'deprecation'
+        'deprecation',
+        'description'
       ].include?(k)
 
       if k == 'type' && v == 'foreign'
