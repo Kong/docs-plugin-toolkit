@@ -1,0 +1,421 @@
+{
+  "entity_checks": [
+
+  ],
+  "fields": [
+    {
+      "protocols": {
+        "required": true,
+        "type": "set",
+        "default": [
+          "grpc",
+          "grpcs",
+          "http",
+          "https"
+        ],
+        "description": "A set of strings representing protocols.",
+        "elements": {
+          "description": "A string representing a protocol, such as HTTP or HTTPS.",
+          "one_of": [
+            "grpc",
+            "grpcs",
+            "http",
+            "https",
+            "tcp",
+            "tls",
+            "tls_passthrough",
+            "udp",
+            "ws",
+            "wss"
+          ],
+          "type": "string"
+        }
+      }
+    },
+    {
+      "consumer_group": {
+        "reference": "consumer_groups",
+        "eq": null,
+        "type": "foreign",
+        "description": "Custom type for representing a foreign key with a null value allowed."
+      }
+    },
+    {
+      "config": {
+        "fields": [
+          {
+            "local_service_name": {
+              "default": "kong",
+              "description": "The name of the service as displayed in Zipkin.",
+              "required": true,
+              "type": "string"
+            }
+          },
+          {
+            "http_endpoint": {
+              "type": "string",
+              "description": "A string representing a URL, such as https://example.com/path/to/resource?q=search."
+            }
+          },
+          {
+            "sample_ratio": {
+              "default": 0.001,
+              "description": "How often to sample requests that do not contain trace IDs. Set to `0` to turn sampling off, or to `1` to sample **all** requests. ",
+              "between": [
+                0,
+                1
+              ],
+              "type": "number"
+            }
+          },
+          {
+            "default_service_name": {
+              "type": "string",
+              "description": "Set a default service name to override `unknown-service-name` in the Zipkin spans."
+            }
+          },
+          {
+            "include_credential": {
+              "default": true,
+              "description": "Specify whether the credential of the currently authenticated consumer should be included in metadata sent to the Zipkin server.",
+              "required": true,
+              "type": "boolean"
+            }
+          },
+          {
+            "traceid_byte_count": {
+              "required": true,
+              "type": "integer",
+              "default": 16,
+              "description": "The length in bytes of each request's Trace ID.",
+              "one_of": [
+                8,
+                16
+              ]
+            }
+          },
+          {
+            "header_type": {
+              "required": true,
+              "type": "string",
+              "default": "preserve",
+              "description": "All HTTP requests going through the plugin are tagged with a tracing HTTP request. This property codifies what kind of tracing header the plugin expects on incoming requests",
+              "one_of": [
+                "preserve",
+                "ignore",
+                "b3",
+                "b3-single",
+                "w3c",
+                "jaeger",
+                "ot",
+                "aws",
+                "datadog",
+                "gcp"
+              ],
+              "deprecation": {
+                "old_default": "preserve",
+                "message": "zipkin: config.header_type is deprecated, please use config.propagation options instead",
+                "removal_in_version": "4.0"
+              }
+            }
+          },
+          {
+            "default_header_type": {
+              "required": true,
+              "type": "string",
+              "default": "b3",
+              "description": "Allows specifying the type of header to be added to requests with no pre-existing tracing headers and when `config.header_type` is set to `\"preserve\"`. When `header_type` is set to any other value, `default_header_type` is ignored.",
+              "one_of": [
+                "b3",
+                "b3-single",
+                "w3c",
+                "jaeger",
+                "ot",
+                "aws",
+                "datadog",
+                "gcp"
+              ],
+              "deprecation": {
+                "old_default": "b3",
+                "message": "zipkin: config.default_header_type is deprecated, please use config.propagation.default_format instead",
+                "removal_in_version": "4.0"
+              }
+            }
+          },
+          {
+            "tags_header": {
+              "default": "Zipkin-Tags",
+              "description": "The Zipkin plugin will add extra headers to the tags associated with any HTTP requests that come with a header named as configured by this property.",
+              "required": true,
+              "type": "string"
+            }
+          },
+          {
+            "static_tags": {
+              "elements": {
+                "type": "record",
+                "fields": [
+                  {
+                    "name": {
+                      "not_one_of": [
+                        "error",
+                        "http.method",
+                        "http.path",
+                        "http.status_code",
+                        "kong.balancer.state",
+                        "kong.balancer.try",
+                        "kong.consumer",
+                        "kong.credential",
+                        "kong.node.id",
+                        "kong.route",
+                        "kong.service",
+                        "lc",
+                        "peer.hostname"
+                      ],
+                      "required": true,
+                      "type": "string"
+                    }
+                  },
+                  {
+                    "value": {
+                      "required": true,
+                      "type": "string"
+                    }
+                  }
+                ]
+              },
+              "description": "The tags specified on this property will be added to the generated request traces.",
+              "type": "array"
+            }
+          },
+          {
+            "http_span_name": {
+              "required": true,
+              "type": "string",
+              "default": "method",
+              "description": "Specify whether to include the HTTP path in the span name.",
+              "one_of": [
+                "method",
+                "method_path"
+              ]
+            }
+          },
+          {
+            "connect_timeout": {
+              "default": 2000,
+              "description": "An integer representing a timeout in milliseconds. Must be between 0 and 2^31-2.",
+              "between": [
+                0,
+                2147483646
+              ],
+              "type": "integer"
+            }
+          },
+          {
+            "send_timeout": {
+              "default": 5000,
+              "description": "An integer representing a timeout in milliseconds. Must be between 0 and 2^31-2.",
+              "between": [
+                0,
+                2147483646
+              ],
+              "type": "integer"
+            }
+          },
+          {
+            "read_timeout": {
+              "default": 5000,
+              "description": "An integer representing a timeout in milliseconds. Must be between 0 and 2^31-2.",
+              "between": [
+                0,
+                2147483646
+              ],
+              "type": "integer"
+            }
+          },
+          {
+            "http_response_header_for_traceid": {
+              "type": "string"
+            }
+          },
+          {
+            "phase_duration_flavor": {
+              "required": true,
+              "type": "string",
+              "default": "annotations",
+              "description": "Specify whether to include the duration of each phase as an annotation or a tag.",
+              "one_of": [
+                "annotations",
+                "tags"
+              ]
+            }
+          },
+          {
+            "queue": {
+              "fields": [
+                {
+                  "max_batch_size": {
+                    "default": 1,
+                    "description": "Maximum number of entries that can be processed at a time.",
+                    "between": [
+                      1,
+                      1000000
+                    ],
+                    "type": "integer"
+                  }
+                },
+                {
+                  "max_coalescing_delay": {
+                    "default": 1,
+                    "description": "Maximum number of (fractional) seconds to elapse after the first entry was queued before the queue starts calling the handler.",
+                    "between": [
+                      0,
+                      3600
+                    ],
+                    "type": "number"
+                  }
+                },
+                {
+                  "max_entries": {
+                    "default": 10000,
+                    "description": "Maximum number of entries that can be waiting on the queue.",
+                    "between": [
+                      1,
+                      1000000
+                    ],
+                    "type": "integer"
+                  }
+                },
+                {
+                  "max_bytes": {
+                    "type": "integer",
+                    "description": "Maximum number of bytes that can be waiting on a queue, requires string content."
+                  }
+                },
+                {
+                  "max_retry_time": {
+                    "default": 60,
+                    "description": "Time in seconds before the queue gives up calling a failed handler for a batch.",
+                    "type": "number"
+                  }
+                },
+                {
+                  "initial_retry_delay": {
+                    "default": 0.01,
+                    "description": "Time in seconds before the initial retry is made for a failing batch.",
+                    "between": [
+                      0.001,
+                      1000000
+                    ],
+                    "type": "number"
+                  }
+                },
+                {
+                  "max_retry_delay": {
+                    "default": 60,
+                    "description": "Maximum time in seconds between retries, caps exponential backoff.",
+                    "between": [
+                      0.001,
+                      1000000
+                    ],
+                    "type": "number"
+                  }
+                },
+                {
+                  "concurrency_limit": {
+                    "default": 1,
+                    "description": "The number of of queue delivery timers. -1 indicates unlimited.",
+                    "type": "integer",
+                    "one_of": [
+                      -1,
+                      1
+                    ]
+                  }
+                }
+              ],
+              "required": true,
+              "type": "record"
+            }
+          },
+          {
+            "propagation": {
+              "default": {
+                "default_format": "b3"
+              },
+              "fields": [
+                {
+                  "extract": {
+                    "elements": {
+                      "type": "string",
+                      "one_of": [
+                        "gcp",
+                        "jaeger",
+                        "aws",
+                        "ot",
+                        "w3c",
+                        "datadog",
+                        "b3"
+                      ]
+                    },
+                    "description": "Header formats used to extract tracing context from incoming requests. If multiple values are specified, the first one found will be used for extraction. If left empty, Kong will not extract any tracing context information from incoming requests and generate a trace with no parent and a new trace ID.",
+                    "type": "array"
+                  }
+                },
+                {
+                  "clear": {
+                    "elements": {
+                      "type": "string"
+                    },
+                    "description": "Header names to clear after context extraction. This allows to extract the context from a certain header and then remove it from the request, useful when extraction and injection are performed on different header formats and the original header should not be sent to the upstream. If left empty, no headers are cleared.",
+                    "type": "array"
+                  }
+                },
+                {
+                  "inject": {
+                    "elements": {
+                      "type": "string",
+                      "one_of": [
+                        "preserve",
+                        "gcp",
+                        "b3-single",
+                        "jaeger",
+                        "aws",
+                        "ot",
+                        "w3c",
+                        "datadog",
+                        "b3"
+                      ]
+                    },
+                    "description": "Header formats used to inject tracing context. The value `preserve` will use the same header format as the incoming request. If multiple values are specified, all of them will be used during injection. If left empty, Kong will not inject any tracing context information in outgoing requests.",
+                    "type": "array"
+                  }
+                },
+                {
+                  "default_format": {
+                    "type": "string",
+                    "description": "The default header format to use when extractors did not match any format in the incoming headers and `inject` is configured with the value: `preserve`. This can happen when no tracing header was found in the request, or the incoming tracing header formats were not included in `extract`.",
+                    "required": true,
+                    "one_of": [
+                      "gcp",
+                      "b3-single",
+                      "jaeger",
+                      "aws",
+                      "ot",
+                      "w3c",
+                      "datadog",
+                      "b3"
+                    ]
+                  }
+                }
+              ],
+              "required": true,
+              "type": "record"
+            }
+          }
+        ],
+        "required": true,
+        "type": "record"
+      }
+    }
+  ]
+}

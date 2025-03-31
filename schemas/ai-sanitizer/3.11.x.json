@@ -1,0 +1,177 @@
+{
+  "entity_checks": [
+    {
+      "custom_entity_check": {
+        "field_sources": [
+          "config"
+        ]
+      }
+    }
+  ],
+  "fields": [
+    {
+      "protocols": {
+        "elements": {
+          "type": "string",
+          "one_of": [
+            "grpc",
+            "grpcs",
+            "http",
+            "https"
+          ]
+        },
+        "description": "A set of strings representing HTTP protocols.",
+        "default": [
+          "grpc",
+          "grpcs",
+          "http",
+          "https"
+        ],
+        "type": "set",
+        "required": true
+      }
+    },
+    {
+      "config": {
+        "type": "record",
+        "fields": [
+          {
+            "host": {
+              "description": "The host of the sanitizer",
+              "type": "string",
+              "default": "localhost",
+              "required": true
+            }
+          },
+          {
+            "port": {
+              "description": "The port of the sanitizer",
+              "type": "number",
+              "default": 8080,
+              "required": true
+            }
+          },
+          {
+            "scheme": {
+              "description": "The protocol can be http and https",
+              "type": "string",
+              "default": "http",
+              "required": true
+            }
+          },
+          {
+            "timeout": {
+              "description": "Connection timeout with the sanitizer",
+              "default": 10000,
+              "type": "number"
+            }
+          },
+          {
+            "keepalive_timeout": {
+              "description": "The keepalive timeout for the established http connnection",
+              "default": 60000,
+              "type": "number"
+            }
+          },
+          {
+            "stop_on_error": {
+              "description": "Stop processing if an error occurs",
+              "default": true,
+              "type": "boolean"
+            }
+          },
+          {
+            "anonymize": {
+              "elements": {
+                "type": "string",
+                "one_of": [
+                  "general",
+                  "phone",
+                  "email",
+                  "creditcard",
+                  "crypto",
+                  "date",
+                  "ssn",
+                  "ip",
+                  "nrp",
+                  "domain",
+                  "credentials",
+                  "url",
+                  "medical",
+                  "driverlicense",
+                  "passport",
+                  "bank",
+                  "nationalid",
+                  "custom",
+                  "all",
+                  "all_and_credentials"
+                ]
+              },
+              "description": "List of types to be anonymized",
+              "default": [
+                "all_and_credentials"
+              ],
+              "type": "array",
+              "required": true
+            }
+          },
+          {
+            "recover_redacted": {
+              "description": "Whether to recover redacted data",
+              "default": true,
+              "type": "boolean"
+            }
+          },
+          {
+            "redact_type": {
+              "description": "What value to be used to redacted to",
+              "default": "placeholder",
+              "type": "string",
+              "one_of": [
+                "placeholder",
+                "synthetic"
+              ]
+            }
+          },
+          {
+            "custom_patterns": {
+              "type": "array",
+              "len_min": 1,
+              "description": "List of custom patterns to be used for anonymization",
+              "elements": {
+                "type": "record",
+                "fields": [
+                  {
+                    "name": {
+                      "required": true,
+                      "type": "string"
+                    }
+                  },
+                  {
+                    "regex": {
+                      "required": true,
+                      "type": "string"
+                    }
+                  },
+                  {
+                    "score": {
+                      "between": [
+                        0,
+                        1
+                      ],
+                      "type": "number",
+                      "default": 0.5,
+                      "required": true
+                    }
+                  }
+                ]
+              },
+              "required": false
+            }
+          }
+        ],
+        "required": true
+      }
+    }
+  ]
+}
