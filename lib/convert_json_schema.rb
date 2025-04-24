@@ -38,6 +38,7 @@ class ConvertJsonSchema
 
       # Fix any broken defaults
       json_schema = fix_broken_defaults(json_schema)
+      json_schema = fix_regex(json_schema)
 
       # Write the schema to the destination
       FileUtils.mkdir_p("#{@options[:destination]}/#{plugin_name}")
@@ -85,21 +86,24 @@ class ConvertJsonSchema
         fields['format'] = 'uuid'
       end
 
-      if k == 'encrypted'
-        note = 'This field is [encrypted](/gateway/keyring/).'
-        if fields.key?('description')
-          fields['description'] << "\n#{note}"
-        else
-          fields['description'] = note
-        end
-      end
 
-      if k == 'referenceable'
-        note = 'This field is [referenceable](/gateway/entities/vault/#how-do-i-reference-secrets-stored-in-a-vault).'
-        if fields.key?('description')
-          fields['description'] << "\n#{note}"
-        else
-          fields['description'] = note
+      if !@options[:skip_custom_annotations]
+        if k == 'encrypted'
+          note = 'This field is [encrypted](/gateway/keyring/).'
+          if fields.key?('description')
+            fields['description'] << "\n#{note}"
+          else
+            fields['description'] = note
+          end
+        end
+
+        if k == 'referenceable'
+          note = 'This field is [referenceable](/gateway/entities/vault/#how-do-i-reference-secrets-stored-in-a-vault).'
+          if fields.key?('description')
+            fields['description'] << "\n#{note}"
+          else
+            fields['description'] = note
+          end
         end
       end
 
@@ -182,7 +186,7 @@ class ConvertJsonSchema
       end
 
     end
-    
+
 
     schema
   end
@@ -232,6 +236,7 @@ class ConvertJsonSchema
       # Escape forward slashes
       schema['pattern'] = schema['pattern'].gsub('%/', '\\/')
     end
+
     if schema['items']
       schema['items'] = fix_regex(schema['items'])
     end
@@ -251,8 +256,12 @@ class ConvertJsonSchema
     if schema['properties']
       schema['properties'].each do |k, v|
         schema['properties'][k] = fix_broken_defaults(v)
-        schema['properties'][k] = fix_regex(v)
+        schema['properties'][k] = fix_regex(schema['properties'][k])
       end
+    end
+
+    if schema['items']
+      schema['items'] = fix_broken_defaults(schema['items'])
     end
 
     return schema
