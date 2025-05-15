@@ -195,6 +195,8 @@ class ConvertJsonSchema
     if schema['required'] && schema['properties']
       unused = []
       schema['required'].each do |k|
+        next unless schema['properties'][k]['type'] == 'object'
+
         schema['properties'][k] = remove_object_required_optional_children(schema['properties'][k])
         if !schema['properties'][k]['required'] || schema['properties'][k]['required'].size == 0
           unused.push(k)
