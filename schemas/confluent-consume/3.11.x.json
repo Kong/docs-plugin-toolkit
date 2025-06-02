@@ -1,10 +1,15 @@
 {
-  "entity_checks": [
-
-  ],
   "fields": [
     {
       "protocols": {
+        "type": "set",
+        "required": true,
+        "default": [
+          "grpc",
+          "grpcs",
+          "http",
+          "https"
+        ],
         "elements": {
           "type": "string",
           "one_of": [
@@ -14,195 +19,190 @@
             "https"
           ]
         },
-        "description": "A set of strings representing HTTP protocols.",
-        "default": [
-          "grpc",
-          "grpcs",
-          "http",
-          "https"
-        ],
-        "type": "set",
-        "required": true
+        "description": "A set of strings representing HTTP protocols."
       }
     },
     {
       "consumer_group": {
         "reference": "consumer_groups",
-        "description": "Custom type for representing a foreign key with a null value allowed.",
         "type": "foreign",
+        "description": "Custom type for representing a foreign key with a null value allowed.",
         "eq": null
       }
     },
     {
       "config": {
+        "required": true,
         "entity_checks": [
 
         ],
-        "type": "record",
         "fields": [
           {
             "bootstrap_servers": {
               "description": "Set of bootstrap brokers in a `{host: host, port: port}` list format.",
-              "type": "set",
               "elements": {
-                "type": "record",
                 "fields": [
                   {
                     "host": {
+                      "required": true,
                       "description": "A string representing a host name, such as example.com.",
-                      "type": "string",
-                      "required": true
+                      "type": "string"
                     }
                   },
                   {
                     "port": {
+                      "required": true,
+                      "description": "An integer representing a port number between 0 and 65535, inclusive.",
                       "between": [
                         0,
                         65535
                       ],
-                      "type": "integer",
-                      "description": "An integer representing a port number between 0 and 65535, inclusive.",
-                      "required": true
+                      "type": "integer"
                     }
                   }
-                ]
-              }
+                ],
+                "type": "record"
+              },
+              "type": "set"
             }
           },
           {
             "topics": {
               "type": "array",
+              "required": true,
               "len_min": 1,
-              "description": "The Kafka topics and their configuration you want to consume from.",
               "elements": {
-                "type": "record",
                 "fields": [
                   {
                     "name": {
-                      "type": "string",
-                      "required": true
+                      "required": true,
+                      "type": "string"
                     }
                   }
-                ]
+                ],
+                "type": "record"
               },
-              "required": true
+              "description": "The Kafka topics and their configuration you want to consume from."
             }
           },
           {
             "mode": {
               "type": "string",
+              "required": true,
+              "default": "http-get",
               "description": "The mode of operation for the plugin.",
               "one_of": [
                 "server-sent-events",
                 "http-get"
-              ],
-              "default": "http-get",
-              "required": true
+              ]
             }
           },
           {
             "message_deserializer": {
               "type": "string",
+              "required": true,
+              "default": "noop",
               "description": "The deserializer to use for the consumed messages.",
               "one_of": [
                 "json",
                 "noop"
-              ],
-              "default": "noop",
-              "required": true
+              ]
             }
           },
           {
             "auto_offset_reset": {
               "type": "string",
+              "required": true,
+              "default": "latest",
               "description": "The offset to start from when there is no initial offset in the consumer group.",
               "one_of": [
                 "earliest",
                 "latest"
-              ],
-              "default": "latest",
-              "required": true
+              ]
             }
           },
           {
             "commit_strategy": {
               "type": "string",
+              "required": true,
+              "default": "auto",
               "description": "The strategy to use for committing offsets.",
               "one_of": [
                 "auto",
                 "off"
-              ],
-              "default": "auto",
-              "required": true
+              ]
             }
           },
           {
             "timeout": {
               "description": "Socket timeout in milliseconds.",
-              "type": "integer",
-              "default": 10000
+              "default": 10000,
+              "type": "integer"
             }
           },
           {
             "keepalive": {
               "description": "Keepalive timeout in milliseconds.",
-              "type": "integer",
-              "default": 60000
+              "default": 60000,
+              "type": "integer"
             }
           },
           {
             "keepalive_enabled": {
-              "type": "boolean",
-              "default": false
+              "default": false,
+              "type": "boolean"
             }
           },
           {
             "cluster_api_key": {
-              "type": "string",
-              "referenceable": true,
-              "description": "Username/Apikey for SASL authentication.",
               "encrypted": true,
-              "required": true
+              "type": "string",
+              "required": true,
+              "description": "Username/Apikey for SASL authentication.",
+              "referenceable": true
             }
           },
           {
             "cluster_api_secret": {
-              "type": "string",
-              "referenceable": true,
-              "description": "Password/ApiSecret for SASL authentication.",
               "encrypted": true,
-              "required": true
+              "type": "string",
+              "required": true,
+              "description": "Password/ApiSecret for SASL authentication.",
+              "referenceable": true
             }
           },
           {
             "confluent_cloud_api_key": {
-              "type": "string",
-              "referenceable": true,
-              "description": "Apikey for authentication with Confluent Cloud. This allows for management tasks such as creating topics, ACLs, etc.",
               "encrypted": true,
-              "required": false
+              "type": "string",
+              "required": false,
+              "description": "Apikey for authentication with Confluent Cloud. This allows for management tasks such as creating topics, ACLs, etc.",
+              "referenceable": true
             }
           },
           {
             "confluent_cloud_api_secret": {
-              "type": "string",
-              "referenceable": true,
-              "description": "The corresponding secret for the Confluent Cloud API key.",
               "encrypted": true,
-              "required": false
+              "type": "string",
+              "required": false,
+              "description": "The corresponding secret for the Confluent Cloud API key.",
+              "referenceable": true
             }
           },
           {
             "cluster_name": {
+              "required": false,
               "description": "An identifier for the Kafka cluster. By default, this field generates a random string. You can also set your own custom cluster identifier.  If more than one Kafka plugin is configured without a `cluster_name` (that is, if the default autogenerated value is removed), these plugins will use the same producer, and by extension, the same cluster. Logs will be sent to the leader of the cluster.",
-              "type": "string",
               "auto": true,
-              "required": false
+              "type": "string"
             }
           }
         ],
-        "required": true
+        "type": "record"
       }
     }
+  ],
+  "entity_checks": [
+
   ]
 }

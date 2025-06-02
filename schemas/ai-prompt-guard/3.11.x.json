@@ -1,4 +1,113 @@
 {
+  "fields": [
+    {
+      "protocols": {
+        "type": "set",
+        "required": true,
+        "default": [
+          "grpc",
+          "grpcs",
+          "http",
+          "https"
+        ],
+        "elements": {
+          "type": "string",
+          "one_of": [
+            "grpc",
+            "grpcs",
+            "http",
+            "https"
+          ]
+        },
+        "description": "A set of strings representing HTTP protocols."
+      }
+    },
+    {
+      "config": {
+        "required": true,
+        "fields": [
+          {
+            "allow_patterns": {
+              "type": "array",
+              "required": false,
+              "description": "Array of valid regex patterns, or valid questions from the 'user' role in chat.",
+              "len_max": 10,
+              "elements": {
+                "len_min": 1,
+                "len_max": 500,
+                "type": "string"
+              }
+            }
+          },
+          {
+            "deny_patterns": {
+              "type": "array",
+              "required": false,
+              "description": "Array of invalid regex patterns, or invalid questions from the 'user' role in chat.",
+              "len_max": 10,
+              "elements": {
+                "len_min": 1,
+                "len_max": 500,
+                "type": "string"
+              }
+            }
+          },
+          {
+            "allow_all_conversation_history": {
+              "required": true,
+              "description": "If true, will ignore all previous chat prompts from the conversation history.",
+              "default": false,
+              "type": "boolean"
+            }
+          },
+          {
+            "max_request_body_size": {
+              "default": 8192,
+              "description": "max allowed body size allowed to be introspected. 0 means unlimited, but the size of this body will still be limited by Nginx's client_max_body_size.",
+              "gt": 0,
+              "type": "integer"
+            }
+          },
+          {
+            "match_all_roles": {
+              "required": true,
+              "description": "If true, will match all roles in addition to 'user' role in conversation history.",
+              "default": false,
+              "type": "boolean"
+            }
+          },
+          {
+            "llm_format": {
+              "type": "string",
+              "required": false,
+              "default": "openai",
+              "description": "LLM input and output format and schema to use",
+              "one_of": [
+                "openai",
+                "bedrock",
+                "gemini",
+                "cohere",
+                "huggingface"
+              ]
+            }
+          },
+          {
+            "genai_category": {
+              "type": "string",
+              "required": false,
+              "default": "text/generation",
+              "description": "Generative AI category of the request",
+              "one_of": [
+                "text/generation",
+                "text/embeddings"
+              ]
+            }
+          }
+        ],
+        "type": "record"
+      }
+    }
+  ],
   "entity_checks": [
     {
       "at_least_one_of": [
@@ -8,96 +117,14 @@
     },
     {
       "conditional": {
-        "if_match": {
-          "eq": true
-        },
-        "then_field": "config.allow_all_conversation_history",
         "if_field": "config.match_all_roles",
         "then_match": {
           "eq": false
-        }
-      }
-    }
-  ],
-  "fields": [
-    {
-      "protocols": {
-        "required": true,
-        "type": "set",
-        "default": [
-          "grpc",
-          "grpcs",
-          "http",
-          "https"
-        ],
-        "description": "A set of strings representing HTTP protocols.",
-        "elements": {
-          "type": "string",
-          "one_of": [
-            "grpc",
-            "grpcs",
-            "http",
-            "https"
-          ]
-        }
-      }
-    },
-    {
-      "config": {
-        "fields": [
-          {
-            "allow_patterns": {
-              "len_max": 10,
-              "required": false,
-              "type": "array",
-              "elements": {
-                "len_max": 500,
-                "len_min": 1,
-                "type": "string"
-              },
-              "description": "Array of valid regex patterns, or valid questions from the 'user' role in chat."
-            }
-          },
-          {
-            "deny_patterns": {
-              "len_max": 10,
-              "required": false,
-              "type": "array",
-              "elements": {
-                "len_max": 500,
-                "len_min": 1,
-                "type": "string"
-              },
-              "description": "Array of invalid regex patterns, or invalid questions from the 'user' role in chat."
-            }
-          },
-          {
-            "allow_all_conversation_history": {
-              "default": false,
-              "description": "If true, will ignore all previous chat prompts from the conversation history.",
-              "required": true,
-              "type": "boolean"
-            }
-          },
-          {
-            "max_request_body_size": {
-              "default": 8192,
-              "description": "max allowed body size allowed to be introspected",
-              "gt": 0,
-              "type": "integer"
-            }
-          },
-          {
-            "match_all_roles": {
-              "default": false,
-              "description": "If true, will match all roles in addition to 'user' role in conversation history.",
-              "required": true,
-              "type": "boolean"
-            }
-          }
-        ],
-        "required": true,
-        "type": "record"
+        },
+        "if_match": {
+          "eq": true
+        },
+        "then_field": "config.allow_all_conversation_history"
       }
     }
   ]
