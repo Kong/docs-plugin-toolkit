@@ -1,25 +1,15 @@
 {
-  "entity_checks": [
-    {
-      "custom_entity_check": {
-        "field_sources": [
-          "config"
-        ]
-      }
-    }
-  ],
   "fields": [
     {
       "protocols": {
-        "required": true,
         "type": "set",
+        "required": true,
         "default": [
           "grpc",
           "grpcs",
           "http",
           "https"
         ],
-        "description": "A set of strings representing HTTP protocols.",
         "elements": {
           "type": "string",
           "one_of": [
@@ -28,19 +18,21 @@
             "http",
             "https"
           ]
-        }
+        },
+        "description": "A set of strings representing HTTP protocols."
       }
     },
     {
       "consumer_group": {
         "reference": "consumer_groups",
-        "eq": null,
         "type": "foreign",
-        "description": "Custom type for representing a foreign key with a null value allowed."
+        "description": "Custom type for representing a foreign key with a null value allowed.",
+        "eq": null
       }
     },
     {
       "config": {
+        "required": true,
         "entity_checks": [
           {
             "at_least_one_of": [
@@ -52,8 +44,8 @@
         "fields": [
           {
             "body_schema": {
-              "description": "The request body schema specification. One of `body_schema` or `parameter_schema` must be specified.",
               "required": false,
+              "description": "The request body schema specification. One of `body_schema` or `parameter_schema` must be specified.",
               "type": "string"
             }
           },
@@ -72,10 +64,10 @@
           },
           {
             "version": {
-              "required": true,
               "type": "string",
-              "default": "kong",
+              "required": true,
               "description": "Which validator to use. Supported values are `kong` (default) for using Kong's own schema validator, or `draft4` for using a JSON Schema Draft 4-compliant validator.",
+              "default": "kong",
               "one_of": [
                 "kong",
                 "draft4"
@@ -84,6 +76,8 @@
           },
           {
             "parameter_schema": {
+              "required": false,
+              "description": "Array of parameter validator specification. One of `body_schema` or `parameter_schema` must be specified.",
               "elements": {
                 "entity_checks": [
                   {
@@ -105,9 +99,9 @@
                 "fields": [
                   {
                     "in": {
-                      "type": "string",
-                      "description": "The location of the parameter.",
                       "required": true,
+                      "description": "The location of the parameter.",
+                      "type": "string",
                       "one_of": [
                         "query",
                         "header",
@@ -117,15 +111,15 @@
                   },
                   {
                     "name": {
-                      "description": "The name of the parameter. Parameter names are case-sensitive, and correspond to the parameter name used by the `in` property. If `in` is `path`, the `name` field MUST correspond to the named capture group from the configured `route`.",
                       "required": true,
+                      "description": "The name of the parameter. Parameter names are case-sensitive, and correspond to the parameter name used by the `in` property. If `in` is `path`, the `name` field MUST correspond to the named capture group from the configured `route`.",
                       "type": "string"
                     }
                   },
                   {
                     "required": {
-                      "description": "Determines whether this parameter is mandatory.",
                       "required": true,
+                      "description": "Determines whether this parameter is mandatory.",
                       "type": "boolean"
                     }
                   },
@@ -146,8 +140,8 @@
                   },
                   {
                     "explode": {
-                      "type": "boolean",
-                      "description": "Required when `schema` and `style` are set. When `explode` is `true`, parameter values of type `array` or `object` generate separate parameters for each value of the array or key-value pair of the map. For other types of parameters, this property has no effect."
+                      "description": "Required when `schema` and `style` are set. When `explode` is `true`, parameter values of type `array` or `object` generate separate parameters for each value of the array or key-value pair of the map. For other types of parameters, this property has no effect.",
+                      "type": "boolean"
                     }
                   },
                   {
@@ -159,30 +153,36 @@
                 ],
                 "type": "record"
               },
-              "description": "Array of parameter validator specification. One of `body_schema` or `parameter_schema` must be specified.",
-              "required": false,
               "type": "array"
             }
           },
           {
             "verbose_response": {
+              "required": true,
               "default": false,
               "description": "If enabled, the plugin returns more verbose and detailed validation errors.",
-              "required": true,
               "type": "boolean"
             }
           },
           {
             "content_type_parameter_validation": {
+              "required": true,
               "default": true,
               "description": "Determines whether to enable parameters validation of request content-type.",
-              "required": true,
               "type": "boolean"
             }
           }
         ],
-        "required": true,
         "type": "record"
+      }
+    }
+  ],
+  "entity_checks": [
+    {
+      "custom_entity_check": {
+        "field_sources": [
+          "config"
+        ]
       }
     }
   ]

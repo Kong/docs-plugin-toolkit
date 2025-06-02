@@ -1,10 +1,16 @@
 {
-  "entity_checks": [
-
-  ],
   "fields": [
     {
       "protocols": {
+        "required": true,
+        "default": [
+          "grpc",
+          "grpcs",
+          "http",
+          "https",
+          "ws",
+          "wss"
+        ],
         "elements": {
           "type": "string",
           "one_of": [
@@ -16,28 +22,20 @@
             "wss"
           ]
         },
-        "type": "set",
-        "default": [
-          "grpc",
-          "grpcs",
-          "http",
-          "https",
-          "ws",
-          "wss"
-        ],
-        "required": true
+        "type": "set"
       }
     },
     {
       "consumer_group": {
         "reference": "consumer_groups",
-        "description": "Custom type for representing a foreign key with a null value allowed.",
         "type": "foreign",
+        "description": "Custom type for representing a foreign key with a null value allowed.",
         "eq": null
       }
     },
     {
       "config": {
+        "required": true,
         "entity_checks": [
           {
             "custom_entity_check": {
@@ -47,45 +45,43 @@
             }
           }
         ],
-        "type": "record",
         "fields": [
           {
             "bootstrap_servers": {
+              "required": true,
               "description": "Set of bootstrap brokers in a `{host: host, port: port}` list format.",
-              "type": "set",
               "elements": {
-                "type": "record",
                 "fields": [
                   {
                     "host": {
+                      "required": true,
                       "description": "A string representing a host name, such as example.com.",
-                      "type": "string",
-                      "required": true
+                      "type": "string"
                     }
                   },
                   {
                     "port": {
+                      "required": true,
+                      "description": "An integer representing a port number between 0 and 65535, inclusive.",
                       "between": [
                         0,
                         65535
                       ],
-                      "type": "integer",
-                      "description": "An integer representing a port number between 0 and 65535, inclusive.",
-                      "required": true
+                      "type": "integer"
                     }
                   }
-                ]
+                ],
+                "type": "record"
               },
-              "required": true
+              "type": "set"
             }
           },
           {
             "topics": {
               "type": "array",
+              "required": true,
               "len_min": 1,
-              "description": "The Kafka topics and their configuration you want to consume from.",
               "elements": {
-                "type": "record",
                 "fields": [
                   {
                     "name": {
@@ -93,147 +89,152 @@
                       "type": "string"
                     }
                   }
-                ]
+                ],
+                "type": "record"
               },
-              "required": true
+              "description": "The Kafka topics and their configuration you want to consume from."
             }
           },
           {
             "mode": {
               "type": "string",
+              "required": true,
+              "default": "http-get",
               "description": "The mode of operation for the plugin.",
               "one_of": [
                 "server-sent-events",
-                "http-get"
-              ],
-              "default": "http-get",
-              "required": true
+                "http-get",
+                "websocket"
+              ]
             }
           },
           {
             "message_deserializer": {
               "type": "string",
+              "required": true,
+              "default": "noop",
               "description": "The deserializer to use for the consumed messages.",
               "one_of": [
                 "json",
                 "noop"
-              ],
-              "default": "noop",
-              "required": true
+              ]
             }
           },
           {
             "auto_offset_reset": {
               "type": "string",
+              "required": true,
+              "default": "latest",
               "description": "The offset to start from when there is no initial offset in the consumer group.",
               "one_of": [
                 "earliest",
                 "latest"
-              ],
-              "default": "latest",
-              "required": true
+              ]
             }
           },
           {
             "commit_strategy": {
               "type": "string",
+              "required": true,
+              "default": "auto",
               "description": "The strategy to use for committing offsets.",
               "one_of": [
                 "auto",
                 "off"
-              ],
-              "default": "auto",
-              "required": true
+              ]
             }
           },
           {
             "authentication": {
-              "type": "record",
+              "required": true,
               "fields": [
                 {
                   "strategy": {
+                    "required": false,
                     "description": "The authentication strategy for the plugin, the only option for the value is `sasl`.",
                     "type": "string",
                     "one_of": [
                       "sasl"
-                    ],
-                    "required": false
+                    ]
                   }
                 },
                 {
                   "mechanism": {
+                    "required": false,
                     "description": "The SASL authentication mechanism.  Supported options: `PLAIN` or `SCRAM-SHA-256`.",
                     "type": "string",
                     "one_of": [
                       "PLAIN",
                       "SCRAM-SHA-256",
                       "SCRAM-SHA-512"
-                    ],
-                    "required": false
+                    ]
                   }
                 },
                 {
                   "tokenauth": {
+                    "required": false,
                     "description": "Enable this to indicate `DelegationToken` authentication",
-                    "type": "boolean",
-                    "required": false
+                    "type": "boolean"
                   }
                 },
                 {
                   "user": {
-                    "type": "string",
-                    "referenceable": true,
-                    "description": "Username for SASL authentication.",
                     "encrypted": true,
-                    "required": false
+                    "type": "string",
+                    "required": false,
+                    "description": "Username for SASL authentication.",
+                    "referenceable": true
                   }
                 },
                 {
                   "password": {
-                    "type": "string",
-                    "referenceable": true,
-                    "description": "Password for SASL authentication.",
                     "encrypted": true,
-                    "required": false
+                    "type": "string",
+                    "required": false,
+                    "description": "Password for SASL authentication.",
+                    "referenceable": true
                   }
                 }
               ],
-              "required": true
+              "type": "record"
             }
           },
           {
             "security": {
-              "type": "record",
+              "required": true,
               "fields": [
                 {
                   "certificate_id": {
+                    "required": false,
                     "description": "UUID of certificate entity for mTLS authentication.",
                     "type": "string",
-                    "required": false,
                     "uuid": true
                   }
                 },
                 {
                   "ssl": {
+                    "required": false,
                     "description": "Enables TLS.",
-                    "type": "boolean",
-                    "required": false
+                    "type": "boolean"
                   }
                 }
               ],
-              "required": true
+              "type": "record"
             }
           },
           {
             "cluster_name": {
+              "required": false,
               "description": "An identifier for the Kafka cluster.",
-              "type": "string",
-              "required": false
+              "type": "string"
             }
           }
         ],
-        "required": true
+        "type": "record"
       }
     }
+  ],
+  "entity_checks": [
+
   ]
 }

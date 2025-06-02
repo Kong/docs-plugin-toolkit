@@ -1,19 +1,15 @@
 {
-  "entity_checks": [
-
-  ],
   "fields": [
     {
       "protocols": {
-        "required": true,
         "type": "set",
+        "required": true,
         "default": [
           "grpc",
           "grpcs",
           "http",
           "https"
         ],
-        "description": "A set of strings representing HTTP protocols.",
         "elements": {
           "type": "string",
           "one_of": [
@@ -22,19 +18,21 @@
             "http",
             "https"
           ]
-        }
+        },
+        "description": "A set of strings representing HTTP protocols."
       }
     },
     {
       "consumer_group": {
         "reference": "consumer_groups",
-        "eq": null,
         "type": "foreign",
-        "description": "Custom type for representing a foreign key with a null value allowed."
+        "description": "Custom type for representing a foreign key with a null value allowed.",
+        "eq": null
       }
     },
     {
       "config": {
+        "required": true,
         "entity_checks": [
           {
             "custom_entity_check": {
@@ -50,37 +48,61 @@
         "fields": [
           {
             "bootstrap_servers": {
+              "description": "Set of bootstrap brokers in a `{host: host, port: port}` list format.",
               "elements": {
-                "type": "record",
                 "fields": [
                   {
                     "host": {
-                      "description": "A string representing a host name, such as example.com.",
                       "required": true,
+                      "description": "A string representing a host name, such as example.com.",
                       "type": "string"
                     }
                   },
                   {
                     "port": {
+                      "required": true,
+                      "description": "An integer representing a port number between 0 and 65535, inclusive.",
                       "between": [
                         0,
                         65535
                       ],
-                      "description": "An integer representing a port number between 0 and 65535, inclusive.",
-                      "required": true,
                       "type": "integer"
                     }
                   }
-                ]
+                ],
+                "type": "record"
               },
-              "description": "Set of bootstrap brokers in a `{host: host, port: port}` list format.",
               "type": "set"
             }
           },
           {
+            "topics_query_arg": {
+              "required": false,
+              "description": "The request query parameter name that contains the topics to publish to",
+              "type": "string"
+            }
+          },
+          {
+            "allowed_topics": {
+              "required": false,
+              "description": "The list of allowed topic names to which messages can be sent. The default topic configured in the `topic` field is always allowed, regardless of its inclusion in `allowed_topics`.",
+              "elements": {
+                "type": "string"
+              },
+              "type": "array"
+            }
+          },
+          {
             "topic": {
-              "description": "The Kafka topic to publish to.",
               "required": true,
+              "description": "The default Kafka topic to publish to if the query parameter defined in the `topics_query_arg` does not exist in the request",
+              "type": "string"
+            }
+          },
+          {
+            "key_query_arg": {
+              "required": false,
+              "description": "The request query parameter name that contains the Kafka message key. If specified, messages with the same key will be sent to the same Kafka partition, ensuring consistent ordering.",
               "type": "string"
             }
           },
@@ -107,37 +129,37 @@
           {
             "cluster_api_key": {
               "encrypted": true,
-              "referenceable": true,
               "type": "string",
+              "required": true,
               "description": "Username/Apikey for SASL authentication.",
-              "required": true
+              "referenceable": true
             }
           },
           {
             "cluster_api_secret": {
               "encrypted": true,
-              "referenceable": true,
               "type": "string",
+              "required": true,
               "description": "Password/ApiSecret for SASL authentication.",
-              "required": true
+              "referenceable": true
             }
           },
           {
             "confluent_cloud_api_key": {
               "encrypted": true,
-              "referenceable": true,
               "type": "string",
+              "required": false,
               "description": "Apikey for authentication with Confluent Cloud. This allows for management tasks such as creating topics, ACLs, etc.",
-              "required": false
+              "referenceable": true
             }
           },
           {
             "confluent_cloud_api_secret": {
               "encrypted": true,
-              "referenceable": true,
               "type": "string",
+              "required": false,
               "description": "The corresponding secret for the Confluent Cloud API key.",
-              "required": false
+              "referenceable": true
             }
           },
           {
@@ -169,18 +191,28 @@
             }
           },
           {
-            "cluster_name": {
-              "auto": true,
-              "description": "An identifier for the Kafka cluster. By default, this field generates a random string. You can also set your own custom cluster identifier.  If more than one Kafka plugin is configured without a `cluster_name` (that is, if the default autogenerated value is removed), these plugins will use the same producer, and by extension, the same cluster. Logs will be sent to the leader of the cluster.",
+            "message_by_lua_functions": {
               "required": false,
+              "description": "The Lua functions that manipulates the message being sent to the Kafka topic.",
+              "elements": {
+                "type": "string"
+              },
+              "type": "array"
+            }
+          },
+          {
+            "cluster_name": {
+              "required": false,
+              "description": "An identifier for the Kafka cluster. By default, this field generates a random string. You can also set your own custom cluster identifier.  If more than one Kafka plugin is configured without a `cluster_name` (that is, if the default autogenerated value is removed), these plugins will use the same producer, and by extension, the same cluster. Logs will be sent to the leader of the cluster.",
+              "auto": true,
               "type": "string"
             }
           },
           {
             "producer_request_acks": {
-              "default": 1,
-              "description": "The number of acknowledgments the producer requires the leader to have received before considering a request complete. Allowed values: 0 for no acknowledgments; 1 for only the leader; and -1 for the full ISR (In-Sync Replica set).",
               "type": "integer",
+              "description": "The number of acknowledgments the producer requires the leader to have received before considering a request complete. Allowed values: 0 for no acknowledgments; 1 for only the leader; and -1 for the full ISR (In-Sync Replica set).",
+              "default": 1,
               "one_of": [
                 -1,
                 0,
@@ -245,9 +277,11 @@
             }
           }
         ],
-        "required": true,
         "type": "record"
       }
     }
+  ],
+  "entity_checks": [
+
   ]
 }

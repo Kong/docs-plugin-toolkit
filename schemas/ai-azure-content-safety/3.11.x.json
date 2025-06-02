@@ -1,19 +1,15 @@
 {
-  "entity_checks": [
-
-  ],
   "fields": [
     {
       "protocols": {
-        "required": true,
         "type": "set",
+        "required": true,
         "default": [
           "grpc",
           "grpcs",
           "http",
           "https"
         ],
-        "description": "A set of strings representing HTTP protocols.",
         "elements": {
           "type": "string",
           "one_of": [
@@ -22,87 +18,89 @@
             "http",
             "https"
           ]
-        }
+        },
+        "description": "A set of strings representing HTTP protocols."
       }
     },
     {
       "consumer": {
         "reference": "consumers",
-        "eq": null,
         "type": "foreign",
-        "description": "Custom type for representing a foreign key with a null value allowed."
+        "description": "Custom type for representing a foreign key with a null value allowed.",
+        "eq": null
       }
     },
     {
       "consumer_group": {
         "reference": "consumer_groups",
-        "eq": null,
         "type": "foreign",
-        "description": "Custom type for representing a foreign key with a null value allowed."
+        "description": "Custom type for representing a foreign key with a null value allowed.",
+        "eq": null
       }
     },
     {
       "config": {
+        "required": true,
         "fields": [
           {
             "content_safety_url": {
-              "referenceable": true,
-              "description": "Full URL, inc protocol, of the Azure Content Safety instance.",
               "required": true,
+              "description": "Full URL, inc protocol, of the Azure Content Safety instance.",
+              "referenceable": true,
               "type": "string"
             }
           },
           {
             "azure_api_version": {
-              "required": true,
               "type": "string",
+              "required": true,
               "default": "2023-10-01",
-              "description": "Sets the ?api-version URL parameter, used for defining the Azure Content Services interchange format.",
-              "len_min": 1
+              "len_min": 1,
+              "description": "Sets the ?api-version URL parameter, used for defining the Azure Content Services interchange format."
             }
           },
           {
             "azure_use_managed_identity": {
-              "default": false,
               "description": "If checked, uses (if set) `azure_client_id`, `azure_client_secret`, and/or `azure_tenant_id` for Azure authentication, via Managed or User-assigned identity",
+              "default": false,
               "type": "boolean"
             }
           },
           {
             "azure_client_id": {
-              "description": "If `azure_use_managed_identity` is true, set the client ID if required.",
               "required": false,
+              "description": "If `azure_use_managed_identity` is true, set the client ID if required.",
               "type": "string"
             }
           },
           {
             "azure_client_secret": {
-              "description": "If `azure_use_managed_identity` is true, set the client secret if required.",
               "required": false,
+              "description": "If `azure_use_managed_identity` is true, set the client secret if required.",
               "type": "string"
             }
           },
           {
             "azure_tenant_id": {
-              "description": "If `azure_use_managed_identity` is true, set the tenant ID if required.",
               "required": false,
+              "description": "If `azure_use_managed_identity` is true, set the tenant ID if required.",
               "type": "string"
             }
           },
           {
             "content_safety_key": {
               "encrypted": true,
-              "required": false,
               "type": "string",
+              "required": false,
               "description": "If `azure_use_managed_identity` is true, set the API key to call Content Safety.",
               "referenceable": true
             }
           },
           {
             "text_source": {
+              "type": "string",
               "default": "concatenate_all_content",
               "description": "Select where to pick the 'text' for the Azure Content Services request.",
-              "type": "string",
               "one_of": [
                 "concatenate_all_content",
                 "concatenate_user_content"
@@ -111,8 +109,8 @@
           },
           {
             "categories": {
+              "description": "Array of categories, and their thresholds, to measure on.",
               "elements": {
-                "type": "record",
                 "required": true,
                 "fields": [
                   {
@@ -127,24 +125,24 @@
                       "type": "integer"
                     }
                   }
-                ]
+                ],
+                "type": "record"
               },
-              "description": "Array of categories, and their thresholds, to measure on.",
               "type": "array"
             }
           },
           {
             "reveal_failure_reason": {
-              "default": true,
               "description": "Set true to tell the caller why their request was rejected, if so.",
+              "default": true,
               "type": "boolean"
             }
           },
           {
             "output_type": {
+              "type": "string",
               "default": "FourSeverityLevels",
               "description": "See https://learn.microsoft.com/en-us/azure/ai-services/openai/concepts/content-filter#content-filtering-categories",
-              "type": "string",
               "one_of": [
                 "FourSeverityLevels",
                 "EightSeverityLevels"
@@ -153,24 +151,26 @@
           },
           {
             "blocklist_names": {
+              "description": "Use these configured blocklists (in Azure Content Services) when inspecting content.",
               "elements": {
                 "type": "string"
               },
-              "description": "Use these configured blocklists (in Azure Content Services) when inspecting content.",
               "type": "array"
             }
           },
           {
             "halt_on_blocklist_hit": {
-              "default": true,
               "description": "Tells Azure to reject the request if any blocklist filter is hit.",
+              "default": true,
               "type": "boolean"
             }
           }
         ],
-        "required": true,
         "type": "record"
       }
     }
+  ],
+  "entity_checks": [
+
   ]
 }
