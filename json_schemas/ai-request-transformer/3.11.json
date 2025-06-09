@@ -42,11 +42,11 @@
                   "type": "boolean"
                 },
                 "aws_access_key_id": {
-                  "description": "Set this if you are using an AWS provider (Bedrock) and you are authenticating using static IAM User credentials. Setting this will override the AWS_ACCESS_KEY_ID environment variable for this plugin instance.\nThis field is [encrypted](/gateway/keyring/).\nThis field is [referenceable](/gateway/entities/vault/#how-do-i-reference-secrets-stored-in-a-vault).",
+                  "description": "Set this if you are using an AWS provider (Bedrock) and you are authenticating using static IAM User credentials. Setting this will override the AWS_ACCESS_KEY_ID environment variable for this plugin instance.\nThis field is [referenceable](/gateway/entities/vault/#how-do-i-reference-secrets-stored-in-a-vault).\nThis field is [encrypted](/gateway/keyring/).",
                   "type": "string"
                 },
                 "aws_secret_access_key": {
-                  "description": "Set this if you are using an AWS provider (Bedrock) and you are authenticating using static IAM User credentials. Setting this will override the AWS_SECRET_ACCESS_KEY environment variable for this plugin instance.\nThis field is [encrypted](/gateway/keyring/).\nThis field is [referenceable](/gateway/entities/vault/#how-do-i-reference-secrets-stored-in-a-vault).",
+                  "description": "Set this if you are using an AWS provider (Bedrock) and you are authenticating using static IAM User credentials. Setting this will override the AWS_SECRET_ACCESS_KEY environment variable for this plugin instance.\nThis field is [referenceable](/gateway/entities/vault/#how-do-i-reference-secrets-stored-in-a-vault).\nThis field is [encrypted](/gateway/keyring/).",
                   "type": "string"
                 },
                 "azure_client_id": {
@@ -54,7 +54,7 @@
                   "type": "string"
                 },
                 "azure_client_secret": {
-                  "description": "If azure_use_managed_identity is set to true, and you need to use a different user-assigned identity for this LLM instance, set the client secret.\nThis field is [encrypted](/gateway/keyring/).\nThis field is [referenceable](/gateway/entities/vault/#how-do-i-reference-secrets-stored-in-a-vault).",
+                  "description": "If azure_use_managed_identity is set to true, and you need to use a different user-assigned identity for this LLM instance, set the client secret.\nThis field is [referenceable](/gateway/entities/vault/#how-do-i-reference-secrets-stored-in-a-vault).\nThis field is [encrypted](/gateway/keyring/).",
                   "type": "string"
                 },
                 "azure_tenant_id": {
@@ -67,7 +67,7 @@
                   "type": "boolean"
                 },
                 "gcp_service_account_json": {
-                  "description": "Set this field to the full JSON of the GCP service account to authenticate, if required. If null (and gcp_use_service_account is true), Kong will attempt to read from environment variable `GCP_SERVICE_ACCOUNT`.\nThis field is [encrypted](/gateway/keyring/).\nThis field is [referenceable](/gateway/entities/vault/#how-do-i-reference-secrets-stored-in-a-vault).",
+                  "description": "Set this field to the full JSON of the GCP service account to authenticate, if required. If null (and gcp_use_service_account is true), Kong will attempt to read from environment variable `GCP_SERVICE_ACCOUNT`.\nThis field is [referenceable](/gateway/entities/vault/#how-do-i-reference-secrets-stored-in-a-vault).\nThis field is [encrypted](/gateway/keyring/).",
                   "type": "string"
                 },
                 "gcp_use_service_account": {
@@ -80,7 +80,7 @@
                   "type": "string"
                 },
                 "header_value": {
-                  "description": "Specify the full auth header value for 'header_name', for example 'Bearer key' or just 'key'.\nThis field is [encrypted](/gateway/keyring/).\nThis field is [referenceable](/gateway/entities/vault/#how-do-i-reference-secrets-stored-in-a-vault).",
+                  "description": "Specify the full auth header value for 'header_name', for example 'Bearer key' or just 'key'.\nThis field is [referenceable](/gateway/entities/vault/#how-do-i-reference-secrets-stored-in-a-vault).\nThis field is [encrypted](/gateway/keyring/).",
                   "type": "string"
                 },
                 "param_location": {
@@ -96,7 +96,7 @@
                   "type": "string"
                 },
                 "param_value": {
-                  "description": "Specify the full parameter value for 'param_name'.\nThis field is [encrypted](/gateway/keyring/).\nThis field is [referenceable](/gateway/entities/vault/#how-do-i-reference-secrets-stored-in-a-vault).",
+                  "description": "Specify the full parameter value for 'param_name'.\nThis field is [referenceable](/gateway/entities/vault/#how-do-i-reference-secrets-stored-in-a-vault).\nThis field is [encrypted](/gateway/keyring/).",
                   "type": "string"
                 }
               },
@@ -151,8 +151,29 @@
                     },
                     "bedrock": {
                       "properties": {
+                        "aws_assume_role_arn": {
+                          "description": "If using AWS providers (Bedrock) you can assume a different role after authentication with the current IAM context is successful.",
+                          "type": "string"
+                        },
                         "aws_region": {
                           "description": "If using AWS providers (Bedrock) you can override the `AWS_REGION` environment variable by setting this option.",
+                          "type": "string"
+                        },
+                        "aws_role_session_name": {
+                          "description": "If using AWS providers (Bedrock), set the identifier of the assumed role session.",
+                          "type": "string"
+                        },
+                        "aws_sts_endpoint_url": {
+                          "description": "If using AWS providers (Bedrock), override the STS endpoint URL when assuming a different role.",
+                          "type": "string"
+                        },
+                        "embeddings_normalize": {
+                          "default": false,
+                          "description": "If using AWS providers (Bedrock), set to true to normalize the embeddings.",
+                          "type": "boolean"
+                        },
+                        "performance_config_latency": {
+                          "description": "Force the client's performance configuration 'latency' for all requests. Leave empty to let the consumer select the performance configuration.",
                           "type": "string"
                         }
                       },
@@ -160,6 +181,35 @@
 
                       ],
                       "type": "object"
+                    },
+                    "cohere": {
+                      "properties": {
+                        "embedding_input_type": {
+                          "default": "classification",
+                          "description": "The purpose of the input text to calculate embedding vectors.",
+                          "enum": [
+                            "classification",
+                            "clustering",
+                            "image",
+                            "search_document",
+                            "search_query"
+                          ],
+                          "type": "string"
+                        },
+                        "wait_for_model": {
+                          "description": "Wait for the model if it is not ready",
+                          "type": "boolean"
+                        }
+                      },
+                      "required": [
+
+                      ],
+                      "type": "object"
+                    },
+                    "embeddings_dimensions": {
+                      "description": "If using embeddings models, set the number of dimensions to generate.",
+                      "minimum": 0,
+                      "type": "integer"
                     },
                     "gemini": {
                       "properties": {
@@ -212,7 +262,6 @@
                       "type": "string"
                     },
                     "max_tokens": {
-                      "default": 256,
                       "description": "Defines the max_tokens, if using chat or completion models.",
                       "type": "integer"
                     },
@@ -278,28 +327,40 @@
                 }
               },
               "required": [
-
+                "provider"
               ],
               "type": "object"
             },
             "route_type": {
-              "description": "The model's operation implementation, for this provider. Set to `preserve` to pass through without transformation.",
+              "description": "The model's operation implementation, for this provider. ",
               "enum": [
+                "audio/v1/audio/speech",
+                "audio/v1/audio/transcriptions",
+                "audio/v1/audio/translations",
+                "image/v1/images/edits",
+                "image/v1/images/generations",
+                "llm/v1/assistants",
+                "llm/v1/batches",
                 "llm/v1/chat",
                 "llm/v1/completions",
-                "preserve"
+                "llm/v1/embeddings",
+                "llm/v1/files",
+                "llm/v1/responses",
+                "preserve",
+                "realtime/v1/realtime"
               ],
               "type": "string"
             }
           },
           "required": [
-
+            "model",
+            "route_type"
           ],
           "type": "object"
         },
         "max_request_body_size": {
           "default": 8192,
-          "description": "max allowed body size allowed to be introspected",
+          "description": "max allowed body size allowed to be introspected. 0 means unlimited, but the size of this body will still be limited by Nginx's client_max_body_size.",
           "minimum": 0,
           "type": "integer"
         },
@@ -313,7 +374,8 @@
         }
       },
       "required": [
-
+        "llm",
+        "prompt"
       ],
       "type": "object"
     },
@@ -380,6 +442,6 @@
     }
   },
   "required": [
-
+    "config"
   ]
 }

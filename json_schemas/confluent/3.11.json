@@ -2,6 +2,16 @@
   "properties": {
     "config": {
       "properties": {
+        "allowed_topics": {
+          "description": "The list of allowed topic names to which messages can be sent. The default topic configured in the `topic` field is always allowed, regardless of its inclusion in `allowed_topics`.",
+          "items": {
+            "required": [
+
+            ],
+            "type": "string"
+          },
+          "type": "array"
+        },
         "bootstrap_servers": {
           "description": "Set of bootstrap brokers in a `{host: host, port: port}` list format.",
           "items": {
@@ -26,11 +36,11 @@
           "type": "array"
         },
         "cluster_api_key": {
-          "description": "Username/Apikey for SASL authentication.\nThis field is [encrypted](/gateway/keyring/).\nThis field is [referenceable](/gateway/entities/vault/#how-do-i-reference-secrets-stored-in-a-vault).",
+          "description": "Username/Apikey for SASL authentication.\nThis field is [referenceable](/gateway/entities/vault/#how-do-i-reference-secrets-stored-in-a-vault).\nThis field is [encrypted](/gateway/keyring/).",
           "type": "string"
         },
         "cluster_api_secret": {
-          "description": "Password/ApiSecret for SASL authentication.\nThis field is [encrypted](/gateway/keyring/).\nThis field is [referenceable](/gateway/entities/vault/#how-do-i-reference-secrets-stored-in-a-vault).",
+          "description": "Password/ApiSecret for SASL authentication.\nThis field is [referenceable](/gateway/entities/vault/#how-do-i-reference-secrets-stored-in-a-vault).\nThis field is [encrypted](/gateway/keyring/).",
           "type": "string"
         },
         "cluster_name": {
@@ -38,11 +48,11 @@
           "type": "string"
         },
         "confluent_cloud_api_key": {
-          "description": "Apikey for authentication with Confluent Cloud. This allows for management tasks such as creating topics, ACLs, etc.\nThis field is [encrypted](/gateway/keyring/).\nThis field is [referenceable](/gateway/entities/vault/#how-do-i-reference-secrets-stored-in-a-vault).",
+          "description": "Apikey for authentication with Confluent Cloud. This allows for management tasks such as creating topics, ACLs, etc.\nThis field is [referenceable](/gateway/entities/vault/#how-do-i-reference-secrets-stored-in-a-vault).\nThis field is [encrypted](/gateway/keyring/).",
           "type": "string"
         },
         "confluent_cloud_api_secret": {
-          "description": "The corresponding secret for the Confluent Cloud API key.\nThis field is [encrypted](/gateway/keyring/).\nThis field is [referenceable](/gateway/entities/vault/#how-do-i-reference-secrets-stored-in-a-vault).",
+          "description": "The corresponding secret for the Confluent Cloud API key.\nThis field is [referenceable](/gateway/entities/vault/#how-do-i-reference-secrets-stored-in-a-vault).\nThis field is [encrypted](/gateway/keyring/).",
           "type": "string"
         },
         "forward_body": {
@@ -73,6 +83,20 @@
         "keepalive_enabled": {
           "default": false,
           "type": "boolean"
+        },
+        "key_query_arg": {
+          "description": "The request query parameter name that contains the Kafka message key. If specified, messages with the same key will be sent to the same Kafka partition, ensuring consistent ordering.",
+          "type": "string"
+        },
+        "message_by_lua_functions": {
+          "description": "The Lua functions that manipulates the message being sent to the Kafka topic.",
+          "items": {
+            "required": [
+
+            ],
+            "type": "string"
+          },
+          "type": "array"
         },
         "producer_async": {
           "default": true,
@@ -124,18 +148,134 @@
           "description": "Time to wait for a Produce response in milliseconds.",
           "type": "integer"
         },
+        "schema_registry": {
+          "description": "The plugin-global schema registry configuration. This can be overwritten by the topic configuration.",
+          "properties": {
+            "confluent": {
+              "properties": {
+                "authentication": {
+                  "properties": {
+                    "basic": {
+                      "properties": {
+                        "password": {
+                          "description": "This field is [referenceable](/gateway/entities/vault/#how-do-i-reference-secrets-stored-in-a-vault).\nThis field is [encrypted](/gateway/keyring/).",
+                          "type": "string"
+                        },
+                        "username": {
+                          "description": "This field is [referenceable](/gateway/entities/vault/#how-do-i-reference-secrets-stored-in-a-vault).\nThis field is [encrypted](/gateway/keyring/).",
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "password",
+                        "username"
+                      ],
+                      "type": "object"
+                    },
+                    "mode": {
+                      "default": "none",
+                      "description": "Authentication mode to use with the schema registry.",
+                      "enum": [
+                        "basic",
+                        "none"
+                      ],
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+
+                  ],
+                  "type": "object"
+                },
+                "key_schema": {
+                  "properties": {
+                    "schema_version": {
+                      "description": "The schema version to use for serialization/deserialization. Use 'latest' to always fetch the most recent version.",
+                      "match_any": {
+                        "patterns": [
+                          "^[0-9]+$",
+                          "^latest$"
+                        ]
+                      },
+                      "type": "string"
+                    },
+                    "subject_name": {
+                      "description": "The name of the subject",
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+
+                  ],
+                  "type": "object"
+                },
+                "ssl_verify": {
+                  "default": true,
+                  "description": "Set to false to disable SSL certificate verification when connecting to the schema registry.",
+                  "type": "boolean"
+                },
+                "ttl": {
+                  "description": "The TTL in seconds for the schema registry cache.",
+                  "maximum": 3600,
+                  "minimum": 0,
+                  "type": "number"
+                },
+                "url": {
+                  "description": "The URL of the schema registry.",
+                  "type": "string"
+                },
+                "value_schema": {
+                  "properties": {
+                    "schema_version": {
+                      "description": "The schema version to use for serialization/deserialization. Use 'latest' to always fetch the most recent version.",
+                      "match_any": {
+                        "patterns": [
+                          "^[0-9]+$",
+                          "^latest$"
+                        ]
+                      },
+                      "type": "string"
+                    },
+                    "subject_name": {
+                      "description": "The name of the subject",
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+
+                  ],
+                  "type": "object"
+                }
+              },
+              "required": [
+                "authentication"
+              ],
+              "type": "object"
+            }
+          },
+          "required": [
+
+          ],
+          "type": "object"
+        },
         "timeout": {
           "default": 10000,
           "description": "Socket timeout in milliseconds.",
           "type": "integer"
         },
         "topic": {
-          "description": "The Kafka topic to publish to.",
+          "description": "The default Kafka topic to publish to if the query parameter defined in the `topics_query_arg` does not exist in the request",
+          "type": "string"
+        },
+        "topics_query_arg": {
+          "description": "The request query parameter name that contains the topics to publish to",
           "type": "string"
         }
       },
       "required": [
-
+        "cluster_api_key",
+        "cluster_api_secret",
+        "topic"
       ],
       "type": "object"
     },
@@ -202,6 +342,6 @@
     }
   },
   "required": [
-
+    "config"
   ]
 }
