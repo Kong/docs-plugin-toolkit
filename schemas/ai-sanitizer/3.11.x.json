@@ -1,15 +1,17 @@
 {
+  "entity_checks": [
+    {
+      "custom_entity_check": {
+        "field_sources": [
+          "config"
+        ]
+      }
+    }
+  ],
   "fields": [
     {
       "protocols": {
         "type": "set",
-        "required": true,
-        "default": [
-          "grpc",
-          "grpcs",
-          "http",
-          "https"
-        ],
         "elements": {
           "type": "string",
           "one_of": [
@@ -19,63 +21,69 @@
             "https"
           ]
         },
-        "description": "A set of strings representing HTTP protocols."
+        "required": true,
+        "description": "A set of strings representing HTTP protocols.",
+        "default": [
+          "grpc",
+          "grpcs",
+          "http",
+          "https"
+        ]
       }
     },
     {
       "config": {
         "required": true,
+        "type": "record",
         "fields": [
           {
             "host": {
               "required": true,
-              "default": "localhost",
               "description": "The host of the sanitizer",
+              "default": "localhost",
               "type": "string"
             }
           },
           {
             "port": {
               "required": true,
-              "default": 8080,
               "description": "The port of the sanitizer",
+              "default": 8080,
               "type": "number"
             }
           },
           {
             "scheme": {
               "required": true,
-              "default": "http",
               "description": "The protocol can be http and https",
+              "default": "http",
               "type": "string"
             }
           },
           {
             "timeout": {
-              "default": 10000,
               "description": "Connection timeout with the sanitizer",
+              "default": 10000,
               "type": "number"
             }
           },
           {
             "keepalive_timeout": {
-              "default": 60000,
               "description": "The keepalive timeout for the established http connnection",
+              "default": 60000,
               "type": "number"
             }
           },
           {
             "stop_on_error": {
-              "default": true,
               "description": "Stop processing if an error occurs",
+              "default": true,
               "type": "boolean"
             }
           },
           {
             "anonymize": {
               "type": "array",
-              "required": true,
-              "description": "List of types to be anonymized",
               "elements": {
                 "type": "string",
                 "one_of": [
@@ -101,6 +109,8 @@
                   "all_and_credentials"
                 ]
               },
+              "required": true,
+              "description": "List of types to be anonymized",
               "default": [
                 "all_and_credentials"
               ]
@@ -108,16 +118,16 @@
           },
           {
             "recover_redacted": {
-              "default": true,
               "description": "Whether to recover redacted data",
+              "default": true,
               "type": "boolean"
             }
           },
           {
             "redact_type": {
-              "type": "string",
-              "description": "What value to be used to redacted to",
               "default": "placeholder",
+              "description": "What value to be used to redacted to",
+              "type": "string",
               "one_of": [
                 "placeholder",
                 "synthetic"
@@ -126,50 +136,40 @@
           },
           {
             "custom_patterns": {
+              "len_min": 1,
               "type": "array",
-              "required": false,
-              "description": "List of custom patterns to be used for anonymization",
               "elements": {
+                "type": "record",
                 "fields": [
                   {
                     "name": {
-                      "required": true,
-                      "type": "string"
+                      "type": "string",
+                      "required": true
                     }
                   },
                   {
                     "regex": {
-                      "required": true,
-                      "type": "string"
+                      "type": "string",
+                      "required": true
                     }
                   },
                   {
                     "score": {
                       "required": true,
-                      "default": 0.5,
                       "between": [
                         0,
                         1
                       ],
+                      "default": 0.5,
                       "type": "number"
                     }
                   }
-                ],
-                "type": "record"
+                ]
               },
-              "len_min": 1
+              "required": false,
+              "description": "List of custom patterns to be used for anonymization"
             }
           }
-        ],
-        "type": "record"
-      }
-    }
-  ],
-  "entity_checks": [
-    {
-      "custom_entity_check": {
-        "field_sources": [
-          "config"
         ]
       }
     }

@@ -1,8 +1,18 @@
 {
+  "entity_checks": [
+    {
+      "custom_entity_check": {
+        "field_sources": [
+          "config"
+        ]
+      }
+    }
+  ],
   "fields": [
     {
       "protocols": {
         "required": true,
+        "type": "set",
         "default": [
           "grpc",
           "grpcs",
@@ -21,14 +31,13 @@
             "ws",
             "wss"
           ]
-        },
-        "type": "set"
+        }
       }
     },
     {
       "consumer_group": {
-        "reference": "consumer_groups",
         "type": "foreign",
+        "reference": "consumer_groups",
         "description": "Custom type for representing a foreign key with a null value allowed.",
         "eq": null
       }
@@ -36,6 +45,7 @@
     {
       "config": {
         "required": true,
+        "type": "record",
         "entity_checks": [
           {
             "custom_entity_check": {
@@ -49,7 +59,9 @@
           {
             "bootstrap_servers": {
               "description": "Set of bootstrap brokers in a `{host: host, port: port}` list format.",
+              "type": "set",
               "elements": {
+                "type": "record",
                 "fields": [
                   {
                     "host": {
@@ -62,17 +74,15 @@
                     "port": {
                       "required": true,
                       "description": "An integer representing a port number between 0 and 65535, inclusive.",
+                      "type": "integer",
                       "between": [
                         0,
                         65535
-                      ],
-                      "type": "integer"
+                      ]
                     }
                   }
-                ],
-                "type": "record"
-              },
-              "type": "set"
+                ]
+              }
             }
           },
           {
@@ -98,19 +108,20 @@
           },
           {
             "keepalive": {
-              "default": 60000,
-              "type": "integer"
+              "type": "integer",
+              "default": 60000
             }
           },
           {
             "keepalive_enabled": {
-              "default": false,
-              "type": "boolean"
+              "type": "boolean",
+              "default": false
             }
           },
           {
             "authentication": {
               "required": true,
+              "type": "record",
               "fields": [
                 {
                   "strategy": {
@@ -143,36 +154,189 @@
                 },
                 {
                   "user": {
-                    "encrypted": true,
                     "type": "string",
+                    "referenceable": true,
                     "required": false,
                     "description": "Username for SASL authentication.",
-                    "referenceable": true
+                    "encrypted": true
                   }
                 },
                 {
                   "password": {
-                    "encrypted": true,
                     "type": "string",
+                    "referenceable": true,
                     "required": false,
                     "description": "Password for SASL authentication.",
-                    "referenceable": true
+                    "encrypted": true
                   }
                 }
-              ],
-              "type": "record"
+              ]
+            }
+          },
+          {
+            "schema_registry": {
+              "required": true,
+              "description": "The plugin-global schema registry configuration. This can be overwritten by the topic configuration.",
+              "type": "record",
+              "fields": [
+                {
+                  "confluent": {
+                    "required": false,
+                    "type": "record",
+                    "fields": [
+                      {
+                        "url": {
+                          "required": false,
+                          "description": "The URL of the schema registry.",
+                          "type": "string"
+                        }
+                      },
+                      {
+                        "ttl": {
+                          "description": "The TTL in seconds for the schema registry cache.",
+                          "type": "number",
+                          "between": [
+                            0,
+                            3600
+                          ]
+                        }
+                      },
+                      {
+                        "ssl_verify": {
+                          "description": "Set to false to disable SSL certificate verification when connecting to the schema registry.",
+                          "default": true,
+                          "type": "boolean"
+                        }
+                      },
+                      {
+                        "authentication": {
+                          "required": true,
+                          "type": "record",
+                          "entity_checks": [
+                            {
+                              "custom_entity_check": {
+                                "field_sources": [
+                                  "mode",
+                                  "basic"
+                                ]
+                              }
+                            }
+                          ],
+                          "fields": [
+                            {
+                              "mode": {
+                                "type": "string",
+                                "required": true,
+                                "description": "Authentication mode to use with the schema registry.",
+                                "default": "none",
+                                "one_of": [
+                                  "none",
+                                  "basic"
+                                ]
+                              }
+                            },
+                            {
+                              "basic": {
+                                "required": false,
+                                "type": "record",
+                                "fields": [
+                                  {
+                                    "username": {
+                                      "required": true,
+                                      "referenceable": true,
+                                      "type": "string",
+                                      "encrypted": true
+                                    }
+                                  },
+                                  {
+                                    "password": {
+                                      "required": true,
+                                      "referenceable": true,
+                                      "type": "string",
+                                      "encrypted": true
+                                    }
+                                  }
+                                ]
+                              }
+                            }
+                          ]
+                        }
+                      },
+                      {
+                        "value_schema": {
+                          "required": false,
+                          "type": "record",
+                          "fields": [
+                            {
+                              "subject_name": {
+                                "required": false,
+                                "description": "The name of the subject",
+                                "type": "string"
+                              }
+                            },
+                            {
+                              "schema_version": {
+                                "required": false,
+                                "description": "The schema version to use for serialization/deserialization. Use 'latest' to always fetch the most recent version.",
+                                "type": "string",
+                                "match_any": {
+                                  "err": "must be either 'latest' or a positive integer",
+                                  "patterns": [
+                                    "^latest$",
+                                    "^[0-9]+$"
+                                  ]
+                                }
+                              }
+                            }
+                          ]
+                        }
+                      },
+                      {
+                        "key_schema": {
+                          "required": false,
+                          "type": "record",
+                          "fields": [
+                            {
+                              "subject_name": {
+                                "required": false,
+                                "description": "The name of the subject",
+                                "type": "string"
+                              }
+                            },
+                            {
+                              "schema_version": {
+                                "required": false,
+                                "description": "The schema version to use for serialization/deserialization. Use 'latest' to always fetch the most recent version.",
+                                "type": "string",
+                                "match_any": {
+                                  "err": "must be either 'latest' or a positive integer",
+                                  "patterns": [
+                                    "^latest$",
+                                    "^[0-9]+$"
+                                  ]
+                                }
+                              }
+                            }
+                          ]
+                        }
+                      }
+                    ]
+                  }
+                }
+              ]
             }
           },
           {
             "security": {
               "required": true,
+              "type": "record",
               "fields": [
                 {
                   "certificate_id": {
                     "required": false,
                     "description": "UUID of certificate entity for mTLS authentication.",
-                    "uuid": true,
-                    "type": "string"
+                    "type": "string",
+                    "uuid": true
                   }
                 },
                 {
@@ -182,23 +346,22 @@
                     "type": "boolean"
                   }
                 }
-              ],
-              "type": "record"
+              ]
             }
           },
           {
             "cluster_name": {
               "required": false,
               "description": "An identifier for the Kafka cluster. By default, this field generates a random string. You can also set your own custom cluster identifier.  If more than one Kafka plugin is configured without a `cluster_name` (that is, if the default autogenerated value is removed), these plugins will use the same producer, and by extension, the same cluster. Logs will be sent to the leader of the cluster.",
-              "auto": true,
-              "type": "string"
+              "type": "string",
+              "auto": true
             }
           },
           {
             "producer_request_acks": {
-              "type": "integer",
               "default": 1,
               "description": "The number of acknowledgments the producer requires the leader to have received before considering a request complete. Allowed values: 0 for no acknowledgments; 1 for only the leader; and -1 for the full ISR (In-Sync Replica set).",
+              "type": "integer",
               "one_of": [
                 -1,
                 0,
@@ -264,24 +427,20 @@
           },
           {
             "custom_fields_by_lua": {
-              "description": "Lua code as a key-value map",
-              "values": {
-                "type": "string",
-                "len_min": 1
-              },
               "keys": {
                 "type": "string",
                 "len_min": 1
               },
-              "type": "map"
+              "description": "Lua code as a key-value map",
+              "type": "map",
+              "values": {
+                "type": "string",
+                "len_min": 1
+              }
             }
           }
-        ],
-        "type": "record"
+        ]
       }
     }
-  ],
-  "entity_checks": [
-
   ]
 }

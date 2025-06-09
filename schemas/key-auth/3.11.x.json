@@ -1,9 +1,12 @@
 {
+  "entity_checks": [
+
+  ],
   "fields": [
     {
       "consumer": {
-        "reference": "consumers",
         "type": "foreign",
+        "reference": "consumers",
         "description": "Custom type for representing a foreign key with a null value allowed.",
         "eq": null
       }
@@ -11,6 +14,7 @@
     {
       "protocols": {
         "required": true,
+        "type": "set",
         "default": [
           "grpc",
           "grpcs",
@@ -29,14 +33,13 @@
             "ws",
             "wss"
           ]
-        },
-        "type": "set"
+        }
       }
     },
     {
       "consumer_group": {
-        "reference": "consumer_groups",
         "type": "foreign",
+        "reference": "consumer_groups",
         "description": "Custom type for representing a foreign key with a null value allowed.",
         "eq": null
       }
@@ -44,16 +47,17 @@
     {
       "config": {
         "required": true,
+        "type": "record",
         "fields": [
           {
             "key_names": {
               "type": "array",
-              "required": true,
-              "description": "Describes an array of parameter names where the plugin will look for a key. The key names may only contain [a-z], [A-Z], [0-9], [_] underscore, and [-] hyphen.",
               "elements": {
                 "type": "string",
                 "description": "A string representing an HTTP header name."
               },
+              "required": true,
+              "description": "Describes an array of parameter names where the plugin will look for a key. The key names may only contain [a-z], [A-Z], [0-9], [_] underscore, and [-] hyphen.",
               "default": [
                 "apikey"
               ]
@@ -62,46 +66,46 @@
           {
             "hide_credentials": {
               "required": true,
-              "default": false,
               "description": "An optional boolean value telling the plugin to show or hide the credential from the upstream service. If `true`, the plugin strips the credential from the request.",
+              "default": false,
               "type": "boolean"
             }
           },
           {
             "anonymous": {
-              "description": "An optional string (consumer UUID or username) value to use as an “anonymous” consumer if authentication fails. If empty (default null), the request will fail with an authentication failure `4xx`.",
-              "type": "string"
+              "type": "string",
+              "description": "An optional string (consumer UUID or username) value to use as an “anonymous” consumer if authentication fails. If empty (default null), the request will fail with an authentication failure `4xx`."
             }
           },
           {
             "key_in_header": {
               "required": true,
-              "default": true,
               "description": "If enabled (default), the plugin reads the request header and tries to find the key in it.",
+              "default": true,
               "type": "boolean"
             }
           },
           {
             "key_in_query": {
               "required": true,
-              "default": true,
               "description": "If enabled (default), the plugin reads the query parameter in the request and tries to find the key in it.",
+              "default": true,
               "type": "boolean"
             }
           },
           {
             "key_in_body": {
               "required": true,
-              "default": false,
               "description": "If enabled, the plugin reads the request body. Supported MIME types: `application/www-form-urlencoded`, `application/json`, and `multipart/form-data`.",
+              "default": false,
               "type": "boolean"
             }
           },
           {
             "run_on_preflight": {
               "required": true,
-              "default": true,
               "description": "A boolean value that indicates whether the plugin should run (and try to authenticate) on `OPTIONS` preflight requests. If set to `false`, then `OPTIONS` requests are always allowed.",
+              "default": true,
               "type": "boolean"
             }
           },
@@ -122,23 +126,24 @@
                 }
               ],
               "description": "A configuration of Konnect Identity Realms that indicate where to source a consumer from.",
+              "type": "set",
               "elements": {
+                "type": "record",
                 "entity_checks": [
                   {
                     "conditional": {
-                      "if_field": "scope",
                       "then_match": {
                         "required": true
                       },
                       "if_match": {
                         "eq": "realm"
                       },
-                      "then_field": "id"
+                      "then_field": "id",
+                      "if_field": "scope"
                     }
                   },
                   {
                     "conditional": {
-                      "if_field": "scope",
                       "then_match": {
                         "required": false,
                         "eq": null
@@ -146,12 +151,12 @@
                       "if_match": {
                         "eq": "cp"
                       },
-                      "then_field": "id"
+                      "then_field": "id",
+                      "if_field": "scope"
                     }
                   },
                   {
                     "conditional": {
-                      "if_field": "scope",
                       "then_match": {
                         "required": false,
                         "eq": null
@@ -159,7 +164,8 @@
                       "if_match": {
                         "eq": "cp"
                       },
-                      "then_field": "region"
+                      "then_field": "region",
+                      "if_field": "scope"
                     }
                   }
                 ],
@@ -175,10 +181,10 @@
                   },
                   {
                     "id": {
-                      "auto": false,
+                      "uuid": true,
                       "description": "A string representing a UUID (universally unique identifier).",
-                      "type": "string",
-                      "uuid": true
+                      "auto": false,
+                      "type": "string"
                     }
                   },
                   {
@@ -186,18 +192,12 @@
                       "type": "string"
                     }
                   }
-                ],
-                "type": "record"
-              },
-              "type": "set"
+                ]
+              }
             }
           }
-        ],
-        "type": "record"
+        ]
       }
     }
-  ],
-  "entity_checks": [
-
   ]
 }

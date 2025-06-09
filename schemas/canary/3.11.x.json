@@ -1,17 +1,50 @@
 {
+  "entity_checks": [
+    {
+      "at_least_one_of": [
+        "config.upstream_uri",
+        "config.upstream_host",
+        "config.upstream_port"
+      ]
+    },
+    {
+      "conditional": {
+        "then_match": {
+          "required": true
+        },
+        "if_match": {
+          "eq": "header"
+        },
+        "then_field": "config.hash_header",
+        "if_field": "config.hash"
+      }
+    },
+    {
+      "conditional": {
+        "then_match": {
+          "required": true
+        },
+        "if_match": {
+          "eq": true
+        },
+        "then_field": "config.upstream_host",
+        "if_field": "config.upstream_fallback"
+      }
+    }
+  ],
   "fields": [
     {
       "consumer": {
-        "reference": "consumers",
         "type": "foreign",
+        "reference": "consumers",
         "description": "Custom type for representing a foreign key with a null value allowed.",
         "eq": null
       }
     },
     {
       "consumer_group": {
-        "reference": "consumer_groups",
         "type": "foreign",
+        "reference": "consumer_groups",
         "description": "Custom type for representing a foreign key with a null value allowed.",
         "eq": null
       }
@@ -19,13 +52,6 @@
     {
       "protocols": {
         "type": "set",
-        "required": true,
-        "default": [
-          "grpc",
-          "grpcs",
-          "http",
-          "https"
-        ],
         "elements": {
           "type": "string",
           "one_of": [
@@ -35,7 +61,14 @@
             "https"
           ]
         },
-        "description": "A set of strings representing HTTP protocols."
+        "required": true,
+        "description": "A set of strings representing HTTP protocols.",
+        "default": [
+          "grpc",
+          "grpcs",
+          "http",
+          "https"
+        ]
       }
     },
     {
@@ -49,18 +82,19 @@
             }
           }
         ],
+        "type": "record",
         "fields": [
           {
             "start": {
-              "description": "Future time in seconds since epoch, when the canary release will start. Ignored when `percentage` is set, or when using `allow` or `deny` in `hash`.",
-              "type": "number"
+              "type": "number",
+              "description": "Future time in seconds since epoch, when the canary release will start. Ignored when `percentage` is set, or when using `allow` or `deny` in `hash`."
             }
           },
           {
             "hash": {
-              "type": "string",
-              "description": "Hash algorithm to be used for canary release.\n\n* `consumer`: The hash will be based on the consumer.\n* `ip`: The hash will be based on the client IP address.\n* `none`: No hash will be applied.\n* `allow`: Allows the specified groups to access the canary release.\n* `deny`: Denies the specified groups from accessing the canary release.\n* `header`: The hash will be based on the specified header value.",
               "default": "consumer",
+              "description": "Hash algorithm to be used for canary release.\n\n* `consumer`: The hash will be based on the consumer.\n* `ip`: The hash will be based on the client IP address.\n* `none`: No hash will be applied.\n* `allow`: Allows the specified groups to access the canary release.\n* `deny`: Denies the specified groups from accessing the canary release.\n* `header`: The hash will be based on the specified header value.",
+              "type": "string",
               "one_of": [
                 "consumer",
                 "ip",
@@ -79,28 +113,28 @@
           },
           {
             "duration": {
-              "default": 3600,
+              "type": "number",
               "description": "The duration of the canary release in seconds.",
               "gt": 0,
-              "type": "number"
+              "default": 3600
             }
           },
           {
             "steps": {
-              "default": 1000,
+              "type": "number",
               "description": "The number of steps for the canary release.",
               "gt": 1,
-              "type": "number"
+              "default": 1000
             }
           },
           {
             "percentage": {
               "description": "The percentage of traffic to be routed to the canary release.",
+              "type": "number",
               "between": [
                 0,
                 100
-              ],
-              "type": "number"
+              ]
             }
           },
           {
@@ -112,35 +146,35 @@
           {
             "upstream_port": {
               "description": "An integer representing a port number between 0 and 65535, inclusive.",
+              "type": "integer",
               "between": [
                 0,
                 65535
-              ],
-              "type": "integer"
+              ]
             }
           },
           {
             "upstream_uri": {
               "len_min": 1,
-              "description": "The URI of the upstream server to be used for the canary release.",
-              "type": "string"
+              "type": "string",
+              "description": "The URI of the upstream server to be used for the canary release."
             }
           },
           {
             "upstream_fallback": {
               "required": true,
               "description": "Specifies whether to fallback to the upstream server if the canary release fails.",
-              "default": false,
-              "type": "boolean"
+              "type": "boolean",
+              "default": false
             }
           },
           {
             "groups": {
               "description": "The groups allowed to access the canary release.",
+              "type": "array",
               "elements": {
                 "type": "string"
-              },
-              "type": "array"
+              }
             }
           },
           {
@@ -149,41 +183,7 @@
               "description": "A string representing an HTTP header name."
             }
           }
-        ],
-        "type": "record"
-      }
-    }
-  ],
-  "entity_checks": [
-    {
-      "at_least_one_of": [
-        "config.upstream_uri",
-        "config.upstream_host",
-        "config.upstream_port"
-      ]
-    },
-    {
-      "conditional": {
-        "if_field": "config.hash",
-        "then_match": {
-          "required": true
-        },
-        "if_match": {
-          "eq": "header"
-        },
-        "then_field": "config.hash_header"
-      }
-    },
-    {
-      "conditional": {
-        "if_field": "config.upstream_fallback",
-        "then_match": {
-          "required": true
-        },
-        "if_match": {
-          "eq": true
-        },
-        "then_field": "config.upstream_host"
+        ]
       }
     }
   ]

@@ -1,15 +1,11 @@
 {
+  "entity_checks": [
+
+  ],
   "fields": [
     {
       "protocols": {
         "type": "set",
-        "required": true,
-        "default": [
-          "grpc",
-          "grpcs",
-          "http",
-          "https"
-        ],
         "elements": {
           "type": "string",
           "one_of": [
@@ -19,17 +15,25 @@
             "https"
           ]
         },
-        "description": "A set of strings representing HTTP protocols."
+        "required": true,
+        "description": "A set of strings representing HTTP protocols.",
+        "default": [
+          "grpc",
+          "grpcs",
+          "http",
+          "https"
+        ]
       }
     },
     {
       "config": {
         "required": true,
+        "type": "record",
         "fields": [
           {
             "message_countback": {
-              "description": "Number of messages in the chat history to Vectorize/Cache",
               "default": 1,
+              "description": "Number of messages in the chat history to Vectorize/Cache",
               "between": [
                 1,
                 1000
@@ -40,62 +44,62 @@
           {
             "ignore_system_prompts": {
               "description": "Ignore and discard any system prompts when Vectorizing the request",
-              "default": false,
-              "type": "boolean"
+              "type": "boolean",
+              "default": false
             }
           },
           {
             "ignore_assistant_prompts": {
               "description": "Ignore and discard any assistant prompts when Vectorizing the request",
-              "default": false,
-              "type": "boolean"
+              "type": "boolean",
+              "default": false
             }
           },
           {
             "ignore_tool_prompts": {
               "description": "Ignore and discard any tool prompts when Vectorizing the request",
-              "default": false,
-              "type": "boolean"
+              "type": "boolean",
+              "default": false
             }
           },
           {
             "stop_on_failure": {
               "required": true,
-              "default": false,
               "description": "Halt the LLM request process in case of a caching system failure",
-              "type": "boolean"
+              "type": "boolean",
+              "default": false
             }
           },
           {
             "cache_ttl": {
+              "type": "integer",
               "description": "TTL in seconds of cache entities. Must be a value greater than 0.",
               "default": 300,
-              "gt": 0,
-              "type": "integer"
+              "gt": 0
             }
           },
           {
             "cache_control": {
               "required": true,
-              "default": false,
               "description": "When enabled, respect the Cache-Control behaviors defined in RFC7234.",
-              "type": "boolean"
+              "type": "boolean",
+              "default": false
             }
           },
           {
             "exact_caching": {
               "required": true,
-              "default": false,
               "description": "When enabled, a first check for exact query will be done. It will impact DB size",
-              "type": "boolean"
+              "type": "boolean",
+              "default": false
             }
           },
           {
             "llm_format": {
               "type": "string",
               "required": false,
-              "default": "openai",
               "description": "LLM input and output format and schema to use",
+              "default": "openai",
               "one_of": [
                 "openai",
                 "bedrock",
@@ -108,10 +112,10 @@
           {
             "embeddings": {
               "required": true,
+              "type": "record",
               "entity_checks": [
                 {
                   "conditional_at_least_one_of": {
-                    "if_field": "model.provider",
                     "then_at_least_one_of": [
                       "model.options.azure.instance"
                     ],
@@ -120,12 +124,12 @@
                         "azure"
                       ]
                     },
-                    "then_err": "must set %s for azure provider"
+                    "then_err": "must set %s for azure provider",
+                    "if_field": "model.provider"
                   }
                 },
                 {
                   "conditional_at_least_one_of": {
-                    "if_field": "model.provider",
                     "then_at_least_one_of": [
                       "model.options.azure.api_version"
                     ],
@@ -134,12 +138,12 @@
                         "azure"
                       ]
                     },
-                    "then_err": "must set %s for azure provider"
+                    "then_err": "must set %s for azure provider",
+                    "if_field": "model.provider"
                   }
                 },
                 {
                   "conditional_at_least_one_of": {
-                    "if_field": "model.provider",
                     "then_at_least_one_of": [
                       "model.options.azure.deployment_id"
                     ],
@@ -148,7 +152,8 @@
                         "azure"
                       ]
                     },
-                    "then_err": "must set %s for azure provider"
+                    "then_err": "must set %s for azure provider",
+                    "if_field": "model.provider"
                   }
                 }
               ],
@@ -156,6 +161,7 @@
                 {
                   "auth": {
                     "required": false,
+                    "type": "record",
                     "fields": [
                       {
                         "header_name": {
@@ -167,11 +173,11 @@
                       },
                       {
                         "header_value": {
-                          "encrypted": true,
                           "type": "string",
+                          "referenceable": true,
                           "required": false,
                           "description": "Specify the full auth header value for 'header_name', for example 'Bearer key' or just 'key'.",
-                          "referenceable": true
+                          "encrypted": true
                         }
                       },
                       {
@@ -184,11 +190,11 @@
                       },
                       {
                         "param_value": {
-                          "encrypted": true,
                           "type": "string",
+                          "referenceable": true,
                           "required": false,
                           "description": "Specify the full parameter value for 'param_name'.",
-                          "referenceable": true
+                          "encrypted": true
                         }
                       },
                       {
@@ -206,8 +212,8 @@
                         "azure_use_managed_identity": {
                           "required": false,
                           "description": "Set true to use the Azure Cloud Managed Identity (or user-assigned identity) to authenticate with Azure-provider models.",
-                          "default": false,
-                          "type": "boolean"
+                          "type": "boolean",
+                          "default": false
                         }
                       },
                       {
@@ -220,11 +226,11 @@
                       },
                       {
                         "azure_client_secret": {
-                          "encrypted": true,
                           "type": "string",
+                          "referenceable": true,
                           "required": false,
                           "description": "If azure_use_managed_identity is set to true, and you need to use a different user-assigned identity for this LLM instance, set the client secret.",
-                          "referenceable": true
+                          "encrypted": true
                         }
                       },
                       {
@@ -239,52 +245,52 @@
                         "gcp_use_service_account": {
                           "required": false,
                           "description": "Use service account auth for GCP-based providers and models.",
-                          "default": false,
-                          "type": "boolean"
+                          "type": "boolean",
+                          "default": false
                         }
                       },
                       {
                         "gcp_service_account_json": {
-                          "encrypted": true,
                           "type": "string",
+                          "referenceable": true,
                           "required": false,
                           "description": "Set this field to the full JSON of the GCP service account to authenticate, if required. If null (and gcp_use_service_account is true), Kong will attempt to read from environment variable `GCP_SERVICE_ACCOUNT`.",
-                          "referenceable": true
+                          "encrypted": true
                         }
                       },
                       {
                         "aws_access_key_id": {
-                          "encrypted": true,
                           "type": "string",
+                          "referenceable": true,
                           "required": false,
                           "description": "Set this if you are using an AWS provider (Bedrock) and you are authenticating using static IAM User credentials. Setting this will override the AWS_ACCESS_KEY_ID environment variable for this plugin instance.",
-                          "referenceable": true
+                          "encrypted": true
                         }
                       },
                       {
                         "aws_secret_access_key": {
-                          "encrypted": true,
                           "type": "string",
+                          "referenceable": true,
                           "required": false,
                           "description": "Set this if you are using an AWS provider (Bedrock) and you are authenticating using static IAM User credentials. Setting this will override the AWS_SECRET_ACCESS_KEY environment variable for this plugin instance.",
-                          "referenceable": true
+                          "encrypted": true
                         }
                       },
                       {
                         "allow_override": {
                           "required": false,
                           "description": "If enabled, the authorization header or parameter can be overridden in the request by the value configured in the plugin.",
-                          "default": false,
-                          "type": "boolean"
+                          "type": "boolean",
+                          "default": false
                         }
                       }
-                    ],
-                    "type": "record"
+                    ]
                   }
                 },
                 {
                   "model": {
                     "required": true,
+                    "type": "record",
                     "fields": [
                       {
                         "provider": {
@@ -312,6 +318,7 @@
                         "options": {
                           "required": false,
                           "description": "Key/value settings for the model",
+                          "type": "record",
                           "fields": [
                             {
                               "upstream_url": {
@@ -323,6 +330,7 @@
                             {
                               "azure": {
                                 "required": true,
+                                "type": "record",
                                 "fields": [
                                   {
                                     "instance": {
@@ -335,8 +343,8 @@
                                     "api_version": {
                                       "required": false,
                                       "description": "'api-version' for Azure OpenAI instances.",
-                                      "default": "2023-05-15",
-                                      "type": "string"
+                                      "type": "string",
+                                      "default": "2023-05-15"
                                     }
                                   },
                                   {
@@ -346,13 +354,13 @@
                                       "type": "string"
                                     }
                                   }
-                                ],
-                                "type": "record"
+                                ]
                               }
                             },
                             {
                               "bedrock": {
                                 "required": false,
+                                "type": "record",
                                 "entity_checks": [
                                   {
                                     "mutually_required": [
@@ -378,8 +386,8 @@
                                   },
                                   {
                                     "aws_role_session_name": {
-                                      "description": "If using AWS providers (Bedrock), set the identifier of the assumed role session.",
-                                      "type": "string"
+                                      "type": "string",
+                                      "description": "If using AWS providers (Bedrock), set the identifier of the assumed role session."
                                     }
                                   },
                                   {
@@ -390,18 +398,25 @@
                                   },
                                   {
                                     "embeddings_normalize": {
-                                      "default": false,
                                       "description": "If using AWS providers (Bedrock), set to true to normalize the embeddings.",
-                                      "type": "boolean"
+                                      "type": "boolean",
+                                      "default": false
+                                    }
+                                  },
+                                  {
+                                    "performance_config_latency": {
+                                      "required": false,
+                                      "description": "Force the client's performance configuration 'latency' for all requests. Leave empty to let the consumer select the performance configuration.",
+                                      "type": "string"
                                     }
                                   }
-                                ],
-                                "type": "record"
+                                ]
                               }
                             },
                             {
                               "gemini": {
                                 "required": false,
+                                "type": "record",
                                 "entity_checks": [
                                   {
                                     "mutually_required": [
@@ -433,13 +448,13 @@
                                       "type": "string"
                                     }
                                   }
-                                ],
-                                "type": "record"
+                                ]
                               }
                             },
                             {
                               "huggingface": {
                                 "required": false,
+                                "type": "record",
                                 "fields": [
                                   {
                                     "use_cache": {
@@ -455,25 +470,22 @@
                                       "type": "boolean"
                                     }
                                   }
-                                ],
-                                "type": "record"
+                                ]
                               }
                             }
-                          ],
-                          "type": "record"
+                          ]
                         }
                       }
-                    ],
-                    "type": "record"
+                    ]
                   }
                 }
-              ],
-              "type": "record"
+              ]
             }
           },
           {
             "vectordb": {
               "required": true,
+              "type": "record",
               "fields": [
                 {
                   "strategy": {
@@ -513,6 +525,74 @@
                 },
                 {
                   "redis": {
+                    "shorthand_fields": [
+                      {
+                        "timeout": {
+                          "type": "integer",
+                          "deprecation": {
+                            "removal_in_version": "4.0",
+                            "replaced_with": [
+                              {
+                                "path": [
+                                  "connect_timeout"
+                                ]
+                              },
+                              {
+                                "path": [
+                                  "send_timeout"
+                                ]
+                              },
+                              {
+                                "path": [
+                                  "read_timeout"
+                                ]
+                              }
+                            ],
+                            "message": "redis schema field `timeout` is deprecated, use `connect_timeout`, `send_timeout` and `read_timeout`"
+                          }
+                        }
+                      },
+                      {
+                        "sentinel_addresses": {
+                          "deprecation": {
+                            "removal_in_version": "4.0",
+                            "replaced_with": [
+                              {
+                                "path": [
+                                  "sentinel_nodes"
+                                ]
+                              }
+                            ],
+                            "message": "sentinel_addresses is deprecated, please use sentinel_nodes instead"
+                          },
+                          "len_min": 1,
+                          "type": "array",
+                          "elements": {
+                            "type": "string"
+                          }
+                        }
+                      },
+                      {
+                        "cluster_addresses": {
+                          "deprecation": {
+                            "removal_in_version": "4.0",
+                            "replaced_with": [
+                              {
+                                "path": [
+                                  "cluster_nodes"
+                                ]
+                              }
+                            ],
+                            "message": "cluster_addresses is deprecated, please use cluster_nodes instead"
+                          },
+                          "len_min": 1,
+                          "type": "array",
+                          "elements": {
+                            "type": "string"
+                          }
+                        }
+                      }
+                    ],
                     "entity_checks": [
                       {
                         "mutually_required": [
@@ -536,111 +616,41 @@
                       },
                       {
                         "conditional": {
-                          "if_field": "connection_is_proxied",
                           "then_match": {
                             "required": true
                           },
                           "if_match": {
                             "eq": true
                           },
-                          "then_field": "host"
+                          "then_field": "host",
+                          "if_field": "connection_is_proxied"
                         }
                       },
                       {
                         "custom_entity_check": {
-                          "run_with_missing_fields": true,
                           "field_sources": [
                             "database",
                             "connection_is_proxied"
-                          ]
+                          ],
+                          "run_with_missing_fields": true
                         }
                       },
                       {
                         "custom_entity_check": {
-                          "run_with_missing_fields": true,
                           "field_sources": [
                             "cluster_nodes",
                             "connection_is_proxied"
-                          ]
+                          ],
+                          "run_with_missing_fields": true
                         }
                       },
                       {
                         "custom_entity_check": {
-                          "run_with_missing_fields": true,
                           "field_sources": [
                             "sentinel_role",
                             "connection_is_proxied"
-                          ]
-                        }
-                      }
-                    ],
-                    "type": "record",
-                    "required": true,
-                    "shorthand_fields": [
-                      {
-                        "timeout": {
-                          "type": "integer",
-                          "deprecation": {
-                            "replaced_with": [
-                              {
-                                "path": [
-                                  "connect_timeout"
-                                ]
-                              },
-                              {
-                                "path": [
-                                  "send_timeout"
-                                ]
-                              },
-                              {
-                                "path": [
-                                  "read_timeout"
-                                ]
-                              }
-                            ],
-                            "removal_in_version": "4.0",
-                            "message": "redis schema field `timeout` is deprecated, use `connect_timeout`, `send_timeout` and `read_timeout`"
-                          }
-                        }
-                      },
-                      {
-                        "sentinel_addresses": {
-                          "len_min": 1,
-                          "deprecation": {
-                            "replaced_with": [
-                              {
-                                "path": [
-                                  "sentinel_nodes"
-                                ]
-                              }
-                            ],
-                            "removal_in_version": "4.0",
-                            "message": "sentinel_addresses is deprecated, please use sentinel_nodes instead"
-                          },
-                          "elements": {
-                            "type": "string"
-                          },
-                          "type": "array"
-                        }
-                      },
-                      {
-                        "cluster_addresses": {
-                          "len_min": 1,
-                          "deprecation": {
-                            "replaced_with": [
-                              {
-                                "path": [
-                                  "cluster_nodes"
-                                ]
-                              }
-                            ],
-                            "removal_in_version": "4.0",
-                            "message": "cluster_addresses is deprecated, please use cluster_nodes instead"
-                          },
-                          "elements": {
-                            "type": "string"
-                          },
-                          "type": "array"
+                          ],
+                          "run_with_missing_fields": true
                         }
                       }
                     ],
@@ -648,82 +658,82 @@
                       {
                         "host": {
                           "description": "A string representing a host name, such as example.com.",
-                          "default": "127.0.0.1",
-                          "type": "string"
+                          "type": "string",
+                          "default": "127.0.0.1"
                         }
                       },
                       {
                         "port": {
-                          "default": 6379,
+                          "type": "integer",
                           "description": "An integer representing a port number between 0 and 65535, inclusive.",
                           "between": [
                             0,
                             65535
                           ],
-                          "type": "integer"
+                          "default": 6379
                         }
                       },
                       {
                         "connect_timeout": {
-                          "default": 2000,
+                          "type": "integer",
                           "description": "An integer representing a timeout in milliseconds. Must be between 0 and 2^31-2.",
                           "between": [
                             0,
                             2147483646
                           ],
-                          "type": "integer"
+                          "default": 2000
                         }
                       },
                       {
                         "send_timeout": {
-                          "default": 2000,
+                          "type": "integer",
                           "description": "An integer representing a timeout in milliseconds. Must be between 0 and 2^31-2.",
                           "between": [
                             0,
                             2147483646
                           ],
-                          "type": "integer"
+                          "default": 2000
                         }
                       },
                       {
                         "read_timeout": {
-                          "default": 2000,
+                          "type": "integer",
                           "description": "An integer representing a timeout in milliseconds. Must be between 0 and 2^31-2.",
                           "between": [
                             0,
                             2147483646
                           ],
-                          "type": "integer"
+                          "default": 2000
                         }
                       },
                       {
                         "username": {
                           "description": "Username to use for Redis connections. If undefined, ACL authentication won't be performed. This requires Redis v6.0.0+. To be compatible with Redis v5.x.y, you can set it to `default`.",
-                          "referenceable": true,
-                          "type": "string"
+                          "type": "string",
+                          "referenceable": true
                         }
                       },
                       {
                         "password": {
-                          "referenceable": true,
-                          "description": "Password to use for Redis connections. If undefined, no AUTH commands are sent to Redis.",
                           "encrypted": true,
-                          "type": "string"
+                          "description": "Password to use for Redis connections. If undefined, no AUTH commands are sent to Redis.",
+                          "type": "string",
+                          "referenceable": true
                         }
                       },
                       {
                         "sentinel_username": {
                           "description": "Sentinel username to authenticate with a Redis Sentinel instance. If undefined, ACL authentication won't be performed. This requires Redis v6.2.0+.",
-                          "referenceable": true,
-                          "type": "string"
+                          "type": "string",
+                          "referenceable": true
                         }
                       },
                       {
                         "sentinel_password": {
-                          "referenceable": true,
-                          "description": "Sentinel password to authenticate with a Redis Sentinel instance. If undefined, no AUTH commands are sent to Redis Sentinels.",
                           "encrypted": true,
-                          "type": "string"
+                          "description": "Sentinel password to authenticate with a Redis Sentinel instance. If undefined, no AUTH commands are sent to Redis Sentinels.",
+                          "type": "string",
+                          "referenceable": true
                         }
                       },
                       {
@@ -735,23 +745,23 @@
                       },
                       {
                         "keepalive_pool_size": {
+                          "type": "integer",
                           "description": "The size limit for every cosocket connection pool associated with every remote server, per worker process. If neither `keepalive_pool_size` nor `keepalive_backlog` is specified, no pool is created. If `keepalive_pool_size` isn't specified but `keepalive_backlog` is specified, then the pool uses the default value. Try to increase (e.g. 512) this value if latency is high or throughput is low.",
-                          "default": 256,
                           "between": [
                             1,
                             2147483646
                           ],
-                          "type": "integer"
+                          "default": 256
                         }
                       },
                       {
                         "keepalive_backlog": {
                           "description": "Limits the total number of opened connections for a pool. If the connection pool is full, connection queues above the limit go into the backlog queue. If the backlog queue is full, subsequent connect operations fail and return `nil`. Queued operations (subject to set timeouts) resume once the number of connections in the pool is less than `keepalive_pool_size`. If latency is high or throughput is low, try increasing this value. Empirically, this value is larger than `keepalive_pool_size`.",
+                          "type": "integer",
                           "between": [
                             0,
                             2147483646
-                          ],
-                          "type": "integer"
+                          ]
                         }
                       },
                       {
@@ -773,81 +783,81 @@
                       },
                       {
                         "sentinel_nodes": {
-                          "type": "array",
-                          "required": false,
                           "len_min": 1,
+                          "type": "array",
                           "elements": {
+                            "type": "record",
                             "fields": [
                               {
                                 "host": {
                                   "required": true,
-                                  "default": "127.0.0.1",
                                   "description": "A string representing a host name, such as example.com.",
-                                  "type": "string"
+                                  "type": "string",
+                                  "default": "127.0.0.1"
                                 }
                               },
                               {
                                 "port": {
-                                  "default": 6379,
+                                  "type": "integer",
                                   "description": "An integer representing a port number between 0 and 65535, inclusive.",
                                   "between": [
                                     0,
                                     65535
                                   ],
-                                  "type": "integer"
+                                  "default": 6379
                                 }
                               }
-                            ],
-                            "type": "record"
+                            ]
                           },
+                          "required": false,
                           "description": "Sentinel node addresses to use for Redis connections when the `redis` strategy is defined. Defining this field implies using a Redis Sentinel. The minimum length of the array is 1 element."
                         }
                       },
                       {
                         "cluster_nodes": {
-                          "type": "array",
-                          "required": false,
                           "len_min": 1,
+                          "type": "array",
                           "elements": {
+                            "type": "record",
                             "fields": [
                               {
                                 "ip": {
                                   "required": true,
-                                  "default": "127.0.0.1",
                                   "description": "A string representing a host name, such as example.com.",
-                                  "type": "string"
+                                  "type": "string",
+                                  "default": "127.0.0.1"
                                 }
                               },
                               {
                                 "port": {
-                                  "default": 6379,
+                                  "type": "integer",
                                   "description": "An integer representing a port number between 0 and 65535, inclusive.",
                                   "between": [
                                     0,
                                     65535
                                   ],
-                                  "type": "integer"
+                                  "default": 6379
                                 }
                               }
-                            ],
-                            "type": "record"
+                            ]
                           },
+                          "required": false,
                           "description": "Cluster addresses to use for Redis connections when the `redis` strategy is defined. Defining this field implies using a Redis Cluster. The minimum length of the array is 1 element."
                         }
                       },
                       {
                         "ssl": {
                           "required": false,
-                          "default": false,
                           "description": "If set to true, uses SSL to connect to Redis.",
+                          "default": false,
                           "type": "boolean"
                         }
                       },
                       {
                         "ssl_verify": {
                           "required": false,
-                          "default": false,
                           "description": "If set to true, verifies the validity of the server SSL certificate. If setting this parameter, also configure `lua_ssl_trusted_certificate` in `kong.conf` to specify the CA (or server) certificate used by your Redis server. You may also need to configure `lua_ssl_verify_depth` accordingly.",
+                          "default": false,
                           "type": "boolean"
                         }
                       },
@@ -861,38 +871,41 @@
                       {
                         "cluster_max_redirections": {
                           "required": false,
-                          "default": 5,
                           "description": "Maximum retry attempts for redirection.",
+                          "default": 5,
                           "type": "integer"
                         }
                       },
                       {
                         "connection_is_proxied": {
                           "required": false,
-                          "default": false,
                           "description": "If the connection to Redis is proxied (e.g. Envoy), set it `true`. Set the `host` and `port` to point to the proxy address.",
+                          "default": false,
                           "type": "boolean"
                         }
                       }
-                    ]
+                    ],
+                    "required": true,
+                    "type": "record"
                   }
                 },
                 {
                   "pgvector": {
                     "required": true,
+                    "type": "record",
                     "fields": [
                       {
                         "host": {
-                          "default": "127.0.0.1",
                           "description": "the host of the pgvector database",
-                          "type": "string"
+                          "type": "string",
+                          "default": "127.0.0.1"
                         }
                       },
                       {
                         "port": {
-                          "default": 5432,
                           "description": "the port of the pgvector database",
-                          "type": "integer"
+                          "type": "integer",
+                          "default": 5432
                         }
                       },
                       {
@@ -905,45 +918,45 @@
                       },
                       {
                         "password": {
-                          "type": "string",
-                          "description": "the password of the pgvector database",
                           "encrypted": true,
+                          "description": "the password of the pgvector database",
+                          "type": "string",
                           "referenceable": true
                         }
                       },
                       {
                         "database": {
-                          "default": "kong-pgvector",
                           "description": "the database of the pgvector database",
-                          "type": "string"
+                          "type": "string",
+                          "default": "kong-pgvector"
                         }
                       },
                       {
                         "timeout": {
-                          "default": 5000,
                           "description": "the timeout of the pgvector database",
-                          "type": "number"
+                          "type": "number",
+                          "default": 5000
                         }
                       },
                       {
                         "ssl": {
-                          "default": false,
                           "description": "whether to use ssl for the pgvector database",
-                          "type": "boolean"
+                          "type": "boolean",
+                          "default": false
                         }
                       },
                       {
                         "ssl_required": {
-                          "default": false,
                           "description": "whether ssl is required for the pgvector database",
-                          "type": "boolean"
+                          "type": "boolean",
+                          "default": false
                         }
                       },
                       {
                         "ssl_verify": {
-                          "default": false,
                           "description": "whether to verify ssl for the pgvector database",
-                          "type": "boolean"
+                          "type": "boolean",
+                          "default": false
                         }
                       },
                       {
@@ -970,20 +983,14 @@
                           "description": "the path of ssl cert key to use for the pgvector database"
                         }
                       }
-                    ],
-                    "type": "record"
+                    ]
                   }
                 }
-              ],
-              "type": "record"
+              ]
             }
           }
-        ],
-        "type": "record"
+        ]
       }
     }
-  ],
-  "entity_checks": [
-
   ]
 }

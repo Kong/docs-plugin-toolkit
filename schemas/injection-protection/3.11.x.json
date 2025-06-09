@@ -1,9 +1,12 @@
 {
+  "entity_checks": [
+
+  ],
   "fields": [
     {
       "consumer": {
-        "reference": "consumers",
         "type": "foreign",
+        "reference": "consumers",
         "description": "Custom type for representing a foreign key with a null value allowed.",
         "eq": null
       }
@@ -11,13 +14,6 @@
     {
       "protocols": {
         "type": "set",
-        "required": true,
-        "default": [
-          "grpc",
-          "grpcs",
-          "http",
-          "https"
-        ],
         "elements": {
           "type": "string",
           "one_of": [
@@ -27,13 +23,20 @@
             "https"
           ]
         },
-        "description": "A set of strings representing HTTP protocols."
+        "required": true,
+        "description": "A set of strings representing HTTP protocols.",
+        "default": [
+          "grpc",
+          "grpcs",
+          "http",
+          "https"
+        ]
       }
     },
     {
       "consumer_group": {
-        "reference": "consumer_groups",
         "type": "foreign",
+        "reference": "consumer_groups",
         "description": "Custom type for representing a foreign key with a null value allowed.",
         "eq": null
       }
@@ -41,6 +44,7 @@
     {
       "config": {
         "required": true,
+        "type": "record",
         "entity_checks": [
           {
             "at_least_one_of": [
@@ -53,8 +57,6 @@
           {
             "injection_types": {
               "type": "set",
-              "required": true,
-              "description": "The type of injections to check for.",
               "elements": {
                 "type": "string",
                 "one_of": [
@@ -66,6 +68,8 @@
                   "java_exception"
                 ]
               },
+              "required": true,
+              "description": "The type of injections to check for.",
               "default": [
                 "sql"
               ]
@@ -74,8 +78,6 @@
           {
             "locations": {
               "type": "set",
-              "required": true,
-              "description": "The locations to check for injection.",
               "elements": {
                 "type": "string",
                 "one_of": [
@@ -84,6 +86,8 @@
                   "body"
                 ]
               },
+              "required": true,
+              "description": "The locations to check for injection.",
               "default": [
                 "path_and_query"
               ]
@@ -91,9 +95,11 @@
           },
           {
             "custom_injections": {
-              "default": null,
+              "type": "array",
               "description": "Custom regexes to check for.",
+              "default": null,
               "elements": {
+                "type": "record",
                 "fields": [
                   {
                     "name": {
@@ -110,18 +116,16 @@
                       "is_regex": true
                     }
                   }
-                ],
-                "type": "record"
-              },
-              "type": "array"
+                ]
+              }
             }
           },
           {
             "enforcement_mode": {
               "type": "string",
               "required": true,
-              "default": "block",
               "description": "Enforcement mode of the security policy.",
+              "default": "block",
               "one_of": [
                 "block",
                 "log_only"
@@ -132,28 +136,24 @@
             "error_status_code": {
               "type": "integer",
               "required": true,
+              "description": "The response status code when validation fails.",
               "default": 400,
               "between": [
                 400,
                 499
-              ],
-              "description": "The response status code when validation fails."
+              ]
             }
           },
           {
             "error_message": {
               "required": true,
               "description": "The response message when validation fails",
-              "default": "Bad Request",
-              "type": "string"
+              "type": "string",
+              "default": "Bad Request"
             }
           }
-        ],
-        "type": "record"
+        ]
       }
     }
-  ],
-  "entity_checks": [
-
   ]
 }

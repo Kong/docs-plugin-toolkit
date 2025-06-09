@@ -1,17 +1,20 @@
 {
+  "entity_checks": [
+    {
+      "custom_entity_check": {
+        "field_sources": [
+          "config"
+        ]
+      }
+    }
+  ],
   "fields": [
     {
       "protocols": {
         "type": "set",
-        "required": true,
-        "default": [
-          "grpc",
-          "grpcs",
-          "http",
-          "https"
-        ],
         "elements": {
           "description": "A string representing a protocol, such as HTTP or HTTPS.",
+          "type": "string",
           "one_of": [
             "grpc",
             "grpcs",
@@ -23,41 +26,46 @@
             "udp",
             "ws",
             "wss"
-          ],
-          "type": "string"
+          ]
         },
-        "description": "A set of strings representing protocols."
+        "required": true,
+        "description": "A set of strings representing protocols.",
+        "default": [
+          "grpc",
+          "grpcs",
+          "http",
+          "https"
+        ]
       }
     },
     {
       "config": {
         "required": true,
+        "type": "record",
         "fields": [
           {
             "response_code": {
               "len_min": 1,
               "type": "array",
+              "elements": {
+                "type": "integer",
+                "between": [
+                  100,
+                  900
+                ]
+              },
               "required": true,
+              "description": "Upstream response status code considered cacheable.",
               "default": [
                 200,
                 301,
                 404
-              ],
-              "elements": {
-                "between": [
-                  100,
-                  900
-                ],
-                "type": "integer"
-              },
-              "description": "Upstream response status code considered cacheable."
+              ]
             }
           },
           {
             "request_method": {
               "type": "array",
-              "required": true,
-              "description": "Downstream request methods considered cacheable.",
               "elements": {
                 "type": "string",
                 "one_of": [
@@ -68,6 +76,8 @@
                   "PUT"
                 ]
               },
+              "required": true,
+              "description": "Downstream request methods considered cacheable.",
               "default": [
                 "GET",
                 "HEAD"
@@ -77,11 +87,11 @@
           {
             "content_type": {
               "type": "array",
-              "required": true,
-              "description": "Upstream response content types considered cacheable. The plugin performs an **exact match** against each specified value.",
               "elements": {
                 "type": "string"
               },
+              "required": true,
+              "description": "Upstream response content types considered cacheable. The plugin performs an **exact match** against each specified value.",
               "default": [
                 "text/plain",
                 "application/json"
@@ -90,10 +100,10 @@
           },
           {
             "cache_ttl": {
-              "default": 300,
+              "type": "integer",
               "description": "TTL, in seconds, of cache entities.",
-              "gt": 0,
-              "type": "integer"
+              "default": 300,
+              "gt": 0
             }
           },
           {
@@ -110,94 +120,84 @@
             "cache_control": {
               "required": true,
               "description": "When enabled, respect the Cache-Control behaviors defined in RFC7234.",
-              "default": false,
-              "type": "boolean"
+              "type": "boolean",
+              "default": false
             }
           },
           {
             "ignore_uri_case": {
               "required": false,
-              "default": false,
-              "type": "boolean"
+              "type": "boolean",
+              "default": false
             }
           },
           {
             "storage_ttl": {
-              "description": "Number of seconds to keep resources in the storage backend. This value is independent of `cache_ttl` or resource TTLs defined by Cache-Control behaviors.",
-              "type": "integer"
+              "type": "integer",
+              "description": "Number of seconds to keep resources in the storage backend. This value is independent of `cache_ttl` or resource TTLs defined by Cache-Control behaviors."
             }
           },
           {
             "memory": {
               "required": true,
+              "type": "record",
               "fields": [
                 {
                   "dictionary_name": {
                     "required": true,
                     "description": "The name of the shared dictionary in which to hold cache entities when the memory strategy is selected. Note that this dictionary currently must be defined manually in the Kong Nginx template.",
-                    "default": "kong_db_cache",
-                    "type": "string"
+                    "type": "string",
+                    "default": "kong_db_cache"
                   }
                 }
-              ],
-              "type": "record"
+              ]
             }
           },
           {
             "vary_query_params": {
               "description": "Relevant query parameters considered for the cache key. If undefined, all params are taken into consideration.",
+              "type": "array",
               "elements": {
                 "type": "string"
-              },
-              "type": "array"
+              }
             }
           },
           {
             "vary_headers": {
               "description": "Relevant headers considered for the cache key. If undefined, none of the headers are taken into consideration.",
+              "type": "array",
               "elements": {
                 "type": "string"
-              },
-              "type": "array"
+              }
             }
           },
           {
             "response_headers": {
               "required": true,
               "description": "Caching related diagnostic headers that should be included in cached responses",
+              "type": "record",
               "fields": [
                 {
                   "age": {
-                    "default": true,
-                    "type": "boolean"
+                    "type": "boolean",
+                    "default": true
                   }
                 },
                 {
                   "X-Cache-Status": {
-                    "default": true,
-                    "type": "boolean"
+                    "type": "boolean",
+                    "default": true
                   }
                 },
                 {
                   "X-Cache-Key": {
-                    "default": true,
-                    "type": "boolean"
+                    "type": "boolean",
+                    "default": true
                   }
                 }
-              ],
-              "type": "record"
+              ]
             }
           }
-        ],
-        "type": "record"
-      }
-    }
-  ],
-  "entity_checks": [
-    {
-      "custom_entity_check": {
-        "field_sources": [
-          "config"
         ]
       }
     }

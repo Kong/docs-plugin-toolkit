@@ -1,15 +1,17 @@
 {
+  "entity_checks": [
+    {
+      "custom_entity_check": {
+        "field_sources": [
+          "config"
+        ]
+      }
+    }
+  ],
   "fields": [
     {
       "protocols": {
         "type": "set",
-        "required": true,
-        "default": [
-          "grpc",
-          "grpcs",
-          "http",
-          "https"
-        ],
         "elements": {
           "type": "string",
           "one_of": [
@@ -19,13 +21,20 @@
             "https"
           ]
         },
-        "description": "A set of strings representing HTTP protocols."
+        "required": true,
+        "description": "A set of strings representing HTTP protocols.",
+        "default": [
+          "grpc",
+          "grpcs",
+          "http",
+          "https"
+        ]
       }
     },
     {
       "consumer_group": {
-        "reference": "consumer_groups",
         "type": "foreign",
+        "reference": "consumer_groups",
         "description": "Custom type for representing a foreign key with a null value allowed.",
         "eq": null
       }
@@ -33,6 +42,7 @@
     {
       "config": {
         "required": true,
+        "type": "record",
         "entity_checks": [
           {
             "custom_entity_check": {
@@ -56,7 +66,9 @@
           {
             "bootstrap_servers": {
               "description": "Set of bootstrap brokers in a `{host: host, port: port}` list format.",
+              "type": "set",
               "elements": {
+                "type": "record",
                 "fields": [
                   {
                     "host": {
@@ -69,17 +81,168 @@
                     "port": {
                       "required": true,
                       "description": "An integer representing a port number between 0 and 65535, inclusive.",
+                      "type": "integer",
                       "between": [
                         0,
                         65535
-                      ],
-                      "type": "integer"
+                      ]
                     }
                   }
-                ],
-                "type": "record"
-              },
-              "type": "set"
+                ]
+              }
+            }
+          },
+          {
+            "schema_registry": {
+              "required": true,
+              "description": "The plugin-global schema registry configuration. This can be overwritten by the topic configuration.",
+              "type": "record",
+              "fields": [
+                {
+                  "confluent": {
+                    "required": false,
+                    "type": "record",
+                    "fields": [
+                      {
+                        "url": {
+                          "required": false,
+                          "description": "The URL of the schema registry.",
+                          "type": "string"
+                        }
+                      },
+                      {
+                        "ttl": {
+                          "description": "The TTL in seconds for the schema registry cache.",
+                          "type": "number",
+                          "between": [
+                            0,
+                            3600
+                          ]
+                        }
+                      },
+                      {
+                        "ssl_verify": {
+                          "description": "Set to false to disable SSL certificate verification when connecting to the schema registry.",
+                          "default": true,
+                          "type": "boolean"
+                        }
+                      },
+                      {
+                        "authentication": {
+                          "required": true,
+                          "type": "record",
+                          "entity_checks": [
+                            {
+                              "custom_entity_check": {
+                                "field_sources": [
+                                  "mode",
+                                  "basic"
+                                ]
+                              }
+                            }
+                          ],
+                          "fields": [
+                            {
+                              "mode": {
+                                "type": "string",
+                                "required": true,
+                                "description": "Authentication mode to use with the schema registry.",
+                                "default": "none",
+                                "one_of": [
+                                  "none",
+                                  "basic"
+                                ]
+                              }
+                            },
+                            {
+                              "basic": {
+                                "required": false,
+                                "type": "record",
+                                "fields": [
+                                  {
+                                    "username": {
+                                      "required": true,
+                                      "referenceable": true,
+                                      "type": "string",
+                                      "encrypted": true
+                                    }
+                                  },
+                                  {
+                                    "password": {
+                                      "required": true,
+                                      "referenceable": true,
+                                      "type": "string",
+                                      "encrypted": true
+                                    }
+                                  }
+                                ]
+                              }
+                            }
+                          ]
+                        }
+                      },
+                      {
+                        "value_schema": {
+                          "required": false,
+                          "type": "record",
+                          "fields": [
+                            {
+                              "subject_name": {
+                                "required": false,
+                                "description": "The name of the subject",
+                                "type": "string"
+                              }
+                            },
+                            {
+                              "schema_version": {
+                                "required": false,
+                                "description": "The schema version to use for serialization/deserialization. Use 'latest' to always fetch the most recent version.",
+                                "type": "string",
+                                "match_any": {
+                                  "err": "must be either 'latest' or a positive integer",
+                                  "patterns": [
+                                    "^latest$",
+                                    "^[0-9]+$"
+                                  ]
+                                }
+                              }
+                            }
+                          ]
+                        }
+                      },
+                      {
+                        "key_schema": {
+                          "required": false,
+                          "type": "record",
+                          "fields": [
+                            {
+                              "subject_name": {
+                                "required": false,
+                                "description": "The name of the subject",
+                                "type": "string"
+                              }
+                            },
+                            {
+                              "schema_version": {
+                                "required": false,
+                                "description": "The schema version to use for serialization/deserialization. Use 'latest' to always fetch the most recent version.",
+                                "type": "string",
+                                "match_any": {
+                                  "err": "must be either 'latest' or a positive integer",
+                                  "patterns": [
+                                    "^latest$",
+                                    "^[0-9]+$"
+                                  ]
+                                }
+                              }
+                            }
+                          ]
+                        }
+                      }
+                    ]
+                  }
+                }
+              ]
             }
           },
           {
@@ -93,10 +256,10 @@
             "allowed_topics": {
               "required": false,
               "description": "The list of allowed topic names to which messages can be sent. The default topic configured in the `topic` field is always allowed, regardless of its inclusion in `allowed_topics`.",
+              "type": "array",
               "elements": {
                 "type": "string"
-              },
-              "type": "array"
+              }
             }
           },
           {
@@ -115,27 +278,28 @@
           },
           {
             "timeout": {
-              "default": 10000,
               "description": "Socket timeout in milliseconds.",
-              "type": "integer"
+              "type": "integer",
+              "default": 10000
             }
           },
           {
             "keepalive": {
-              "default": 60000,
               "description": "Keepalive timeout in milliseconds.",
-              "type": "integer"
+              "type": "integer",
+              "default": 60000
             }
           },
           {
             "keepalive_enabled": {
-              "default": false,
-              "type": "boolean"
+              "type": "boolean",
+              "default": false
             }
           },
           {
             "authentication": {
               "required": true,
+              "type": "record",
               "fields": [
                 {
                   "strategy": {
@@ -168,36 +332,36 @@
                 },
                 {
                   "user": {
-                    "encrypted": true,
                     "type": "string",
+                    "referenceable": true,
                     "required": false,
                     "description": "Username for SASL authentication.",
-                    "referenceable": true
+                    "encrypted": true
                   }
                 },
                 {
                   "password": {
-                    "encrypted": true,
                     "type": "string",
+                    "referenceable": true,
                     "required": false,
                     "description": "Password for SASL authentication.",
-                    "referenceable": true
+                    "encrypted": true
                   }
                 }
-              ],
-              "type": "record"
+              ]
             }
           },
           {
             "security": {
               "required": true,
+              "type": "record",
               "fields": [
                 {
                   "certificate_id": {
-                    "required": false,
+                    "uuid": true,
                     "description": "UUID of certificate entity for mTLS authentication.",
                     "type": "string",
-                    "uuid": true
+                    "required": false
                   }
                 },
                 {
@@ -207,46 +371,45 @@
                     "type": "boolean"
                   }
                 }
-              ],
-              "type": "record"
+              ]
             }
           },
           {
             "forward_method": {
-              "default": false,
               "description": "Include the request method in the message. At least one of these must be true: `forward_method`, `forward_uri`, `forward_headers`, `forward_body`.",
-              "type": "boolean"
+              "type": "boolean",
+              "default": false
             }
           },
           {
             "forward_uri": {
-              "default": false,
               "description": "Include the request URI and URI arguments (as in, query arguments) in the message. At least one of these must be true: `forward_method`, `forward_uri`, `forward_headers`, `forward_body`.",
-              "type": "boolean"
+              "type": "boolean",
+              "default": false
             }
           },
           {
             "forward_headers": {
-              "default": false,
               "description": "Include the request headers in the message. At least one of these must be true: `forward_method`, `forward_uri`, `forward_headers`, `forward_body`.",
-              "type": "boolean"
+              "type": "boolean",
+              "default": false
             }
           },
           {
             "forward_body": {
-              "default": true,
               "description": "Include the request body in the message. At least one of these must be true: `forward_method`, `forward_uri`, `forward_headers`, `forward_body`.",
-              "type": "boolean"
+              "type": "boolean",
+              "default": true
             }
           },
           {
             "message_by_lua_functions": {
               "required": false,
               "description": "The Lua functions that manipulates the message being sent to the Kafka topic.",
+              "type": "array",
               "elements": {
                 "type": "string"
-              },
-              "type": "array"
+              }
             }
           },
           {
@@ -271,66 +434,62 @@
           },
           {
             "producer_request_timeout": {
-              "default": 2000,
               "description": "Time to wait for a Produce response in milliseconds.",
-              "type": "integer"
+              "type": "integer",
+              "default": 2000
             }
           },
           {
             "producer_request_limits_messages_per_request": {
-              "default": 200,
               "description": "Maximum number of messages to include into a single producer request.",
-              "type": "integer"
+              "type": "integer",
+              "default": 200
             }
           },
           {
             "producer_request_limits_bytes_per_request": {
-              "default": 1048576,
               "description": "Maximum size of a Produce request in bytes.",
-              "type": "integer"
+              "type": "integer",
+              "default": 1048576
             }
           },
           {
             "producer_request_retries_max_attempts": {
-              "default": 10,
               "description": "Maximum number of retry attempts per single Produce request.",
-              "type": "integer"
+              "type": "integer",
+              "default": 10
             }
           },
           {
             "producer_request_retries_backoff_timeout": {
-              "default": 100,
               "description": "Backoff interval between retry attempts in milliseconds.",
-              "type": "integer"
+              "type": "integer",
+              "default": 100
             }
           },
           {
             "producer_async": {
-              "default": true,
               "description": "Flag to enable asynchronous mode.",
-              "type": "boolean"
+              "type": "boolean",
+              "default": true
             }
           },
           {
             "producer_async_flush_timeout": {
-              "default": 1000,
               "description": "Maximum time interval in milliseconds between buffer flushes in asynchronous mode.",
-              "type": "integer"
+              "type": "integer",
+              "default": 1000
             }
           },
           {
             "producer_async_buffering_limits_messages_in_memory": {
-              "default": 50000,
               "description": "Maximum number of messages that can be buffered in memory in asynchronous mode.",
-              "type": "integer"
+              "type": "integer",
+              "default": 50000
             }
           }
-        ],
-        "type": "record"
+        ]
       }
     }
-  ],
-  "entity_checks": [
-
   ]
 }

@@ -1,4 +1,9 @@
 {
+  "supported_partials": {
+    "redis-ee": [
+      "config.redis"
+    ]
+  },
   "entity_checks": [
     {
       "custom_entity_check": {
@@ -12,13 +17,6 @@
     {
       "protocols": {
         "type": "set",
-        "required": true,
-        "default": [
-          "grpc",
-          "grpcs",
-          "http",
-          "https"
-        ],
         "elements": {
           "type": "string",
           "one_of": [
@@ -28,13 +26,20 @@
             "https"
           ]
         },
-        "description": "A set of strings representing HTTP protocols."
+        "required": true,
+        "description": "A set of strings representing HTTP protocols.",
+        "default": [
+          "grpc",
+          "grpcs",
+          "http",
+          "https"
+        ]
       }
     },
     {
       "consumer_group": {
-        "reference": "consumer_groups",
         "type": "foreign",
+        "reference": "consumer_groups",
         "description": "Custom type for representing a foreign key with a null value allowed.",
         "eq": null
       }
@@ -42,6 +47,7 @@
     {
       "config": {
         "required": true,
+        "type": "record",
         "fields": [
           {
             "identifier": {
@@ -60,17 +66,17 @@
             "window_size": {
               "required": true,
               "description": "One or more window sizes to apply a limit to (defined in seconds).",
+              "type": "array",
               "elements": {
                 "type": "number"
-              },
-              "type": "array"
+              }
             }
           },
           {
             "window_type": {
-              "type": "string",
-              "description": "Sets the time window to either `sliding` or `fixed`.",
               "default": "sliding",
+              "description": "Sets the time window to either `sliding` or `fixed`.",
+              "type": "string",
               "one_of": [
                 "fixed",
                 "sliding"
@@ -81,10 +87,10 @@
             "limit": {
               "required": true,
               "description": "One or more requests-per-window limits to apply.",
+              "type": "array",
               "elements": {
                 "type": "number"
-              },
-              "type": "array"
+              }
             }
           },
           {
@@ -97,8 +103,8 @@
           {
             "namespace": {
               "description": "The rate limiting namespace to use for this plugin instance. This namespace is used to share rate limiting counters across different instances. If it is not provided, a random UUID is generated. NOTE: For the plugin instances sharing the same namespace, all the configurations that are required for synchronizing counters, e.g. `strategy`, `redis`, `sync_rate`, `window_size`, `dictionary_name`, need to be the same.",
-              "type": "string",
-              "auto": true
+              "auto": true,
+              "type": "string"
             }
           },
           {
@@ -123,16 +129,16 @@
           },
           {
             "hide_client_headers": {
-              "default": false,
               "description": "Optionally hide informative response headers. Available options: `true` or `false`.",
+              "default": false,
               "type": "boolean"
             }
           },
           {
             "cost_strategy": {
-              "type": "string",
-              "description": "Strategy to use to evaluate query costs. Either `default` or `node_quantifier`.",
               "default": "default",
+              "description": "Strategy to use to evaluate query costs. Either `default` or `node_quantifier`.",
+              "type": "string",
               "one_of": [
                 "default",
                 "node_quantifier"
@@ -141,11 +147,11 @@
           },
           {
             "score_factor": {
-              "gt": 0,
               "type": "number",
               "required": false,
               "description": "A scoring factor to multiply (or divide) the cost. The `score_factor` must always be greater than 0.",
-              "default": 1
+              "default": 1,
+              "gt": 0
             }
           },
           {
@@ -158,6 +164,74 @@
           },
           {
             "redis": {
+              "shorthand_fields": [
+                {
+                  "timeout": {
+                    "type": "integer",
+                    "deprecation": {
+                      "removal_in_version": "4.0",
+                      "replaced_with": [
+                        {
+                          "path": [
+                            "connect_timeout"
+                          ]
+                        },
+                        {
+                          "path": [
+                            "send_timeout"
+                          ]
+                        },
+                        {
+                          "path": [
+                            "read_timeout"
+                          ]
+                        }
+                      ],
+                      "message": "redis schema field `timeout` is deprecated, use `connect_timeout`, `send_timeout` and `read_timeout`"
+                    }
+                  }
+                },
+                {
+                  "sentinel_addresses": {
+                    "deprecation": {
+                      "removal_in_version": "4.0",
+                      "replaced_with": [
+                        {
+                          "path": [
+                            "sentinel_nodes"
+                          ]
+                        }
+                      ],
+                      "message": "sentinel_addresses is deprecated, please use sentinel_nodes instead"
+                    },
+                    "len_min": 1,
+                    "type": "array",
+                    "elements": {
+                      "type": "string"
+                    }
+                  }
+                },
+                {
+                  "cluster_addresses": {
+                    "deprecation": {
+                      "removal_in_version": "4.0",
+                      "replaced_with": [
+                        {
+                          "path": [
+                            "cluster_nodes"
+                          ]
+                        }
+                      ],
+                      "message": "cluster_addresses is deprecated, please use cluster_nodes instead"
+                    },
+                    "len_min": 1,
+                    "type": "array",
+                    "elements": {
+                      "type": "string"
+                    }
+                  }
+                }
+              ],
               "entity_checks": [
                 {
                   "mutually_required": [
@@ -181,111 +255,41 @@
                 },
                 {
                   "conditional": {
-                    "if_field": "connection_is_proxied",
                     "then_match": {
                       "required": true
                     },
                     "if_match": {
                       "eq": true
                     },
-                    "then_field": "host"
+                    "then_field": "host",
+                    "if_field": "connection_is_proxied"
                   }
                 },
                 {
                   "custom_entity_check": {
-                    "run_with_missing_fields": true,
                     "field_sources": [
                       "database",
                       "connection_is_proxied"
-                    ]
+                    ],
+                    "run_with_missing_fields": true
                   }
                 },
                 {
                   "custom_entity_check": {
-                    "run_with_missing_fields": true,
                     "field_sources": [
                       "cluster_nodes",
                       "connection_is_proxied"
-                    ]
+                    ],
+                    "run_with_missing_fields": true
                   }
                 },
                 {
                   "custom_entity_check": {
-                    "run_with_missing_fields": true,
                     "field_sources": [
                       "sentinel_role",
                       "connection_is_proxied"
-                    ]
-                  }
-                }
-              ],
-              "type": "record",
-              "required": true,
-              "shorthand_fields": [
-                {
-                  "timeout": {
-                    "type": "integer",
-                    "deprecation": {
-                      "replaced_with": [
-                        {
-                          "path": [
-                            "connect_timeout"
-                          ]
-                        },
-                        {
-                          "path": [
-                            "send_timeout"
-                          ]
-                        },
-                        {
-                          "path": [
-                            "read_timeout"
-                          ]
-                        }
-                      ],
-                      "removal_in_version": "4.0",
-                      "message": "redis schema field `timeout` is deprecated, use `connect_timeout`, `send_timeout` and `read_timeout`"
-                    }
-                  }
-                },
-                {
-                  "sentinel_addresses": {
-                    "len_min": 1,
-                    "deprecation": {
-                      "replaced_with": [
-                        {
-                          "path": [
-                            "sentinel_nodes"
-                          ]
-                        }
-                      ],
-                      "removal_in_version": "4.0",
-                      "message": "sentinel_addresses is deprecated, please use sentinel_nodes instead"
-                    },
-                    "elements": {
-                      "type": "string"
-                    },
-                    "type": "array"
-                  }
-                },
-                {
-                  "cluster_addresses": {
-                    "len_min": 1,
-                    "deprecation": {
-                      "replaced_with": [
-                        {
-                          "path": [
-                            "cluster_nodes"
-                          ]
-                        }
-                      ],
-                      "removal_in_version": "4.0",
-                      "message": "cluster_addresses is deprecated, please use cluster_nodes instead"
-                    },
-                    "elements": {
-                      "type": "string"
-                    },
-                    "type": "array"
+                    ],
+                    "run_with_missing_fields": true
                   }
                 }
               ],
@@ -293,82 +297,82 @@
                 {
                   "host": {
                     "description": "A string representing a host name, such as example.com.",
-                    "default": "127.0.0.1",
-                    "type": "string"
+                    "type": "string",
+                    "default": "127.0.0.1"
                   }
                 },
                 {
                   "port": {
-                    "default": 6379,
+                    "type": "integer",
                     "description": "An integer representing a port number between 0 and 65535, inclusive.",
                     "between": [
                       0,
                       65535
                     ],
-                    "type": "integer"
+                    "default": 6379
                   }
                 },
                 {
                   "connect_timeout": {
-                    "default": 2000,
+                    "type": "integer",
                     "description": "An integer representing a timeout in milliseconds. Must be between 0 and 2^31-2.",
                     "between": [
                       0,
                       2147483646
                     ],
-                    "type": "integer"
+                    "default": 2000
                   }
                 },
                 {
                   "send_timeout": {
-                    "default": 2000,
+                    "type": "integer",
                     "description": "An integer representing a timeout in milliseconds. Must be between 0 and 2^31-2.",
                     "between": [
                       0,
                       2147483646
                     ],
-                    "type": "integer"
+                    "default": 2000
                   }
                 },
                 {
                   "read_timeout": {
-                    "default": 2000,
+                    "type": "integer",
                     "description": "An integer representing a timeout in milliseconds. Must be between 0 and 2^31-2.",
                     "between": [
                       0,
                       2147483646
                     ],
-                    "type": "integer"
+                    "default": 2000
                   }
                 },
                 {
                   "username": {
                     "description": "Username to use for Redis connections. If undefined, ACL authentication won't be performed. This requires Redis v6.0.0+. To be compatible with Redis v5.x.y, you can set it to `default`.",
-                    "referenceable": true,
-                    "type": "string"
+                    "type": "string",
+                    "referenceable": true
                   }
                 },
                 {
                   "password": {
-                    "referenceable": true,
-                    "description": "Password to use for Redis connections. If undefined, no AUTH commands are sent to Redis.",
                     "encrypted": true,
-                    "type": "string"
+                    "description": "Password to use for Redis connections. If undefined, no AUTH commands are sent to Redis.",
+                    "type": "string",
+                    "referenceable": true
                   }
                 },
                 {
                   "sentinel_username": {
                     "description": "Sentinel username to authenticate with a Redis Sentinel instance. If undefined, ACL authentication won't be performed. This requires Redis v6.2.0+.",
-                    "referenceable": true,
-                    "type": "string"
+                    "type": "string",
+                    "referenceable": true
                   }
                 },
                 {
                   "sentinel_password": {
-                    "referenceable": true,
-                    "description": "Sentinel password to authenticate with a Redis Sentinel instance. If undefined, no AUTH commands are sent to Redis Sentinels.",
                     "encrypted": true,
-                    "type": "string"
+                    "description": "Sentinel password to authenticate with a Redis Sentinel instance. If undefined, no AUTH commands are sent to Redis Sentinels.",
+                    "type": "string",
+                    "referenceable": true
                   }
                 },
                 {
@@ -380,23 +384,23 @@
                 },
                 {
                   "keepalive_pool_size": {
+                    "type": "integer",
                     "description": "The size limit for every cosocket connection pool associated with every remote server, per worker process. If neither `keepalive_pool_size` nor `keepalive_backlog` is specified, no pool is created. If `keepalive_pool_size` isn't specified but `keepalive_backlog` is specified, then the pool uses the default value. Try to increase (e.g. 512) this value if latency is high or throughput is low.",
-                    "default": 256,
                     "between": [
                       1,
                       2147483646
                     ],
-                    "type": "integer"
+                    "default": 256
                   }
                 },
                 {
                   "keepalive_backlog": {
                     "description": "Limits the total number of opened connections for a pool. If the connection pool is full, connection queues above the limit go into the backlog queue. If the backlog queue is full, subsequent connect operations fail and return `nil`. Queued operations (subject to set timeouts) resume once the number of connections in the pool is less than `keepalive_pool_size`. If latency is high or throughput is low, try increasing this value. Empirically, this value is larger than `keepalive_pool_size`.",
+                    "type": "integer",
                     "between": [
                       0,
                       2147483646
-                    ],
-                    "type": "integer"
+                    ]
                   }
                 },
                 {
@@ -418,81 +422,81 @@
                 },
                 {
                   "sentinel_nodes": {
-                    "type": "array",
-                    "required": false,
                     "len_min": 1,
+                    "type": "array",
                     "elements": {
+                      "type": "record",
                       "fields": [
                         {
                           "host": {
                             "required": true,
-                            "default": "127.0.0.1",
                             "description": "A string representing a host name, such as example.com.",
-                            "type": "string"
+                            "type": "string",
+                            "default": "127.0.0.1"
                           }
                         },
                         {
                           "port": {
-                            "default": 6379,
+                            "type": "integer",
                             "description": "An integer representing a port number between 0 and 65535, inclusive.",
                             "between": [
                               0,
                               65535
                             ],
-                            "type": "integer"
+                            "default": 6379
                           }
                         }
-                      ],
-                      "type": "record"
+                      ]
                     },
+                    "required": false,
                     "description": "Sentinel node addresses to use for Redis connections when the `redis` strategy is defined. Defining this field implies using a Redis Sentinel. The minimum length of the array is 1 element."
                   }
                 },
                 {
                   "cluster_nodes": {
-                    "type": "array",
-                    "required": false,
                     "len_min": 1,
+                    "type": "array",
                     "elements": {
+                      "type": "record",
                       "fields": [
                         {
                           "ip": {
                             "required": true,
-                            "default": "127.0.0.1",
                             "description": "A string representing a host name, such as example.com.",
-                            "type": "string"
+                            "type": "string",
+                            "default": "127.0.0.1"
                           }
                         },
                         {
                           "port": {
-                            "default": 6379,
+                            "type": "integer",
                             "description": "An integer representing a port number between 0 and 65535, inclusive.",
                             "between": [
                               0,
                               65535
                             ],
-                            "type": "integer"
+                            "default": 6379
                           }
                         }
-                      ],
-                      "type": "record"
+                      ]
                     },
+                    "required": false,
                     "description": "Cluster addresses to use for Redis connections when the `redis` strategy is defined. Defining this field implies using a Redis Cluster. The minimum length of the array is 1 element."
                   }
                 },
                 {
                   "ssl": {
                     "required": false,
-                    "default": false,
                     "description": "If set to true, uses SSL to connect to Redis.",
+                    "default": false,
                     "type": "boolean"
                   }
                 },
                 {
                   "ssl_verify": {
                     "required": false,
-                    "default": false,
                     "description": "If set to true, verifies the validity of the server SSL certificate. If setting this parameter, also configure `lua_ssl_trusted_certificate` in `kong.conf` to specify the CA (or server) certificate used by your Redis server. You may also need to configure `lua_ssl_verify_depth` accordingly.",
+                    "default": false,
                     "type": "boolean"
                   }
                 },
@@ -506,20 +510,22 @@
                 {
                   "cluster_max_redirections": {
                     "required": false,
-                    "default": 5,
                     "description": "Maximum retry attempts for redirection.",
+                    "default": 5,
                     "type": "integer"
                   }
                 },
                 {
                   "connection_is_proxied": {
                     "required": false,
-                    "default": false,
                     "description": "If the connection to Redis is proxied (e.g. Envoy), set it `true`. Set the `host` and `port` to point to the proxy address.",
+                    "default": false,
                     "type": "boolean"
                   }
                 }
-              ]
+              ],
+              "required": true,
+              "type": "record"
             }
           },
           {
@@ -530,14 +536,8 @@
               "type": "boolean"
             }
           }
-        ],
-        "type": "record"
+        ]
       }
     }
-  ],
-  "supported_partials": {
-    "redis-ee": [
-      "config.redis"
-    ]
-  }
+  ]
 }

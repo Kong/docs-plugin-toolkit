@@ -1,15 +1,11 @@
 {
+  "entity_checks": [
+
+  ],
   "fields": [
     {
       "protocols": {
         "type": "set",
-        "required": true,
-        "default": [
-          "grpc",
-          "grpcs",
-          "http",
-          "https"
-        ],
         "elements": {
           "type": "string",
           "one_of": [
@@ -19,19 +15,46 @@
             "https"
           ]
         },
-        "description": "A set of strings representing HTTP protocols."
+        "required": true,
+        "description": "A set of strings representing HTTP protocols.",
+        "default": [
+          "grpc",
+          "grpcs",
+          "http",
+          "https"
+        ]
       }
     },
     {
       "consumer_group": {
-        "reference": "consumer_groups",
         "type": "foreign",
+        "reference": "consumer_groups",
         "description": "Custom type for representing a foreign key with a null value allowed.",
         "eq": null
       }
     },
     {
       "config": {
+        "shorthand_fields": [
+          {
+            "proxy_host": {
+              "type": "string",
+              "deprecation": {
+                "removal_in_version": "4.0",
+                "message": "forward-proxy: config.proxy_host is deprecated, please use config.http_proxy_host instead"
+              }
+            }
+          },
+          {
+            "proxy_port": {
+              "type": "integer",
+              "deprecation": {
+                "removal_in_version": "4.0",
+                "message": "forward-proxy: config.proxy_port is deprecated, please use config.http_proxy_port instead"
+              }
+            }
+          }
+        ],
         "entity_checks": [
           {
             "at_least_one_of": [
@@ -58,28 +81,6 @@
             ]
           }
         ],
-        "type": "record",
-        "required": true,
-        "shorthand_fields": [
-          {
-            "proxy_host": {
-              "type": "string",
-              "deprecation": {
-                "message": "forward-proxy: config.proxy_host is deprecated, please use config.http_proxy_host instead",
-                "removal_in_version": "4.0"
-              }
-            }
-          },
-          {
-            "proxy_port": {
-              "type": "integer",
-              "deprecation": {
-                "message": "forward-proxy: config.proxy_port is deprecated, please use config.http_proxy_port instead",
-                "removal_in_version": "4.0"
-              }
-            }
-          }
-        ],
         "fields": [
           {
             "x_headers": {
@@ -103,11 +104,11 @@
           {
             "http_proxy_port": {
               "description": "An integer representing a port number between 0 and 65535, inclusive.",
+              "type": "integer",
               "between": [
                 0,
                 65535
-              ],
-              "type": "integer"
+              ]
             }
           },
           {
@@ -119,11 +120,11 @@
           {
             "https_proxy_port": {
               "description": "An integer representing a port number between 0 and 65535, inclusive.",
+              "type": "integer",
               "between": [
                 0,
                 65535
-              ],
-              "type": "integer"
+              ]
             }
           },
           {
@@ -147,11 +148,11 @@
           },
           {
             "auth_password": {
-              "encrypted": true,
               "type": "string",
+              "referenceable": true,
               "required": false,
               "description": "The password to authenticate with, if the forward proxy is protected\nby basic authentication.",
-              "referenceable": true
+              "encrypted": true
             }
           },
           {
@@ -162,11 +163,10 @@
               "type": "boolean"
             }
           }
-        ]
+        ],
+        "required": true,
+        "type": "record"
       }
     }
-  ],
-  "entity_checks": [
-
   ]
 }

@@ -1,15 +1,28 @@
 {
+  "entity_checks": [
+    {
+      "at_least_one_of": [
+        "config.allow_patterns",
+        "config.deny_patterns"
+      ]
+    },
+    {
+      "conditional": {
+        "then_match": {
+          "eq": false
+        },
+        "if_match": {
+          "eq": true
+        },
+        "then_field": "config.allow_all_conversation_history",
+        "if_field": "config.match_all_roles"
+      }
+    }
+  ],
   "fields": [
     {
       "protocols": {
         "type": "set",
-        "required": true,
-        "default": [
-          "grpc",
-          "grpcs",
-          "http",
-          "https"
-        ],
         "elements": {
           "type": "string",
           "one_of": [
@@ -19,69 +32,77 @@
             "https"
           ]
         },
-        "description": "A set of strings representing HTTP protocols."
+        "required": true,
+        "description": "A set of strings representing HTTP protocols.",
+        "default": [
+          "grpc",
+          "grpcs",
+          "http",
+          "https"
+        ]
       }
     },
     {
       "config": {
         "required": true,
+        "type": "record",
         "fields": [
           {
             "allow_patterns": {
-              "type": "array",
-              "required": false,
-              "description": "Array of valid regex patterns, or valid questions from the 'user' role in chat.",
               "len_max": 10,
               "elements": {
                 "len_min": 1,
-                "len_max": 500,
-                "type": "string"
-              }
+                "type": "string",
+                "len_max": 500
+              },
+              "required": false,
+              "description": "Array of valid regex patterns, or valid questions from the 'user' role in chat.",
+              "type": "array"
             }
           },
           {
             "deny_patterns": {
-              "type": "array",
-              "required": false,
-              "description": "Array of invalid regex patterns, or invalid questions from the 'user' role in chat.",
               "len_max": 10,
               "elements": {
                 "len_min": 1,
-                "len_max": 500,
-                "type": "string"
-              }
+                "type": "string",
+                "len_max": 500
+              },
+              "required": false,
+              "description": "Array of invalid regex patterns, or invalid questions from the 'user' role in chat.",
+              "type": "array"
             }
           },
           {
             "allow_all_conversation_history": {
               "required": true,
               "description": "If true, will ignore all previous chat prompts from the conversation history.",
-              "default": false,
-              "type": "boolean"
+              "type": "boolean",
+              "default": false
             }
           },
           {
             "max_request_body_size": {
               "default": 8192,
               "description": "max allowed body size allowed to be introspected. 0 means unlimited, but the size of this body will still be limited by Nginx's client_max_body_size.",
-              "gt": 0,
-              "type": "integer"
+              "type": "integer",
+              "gt": 0
             }
           },
           {
             "match_all_roles": {
               "required": true,
               "description": "If true, will match all roles in addition to 'user' role in conversation history.",
-              "default": false,
-              "type": "boolean"
+              "type": "boolean",
+              "default": false
             }
           },
           {
             "llm_format": {
               "type": "string",
               "required": false,
-              "default": "openai",
               "description": "LLM input and output format and schema to use",
+              "default": "openai",
               "one_of": [
                 "openai",
                 "bedrock",
@@ -95,36 +116,20 @@
             "genai_category": {
               "type": "string",
               "required": false,
-              "default": "text/generation",
               "description": "Generative AI category of the request",
+              "default": "text/generation",
               "one_of": [
                 "text/generation",
-                "text/embeddings"
+                "text/embeddings",
+                "audio/transcription",
+                "audio/speech",
+                "image/generation",
+                "video/generation",
+                "realtime/generation"
               ]
             }
           }
-        ],
-        "type": "record"
-      }
-    }
-  ],
-  "entity_checks": [
-    {
-      "at_least_one_of": [
-        "config.allow_patterns",
-        "config.deny_patterns"
-      ]
-    },
-    {
-      "conditional": {
-        "if_field": "config.match_all_roles",
-        "then_match": {
-          "eq": false
-        },
-        "if_match": {
-          "eq": true
-        },
-        "then_field": "config.allow_all_conversation_history"
+        ]
       }
     }
   ]

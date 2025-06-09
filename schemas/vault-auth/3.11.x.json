@@ -1,15 +1,11 @@
 {
+  "entity_checks": [
+
+  ],
   "fields": [
     {
       "protocols": {
         "type": "set",
-        "required": true,
-        "default": [
-          "grpc",
-          "grpcs",
-          "http",
-          "https"
-        ],
         "elements": {
           "type": "string",
           "one_of": [
@@ -19,21 +15,28 @@
             "https"
           ]
         },
-        "description": "A set of strings representing HTTP protocols."
+        "required": true,
+        "description": "A set of strings representing HTTP protocols.",
+        "default": [
+          "grpc",
+          "grpcs",
+          "http",
+          "https"
+        ]
       }
     },
     {
       "consumer_group": {
-        "reference": "consumer_groups",
         "type": "foreign",
+        "reference": "consumer_groups",
         "description": "Custom type for representing a foreign key with a null value allowed.",
         "eq": null
       }
     },
     {
       "consumer": {
-        "reference": "consumers",
         "type": "foreign",
+        "reference": "consumers",
         "description": "Custom type for representing a foreign key with a null value allowed.",
         "eq": null
       }
@@ -41,28 +44,29 @@
     {
       "config": {
         "required": true,
+        "type": "record",
         "fields": [
           {
             "access_token_name": {
               "type": "string",
-              "required": true,
-              "description": "Describes an array of comma-separated parameter names where the plugin looks for an access token. The client must send the access token in one of those key names, and the plugin will try to read the credential from a header or the querystring parameter with the same name. The key names can only contain [a-z], [A-Z], [0-9], [_], and [-].",
               "elements": {
                 "type": "string",
                 "description": "A string representing an HTTP header name."
               },
+              "required": true,
+              "description": "Describes an array of comma-separated parameter names where the plugin looks for an access token. The client must send the access token in one of those key names, and the plugin will try to read the credential from a header or the querystring parameter with the same name. The key names can only contain [a-z], [A-Z], [0-9], [_], and [-].",
               "default": "access_token"
             }
           },
           {
             "secret_token_name": {
               "type": "string",
-              "required": true,
-              "description": "Describes an array of comma-separated parameter names where the plugin looks for a secret token. The client must send the secret in one of those key names, and the plugin will try to read the credential from a header or the querystring parameter with the same name. The key names can only contain [a-z], [A-Z], [0-9], [_], and [-].",
               "elements": {
                 "type": "string",
                 "description": "A string representing an HTTP header name."
               },
+              "required": true,
+              "description": "Describes an array of comma-separated parameter names where the plugin looks for a secret token. The client must send the secret in one of those key names, and the plugin will try to read the credential from a header or the querystring parameter with the same name. The key names can only contain [a-z], [A-Z], [0-9], [_], and [-].",
               "default": "secret_token"
             }
           },
@@ -70,15 +74,15 @@
             "vault": {
               "required": true,
               "description": "A reference to an existing `vault` object within the database. `vault` entities define the connection and authentication parameters used to connect to a Vault HTTP(S) API.",
-              "reference": "vault_auth_vaults",
-              "type": "foreign"
+              "type": "foreign",
+              "reference": "vault_auth_vaults"
             }
           },
           {
             "hide_credentials": {
               "description": "An optional boolean value telling the plugin to show or hide the credential from the upstream service. If `true`, the plugin will strip the credential from the request (i.e. the header or querystring containing the key) before proxying it.",
-              "default": false,
-              "type": "boolean"
+              "type": "boolean",
+              "default": false
             }
           },
           {
@@ -90,23 +94,19 @@
           {
             "tokens_in_body": {
               "description": "If enabled, the plugin will read the request body (if said request has one and its MIME type is supported) and try to find the key in it. Supported MIME types are `application/www-form-urlencoded`, `application/json`, and `multipart/form-data`.",
-              "default": false,
-              "type": "boolean"
+              "type": "boolean",
+              "default": false
             }
           },
           {
             "run_on_preflight": {
               "description": "A boolean value that indicates whether the plugin should run (and try to authenticate) on `OPTIONS` preflight requests. If set to `false`, then `OPTIONS` requests will always be allowed.",
-              "default": true,
-              "type": "boolean"
+              "type": "boolean",
+              "default": true
             }
           }
-        ],
-        "type": "record"
+        ]
       }
     }
-  ],
-  "entity_checks": [
-
   ]
 }

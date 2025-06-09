@@ -1,9 +1,12 @@
 {
+  "entity_checks": [
+
+  ],
   "fields": [
     {
       "consumer": {
-        "reference": "consumers",
         "type": "foreign",
+        "reference": "consumers",
         "description": "Custom type for representing a foreign key with a null value allowed.",
         "eq": null
       }
@@ -11,6 +14,7 @@
     {
       "protocols": {
         "required": true,
+        "type": "set",
         "default": [
           "grpc",
           "grpcs",
@@ -29,14 +33,13 @@
             "ws",
             "wss"
           ]
-        },
-        "type": "set"
+        }
       }
     },
     {
       "consumer_group": {
-        "reference": "consumer_groups",
         "type": "foreign",
+        "reference": "consumer_groups",
         "description": "Custom type for representing a foreign key with a null value allowed.",
         "eq": null
       }
@@ -44,18 +47,19 @@
     {
       "config": {
         "required": true,
+        "type": "record",
         "entity_checks": [
           {
             "conditional": {
+              "if_match": {
+                "eq": true
+              },
+              "then_field": "start_tls",
               "if_field": "ldaps",
               "then_match": {
                 "eq": false
               },
-              "then_err": "'ldaps' and 'start_tls' cannot be enabled simultaneously",
-              "if_match": {
-                "eq": true
-              },
-              "then_field": "start_tls"
+              "then_err": "'ldaps' and 'start_tls' cannot be enabled simultaneously"
             }
           }
         ],
@@ -71,12 +75,12 @@
             "ldap_port": {
               "type": "integer",
               "required": true,
+              "description": "An integer representing a port number between 0 and 65535, inclusive.",
               "default": 389,
               "between": [
                 0,
                 65535
-              ],
-              "description": "An integer representing a port number between 0 and 65535, inclusive."
+              ]
             }
           },
           {
@@ -135,15 +139,15 @@
           },
           {
             "timeout": {
-              "default": 10000,
               "description": "An optional timeout in milliseconds when waiting for connection with LDAP server.",
+              "default": 10000,
               "type": "number"
             }
           },
           {
             "keepalive": {
-              "default": 60000,
               "description": "An optional value in milliseconds that defines how long an idle connection to LDAP server will live before being closed.",
+              "default": 60000,
               "type": "number"
             }
           },
@@ -155,8 +159,8 @@
           },
           {
             "header_type": {
-              "default": "ldap",
               "description": "An optional string to use as part of the Authorization header",
+              "default": "ldap",
               "type": "string"
             }
           },
@@ -167,12 +171,8 @@
               "type": "string"
             }
           }
-        ],
-        "type": "record"
+        ]
       }
     }
-  ],
-  "entity_checks": [
-
   ]
 }

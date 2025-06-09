@@ -1,9 +1,12 @@
 {
+  "entity_checks": [
+
+  ],
   "fields": [
     {
       "consumer": {
-        "reference": "consumers",
         "type": "foreign",
+        "reference": "consumers",
         "description": "Custom type for representing a foreign key with a null value allowed.",
         "eq": null
       }
@@ -11,6 +14,7 @@
     {
       "protocols": {
         "required": true,
+        "type": "set",
         "default": [
           "grpc",
           "grpcs",
@@ -29,14 +33,13 @@
             "ws",
             "wss"
           ]
-        },
-        "type": "set"
+        }
       }
     },
     {
       "consumer_group": {
-        "reference": "consumer_groups",
         "type": "foreign",
+        "reference": "consumer_groups",
         "description": "Custom type for representing a foreign key with a null value allowed.",
         "eq": null
       }
@@ -44,17 +47,18 @@
     {
       "config": {
         "required": true,
+        "type": "record",
         "entity_checks": [
           {
             "conditional": {
-              "if_field": "mandatory_scope",
               "then_match": {
                 "required": true
               },
               "if_match": {
                 "eq": true
               },
-              "then_field": "scopes"
+              "then_field": "scopes",
+              "if_field": "mandatory_scope"
             }
           }
         ],
@@ -62,132 +66,132 @@
           {
             "scopes": {
               "description": "Describes an array of scope names that will be available to the end user. If `mandatory_scope` is set to `true`, then `scopes` are required.",
+              "type": "array",
               "elements": {
                 "type": "string"
-              },
-              "type": "array"
+              }
             }
           },
           {
             "mandatory_scope": {
               "required": true,
               "description": "An optional boolean value telling the plugin to require at least one `scope` to be authorized by the end user.",
-              "default": false,
-              "type": "boolean"
+              "type": "boolean",
+              "default": false
             }
           },
           {
             "provision_key": {
-              "encrypted": true,
+              "auto": true,
               "unique": true,
               "required": true,
               "description": "The unique key the plugin has generated when it has been added to the Service.",
               "type": "string",
-              "auto": true
+              "encrypted": true
             }
           },
           {
             "token_expiration": {
               "required": true,
               "description": "An optional integer value telling the plugin how many seconds a token should last, after which the client will need to refresh the token. Set to `0` to disable the expiration.",
-              "default": 7200,
-              "type": "number"
+              "type": "number",
+              "default": 7200
             }
           },
           {
             "enable_authorization_code": {
               "required": true,
               "description": "An optional boolean value to enable the three-legged Authorization Code flow (RFC 6742 Section 4.1).",
-              "default": false,
-              "type": "boolean"
+              "type": "boolean",
+              "default": false
             }
           },
           {
             "enable_implicit_grant": {
               "required": true,
               "description": "An optional boolean value to enable the Implicit Grant flow which allows to provision a token as a result of the authorization process (RFC 6742 Section 4.2).",
-              "default": false,
-              "type": "boolean"
+              "type": "boolean",
+              "default": false
             }
           },
           {
             "enable_client_credentials": {
               "required": true,
               "description": "An optional boolean value to enable the Client Credentials Grant flow (RFC 6742 Section 4.4).",
-              "default": false,
-              "type": "boolean"
+              "type": "boolean",
+              "default": false
             }
           },
           {
             "enable_password_grant": {
               "required": true,
               "description": "An optional boolean value to enable the Resource Owner Password Credentials Grant flow (RFC 6742 Section 4.3).",
-              "default": false,
-              "type": "boolean"
+              "type": "boolean",
+              "default": false
             }
           },
           {
             "hide_credentials": {
               "required": true,
               "description": "An optional boolean value telling the plugin to show or hide the credential from the upstream service.",
-              "default": false,
-              "type": "boolean"
+              "type": "boolean",
+              "default": false
             }
           },
           {
             "accept_http_if_already_terminated": {
               "required": true,
               "description": "Accepts HTTPs requests that have already been terminated by a proxy or load balancer.",
-              "default": false,
-              "type": "boolean"
+              "type": "boolean",
+              "default": false
             }
           },
           {
             "anonymous": {
-              "description": "An optional string (consumer UUID or username) value to use as an “anonymous” consumer if authentication fails.",
-              "type": "string"
+              "type": "string",
+              "description": "An optional string (consumer UUID or username) value to use as an “anonymous” consumer if authentication fails."
             }
           },
           {
             "global_credentials": {
               "required": true,
               "description": "An optional boolean value that allows using the same OAuth credentials generated by the plugin with any other service whose OAuth 2.0 plugin configuration also has `config.global_credentials=true`.",
-              "default": false,
-              "type": "boolean"
+              "type": "boolean",
+              "default": false
             }
           },
           {
             "auth_header_name": {
-              "default": "authorization",
               "description": "The name of the header that is supposed to carry the access token.",
-              "type": "string"
+              "type": "string",
+              "default": "authorization"
             }
           },
           {
             "refresh_token_ttl": {
               "type": "number",
               "required": true,
+              "description": "Time-to-live value for data",
               "default": 1209600,
               "between": [
                 0,
                 100000000
-              ],
-              "description": "Time-to-live value for data"
+              ]
             }
           },
           {
             "reuse_refresh_token": {
               "required": true,
               "description": "An optional boolean value that indicates whether an OAuth refresh token is reused when refreshing an access token.",
-              "default": false,
-              "type": "boolean"
+              "type": "boolean",
+              "default": false
             }
           },
           {
             "persistent_refresh_token": {
               "required": true,
-              "default": false,
-              "type": "boolean"
+              "type": "boolean",
+              "default": false
             }
           },
           {
@@ -210,12 +214,8 @@
               "type": "string"
             }
           }
-        ],
-        "type": "record"
+        ]
       }
     }
-  ],
-  "entity_checks": [
-
   ]
 }
