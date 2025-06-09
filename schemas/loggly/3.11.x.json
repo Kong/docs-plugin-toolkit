@@ -2,16 +2,8 @@
   "fields": [
     {
       "protocols": {
-        "type": "set",
-        "required": true,
-        "default": [
-          "grpc",
-          "grpcs",
-          "http",
-          "https"
-        ],
         "elements": {
-          "description": "A string representing a protocol, such as HTTP or HTTPS.",
+          "type": "string",
           "one_of": [
             "grpc",
             "grpcs",
@@ -24,8 +16,16 @@
             "ws",
             "wss"
           ],
-          "type": "string"
+          "description": "A string representing a protocol, such as HTTP or HTTPS."
         },
+        "type": "set",
+        "default": [
+          "grpc",
+          "grpcs",
+          "http",
+          "https"
+        ],
+        "required": true,
         "description": "A set of strings representing protocols."
       }
     },
@@ -33,55 +33,52 @@
       "consumer_group": {
         "reference": "consumer_groups",
         "type": "foreign",
-        "description": "Custom type for representing a foreign key with a null value allowed.",
-        "eq": null
+        "eq": null,
+        "description": "Custom type for representing a foreign key with a null value allowed."
       }
     },
     {
       "config": {
-        "required": true,
         "fields": [
           {
             "host": {
-              "description": "A string representing a host name, such as example.com.",
+              "type": "string",
               "default": "logs-01.loggly.com",
-              "type": "string"
+              "description": "A string representing a host name, such as example.com."
             }
           },
           {
             "port": {
-              "default": 514,
               "description": "An integer representing a port number between 0 and 65535, inclusive.",
+              "type": "integer",
+              "default": 514,
               "between": [
                 0,
                 65535
-              ],
-              "type": "integer"
+              ]
             }
           },
           {
             "key": {
               "required": true,
-              "type": "string",
+              "referenceable": true,
               "encrypted": true,
-              "referenceable": true
+              "type": "string"
             }
           },
           {
             "tags": {
-              "default": [
-                "kong"
-              ],
+              "type": "set",
               "elements": {
                 "type": "string"
               },
-              "type": "set"
+              "default": [
+                "kong"
+              ]
             }
           },
           {
             "log_level": {
-              "default": "info",
-              "type": "string",
               "one_of": [
                 "debug",
                 "info",
@@ -91,13 +88,13 @@
                 "crit",
                 "alert",
                 "emerg"
-              ]
+              ],
+              "type": "string",
+              "default": "info"
             }
           },
           {
             "successful_severity": {
-              "default": "info",
-              "type": "string",
               "one_of": [
                 "debug",
                 "info",
@@ -107,13 +104,13 @@
                 "crit",
                 "alert",
                 "emerg"
-              ]
+              ],
+              "type": "string",
+              "default": "info"
             }
           },
           {
             "client_errors_severity": {
-              "default": "info",
-              "type": "string",
               "one_of": [
                 "debug",
                 "info",
@@ -123,13 +120,13 @@
                 "crit",
                 "alert",
                 "emerg"
-              ]
+              ],
+              "type": "string",
+              "default": "info"
             }
           },
           {
             "server_errors_severity": {
-              "default": "info",
-              "type": "string",
               "one_of": [
                 "debug",
                 "info",
@@ -139,7 +136,9 @@
                 "crit",
                 "alert",
                 "emerg"
-              ]
+              ],
+              "type": "string",
+              "default": "info"
             }
           },
           {
@@ -150,20 +149,21 @@
           },
           {
             "custom_fields_by_lua": {
-              "description": "Lua code as a key-value map",
               "values": {
-                "type": "string",
-                "len_min": 1
+                "len_min": 1,
+                "type": "string"
               },
+              "type": "map",
               "keys": {
-                "type": "string",
-                "len_min": 1
+                "len_min": 1,
+                "type": "string"
               },
-              "type": "map"
+              "description": "Lua code as a key-value map"
             }
           }
         ],
-        "type": "record"
+        "type": "record",
+        "required": true
       }
     }
   ],

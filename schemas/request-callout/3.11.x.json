@@ -2,14 +2,6 @@
   "fields": [
     {
       "protocols": {
-        "type": "set",
-        "required": true,
-        "default": [
-          "grpc",
-          "grpcs",
-          "http",
-          "https"
-        ],
         "elements": {
           "type": "string",
           "one_of": [
@@ -19,72 +11,75 @@
             "https"
           ]
         },
+        "type": "set",
+        "default": [
+          "grpc",
+          "grpcs",
+          "http",
+          "https"
+        ],
+        "required": true,
         "description": "A set of strings representing HTTP protocols."
       }
     },
     {
       "config": {
-        "required": true,
         "fields": [
           {
             "callouts": {
               "required": true,
-              "description": "A collection of callout objects, where each object represents an HTTP request made in the context of a proxy request.",
+              "type": "array",
               "elements": {
                 "fields": [
                   {
                     "name": {
+                      "type": "string",
                       "required": true,
-                      "description": "A string identifier for a callout. A callout object is referenceable via its name in the `kong.ctx.shared.callouts.<name>`",
-                      "type": "string"
+                      "description": "A string identifier for a callout. A callout object is referenceable via its name in the `kong.ctx.shared.callouts.<name>`"
                     }
                   },
                   {
                     "depends_on": {
-                      "type": "array",
-                      "required": true,
-                      "default": [
-
-                      ],
                       "elements": {
                         "required": true,
                         "type": "string"
                       },
+                      "type": "array",
+                      "default": [
+
+                      ],
+                      "required": true,
                       "description": "An array of callout names the current callout depends on. This dependency list determines the callout execution order via a topological sorting algorithm."
                     }
                   },
                   {
                     "request": {
-                      "required": true,
-                      "description": "The customizations for the callout request.",
                       "fields": [
                         {
                           "url": {
-                            "required": true,
-                            "description": "The URL that will be requested.",
                             "referenceable": true,
-                            "type": "string"
+                            "type": "string",
+                            "required": true,
+                            "description": "The URL that will be requested."
                           }
                         },
                         {
                           "method": {
-                            "match": "^%u+$",
+                            "description": "The HTTP method that will be requested.",
+                            "default": "GET",
                             "type": "string",
                             "required": true,
-                            "default": "GET",
-                            "description": "The HTTP method that will be requested."
+                            "match": "^%u+$"
                           }
                         },
                         {
                           "http_opts": {
-                            "required": true,
-                            "description": "HTTP connection parameters.",
                             "fields": [
                               {
                                 "ssl_verify": {
-                                  "description": "If set to `true`, verifies the validity of the server SSL certificate. If setting this parameter, also configure `lua_ssl_trusted_certificate` in `kong.conf` to specify the CA (or server) certificate used by your Redis server. You may also need to configure `lua_ssl_verify_depth` accordingly.",
+                                  "type": "boolean",
                                   "default": false,
-                                  "type": "boolean"
+                                  "description": "If set to `true`, verifies the validity of the server SSL certificate. If setting this parameter, also configure `lua_ssl_trusted_certificate` in `kong.conf` to specify the CA (or server) certificate used by your Redis server. You may also need to configure `lua_ssl_verify_depth` accordingly."
                                 }
                               },
                               {
@@ -95,6 +90,40 @@
                               },
                               {
                                 "timeouts": {
+                                  "fields": [
+                                    {
+                                      "connect": {
+                                        "type": "integer",
+                                        "description": "The socket connect timeout.",
+                                        "between": [
+                                          0,
+                                          2147483646
+                                        ]
+                                      }
+                                    },
+                                    {
+                                      "write": {
+                                        "type": "integer",
+                                        "description": "The socket write timeout.",
+                                        "between": [
+                                          0,
+                                          2147483646
+                                        ]
+                                      }
+                                    },
+                                    {
+                                      "read": {
+                                        "type": "integer",
+                                        "description": "The socket read timeout. ",
+                                        "between": [
+                                          0,
+                                          2147483646
+                                        ]
+                                      }
+                                    }
+                                  ],
+                                  "type": "record",
+                                  "description": "Socket timeouts in milliseconds. All or none must be set.",
                                   "entity_checks": [
                                     {
                                       "mutually_required": [
@@ -103,360 +132,630 @@
                                         "read"
                                       ]
                                     }
-                                  ],
-                                  "description": "Socket timeouts in milliseconds. All or none must be set.",
-                                  "fields": [
-                                    {
-                                      "connect": {
-                                        "description": "The socket connect timeout.",
-                                        "between": [
-                                          0,
-                                          2147483646
-                                        ],
-                                        "type": "integer"
-                                      }
-                                    },
-                                    {
-                                      "write": {
-                                        "description": "The socket write timeout.",
-                                        "between": [
-                                          0,
-                                          2147483646
-                                        ],
-                                        "type": "integer"
-                                      }
-                                    },
-                                    {
-                                      "read": {
-                                        "description": "The socket read timeout. ",
-                                        "between": [
-                                          0,
-                                          2147483646
-                                        ],
-                                        "type": "integer"
-                                      }
-                                    }
-                                  ],
-                                  "type": "record"
+                                  ]
                                 }
                               },
                               {
                                 "proxy": {
-                                  "description": "Proxy settings.",
                                   "fields": [
                                     {
                                       "auth_username": {
-                                        "required": false,
-                                        "description": "The username to authenticate with, if the forward proxy is protected by basic authentication.",
+                                        "type": "string",
                                         "referenceable": true,
-                                        "type": "string"
+                                        "required": false,
+                                        "description": "The username to authenticate with, if the forward proxy is protected by basic authentication."
                                       }
                                     },
                                     {
                                       "auth_password": {
-                                        "required": false,
-                                        "description": "The password to authenticate with, if the forward proxy is protected by basic authentication.",
                                         "referenceable": true,
-                                        "type": "string"
+                                        "required": false,
+                                        "type": "string",
+                                        "encrypted": true,
+                                        "description": "The password to authenticate with, if the forward proxy is protected by basic authentication."
                                       }
                                     },
                                     {
                                       "https_proxy": {
-                                        "type": "string",
-                                        "description": "The HTTPS proxy URL. This proxy server will be used for HTTPS requests."
+                                        "description": "The HTTPS proxy URL. This proxy server will be used for HTTPS requests.",
+                                        "type": "string"
                                       }
                                     },
                                     {
                                       "http_proxy": {
-                                        "type": "string",
-                                        "description": "The HTTP proxy URL. This proxy server will be used for HTTP requests."
+                                        "description": "The HTTP proxy URL. This proxy server will be used for HTTP requests.",
+                                        "type": "string"
                                       }
                                     }
                                   ],
-                                  "type": "record"
+                                  "type": "record",
+                                  "description": "Proxy settings."
                                 }
                               }
                             ],
-                            "type": "record"
+                            "type": "record",
+                            "required": true,
+                            "description": "HTTP connection parameters."
                           }
                         },
                         {
                           "query": {
-                            "required": true,
-                            "description": "Callout request query param customizations.",
                             "fields": [
                               {
                                 "forward": {
-                                  "description": "If `true`, forwards the incoming request's query params to the callout request. ",
+                                  "type": "boolean",
                                   "default": false,
-                                  "type": "boolean"
+                                  "description": "If `true`, forwards the incoming request's query params to the callout request. "
                                 }
                               },
                               {
                                 "custom": {
                                   "values": {
-                                    "required": false,
                                     "referenceable": true,
+                                    "required": false,
+                                    "type": "string"
+                                  },
+                                  "keys": {
                                     "type": "string"
                                   },
                                   "type": "map",
                                   "required": false,
-                                  "description": "The custom query params to be added in the callout HTTP request. Values can contain Lua expressions in the form `$(some_lua_expression)`. The syntax is based on `request-transformer-advanced` templates.",
-                                  "keys": {
-                                    "type": "string"
-                                  }
+                                  "description": "The custom query params to be added in the callout HTTP request. Values can contain Lua expressions in the form `$(some_lua_expression)`. The syntax is based on `request-transformer-advanced` templates."
                                 }
                               }
                             ],
-                            "type": "record"
+                            "type": "record",
+                            "required": true,
+                            "description": "Callout request query param customizations."
                           }
                         },
                         {
                           "headers": {
-                            "required": true,
-                            "description": "Callout request header customizations.",
                             "fields": [
                               {
                                 "forward": {
-                                  "description": "If `true`, forwards the incoming request's headers to the callout request. ",
+                                  "type": "boolean",
                                   "default": false,
-                                  "type": "boolean"
+                                  "description": "If `true`, forwards the incoming request's headers to the callout request. "
                                 }
                               },
                               {
                                 "custom": {
                                   "values": {
-                                    "required": false,
                                     "referenceable": true,
+                                    "required": false,
+                                    "type": "string"
+                                  },
+                                  "keys": {
                                     "type": "string"
                                   },
                                   "type": "map",
                                   "required": false,
-                                  "description": "The custom headers to be added in the callout HTTP request. Values can contain Lua expressions in the form `$(some_lua_expression)`. The syntax is based on `request-transformer-advanced` templates.",
-                                  "keys": {
-                                    "type": "string"
-                                  }
+                                  "description": "The custom headers to be added in the callout HTTP request. Values can contain Lua expressions in the form `$(some_lua_expression)`. The syntax is based on `request-transformer-advanced` templates."
                                 }
                               }
                             ],
-                            "type": "record"
+                            "type": "record",
+                            "required": true,
+                            "description": "Callout request header customizations."
                           }
                         },
                         {
                           "body": {
-                            "required": true,
-                            "description": "Callout request body customizations.",
                             "fields": [
                               {
                                 "forward": {
-                                  "description": "If `true`, forwards the incoming request's body to the callout request.",
+                                  "type": "boolean",
                                   "default": false,
-                                  "type": "boolean"
+                                  "description": "If `true`, forwards the incoming request's body to the callout request."
                                 }
                               },
                               {
                                 "decode": {
-                                  "description": "If `true`, decodes the request's body and make it available for customizations. Only JSON content type is supported.",
+                                  "type": "boolean",
                                   "default": false,
-                                  "type": "boolean"
+                                  "description": "If `true`, decodes the request's body and make it available for customizations. Only JSON content type is supported."
                                 }
                               },
                               {
                                 "custom": {
                                   "values": {
-                                    "required": false,
                                     "referenceable": true,
+                                    "required": false,
+                                    "type": "string"
+                                  },
+                                  "keys": {
                                     "type": "string"
                                   },
                                   "type": "map",
                                   "required": false,
-                                  "description": "The custom body fields to be added to the callout HTTP request. Values can contain Lua expressions in the form $(some_lua_expression). The syntax is based on `request-transformer-advanced` templates.",
-                                  "keys": {
-                                    "type": "string"
-                                  }
+                                  "description": "The custom body fields to be added to the callout HTTP request. Values can contain Lua expressions in the form $(some_lua_expression). The syntax is based on `request-transformer-advanced` templates."
                                 }
                               }
                             ],
-                            "type": "record"
+                            "type": "record",
+                            "required": true,
+                            "description": "Callout request body customizations."
                           }
                         },
                         {
                           "error": {
-                            "required": true,
-                            "description": "The error handling policy the plugin will apply to TCP and HTTP errors.",
                             "fields": [
                               {
                                 "on_error": {
-                                  "default": "fail",
                                   "type": "string",
                                   "one_of": [
                                     "retry",
                                     "fail",
                                     "continue"
-                                  ]
+                                  ],
+                                  "default": "fail"
                                 }
                               },
                               {
                                 "retries": {
-                                  "description": "The number of retries the plugin will attempt on TCP and HTTP errors if `on_error` is set to `retry`.",
+                                  "type": "integer",
                                   "default": 2,
-                                  "type": "integer"
+                                  "description": "The number of retries the plugin will attempt on TCP and HTTP errors if `on_error` is set to `retry`."
                                 }
                               },
                               {
                                 "http_statuses": {
-                                  "description": "The list of HTTP status codes considered errors under the error handling policy.",
+                                  "type": "array",
                                   "elements": {
+                                    "type": "integer",
                                     "between": [
                                       100,
                                       999
-                                    ],
-                                    "type": "integer"
+                                    ]
                                   },
-                                  "type": "array"
+                                  "description": "The list of HTTP status codes considered errors under the error handling policy."
                                 }
                               },
                               {
                                 "error_response_code": {
-                                  "description": "The error code to respond with if `on_error` is `fail` or if `retries` is achieved.",
+                                  "type": "integer",
                                   "default": 400,
-                                  "type": "integer"
+                                  "description": "The error code to respond with if `on_error` is `fail` or if `retries` is achieved."
                                 }
                               },
                               {
                                 "error_response_msg": {
-                                  "description": "The error mesasge to respond with if `on_error` is set to `fail` or if `retries` is achieved. Templating with Lua expressions is supported.",
+                                  "type": "string",
                                   "default": "service callout error",
-                                  "type": "string"
+                                  "description": "The error mesasge to respond with if `on_error` is set to `fail` or if `retries` is achieved. Templating with Lua expressions is supported."
                                 }
                               }
                             ],
-                            "type": "record"
+                            "type": "record",
+                            "required": true,
+                            "description": "The error handling policy the plugin will apply to TCP and HTTP errors."
                           }
                         },
                         {
                           "by_lua": {
+                            "type": "string",
                             "required": false,
-                            "description": "Lua code that executes before the callout request is made. **Warning** can impact system behavior. Standard Lua sandboxing restrictions apply.",
-                            "type": "string"
+                            "description": "Lua code that executes before the callout request is made. **Warning** can impact system behavior. Standard Lua sandboxing restrictions apply."
                           }
                         }
                       ],
-                      "type": "record"
+                      "type": "record",
+                      "required": true,
+                      "description": "The customizations for the callout request."
                     }
                   },
                   {
                     "response": {
-                      "required": true,
-                      "description": "Configurations of callout response handling.",
                       "fields": [
                         {
                           "headers": {
-                            "required": true,
-                            "description": "Callout response header customizations.",
                             "fields": [
                               {
                                 "store": {
-                                  "description": "If `false`, skips storing the callout response headers into kong.ctx.shared.callouts.<name>.response.headers.",
+                                  "type": "boolean",
                                   "default": true,
-                                  "type": "boolean"
+                                  "description": "If `false`, skips storing the callout response headers into kong.ctx.shared.callouts.<name>.response.headers."
                                 }
                               }
                             ],
-                            "type": "record"
+                            "type": "record",
+                            "required": true,
+                            "description": "Callout response header customizations."
                           }
                         },
                         {
                           "body": {
-                            "required": true,
                             "fields": [
                               {
                                 "store": {
-                                  "description": "If `false`, skips storing the callout response body into kong.ctx.shared.callouts.<name>.response.body.",
+                                  "type": "boolean",
                                   "default": true,
-                                  "type": "boolean"
+                                  "description": "If `false`, skips storing the callout response body into kong.ctx.shared.callouts.<name>.response.body."
                                 }
                               },
                               {
                                 "decode": {
-                                  "description": "If `true`, decodes the response body before storing into the context. Only JSON is supported.",
+                                  "type": "boolean",
                                   "default": false,
-                                  "type": "boolean"
+                                  "description": "If `true`, decodes the response body before storing into the context. Only JSON is supported."
                                 }
                               }
                             ],
-                            "type": "record"
+                            "type": "record",
+                            "required": true
                           }
                         },
                         {
                           "by_lua": {
+                            "type": "string",
                             "required": false,
-                            "description": "Lua code that executes after the callout response is received, before caching takes place. Can produce side effects. Standard Lua sandboxing restrictions apply.",
-                            "type": "string"
+                            "description": "Lua code that executes after the callout response is received, before caching takes place. Can produce side effects. Standard Lua sandboxing restrictions apply."
                           }
                         }
                       ],
-                      "type": "record"
+                      "type": "record",
+                      "required": true,
+                      "description": "Configurations of callout response handling."
                     }
                   },
                   {
                     "cache": {
-                      "required": true,
-                      "description": "Callout caching configuration.",
                       "fields": [
                         {
                           "bypass": {
-                            "description": "If `true`, skips caching the callout response.",
+                            "type": "boolean",
                             "default": false,
-                            "type": "boolean"
+                            "description": "If `true`, skips caching the callout response."
                           }
                         }
                       ],
-                      "type": "record"
+                      "type": "record",
+                      "required": true,
+                      "description": "Callout caching configuration."
                     }
                   }
                 ],
                 "type": "record"
               },
-              "type": "array"
+              "description": "A collection of callout objects, where each object represents an HTTP request made in the context of a proxy request."
             }
           },
           {
             "cache": {
-              "required": true,
-              "description": "Plugin global caching configuration.",
               "fields": [
                 {
                   "strategy": {
-                    "type": "string",
-                    "required": true,
-                    "default": "off",
-                    "description": "The backing data store in which to hold cache entities. Accepted values are: `off`, `memory`, and `redis`.",
                     "one_of": [
                       "memory",
                       "redis",
                       "off"
-                    ]
+                    ],
+                    "type": "string",
+                    "default": "off",
+                    "required": true,
+                    "description": "The backing data store in which to hold cache entities. Accepted values are: `off`, `memory`, and `redis`."
                   }
                 },
                 {
                   "memory": {
-                    "required": true,
                     "fields": [
                       {
                         "dictionary_name": {
-                          "required": true,
+                          "type": "string",
                           "default": "kong_db_cache",
-                          "description": "The name of the shared dictionary in which to hold cache entities when the memory strategy is selected. Note that this dictionary currently must be defined manually in the Kong Nginx template.",
-                          "type": "string"
+                          "required": true,
+                          "description": "The name of the shared dictionary in which to hold cache entities when the memory strategy is selected. Note that this dictionary currently must be defined manually in the Kong Nginx template."
                         }
                       }
                     ],
-                    "type": "record"
+                    "type": "record",
+                    "required": true
                   }
                 },
                 {
                   "redis": {
+                    "type": "record",
+                    "fields": [
+                      {
+                        "host": {
+                          "type": "string",
+                          "default": "127.0.0.1",
+                          "description": "A string representing a host name, such as example.com."
+                        }
+                      },
+                      {
+                        "port": {
+                          "description": "An integer representing a port number between 0 and 65535, inclusive.",
+                          "type": "integer",
+                          "default": 6379,
+                          "between": [
+                            0,
+                            65535
+                          ]
+                        }
+                      },
+                      {
+                        "connect_timeout": {
+                          "description": "An integer representing a timeout in milliseconds. Must be between 0 and 2^31-2.",
+                          "type": "integer",
+                          "default": 2000,
+                          "between": [
+                            0,
+                            2147483646
+                          ]
+                        }
+                      },
+                      {
+                        "send_timeout": {
+                          "description": "An integer representing a timeout in milliseconds. Must be between 0 and 2^31-2.",
+                          "type": "integer",
+                          "default": 2000,
+                          "between": [
+                            0,
+                            2147483646
+                          ]
+                        }
+                      },
+                      {
+                        "read_timeout": {
+                          "description": "An integer representing a timeout in milliseconds. Must be between 0 and 2^31-2.",
+                          "type": "integer",
+                          "default": 2000,
+                          "between": [
+                            0,
+                            2147483646
+                          ]
+                        }
+                      },
+                      {
+                        "username": {
+                          "referenceable": true,
+                          "type": "string",
+                          "description": "Username to use for Redis connections. If undefined, ACL authentication won't be performed. This requires Redis v6.0.0+. To be compatible with Redis v5.x.y, you can set it to `default`."
+                        }
+                      },
+                      {
+                        "password": {
+                          "referenceable": true,
+                          "type": "string",
+                          "encrypted": true,
+                          "description": "Password to use for Redis connections. If undefined, no AUTH commands are sent to Redis."
+                        }
+                      },
+                      {
+                        "sentinel_username": {
+                          "referenceable": true,
+                          "type": "string",
+                          "description": "Sentinel username to authenticate with a Redis Sentinel instance. If undefined, ACL authentication won't be performed. This requires Redis v6.2.0+."
+                        }
+                      },
+                      {
+                        "sentinel_password": {
+                          "referenceable": true,
+                          "type": "string",
+                          "encrypted": true,
+                          "description": "Sentinel password to authenticate with a Redis Sentinel instance. If undefined, no AUTH commands are sent to Redis Sentinels."
+                        }
+                      },
+                      {
+                        "database": {
+                          "type": "integer",
+                          "default": 0,
+                          "description": "Database to use for the Redis connection when using the `redis` strategy"
+                        }
+                      },
+                      {
+                        "keepalive_pool_size": {
+                          "description": "The size limit for every cosocket connection pool associated with every remote server, per worker process. If neither `keepalive_pool_size` nor `keepalive_backlog` is specified, no pool is created. If `keepalive_pool_size` isn't specified but `keepalive_backlog` is specified, then the pool uses the default value. Try to increase (e.g. 512) this value if latency is high or throughput is low.",
+                          "default": 256,
+                          "type": "integer",
+                          "between": [
+                            1,
+                            2147483646
+                          ]
+                        }
+                      },
+                      {
+                        "keepalive_backlog": {
+                          "type": "integer",
+                          "description": "Limits the total number of opened connections for a pool. If the connection pool is full, connection queues above the limit go into the backlog queue. If the backlog queue is full, subsequent connect operations fail and return `nil`. Queued operations (subject to set timeouts) resume once the number of connections in the pool is less than `keepalive_pool_size`. If latency is high or throughput is low, try increasing this value. Empirically, this value is larger than `keepalive_pool_size`.",
+                          "between": [
+                            0,
+                            2147483646
+                          ]
+                        }
+                      },
+                      {
+                        "sentinel_master": {
+                          "type": "string",
+                          "description": "Sentinel master to use for Redis connections. Defining this value implies using Redis Sentinel."
+                        }
+                      },
+                      {
+                        "sentinel_role": {
+                          "one_of": [
+                            "master",
+                            "slave",
+                            "any"
+                          ],
+                          "type": "string",
+                          "description": "Sentinel role to use for Redis connections when the `redis` strategy is defined. Defining this value implies using Redis Sentinel."
+                        }
+                      },
+                      {
+                        "sentinel_nodes": {
+                          "len_min": 1,
+                          "elements": {
+                            "fields": [
+                              {
+                                "host": {
+                                  "type": "string",
+                                  "default": "127.0.0.1",
+                                  "required": true,
+                                  "description": "A string representing a host name, such as example.com."
+                                }
+                              },
+                              {
+                                "port": {
+                                  "description": "An integer representing a port number between 0 and 65535, inclusive.",
+                                  "type": "integer",
+                                  "default": 6379,
+                                  "between": [
+                                    0,
+                                    65535
+                                  ]
+                                }
+                              }
+                            ],
+                            "type": "record"
+                          },
+                          "type": "array",
+                          "required": false,
+                          "description": "Sentinel node addresses to use for Redis connections when the `redis` strategy is defined. Defining this field implies using a Redis Sentinel. The minimum length of the array is 1 element."
+                        }
+                      },
+                      {
+                        "cluster_nodes": {
+                          "len_min": 1,
+                          "elements": {
+                            "fields": [
+                              {
+                                "ip": {
+                                  "type": "string",
+                                  "default": "127.0.0.1",
+                                  "required": true,
+                                  "description": "A string representing a host name, such as example.com."
+                                }
+                              },
+                              {
+                                "port": {
+                                  "description": "An integer representing a port number between 0 and 65535, inclusive.",
+                                  "type": "integer",
+                                  "default": 6379,
+                                  "between": [
+                                    0,
+                                    65535
+                                  ]
+                                }
+                              }
+                            ],
+                            "type": "record"
+                          },
+                          "type": "array",
+                          "required": false,
+                          "description": "Cluster addresses to use for Redis connections when the `redis` strategy is defined. Defining this field implies using a Redis Cluster. The minimum length of the array is 1 element."
+                        }
+                      },
+                      {
+                        "ssl": {
+                          "default": false,
+                          "type": "boolean",
+                          "required": false,
+                          "description": "If set to true, uses SSL to connect to Redis."
+                        }
+                      },
+                      {
+                        "ssl_verify": {
+                          "default": false,
+                          "type": "boolean",
+                          "required": false,
+                          "description": "If set to true, verifies the validity of the server SSL certificate. If setting this parameter, also configure `lua_ssl_trusted_certificate` in `kong.conf` to specify the CA (or server) certificate used by your Redis server. You may also need to configure `lua_ssl_verify_depth` accordingly."
+                        }
+                      },
+                      {
+                        "server_name": {
+                          "type": "string",
+                          "required": false,
+                          "description": "A string representing an SNI (server name indication) value for TLS."
+                        }
+                      },
+                      {
+                        "cluster_max_redirections": {
+                          "default": 5,
+                          "type": "integer",
+                          "required": false,
+                          "description": "Maximum retry attempts for redirection."
+                        }
+                      },
+                      {
+                        "connection_is_proxied": {
+                          "default": false,
+                          "type": "boolean",
+                          "required": false,
+                          "description": "If the connection to Redis is proxied (e.g. Envoy), set it `true`. Set the `host` and `port` to point to the proxy address."
+                        }
+                      }
+                    ],
+                    "shorthand_fields": [
+                      {
+                        "timeout": {
+                          "deprecation": {
+                            "replaced_with": [
+                              {
+                                "path": [
+                                  "connect_timeout"
+                                ]
+                              },
+                              {
+                                "path": [
+                                  "send_timeout"
+                                ]
+                              },
+                              {
+                                "path": [
+                                  "read_timeout"
+                                ]
+                              }
+                            ],
+                            "removal_in_version": "4.0",
+                            "message": "redis schema field `timeout` is deprecated, use `connect_timeout`, `send_timeout` and `read_timeout`"
+                          },
+                          "type": "integer"
+                        }
+                      },
+                      {
+                        "sentinel_addresses": {
+                          "deprecation": {
+                            "replaced_with": [
+                              {
+                                "path": [
+                                  "sentinel_nodes"
+                                ]
+                              }
+                            ],
+                            "removal_in_version": "4.0",
+                            "message": "sentinel_addresses is deprecated, please use sentinel_nodes instead"
+                          },
+                          "type": "array",
+                          "len_min": 1,
+                          "elements": {
+                            "type": "string"
+                          }
+                        }
+                      },
+                      {
+                        "cluster_addresses": {
+                          "deprecation": {
+                            "replaced_with": [
+                              {
+                                "path": [
+                                  "cluster_nodes"
+                                ]
+                              }
+                            ],
+                            "removal_in_version": "4.0",
+                            "message": "cluster_addresses is deprecated, please use cluster_nodes instead"
+                          },
+                          "type": "array",
+                          "len_min": 1,
+                          "elements": {
+                            "type": "string"
+                          }
+                        }
+                      }
+                    ],
+                    "required": true,
                     "entity_checks": [
                       {
                         "mutually_required": [
@@ -480,342 +779,41 @@
                       },
                       {
                         "conditional": {
+                          "then_field": "host",
                           "if_field": "connection_is_proxied",
                           "then_match": {
                             "required": true
                           },
                           "if_match": {
                             "eq": true
-                          },
-                          "then_field": "host"
-                        }
-                      },
-                      {
-                        "custom_entity_check": {
-                          "run_with_missing_fields": true,
-                          "field_sources": [
-                            "database",
-                            "connection_is_proxied"
-                          ]
-                        }
-                      },
-                      {
-                        "custom_entity_check": {
-                          "run_with_missing_fields": true,
-                          "field_sources": [
-                            "cluster_nodes",
-                            "connection_is_proxied"
-                          ]
-                        }
-                      },
-                      {
-                        "custom_entity_check": {
-                          "run_with_missing_fields": true,
-                          "field_sources": [
-                            "sentinel_role",
-                            "connection_is_proxied"
-                          ]
-                        }
-                      }
-                    ],
-                    "type": "record",
-                    "required": true,
-                    "shorthand_fields": [
-                      {
-                        "timeout": {
-                          "type": "integer",
-                          "deprecation": {
-                            "replaced_with": [
-                              {
-                                "path": [
-                                  "connect_timeout"
-                                ]
-                              },
-                              {
-                                "path": [
-                                  "send_timeout"
-                                ]
-                              },
-                              {
-                                "path": [
-                                  "read_timeout"
-                                ]
-                              }
-                            ],
-                            "removal_in_version": "4.0",
-                            "message": "redis schema field `timeout` is deprecated, use `connect_timeout`, `send_timeout` and `read_timeout`"
                           }
                         }
                       },
                       {
-                        "sentinel_addresses": {
-                          "len_min": 1,
-                          "deprecation": {
-                            "replaced_with": [
-                              {
-                                "path": [
-                                  "sentinel_nodes"
-                                ]
-                              }
-                            ],
-                            "removal_in_version": "4.0",
-                            "message": "sentinel_addresses is deprecated, please use sentinel_nodes instead"
-                          },
-                          "elements": {
-                            "type": "string"
-                          },
-                          "type": "array"
-                        }
-                      },
-                      {
-                        "cluster_addresses": {
-                          "len_min": 1,
-                          "deprecation": {
-                            "replaced_with": [
-                              {
-                                "path": [
-                                  "cluster_nodes"
-                                ]
-                              }
-                            ],
-                            "removal_in_version": "4.0",
-                            "message": "cluster_addresses is deprecated, please use cluster_nodes instead"
-                          },
-                          "elements": {
-                            "type": "string"
-                          },
-                          "type": "array"
-                        }
-                      }
-                    ],
-                    "fields": [
-                      {
-                        "host": {
-                          "description": "A string representing a host name, such as example.com.",
-                          "default": "127.0.0.1",
-                          "type": "string"
-                        }
-                      },
-                      {
-                        "port": {
-                          "default": 6379,
-                          "description": "An integer representing a port number between 0 and 65535, inclusive.",
-                          "between": [
-                            0,
-                            65535
+                        "custom_entity_check": {
+                          "field_sources": [
+                            "database",
+                            "connection_is_proxied"
                           ],
-                          "type": "integer"
+                          "run_with_missing_fields": true
                         }
                       },
                       {
-                        "connect_timeout": {
-                          "default": 2000,
-                          "description": "An integer representing a timeout in milliseconds. Must be between 0 and 2^31-2.",
-                          "between": [
-                            0,
-                            2147483646
+                        "custom_entity_check": {
+                          "field_sources": [
+                            "cluster_nodes",
+                            "connection_is_proxied"
                           ],
-                          "type": "integer"
+                          "run_with_missing_fields": true
                         }
                       },
                       {
-                        "send_timeout": {
-                          "default": 2000,
-                          "description": "An integer representing a timeout in milliseconds. Must be between 0 and 2^31-2.",
-                          "between": [
-                            0,
-                            2147483646
+                        "custom_entity_check": {
+                          "field_sources": [
+                            "sentinel_role",
+                            "connection_is_proxied"
                           ],
-                          "type": "integer"
-                        }
-                      },
-                      {
-                        "read_timeout": {
-                          "default": 2000,
-                          "description": "An integer representing a timeout in milliseconds. Must be between 0 and 2^31-2.",
-                          "between": [
-                            0,
-                            2147483646
-                          ],
-                          "type": "integer"
-                        }
-                      },
-                      {
-                        "username": {
-                          "description": "Username to use for Redis connections. If undefined, ACL authentication won't be performed. This requires Redis v6.0.0+. To be compatible with Redis v5.x.y, you can set it to `default`.",
-                          "referenceable": true,
-                          "type": "string"
-                        }
-                      },
-                      {
-                        "password": {
-                          "referenceable": true,
-                          "description": "Password to use for Redis connections. If undefined, no AUTH commands are sent to Redis.",
-                          "encrypted": true,
-                          "type": "string"
-                        }
-                      },
-                      {
-                        "sentinel_username": {
-                          "description": "Sentinel username to authenticate with a Redis Sentinel instance. If undefined, ACL authentication won't be performed. This requires Redis v6.2.0+.",
-                          "referenceable": true,
-                          "type": "string"
-                        }
-                      },
-                      {
-                        "sentinel_password": {
-                          "referenceable": true,
-                          "description": "Sentinel password to authenticate with a Redis Sentinel instance. If undefined, no AUTH commands are sent to Redis Sentinels.",
-                          "encrypted": true,
-                          "type": "string"
-                        }
-                      },
-                      {
-                        "database": {
-                          "description": "Database to use for the Redis connection when using the `redis` strategy",
-                          "default": 0,
-                          "type": "integer"
-                        }
-                      },
-                      {
-                        "keepalive_pool_size": {
-                          "description": "The size limit for every cosocket connection pool associated with every remote server, per worker process. If neither `keepalive_pool_size` nor `keepalive_backlog` is specified, no pool is created. If `keepalive_pool_size` isn't specified but `keepalive_backlog` is specified, then the pool uses the default value. Try to increase (e.g. 512) this value if latency is high or throughput is low.",
-                          "default": 256,
-                          "between": [
-                            1,
-                            2147483646
-                          ],
-                          "type": "integer"
-                        }
-                      },
-                      {
-                        "keepalive_backlog": {
-                          "description": "Limits the total number of opened connections for a pool. If the connection pool is full, connection queues above the limit go into the backlog queue. If the backlog queue is full, subsequent connect operations fail and return `nil`. Queued operations (subject to set timeouts) resume once the number of connections in the pool is less than `keepalive_pool_size`. If latency is high or throughput is low, try increasing this value. Empirically, this value is larger than `keepalive_pool_size`.",
-                          "between": [
-                            0,
-                            2147483646
-                          ],
-                          "type": "integer"
-                        }
-                      },
-                      {
-                        "sentinel_master": {
-                          "type": "string",
-                          "description": "Sentinel master to use for Redis connections. Defining this value implies using Redis Sentinel."
-                        }
-                      },
-                      {
-                        "sentinel_role": {
-                          "description": "Sentinel role to use for Redis connections when the `redis` strategy is defined. Defining this value implies using Redis Sentinel.",
-                          "type": "string",
-                          "one_of": [
-                            "master",
-                            "slave",
-                            "any"
-                          ]
-                        }
-                      },
-                      {
-                        "sentinel_nodes": {
-                          "type": "array",
-                          "required": false,
-                          "len_min": 1,
-                          "elements": {
-                            "fields": [
-                              {
-                                "host": {
-                                  "required": true,
-                                  "default": "127.0.0.1",
-                                  "description": "A string representing a host name, such as example.com.",
-                                  "type": "string"
-                                }
-                              },
-                              {
-                                "port": {
-                                  "default": 6379,
-                                  "description": "An integer representing a port number between 0 and 65535, inclusive.",
-                                  "between": [
-                                    0,
-                                    65535
-                                  ],
-                                  "type": "integer"
-                                }
-                              }
-                            ],
-                            "type": "record"
-                          },
-                          "description": "Sentinel node addresses to use for Redis connections when the `redis` strategy is defined. Defining this field implies using a Redis Sentinel. The minimum length of the array is 1 element."
-                        }
-                      },
-                      {
-                        "cluster_nodes": {
-                          "type": "array",
-                          "required": false,
-                          "len_min": 1,
-                          "elements": {
-                            "fields": [
-                              {
-                                "ip": {
-                                  "required": true,
-                                  "default": "127.0.0.1",
-                                  "description": "A string representing a host name, such as example.com.",
-                                  "type": "string"
-                                }
-                              },
-                              {
-                                "port": {
-                                  "default": 6379,
-                                  "description": "An integer representing a port number between 0 and 65535, inclusive.",
-                                  "between": [
-                                    0,
-                                    65535
-                                  ],
-                                  "type": "integer"
-                                }
-                              }
-                            ],
-                            "type": "record"
-                          },
-                          "description": "Cluster addresses to use for Redis connections when the `redis` strategy is defined. Defining this field implies using a Redis Cluster. The minimum length of the array is 1 element."
-                        }
-                      },
-                      {
-                        "ssl": {
-                          "required": false,
-                          "default": false,
-                          "description": "If set to true, uses SSL to connect to Redis.",
-                          "type": "boolean"
-                        }
-                      },
-                      {
-                        "ssl_verify": {
-                          "required": false,
-                          "default": false,
-                          "description": "If set to true, verifies the validity of the server SSL certificate. If setting this parameter, also configure `lua_ssl_trusted_certificate` in `kong.conf` to specify the CA (or server) certificate used by your Redis server. You may also need to configure `lua_ssl_verify_depth` accordingly.",
-                          "type": "boolean"
-                        }
-                      },
-                      {
-                        "server_name": {
-                          "required": false,
-                          "description": "A string representing an SNI (server name indication) value for TLS.",
-                          "type": "string"
-                        }
-                      },
-                      {
-                        "cluster_max_redirections": {
-                          "required": false,
-                          "default": 5,
-                          "description": "Maximum retry attempts for redirection.",
-                          "type": "integer"
-                        }
-                      },
-                      {
-                        "connection_is_proxied": {
-                          "required": false,
-                          "default": false,
-                          "description": "If the connection to Redis is proxied (e.g. Envoy), set it `true`. Set the `host` and `port` to point to the proxy address.",
-                          "type": "boolean"
+                          "run_with_missing_fields": true
                         }
                       }
                     ]
@@ -825,132 +823,135 @@
                   "cache_ttl": {
                     "description": "TTL in seconds of cache entities.",
                     "default": 300,
-                    "gt": 0,
-                    "type": "integer"
+                    "type": "integer",
+                    "gt": 0
                   }
                 }
               ],
-              "type": "record"
+              "type": "record",
+              "required": true,
+              "description": "Plugin global caching configuration."
             }
           },
           {
             "upstream": {
-              "required": true,
-              "description": "Customizations to the upstream request.",
               "fields": [
                 {
                   "by_lua": {
+                    "type": "string",
                     "required": false,
-                    "description": "Lua code that executes before the upstream request is made. Can produce side effects. Standard Lua sandboxing restrictions apply.",
-                    "type": "string"
+                    "description": "Lua code that executes before the upstream request is made. Can produce side effects. Standard Lua sandboxing restrictions apply."
                   }
                 },
                 {
                   "query": {
-                    "required": true,
-                    "description": "Upstream request query param customizations.",
                     "fields": [
                       {
                         "forward": {
-                          "description": "If `false`, does not forward request query params to upstream request.",
+                          "type": "boolean",
                           "default": true,
-                          "type": "boolean"
+                          "description": "If `false`, does not forward request query params to upstream request."
                         }
                       },
                       {
                         "custom": {
                           "values": {
-                            "required": false,
                             "referenceable": true,
+                            "required": false,
+                            "type": "string"
+                          },
+                          "keys": {
                             "type": "string"
                           },
                           "type": "map",
                           "required": false,
-                          "description": "The custom query params to be added in the upstream HTTP request. Values can contain Lua expressions in the form `$(some_lua_expression)`. The syntax is based on `request-transformer-advanced` templates.",
-                          "keys": {
-                            "type": "string"
-                          }
+                          "description": "The custom query params to be added in the upstream HTTP request. Values can contain Lua expressions in the form `$(some_lua_expression)`. The syntax is based on `request-transformer-advanced` templates."
                         }
                       }
                     ],
-                    "type": "record"
+                    "type": "record",
+                    "required": true,
+                    "description": "Upstream request query param customizations."
                   }
                 },
                 {
                   "headers": {
-                    "required": true,
-                    "description": "Callout request header customizations.",
                     "fields": [
                       {
                         "forward": {
-                          "description": "If `false`, does not forward request headers to upstream request.",
+                          "type": "boolean",
                           "default": true,
-                          "type": "boolean"
+                          "description": "If `false`, does not forward request headers to upstream request."
                         }
                       },
                       {
                         "custom": {
                           "values": {
-                            "required": false,
                             "referenceable": true,
+                            "required": false,
+                            "type": "string"
+                          },
+                          "keys": {
                             "type": "string"
                           },
                           "type": "map",
                           "required": false,
-                          "description": "The custom headers to be added in the upstream HTTP request. Values can contain Lua expressions in the form $(some_lua_expression). The syntax is based on `request-transformer-advanced` templates.",
-                          "keys": {
-                            "type": "string"
-                          }
+                          "description": "The custom headers to be added in the upstream HTTP request. Values can contain Lua expressions in the form $(some_lua_expression). The syntax is based on `request-transformer-advanced` templates."
                         }
                       }
                     ],
-                    "type": "record"
+                    "type": "record",
+                    "required": true,
+                    "description": "Callout request header customizations."
                   }
                 },
                 {
                   "body": {
-                    "required": true,
-                    "description": "Callout request body customizations.",
                     "fields": [
                       {
                         "forward": {
-                          "description": "If `false`, skips forwarding the incoming request's body to the upstream request.",
+                          "type": "boolean",
                           "default": true,
-                          "type": "boolean"
+                          "description": "If `false`, skips forwarding the incoming request's body to the upstream request."
                         }
                       },
                       {
                         "decode": {
-                          "description": "If `true`, decodes the request's body to make it available for upstream by_lua customizations. Only JSON content type is supported.",
+                          "type": "boolean",
                           "default": true,
-                          "type": "boolean"
+                          "description": "If `true`, decodes the request's body to make it available for upstream by_lua customizations. Only JSON content type is supported."
                         }
                       },
                       {
                         "custom": {
                           "values": {
-                            "required": false,
                             "referenceable": true,
+                            "required": false,
+                            "type": "string"
+                          },
+                          "keys": {
                             "type": "string"
                           },
                           "type": "map",
                           "required": false,
-                          "description": "The custom body fields to be added in the upstream request body. Values can contain Lua expressions in the form $(some_lua_expression). The syntax is based on `request-transformer-advanced` templates.",
-                          "keys": {
-                            "type": "string"
-                          }
+                          "description": "The custom body fields to be added in the upstream request body. Values can contain Lua expressions in the form $(some_lua_expression). The syntax is based on `request-transformer-advanced` templates."
                         }
                       }
                     ],
-                    "type": "record"
+                    "type": "record",
+                    "required": true,
+                    "description": "Callout request body customizations."
                   }
                 }
               ],
-              "type": "record"
+              "type": "record",
+              "required": true,
+              "description": "Customizations to the upstream request."
             }
           }
         ],
-        "type": "record"
+        "type": "record",
+        "required": true
       }
     }
   ],

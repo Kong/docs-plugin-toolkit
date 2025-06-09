@@ -4,20 +4,12 @@
       "consumer": {
         "reference": "consumers",
         "type": "foreign",
-        "description": "Custom type for representing a foreign key with a null value allowed.",
-        "eq": null
+        "eq": null,
+        "description": "Custom type for representing a foreign key with a null value allowed."
       }
     },
     {
       "protocols": {
-        "type": "set",
-        "required": true,
-        "default": [
-          "grpc",
-          "grpcs",
-          "http",
-          "https"
-        ],
         "elements": {
           "type": "string",
           "one_of": [
@@ -27,6 +19,14 @@
             "https"
           ]
         },
+        "type": "set",
+        "default": [
+          "grpc",
+          "grpcs",
+          "http",
+          "https"
+        ],
+        "required": true,
         "description": "A set of strings representing HTTP protocols."
       }
     },
@@ -34,24 +34,23 @@
       "consumer_group": {
         "reference": "consumer_groups",
         "type": "foreign",
-        "description": "Custom type for representing a foreign key with a null value allowed.",
-        "eq": null
+        "eq": null,
+        "description": "Custom type for representing a foreign key with a null value allowed."
       }
     },
     {
       "config": {
-        "required": true,
         "fields": [
           {
             "uri_param_names": {
               "default": [
                 "jwt"
               ],
-              "description": "A list of querystring parameters that Kong will inspect to retrieve JWTs.",
+              "type": "set",
               "elements": {
                 "type": "string"
               },
-              "type": "set"
+              "description": "A list of querystring parameters that Kong will inspect to retrieve JWTs."
             }
           },
           {
@@ -59,31 +58,31 @@
               "default": [
 
               ],
-              "description": "A list of cookie names that Kong will inspect to retrieve JWTs.",
+              "type": "set",
               "elements": {
                 "type": "string"
               },
-              "type": "set"
+              "description": "A list of cookie names that Kong will inspect to retrieve JWTs."
             }
           },
           {
             "key_claim_name": {
+              "type": "string",
               "default": "iss",
-              "description": "The name of the claim in which the key identifying the secret must be passed. The plugin will attempt to read this claim from the JWT payload and the header, in that order.",
-              "type": "string"
+              "description": "The name of the claim in which the key identifying the secret must be passed. The plugin will attempt to read this claim from the JWT payload and the header, in that order."
             }
           },
           {
             "secret_is_base64": {
-              "required": true,
-              "description": "If true, the plugin assumes the credential’s secret to be base64 encoded. You will need to create a base64-encoded secret for your Consumer, and sign your JWT with the original secret.",
               "default": false,
-              "type": "boolean"
+              "type": "boolean",
+              "required": true,
+              "description": "If true, the plugin assumes the credential’s secret to be base64 encoded. You will need to create a base64-encoded secret for your Consumer, and sign your JWT with the original secret."
             }
           },
           {
             "claims_to_verify": {
-              "description": "A list of registered claims (according to RFC 7519) that Kong can verify as well. Accepted values: one of exp or nbf.",
+              "type": "set",
               "elements": {
                 "type": "string",
                 "one_of": [
@@ -91,32 +90,32 @@
                   "nbf"
                 ]
               },
-              "type": "set"
+              "description": "A list of registered claims (according to RFC 7519) that Kong can verify as well. Accepted values: one of exp or nbf."
             }
           },
           {
             "anonymous": {
-              "description": "An optional string (consumer UUID or username) value to use as an “anonymous” consumer if authentication fails.",
-              "type": "string"
+              "type": "string",
+              "description": "An optional string (consumer UUID or username) value to use as an “anonymous” consumer if authentication fails."
             }
           },
           {
             "run_on_preflight": {
-              "required": true,
-              "description": "A boolean value that indicates whether the plugin should run (and try to authenticate) on OPTIONS preflight requests. If set to false, then OPTIONS requests will always be allowed.",
               "default": true,
-              "type": "boolean"
+              "type": "boolean",
+              "required": true,
+              "description": "A boolean value that indicates whether the plugin should run (and try to authenticate) on OPTIONS preflight requests. If set to false, then OPTIONS requests will always be allowed."
             }
           },
           {
             "maximum_expiration": {
-              "default": 0,
               "description": "A value between 0 and 31536000 (365 days) limiting the lifetime of the JWT to maximum_expiration seconds in the future.",
+              "type": "number",
+              "default": 0,
               "between": [
                 0,
                 31536000
-              ],
-              "type": "number"
+              ]
             }
           },
           {
@@ -124,36 +123,37 @@
               "default": [
                 "authorization"
               ],
-              "description": "A list of HTTP header names that Kong will inspect to retrieve JWTs.",
+              "type": "set",
               "elements": {
                 "type": "string"
               },
-              "type": "set"
+              "description": "A list of HTTP header names that Kong will inspect to retrieve JWTs."
             }
           },
           {
             "realm": {
+              "type": "string",
               "required": false,
-              "description": "When authentication fails the plugin sends `WWW-Authenticate` header with `realm` attribute value.",
-              "type": "string"
+              "description": "When authentication fails the plugin sends `WWW-Authenticate` header with `realm` attribute value."
             }
           }
         ],
-        "type": "record"
+        "type": "record",
+        "required": true
       }
     }
   ],
   "entity_checks": [
     {
       "conditional": {
+        "then_field": "config.claims_to_verify",
         "if_field": "config.maximum_expiration",
         "then_match": {
           "contains": "exp"
         },
         "if_match": {
           "gt": 0
-        },
-        "then_field": "config.claims_to_verify"
+        }
       }
     }
   ]

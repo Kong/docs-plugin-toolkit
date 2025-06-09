@@ -4,28 +4,20 @@
       "consumer": {
         "reference": "consumers",
         "type": "foreign",
-        "description": "Custom type for representing a foreign key with a null value allowed.",
-        "eq": null
+        "eq": null,
+        "description": "Custom type for representing a foreign key with a null value allowed."
       }
     },
     {
       "consumer_group": {
         "reference": "consumer_groups",
         "type": "foreign",
-        "description": "Custom type for representing a foreign key with a null value allowed.",
-        "eq": null
+        "eq": null,
+        "description": "Custom type for representing a foreign key with a null value allowed."
       }
     },
     {
       "protocols": {
-        "type": "set",
-        "required": true,
-        "default": [
-          "grpc",
-          "grpcs",
-          "http",
-          "https"
-        ],
         "elements": {
           "type": "string",
           "one_of": [
@@ -35,32 +27,30 @@
             "https"
           ]
         },
+        "type": "set",
+        "default": [
+          "grpc",
+          "grpcs",
+          "http",
+          "https"
+        ],
+        "required": true,
         "description": "A set of strings representing HTTP protocols."
       }
     },
     {
       "config": {
-        "required": true,
-        "shorthand_fields": [
-          {
-            "hash": {
-              "type": "string",
-              "description": "Hash algorithm to be used for canary release. `whitelist` is deprecated. Use `allow` instead `blacklist` is deprecated. Use `deny` instead."
-            }
-          }
-        ],
         "fields": [
           {
             "start": {
-              "description": "Future time in seconds since epoch, when the canary release will start. Ignored when `percentage` is set, or when using `allow` or `deny` in `hash`.",
-              "type": "number"
+              "type": "number",
+              "description": "Future time in seconds since epoch, when the canary release will start. Ignored when `percentage` is set, or when using `allow` or `deny` in `hash`."
             }
           },
           {
             "hash": {
-              "type": "string",
-              "description": "Hash algorithm to be used for canary release.\n\n* `consumer`: The hash will be based on the consumer.\n* `ip`: The hash will be based on the client IP address.\n* `none`: No hash will be applied.\n* `allow`: Allows the specified groups to access the canary release.\n* `deny`: Denies the specified groups from accessing the canary release.\n* `header`: The hash will be based on the specified header value.",
               "default": "consumer",
+              "type": "string",
               "one_of": [
                 "consumer",
                 "ip",
@@ -68,89 +58,99 @@
                 "allow",
                 "deny",
                 "header"
-              ]
+              ],
+              "description": "Hash algorithm to be used for canary release.\n\n* `consumer`: The hash will be based on the consumer.\n* `ip`: The hash will be based on the client IP address.\n* `none`: No hash will be applied.\n* `allow`: Allows the specified groups to access the canary release.\n* `deny`: Denies the specified groups from accessing the canary release.\n* `header`: The hash will be based on the specified header value."
             }
           },
           {
             "hash_header": {
-              "type": "string",
-              "description": "A string representing an HTTP header name."
-            }
-          },
-          {
-            "duration": {
-              "default": 3600,
-              "description": "The duration of the canary release in seconds.",
-              "gt": 0,
-              "type": "number"
-            }
-          },
-          {
-            "steps": {
-              "default": 1000,
-              "description": "The number of steps for the canary release.",
-              "gt": 1,
-              "type": "number"
-            }
-          },
-          {
-            "percentage": {
-              "description": "The percentage of traffic to be routed to the canary release.",
-              "between": [
-                0,
-                100
-              ],
-              "type": "number"
-            }
-          },
-          {
-            "upstream_host": {
-              "type": "string",
-              "description": "A string representing a host name, such as example.com."
-            }
-          },
-          {
-            "upstream_port": {
-              "description": "An integer representing a port number between 0 and 65535, inclusive.",
-              "between": [
-                0,
-                65535
-              ],
-              "type": "integer"
-            }
-          },
-          {
-            "upstream_uri": {
-              "len_min": 1,
-              "description": "The URI of the upstream server to be used for the canary release.",
+              "description": "A string representing an HTTP header name.",
               "type": "string"
             }
           },
           {
+            "duration": {
+              "gt": 0,
+              "type": "number",
+              "default": 3600,
+              "description": "The duration of the canary release in seconds."
+            }
+          },
+          {
+            "steps": {
+              "gt": 1,
+              "type": "number",
+              "default": 1000,
+              "description": "The number of steps for the canary release."
+            }
+          },
+          {
+            "percentage": {
+              "type": "number",
+              "description": "The percentage of traffic to be routed to the canary release.",
+              "between": [
+                0,
+                100
+              ]
+            }
+          },
+          {
+            "upstream_host": {
+              "description": "A string representing a host name, such as example.com.",
+              "type": "string"
+            }
+          },
+          {
+            "upstream_port": {
+              "type": "integer",
+              "between": [
+                0,
+                65535
+              ],
+              "description": "An integer representing a port number between 0 and 65535, inclusive."
+            }
+          },
+          {
+            "upstream_uri": {
+              "type": "string",
+              "len_min": 1,
+              "description": "The URI of the upstream server to be used for the canary release."
+            }
+          },
+          {
             "upstream_fallback": {
-              "required": true,
-              "description": "Specifies whether to fallback to the upstream server if the canary release fails.",
+              "type": "boolean",
               "default": false,
-              "type": "boolean"
+              "required": true,
+              "description": "Specifies whether to fallback to the upstream server if the canary release fails."
             }
           },
           {
             "groups": {
-              "description": "The groups allowed to access the canary release.",
+              "type": "array",
               "elements": {
                 "type": "string"
               },
-              "type": "array"
+              "description": "The groups allowed to access the canary release."
             }
           },
           {
             "canary_by_header_name": {
-              "type": "string",
-              "description": "A string representing an HTTP header name."
+              "description": "A string representing an HTTP header name.",
+              "type": "string"
             }
           }
         ],
-        "type": "record"
+        "type": "record",
+        "required": true,
+        "shorthand_fields": [
+          {
+            "hash": {
+              "description": "Hash algorithm to be used for canary release. `whitelist` is deprecated. Use `allow` instead `blacklist` is deprecated. Use `deny` instead.",
+              "type": "string"
+            }
+          }
+        ]
       }
     }
   ],
@@ -164,26 +164,26 @@
     },
     {
       "conditional": {
+        "then_field": "config.hash_header",
         "if_field": "config.hash",
         "then_match": {
           "required": true
         },
         "if_match": {
           "eq": "header"
-        },
-        "then_field": "config.hash_header"
+        }
       }
     },
     {
       "conditional": {
+        "then_field": "config.upstream_host",
         "if_field": "config.upstream_fallback",
         "then_match": {
           "required": true
         },
         "if_match": {
           "eq": true
-        },
-        "then_field": "config.upstream_host"
+        }
       }
     }
   ]
