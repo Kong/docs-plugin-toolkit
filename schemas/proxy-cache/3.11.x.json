@@ -2,8 +2,9 @@
   "fields": [
     {
       "protocols": {
+        "required": true,
+        "description": "A set of strings representing protocols.",
         "elements": {
-          "type": "string",
           "one_of": [
             "grpc",
             "grpcs",
@@ -16,25 +17,28 @@
             "ws",
             "wss"
           ],
-          "description": "A string representing a protocol, such as HTTP or HTTPS."
+          "description": "A string representing a protocol, such as HTTP or HTTPS.",
+          "type": "string"
         },
-        "type": "set",
         "default": [
           "grpc",
           "grpcs",
           "http",
           "https"
         ],
-        "required": true,
-        "description": "A set of strings representing protocols."
+        "type": "set"
       }
     },
     {
       "config": {
+        "required": true,
         "fields": [
           {
             "response_code": {
+              "required": true,
+              "description": "Upstream response status code considered cacheable.",
               "len_min": 1,
+              "type": "array",
               "default": [
                 200,
                 301,
@@ -46,53 +50,50 @@
                   100,
                   900
                 ]
-              },
-              "type": "array",
-              "required": true,
-              "description": "Upstream response status code considered cacheable."
+              }
             }
           },
           {
             "request_method": {
+              "required": true,
+              "description": "Downstream request methods considered cacheable.",
+              "type": "array",
+              "default": [
+                "GET",
+                "HEAD"
+              ],
               "elements": {
-                "type": "string",
                 "one_of": [
                   "HEAD",
                   "GET",
                   "POST",
                   "PATCH",
                   "PUT"
-                ]
-              },
-              "type": "array",
-              "default": [
-                "GET",
-                "HEAD"
-              ],
-              "required": true,
-              "description": "Downstream request methods considered cacheable."
+                ],
+                "type": "string"
+              }
             }
           },
           {
             "content_type": {
-              "elements": {
-                "type": "string"
-              },
+              "required": true,
+              "description": "Upstream response content types considered cacheable. The plugin performs an **exact match** against each specified value.",
               "type": "array",
               "default": [
                 "text/plain",
                 "application/json"
               ],
-              "required": true,
-              "description": "Upstream response content types considered cacheable. The plugin performs an **exact match** against each specified value."
+              "elements": {
+                "type": "string"
+              }
             }
           },
           {
             "cache_ttl": {
+              "description": "TTL, in seconds, of cache entities.",
               "gt": 0,
               "default": 300,
-              "type": "integer",
-              "description": "TTL, in seconds, of cache entities."
+              "type": "integer"
             }
           },
           {
@@ -100,96 +101,95 @@
               "one_of": [
                 "memory"
               ],
-              "type": "string",
               "required": true,
-              "description": "The backing data store in which to hold cache entities."
+              "description": "The backing data store in which to hold cache entities.",
+              "type": "string"
             }
           },
           {
             "cache_control": {
-              "type": "boolean",
-              "default": false,
+              "description": "When enabled, respect the Cache-Control behaviors defined in RFC7234.",
               "required": true,
-              "description": "When enabled, respect the Cache-Control behaviors defined in RFC7234."
+              "default": false,
+              "type": "boolean"
             }
           },
           {
             "ignore_uri_case": {
-              "default": false,
               "required": false,
+              "default": false,
               "type": "boolean"
             }
           },
           {
             "storage_ttl": {
-              "type": "integer",
-              "description": "Number of seconds to keep resources in the storage backend. This value is independent of `cache_ttl` or resource TTLs defined by Cache-Control behaviors."
+              "description": "Number of seconds to keep resources in the storage backend. This value is independent of `cache_ttl` or resource TTLs defined by Cache-Control behaviors.",
+              "type": "integer"
             }
           },
           {
             "memory": {
+              "required": true,
               "fields": [
                 {
                   "dictionary_name": {
-                    "type": "string",
-                    "default": "kong_db_cache",
+                    "description": "The name of the shared dictionary in which to hold cache entities when the memory strategy is selected. Note that this dictionary currently must be defined manually in the Kong Nginx template.",
                     "required": true,
-                    "description": "The name of the shared dictionary in which to hold cache entities when the memory strategy is selected. Note that this dictionary currently must be defined manually in the Kong Nginx template."
+                    "default": "kong_db_cache",
+                    "type": "string"
                   }
                 }
               ],
-              "type": "record",
-              "required": true
+              "type": "record"
             }
           },
           {
             "vary_query_params": {
               "type": "array",
+              "description": "Relevant query parameters considered for the cache key. If undefined, all params are taken into consideration.",
               "elements": {
                 "type": "string"
-              },
-              "description": "Relevant query parameters considered for the cache key. If undefined, all params are taken into consideration."
+              }
             }
           },
           {
             "vary_headers": {
               "type": "array",
+              "description": "Relevant headers considered for the cache key. If undefined, none of the headers are taken into consideration.",
               "elements": {
                 "type": "string"
-              },
-              "description": "Relevant headers considered for the cache key. If undefined, none of the headers are taken into consideration."
+              }
             }
           },
           {
             "response_headers": {
+              "description": "Caching related diagnostic headers that should be included in cached responses",
+              "required": true,
               "fields": [
                 {
                   "age": {
-                    "type": "boolean",
-                    "default": true
+                    "default": true,
+                    "type": "boolean"
                   }
                 },
                 {
                   "X-Cache-Status": {
-                    "type": "boolean",
-                    "default": true
+                    "default": true,
+                    "type": "boolean"
                   }
                 },
                 {
                   "X-Cache-Key": {
-                    "type": "boolean",
-                    "default": true
+                    "default": true,
+                    "type": "boolean"
                   }
                 }
               ],
-              "type": "record",
-              "required": true,
-              "description": "Caching related diagnostic headers that should be included in cached responses"
+              "type": "record"
             }
           }
         ],
-        "type": "record",
-        "required": true
+        "type": "record"
       }
     }
   ],

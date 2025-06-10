@@ -2,81 +2,84 @@
   "fields": [
     {
       "protocols": {
+        "required": true,
+        "description": "A set of strings representing HTTP protocols.",
         "elements": {
-          "type": "string",
           "one_of": [
             "grpc",
             "grpcs",
             "http",
             "https"
-          ]
+          ],
+          "type": "string"
         },
-        "type": "set",
         "default": [
           "grpc",
           "grpcs",
           "http",
           "https"
         ],
-        "required": true,
-        "description": "A set of strings representing HTTP protocols."
+        "type": "set"
       }
     },
     {
       "config": {
+        "required": true,
         "fields": [
           {
             "allow_patterns": {
-              "elements": {
-                "type": "string",
-                "len_min": 1,
-                "len_max": 500
-              },
+              "required": false,
+              "description": "Array of valid regex patterns, or valid questions from the 'user' role in chat.",
               "len_max": 10,
               "type": "array",
-              "required": false,
-              "description": "Array of valid regex patterns, or valid questions from the 'user' role in chat."
+              "elements": {
+                "len_min": 1,
+                "len_max": 500,
+                "type": "string"
+              }
             }
           },
           {
             "deny_patterns": {
-              "elements": {
-                "type": "string",
-                "len_min": 1,
-                "len_max": 500
-              },
+              "required": false,
+              "description": "Array of invalid regex patterns, or invalid questions from the 'user' role in chat.",
               "len_max": 10,
               "type": "array",
-              "required": false,
-              "description": "Array of invalid regex patterns, or invalid questions from the 'user' role in chat."
+              "elements": {
+                "len_min": 1,
+                "len_max": 500,
+                "type": "string"
+              }
             }
           },
           {
             "allow_all_conversation_history": {
               "default": false,
-              "type": "boolean",
               "required": true,
-              "description": "If true, will ignore all previous chat prompts from the conversation history."
+              "description": "If true, will ignore all previous chat prompts from the conversation history.",
+              "type": "boolean"
             }
           },
           {
             "max_request_body_size": {
-              "gt": 0,
               "default": 8192,
-              "type": "integer",
-              "description": "max allowed body size allowed to be introspected. 0 means unlimited, but the size of this body will still be limited by Nginx's client_max_body_size."
+              "gt": 0,
+              "description": "max allowed body size allowed to be introspected. 0 means unlimited, but the size of this body will still be limited by Nginx's client_max_body_size.",
+              "type": "integer"
             }
           },
           {
             "match_all_roles": {
               "default": false,
-              "type": "boolean",
               "required": true,
-              "description": "If true, will match all roles in addition to 'user' role in conversation history."
+              "description": "If true, will match all roles in addition to 'user' role in conversation history.",
+              "type": "boolean"
             }
           },
           {
             "llm_format": {
+              "required": false,
+              "description": "LLM input and output format and schema to use",
               "one_of": [
                 "openai",
                 "bedrock",
@@ -85,13 +88,13 @@
                 "huggingface"
               ],
               "default": "openai",
-              "type": "string",
-              "required": false,
-              "description": "LLM input and output format and schema to use"
+              "type": "string"
             }
           },
           {
             "genai_category": {
+              "required": false,
+              "description": "Generative AI category of the request",
               "one_of": [
                 "text/generation",
                 "text/embeddings",
@@ -102,14 +105,11 @@
                 "realtime/generation"
               ],
               "default": "text/generation",
-              "type": "string",
-              "required": false,
-              "description": "Generative AI category of the request"
+              "type": "string"
             }
           }
         ],
-        "type": "record",
-        "required": true
+        "type": "record"
       }
     }
   ],
@@ -122,13 +122,13 @@
     },
     {
       "conditional": {
+        "if_match": {
+          "eq": true
+        },
         "then_field": "config.allow_all_conversation_history",
         "if_field": "config.match_all_roles",
         "then_match": {
           "eq": false
-        },
-        "if_match": {
-          "eq": true
         }
       }
     }
