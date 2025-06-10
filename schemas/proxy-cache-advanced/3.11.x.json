@@ -1,33 +1,46 @@
 {
+  "entity_checks": [
+    {
+      "custom_entity_check": {
+        "field_sources": [
+          "config"
+        ]
+      }
+    }
+  ],
   "fields": [
     {
       "protocols": {
+        "required": true,
+        "description": "A set of strings representing HTTP protocols.",
         "elements": {
-          "type": "string",
           "one_of": [
             "grpc",
             "grpcs",
             "http",
             "https"
-          ]
+          ],
+          "type": "string"
         },
-        "type": "set",
         "default": [
           "grpc",
           "grpcs",
           "http",
           "https"
         ],
-        "required": true,
-        "description": "A set of strings representing HTTP protocols."
+        "type": "set"
       }
     },
     {
       "config": {
+        "required": true,
         "fields": [
           {
             "response_code": {
+              "required": true,
+              "description": "Upstream response status code considered cacheable. The integers must be a value between 100 and 900.",
               "len_min": 1,
+              "type": "array",
               "default": [
                 200,
                 301,
@@ -39,53 +52,50 @@
                   100,
                   900
                 ]
-              },
-              "type": "array",
-              "required": true,
-              "description": "Upstream response status code considered cacheable. The integers must be a value between 100 and 900."
+              }
             }
           },
           {
             "request_method": {
+              "required": true,
+              "description": "Downstream request methods considered cacheable. Available options: `HEAD`, `GET`, `POST`, `PATCH`, `PUT`.",
+              "type": "array",
+              "default": [
+                "GET",
+                "HEAD"
+              ],
               "elements": {
-                "type": "string",
                 "one_of": [
                   "HEAD",
                   "GET",
                   "POST",
                   "PATCH",
                   "PUT"
-                ]
-              },
-              "type": "array",
-              "default": [
-                "GET",
-                "HEAD"
-              ],
-              "required": true,
-              "description": "Downstream request methods considered cacheable. Available options: `HEAD`, `GET`, `POST`, `PATCH`, `PUT`."
+                ],
+                "type": "string"
+              }
             }
           },
           {
             "content_type": {
-              "elements": {
-                "type": "string"
-              },
+              "required": true,
+              "description": "Upstream response content types considered cacheable. The plugin performs an **exact match** against each specified value; for example, if the upstream is expected to respond with a `application/json; charset=utf-8` content-type, the plugin configuration must contain said value or a `Bypass` cache status is returned.",
               "type": "array",
               "default": [
                 "text/plain",
                 "application/json"
               ],
-              "required": true,
-              "description": "Upstream response content types considered cacheable. The plugin performs an **exact match** against each specified value; for example, if the upstream is expected to respond with a `application/json; charset=utf-8` content-type, the plugin configuration must contain said value or a `Bypass` cache status is returned."
+              "elements": {
+                "type": "string"
+              }
             }
           },
           {
             "cache_ttl": {
-              "description": "TTL in seconds of cache entities.",
-              "type": "integer",
               "default": 300,
-              "gt": 0
+              "gt": 0,
+              "description": "TTL in seconds of cache entities.",
+              "type": "integer"
             }
           },
           {
@@ -94,25 +104,25 @@
                 "memory",
                 "redis"
               ],
-              "type": "string",
               "required": true,
-              "description": "The backing data store in which to hold cache entities. Accepted values are: `memory` and `redis`."
+              "description": "The backing data store in which to hold cache entities. Accepted values are: `memory` and `redis`.",
+              "type": "string"
             }
           },
           {
             "cache_control": {
               "default": false,
-              "type": "boolean",
               "required": true,
-              "description": "When enabled, respect the Cache-Control behaviors defined in RFC7234."
+              "description": "When enabled, respect the Cache-Control behaviors defined in RFC7234.",
+              "type": "boolean"
             }
           },
           {
             "ignore_uri_case": {
               "default": false,
-              "type": "boolean",
               "required": false,
-              "description": "Determines whether to treat URIs as case sensitive. By default, case sensitivity is enabled. If set to true, requests are cached while ignoring case sensitivity in the URI."
+              "description": "Determines whether to treat URIs as case sensitive. By default, case sensitivity is enabled. If set to true, requests are cached while ignoring case sensitivity in the URI.",
+              "type": "boolean"
             }
           },
           {
@@ -123,40 +133,42 @@
           },
           {
             "memory": {
+              "required": true,
               "fields": [
                 {
                   "dictionary_name": {
                     "default": "kong_db_cache",
-                    "type": "string",
                     "required": true,
-                    "description": "The name of the shared dictionary in which to hold cache entities when the memory strategy is selected. Note that this dictionary currently must be defined manually in the Kong Nginx template."
+                    "description": "The name of the shared dictionary in which to hold cache entities when the memory strategy is selected. Note that this dictionary currently must be defined manually in the Kong Nginx template.",
+                    "type": "string"
                   }
                 }
               ],
-              "type": "record",
-              "required": true
+              "type": "record"
             }
           },
           {
             "vary_query_params": {
               "type": "array",
+              "description": "Relevant query parameters considered for the cache key. If undefined, all params are taken into consideration. By default, the max number of params accepted is 100. You can change this value via the `lua_max_post_args` in `kong.conf`.",
               "elements": {
                 "type": "string"
-              },
-              "description": "Relevant query parameters considered for the cache key. If undefined, all params are taken into consideration. By default, the max number of params accepted is 100. You can change this value via the `lua_max_post_args` in `kong.conf`."
+              }
             }
           },
           {
             "vary_headers": {
               "type": "array",
+              "description": "Relevant headers considered for the cache key. If undefined, none of the headers are taken into consideration.",
               "elements": {
                 "type": "string"
-              },
-              "description": "Relevant headers considered for the cache key. If undefined, none of the headers are taken into consideration."
+              }
             }
           },
           {
             "response_headers": {
+              "description": "Caching related diagnostic headers that should be included in cached responses",
+              "required": true,
               "fields": [
                 {
                   "age": {
@@ -177,128 +189,126 @@
                   }
                 }
               ],
-              "type": "record",
-              "required": true,
-              "description": "Caching related diagnostic headers that should be included in cached responses"
+              "type": "record"
             }
           },
           {
             "redis": {
-              "type": "record",
+              "required": true,
               "fields": [
                 {
                   "host": {
-                    "type": "string",
                     "default": "127.0.0.1",
-                    "description": "A string representing a host name, such as example.com."
+                    "description": "A string representing a host name, such as example.com.",
+                    "type": "string"
                   }
                 },
                 {
                   "port": {
-                    "description": "An integer representing a port number between 0 and 65535, inclusive.",
-                    "type": "integer",
                     "default": 6379,
                     "between": [
                       0,
                       65535
-                    ]
+                    ],
+                    "description": "An integer representing a port number between 0 and 65535, inclusive.",
+                    "type": "integer"
                   }
                 },
                 {
                   "connect_timeout": {
-                    "description": "An integer representing a timeout in milliseconds. Must be between 0 and 2^31-2.",
-                    "type": "integer",
                     "default": 2000,
                     "between": [
                       0,
                       2147483646
-                    ]
+                    ],
+                    "description": "An integer representing a timeout in milliseconds. Must be between 0 and 2^31-2.",
+                    "type": "integer"
                   }
                 },
                 {
                   "send_timeout": {
-                    "description": "An integer representing a timeout in milliseconds. Must be between 0 and 2^31-2.",
-                    "type": "integer",
                     "default": 2000,
                     "between": [
                       0,
                       2147483646
-                    ]
+                    ],
+                    "description": "An integer representing a timeout in milliseconds. Must be between 0 and 2^31-2.",
+                    "type": "integer"
                   }
                 },
                 {
                   "read_timeout": {
-                    "description": "An integer representing a timeout in milliseconds. Must be between 0 and 2^31-2.",
-                    "type": "integer",
                     "default": 2000,
                     "between": [
                       0,
                       2147483646
-                    ]
+                    ],
+                    "description": "An integer representing a timeout in milliseconds. Must be between 0 and 2^31-2.",
+                    "type": "integer"
                   }
                 },
                 {
                   "username": {
+                    "description": "Username to use for Redis connections. If undefined, ACL authentication won't be performed. This requires Redis v6.0.0+. To be compatible with Redis v5.x.y, you can set it to `default`.",
                     "referenceable": true,
-                    "type": "string",
-                    "description": "Username to use for Redis connections. If undefined, ACL authentication won't be performed. This requires Redis v6.0.0+. To be compatible with Redis v5.x.y, you can set it to `default`."
+                    "type": "string"
                   }
                 },
                 {
                   "password": {
-                    "referenceable": true,
                     "type": "string",
-                    "encrypted": true,
-                    "description": "Password to use for Redis connections. If undefined, no AUTH commands are sent to Redis."
+                    "description": "Password to use for Redis connections. If undefined, no AUTH commands are sent to Redis.",
+                    "referenceable": true,
+                    "encrypted": true
                   }
                 },
                 {
                   "sentinel_username": {
+                    "description": "Sentinel username to authenticate with a Redis Sentinel instance. If undefined, ACL authentication won't be performed. This requires Redis v6.2.0+.",
                     "referenceable": true,
-                    "type": "string",
-                    "description": "Sentinel username to authenticate with a Redis Sentinel instance. If undefined, ACL authentication won't be performed. This requires Redis v6.2.0+."
+                    "type": "string"
                   }
                 },
                 {
                   "sentinel_password": {
-                    "referenceable": true,
                     "type": "string",
-                    "encrypted": true,
-                    "description": "Sentinel password to authenticate with a Redis Sentinel instance. If undefined, no AUTH commands are sent to Redis Sentinels."
+                    "description": "Sentinel password to authenticate with a Redis Sentinel instance. If undefined, no AUTH commands are sent to Redis Sentinels.",
+                    "referenceable": true,
+                    "encrypted": true
                   }
                 },
                 {
                   "database": {
-                    "type": "integer",
+                    "description": "Database to use for the Redis connection when using the `redis` strategy",
                     "default": 0,
-                    "description": "Database to use for the Redis connection when using the `redis` strategy"
+                    "type": "integer"
                   }
                 },
                 {
                   "keepalive_pool_size": {
-                    "description": "The size limit for every cosocket connection pool associated with every remote server, per worker process. If neither `keepalive_pool_size` nor `keepalive_backlog` is specified, no pool is created. If `keepalive_pool_size` isn't specified but `keepalive_backlog` is specified, then the pool uses the default value. Try to increase (e.g. 512) this value if latency is high or throughput is low.",
                     "default": 256,
-                    "type": "integer",
                     "between": [
                       1,
                       2147483646
-                    ]
+                    ],
+                    "description": "The size limit for every cosocket connection pool associated with every remote server, per worker process. If neither `keepalive_pool_size` nor `keepalive_backlog` is specified, no pool is created. If `keepalive_pool_size` isn't specified but `keepalive_backlog` is specified, then the pool uses the default value. Try to increase (e.g. 512) this value if latency is high or throughput is low.",
+                    "type": "integer"
                   }
                 },
                 {
                   "keepalive_backlog": {
-                    "type": "integer",
-                    "description": "Limits the total number of opened connections for a pool. If the connection pool is full, connection queues above the limit go into the backlog queue. If the backlog queue is full, subsequent connect operations fail and return `nil`. Queued operations (subject to set timeouts) resume once the number of connections in the pool is less than `keepalive_pool_size`. If latency is high or throughput is low, try increasing this value. Empirically, this value is larger than `keepalive_pool_size`.",
                     "between": [
                       0,
                       2147483646
-                    ]
+                    ],
+                    "description": "Limits the total number of opened connections for a pool. If the connection pool is full, connection queues above the limit go into the backlog queue. If the backlog queue is full, subsequent connect operations fail and return `nil`. Queued operations (subject to set timeouts) resume once the number of connections in the pool is less than `keepalive_pool_size`. If latency is high or throughput is low, try increasing this value. Empirically, this value is larger than `keepalive_pool_size`.",
+                    "type": "integer"
                   }
                 },
                 {
                   "sentinel_master": {
-                    "type": "string",
-                    "description": "Sentinel master to use for Redis connections. Defining this value implies using Redis Sentinel."
+                    "description": "Sentinel master to use for Redis connections. Defining this value implies using Redis Sentinel.",
+                    "type": "string"
                   }
                 },
                 {
@@ -308,183 +318,114 @@
                       "slave",
                       "any"
                     ],
-                    "type": "string",
-                    "description": "Sentinel role to use for Redis connections when the `redis` strategy is defined. Defining this value implies using Redis Sentinel."
+                    "description": "Sentinel role to use for Redis connections when the `redis` strategy is defined. Defining this value implies using Redis Sentinel.",
+                    "type": "string"
                   }
                 },
                 {
                   "sentinel_nodes": {
+                    "required": false,
+                    "description": "Sentinel node addresses to use for Redis connections when the `redis` strategy is defined. Defining this field implies using a Redis Sentinel. The minimum length of the array is 1 element.",
                     "len_min": 1,
+                    "type": "array",
                     "elements": {
                       "fields": [
                         {
                           "host": {
-                            "type": "string",
                             "default": "127.0.0.1",
                             "required": true,
-                            "description": "A string representing a host name, such as example.com."
+                            "description": "A string representing a host name, such as example.com.",
+                            "type": "string"
                           }
                         },
                         {
                           "port": {
-                            "description": "An integer representing a port number between 0 and 65535, inclusive.",
-                            "type": "integer",
                             "default": 6379,
                             "between": [
                               0,
                               65535
-                            ]
+                            ],
+                            "description": "An integer representing a port number between 0 and 65535, inclusive.",
+                            "type": "integer"
                           }
                         }
                       ],
                       "type": "record"
-                    },
-                    "type": "array",
-                    "required": false,
-                    "description": "Sentinel node addresses to use for Redis connections when the `redis` strategy is defined. Defining this field implies using a Redis Sentinel. The minimum length of the array is 1 element."
+                    }
                   }
                 },
                 {
                   "cluster_nodes": {
+                    "required": false,
+                    "description": "Cluster addresses to use for Redis connections when the `redis` strategy is defined. Defining this field implies using a Redis Cluster. The minimum length of the array is 1 element.",
                     "len_min": 1,
+                    "type": "array",
                     "elements": {
                       "fields": [
                         {
                           "ip": {
-                            "type": "string",
                             "default": "127.0.0.1",
                             "required": true,
-                            "description": "A string representing a host name, such as example.com."
+                            "description": "A string representing a host name, such as example.com.",
+                            "type": "string"
                           }
                         },
                         {
                           "port": {
-                            "description": "An integer representing a port number between 0 and 65535, inclusive.",
-                            "type": "integer",
                             "default": 6379,
                             "between": [
                               0,
                               65535
-                            ]
+                            ],
+                            "description": "An integer representing a port number between 0 and 65535, inclusive.",
+                            "type": "integer"
                           }
                         }
                       ],
                       "type": "record"
-                    },
-                    "type": "array",
-                    "required": false,
-                    "description": "Cluster addresses to use for Redis connections when the `redis` strategy is defined. Defining this field implies using a Redis Cluster. The minimum length of the array is 1 element."
+                    }
                   }
                 },
                 {
                   "ssl": {
-                    "default": false,
-                    "type": "boolean",
+                    "description": "If set to true, uses SSL to connect to Redis.",
                     "required": false,
-                    "description": "If set to true, uses SSL to connect to Redis."
+                    "default": false,
+                    "type": "boolean"
                   }
                 },
                 {
                   "ssl_verify": {
-                    "default": false,
-                    "type": "boolean",
+                    "description": "If set to true, verifies the validity of the server SSL certificate. If setting this parameter, also configure `lua_ssl_trusted_certificate` in `kong.conf` to specify the CA (or server) certificate used by your Redis server. You may also need to configure `lua_ssl_verify_depth` accordingly.",
                     "required": false,
-                    "description": "If set to true, verifies the validity of the server SSL certificate. If setting this parameter, also configure `lua_ssl_trusted_certificate` in `kong.conf` to specify the CA (or server) certificate used by your Redis server. You may also need to configure `lua_ssl_verify_depth` accordingly."
+                    "default": false,
+                    "type": "boolean"
                   }
                 },
                 {
                   "server_name": {
-                    "type": "string",
                     "required": false,
-                    "description": "A string representing an SNI (server name indication) value for TLS."
+                    "description": "A string representing an SNI (server name indication) value for TLS.",
+                    "type": "string"
                   }
                 },
                 {
                   "cluster_max_redirections": {
+                    "description": "Maximum retry attempts for redirection.",
+                    "required": false,
                     "default": 5,
-                    "type": "integer",
-                    "required": false,
-                    "description": "Maximum retry attempts for redirection."
-                  }
-                },
-                {
-                  "connection_is_proxied": {
-                    "default": false,
-                    "type": "boolean",
-                    "required": false,
-                    "description": "If the connection to Redis is proxied (e.g. Envoy), set it `true`. Set the `host` and `port` to point to the proxy address."
-                  }
-                }
-              ],
-              "shorthand_fields": [
-                {
-                  "timeout": {
-                    "deprecation": {
-                      "replaced_with": [
-                        {
-                          "path": [
-                            "connect_timeout"
-                          ]
-                        },
-                        {
-                          "path": [
-                            "send_timeout"
-                          ]
-                        },
-                        {
-                          "path": [
-                            "read_timeout"
-                          ]
-                        }
-                      ],
-                      "removal_in_version": "4.0",
-                      "message": "redis schema field `timeout` is deprecated, use `connect_timeout`, `send_timeout` and `read_timeout`"
-                    },
                     "type": "integer"
                   }
                 },
                 {
-                  "sentinel_addresses": {
-                    "deprecation": {
-                      "replaced_with": [
-                        {
-                          "path": [
-                            "sentinel_nodes"
-                          ]
-                        }
-                      ],
-                      "removal_in_version": "4.0",
-                      "message": "sentinel_addresses is deprecated, please use sentinel_nodes instead"
-                    },
-                    "type": "array",
-                    "len_min": 1,
-                    "elements": {
-                      "type": "string"
-                    }
-                  }
-                },
-                {
-                  "cluster_addresses": {
-                    "deprecation": {
-                      "replaced_with": [
-                        {
-                          "path": [
-                            "cluster_nodes"
-                          ]
-                        }
-                      ],
-                      "removal_in_version": "4.0",
-                      "message": "cluster_addresses is deprecated, please use cluster_nodes instead"
-                    },
-                    "type": "array",
-                    "len_min": 1,
-                    "elements": {
-                      "type": "string"
-                    }
+                  "connection_is_proxied": {
+                    "description": "If the connection to Redis is proxied (e.g. Envoy), set it `true`. Set the `host` and `port` to point to the proxy address.",
+                    "required": false,
+                    "default": false,
+                    "type": "boolean"
                   }
                 }
               ],
-              "required": true,
               "entity_checks": [
                 {
                   "mutually_required": [
@@ -508,56 +449,124 @@
                 },
                 {
                   "conditional": {
+                    "if_match": {
+                      "eq": true
+                    },
                     "then_field": "host",
                     "if_field": "connection_is_proxied",
                     "then_match": {
                       "required": true
-                    },
-                    "if_match": {
-                      "eq": true
                     }
                   }
                 },
                 {
                   "custom_entity_check": {
+                    "run_with_missing_fields": true,
                     "field_sources": [
                       "database",
                       "connection_is_proxied"
-                    ],
-                    "run_with_missing_fields": true
+                    ]
                   }
                 },
                 {
                   "custom_entity_check": {
+                    "run_with_missing_fields": true,
                     "field_sources": [
                       "cluster_nodes",
                       "connection_is_proxied"
-                    ],
-                    "run_with_missing_fields": true
+                    ]
                   }
                 },
                 {
                   "custom_entity_check": {
+                    "run_with_missing_fields": true,
                     "field_sources": [
                       "sentinel_role",
                       "connection_is_proxied"
-                    ],
-                    "run_with_missing_fields": true
+                    ]
                   }
                 }
-              ]
+              ],
+              "shorthand_fields": [
+                {
+                  "timeout": {
+                    "deprecation": {
+                      "removal_in_version": "4.0",
+                      "replaced_with": [
+                        {
+                          "path": [
+                            "connect_timeout"
+                          ]
+                        },
+                        {
+                          "path": [
+                            "send_timeout"
+                          ]
+                        },
+                        {
+                          "path": [
+                            "read_timeout"
+                          ]
+                        }
+                      ],
+                      "message": "redis schema field `timeout` is deprecated, use `connect_timeout`, `send_timeout` and `read_timeout`"
+                    },
+                    "type": "integer"
+                  }
+                },
+                {
+                  "sentinel_addresses": {
+                    "deprecation": {
+                      "removal_in_version": "4.0",
+                      "replaced_with": [
+                        {
+                          "path": [
+                            "sentinel_nodes"
+                          ]
+                        }
+                      ],
+                      "message": "sentinel_addresses is deprecated, please use sentinel_nodes instead"
+                    },
+                    "type": "array",
+                    "len_min": 1,
+                    "elements": {
+                      "type": "string"
+                    }
+                  }
+                },
+                {
+                  "cluster_addresses": {
+                    "deprecation": {
+                      "removal_in_version": "4.0",
+                      "replaced_with": [
+                        {
+                          "path": [
+                            "cluster_nodes"
+                          ]
+                        }
+                      ],
+                      "message": "cluster_addresses is deprecated, please use cluster_nodes instead"
+                    },
+                    "type": "array",
+                    "len_min": 1,
+                    "elements": {
+                      "type": "string"
+                    }
+                  }
+                }
+              ],
+              "type": "record"
             }
           },
           {
             "bypass_on_err": {
               "default": false,
-              "type": "boolean",
-              "description": "Unhandled errors while trying to retrieve a cache entry (such as redis down) are resolved with `Bypass`, with the request going upstream."
+              "description": "Unhandled errors while trying to retrieve a cache entry (such as redis down) are resolved with `Bypass`, with the request going upstream.",
+              "type": "boolean"
             }
           }
         ],
-        "type": "record",
-        "required": true
+        "type": "record"
       }
     }
   ],
@@ -565,14 +574,5 @@
     "redis-ee": [
       "config.redis"
     ]
-  },
-  "entity_checks": [
-    {
-      "custom_entity_check": {
-        "field_sources": [
-          "config"
-        ]
-      }
-    }
-  ]
+  }
 }

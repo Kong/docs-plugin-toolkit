@@ -2,145 +2,89 @@
   "fields": [
     {
       "consumer": {
-        "reference": "consumers",
-        "type": "foreign",
+        "description": "Custom type for representing a foreign key with a null value allowed.",
         "eq": null,
-        "description": "Custom type for representing a foreign key with a null value allowed."
+        "reference": "consumers",
+        "type": "foreign"
       }
     },
     {
       "consumer_group": {
-        "reference": "consumer_groups",
-        "type": "foreign",
+        "description": "Custom type for representing a foreign key with a null value allowed.",
         "eq": null,
-        "description": "Custom type for representing a foreign key with a null value allowed."
+        "reference": "consumer_groups",
+        "type": "foreign"
       }
     },
     {
       "protocols": {
+        "required": true,
+        "description": "A set of strings representing HTTP protocols.",
         "elements": {
-          "type": "string",
           "one_of": [
             "grpc",
             "grpcs",
             "http",
             "https"
-          ]
+          ],
+          "type": "string"
         },
-        "type": "set",
         "default": [
           "grpc",
           "grpcs",
           "http",
           "https"
         ],
-        "required": true,
-        "description": "A set of strings representing HTTP protocols."
+        "type": "set"
       }
     },
     {
       "config": {
+        "required": true,
         "fields": [
           {
             "session": {
+              "required": true,
               "fields": [
                 {
                   "host": {
                     "referenceable": true,
-                    "type": "string",
                     "required": true,
-                    "description": "A string representing a URL, such as https://example.com/path/to/resource?q=search."
-                  }
-                },
-                {
-                  "vpn_name": {
-                    "required": false,
+                    "description": "A string representing a URL, such as https://example.com/path/to/resource?q=search.",
                     "type": "string"
                   }
                 },
                 {
+                  "vpn_name": {
+                    "type": "string",
+                    "required": false
+                  }
+                },
+                {
                   "authentication": {
-                    "fields": [
-                      {
-                        "scheme": {
-                          "default": "BASIC",
-                          "type": "string",
-                          "required": true,
-                          "one_of": [
-                            "NONE",
-                            "BASIC",
-                            "OAUTH2"
-                          ]
-                        }
-                      },
-                      {
-                        "username": {
-                          "type": "string",
-                          "required": false,
-                          "referenceable": true
-                        }
-                      },
-                      {
-                        "password": {
-                          "encrypted": true,
-                          "type": "string",
-                          "required": false,
-                          "referenceable": true
-                        }
-                      },
-                      {
-                        "access_token": {
-                          "encrypted": true,
-                          "type": "string",
-                          "required": false,
-                          "referenceable": true
-                        }
-                      },
-                      {
-                        "access_token_header": {
-                          "required": false,
-                          "type": "string"
-                        }
-                      },
-                      {
-                        "id_token": {
-                          "encrypted": true,
-                          "type": "string",
-                          "required": false,
-                          "referenceable": true
-                        }
-                      },
-                      {
-                        "id_token_header": {
-                          "required": false,
-                          "type": "string"
-                        }
-                      }
-                    ],
-                    "type": "record",
                     "required": true,
                     "entity_checks": [
                       {
                         "conditional": {
+                          "if_match": {
+                            "eq": "BASIC"
+                          },
                           "then_field": "username",
                           "if_field": "scheme",
                           "then_match": {
                             "required": true
-                          },
-                          "if_match": {
-                            "eq": "BASIC"
                           }
                         }
                       },
                       {
                         "conditional": {
+                          "if_match": {
+                            "eq": "BASIC"
+                          },
                           "then_field": "password",
                           "if_field": "scheme",
                           "then_match": {
                             "required": true
-                          },
-                          "if_match": {
-                            "eq": "BASIC"
                           }
                         }
                       },
@@ -149,48 +93,101 @@
                           "if_match": {
                             "eq": "OAUTH2"
                           },
+                          "then_err": "must set one of %s when 'scheme' is 'OAUTH2'",
                           "if_field": "scheme",
                           "then_at_least_one_of": [
                             "access_token",
                             "access_token_header",
                             "id_token",
                             "id_token_header"
-                          ],
-                          "then_err": "must set one of %s when 'scheme' is 'OAUTH2'"
+                          ]
                         }
                       }
-                    ]
+                    ],
+                    "fields": [
+                      {
+                        "scheme": {
+                          "one_of": [
+                            "NONE",
+                            "BASIC",
+                            "OAUTH2"
+                          ],
+                          "required": true,
+                          "default": "BASIC",
+                          "type": "string"
+                        }
+                      },
+                      {
+                        "username": {
+                          "required": false,
+                          "referenceable": true,
+                          "type": "string"
+                        }
+                      },
+                      {
+                        "password": {
+                          "type": "string",
+                          "required": false,
+                          "referenceable": true,
+                          "encrypted": true
+                        }
+                      },
+                      {
+                        "access_token": {
+                          "type": "string",
+                          "required": false,
+                          "referenceable": true,
+                          "encrypted": true
+                        }
+                      },
+                      {
+                        "access_token_header": {
+                          "type": "string",
+                          "required": false
+                        }
+                      },
+                      {
+                        "id_token": {
+                          "type": "string",
+                          "required": false,
+                          "referenceable": true,
+                          "encrypted": true
+                        }
+                      },
+                      {
+                        "id_token_header": {
+                          "type": "string",
+                          "required": false
+                        }
+                      }
+                    ],
+                    "type": "record"
                   }
                 },
                 {
                   "connect_timeout": {
+                    "required": true,
+                    "description": "An integer representing a timeout in milliseconds. Must be between 0 and 2^31-2.",
                     "between": [
                       100,
                       100000
                     ],
                     "default": 3000,
-                    "type": "integer",
-                    "required": true,
-                    "description": "An integer representing a timeout in milliseconds. Must be between 0 and 2^31-2."
+                    "type": "integer"
                   }
                 },
                 {
                   "ssl_validate_certificate": {
-                    "type": "boolean",
                     "required": true,
-                    "default": false
+                    "default": false,
+                    "type": "boolean"
                   }
                 },
                 {
                   "properties": {
-                    "values": {
-                      "type": "string",
-                      "required": true,
-                      "referenceable": true
-                    },
-                    "type": "map",
-                    "required": false,
                     "keys": {
+                      "match": "^SESSION_",
+                      "required": true,
                       "not_one_of": [
                         "SESSION_AUTHENTICATION_SCHEME",
                         "SESSION_USERNAME",
@@ -207,30 +204,36 @@
                         "SESSION_SUBSCRIBE_BLOCKING",
                         "SESSION_BLOCK_WHILE_CONNECTING"
                       ],
-                      "type": "string",
+                      "type": "string"
+                    },
+                    "required": false,
+                    "values": {
                       "required": true,
-                      "match": "^SESSION_"
-                    }
+                      "referenceable": true,
+                      "type": "string"
+                    },
+                    "type": "map"
                   }
                 }
               ],
-              "type": "record",
-              "required": true
+              "type": "record"
             }
           },
           {
             "message": {
+              "required": true,
               "fields": [
                 {
                   "destinations": {
                     "len_min": 1,
+                    "required": true,
                     "type": "array",
                     "elements": {
                       "fields": [
                         {
                           "name": {
-                            "required": true,
-                            "type": "string"
+                            "type": "string",
+                            "required": true
                           }
                         },
                         {
@@ -239,15 +242,14 @@
                               "QUEUE",
                               "TOPIC"
                             ],
-                            "default": "QUEUE",
                             "required": true,
+                            "default": "QUEUE",
                             "type": "string"
                           }
                         }
                       ],
                       "type": "record"
-                    },
-                    "required": true
+                    }
                   }
                 },
                 {
@@ -256,121 +258,119 @@
                       "DIRECT",
                       "PERSISTENT"
                     ],
-                    "default": "DIRECT",
                     "required": true,
+                    "default": "DIRECT",
                     "type": "string"
                   }
                 },
                 {
                   "sender_id": {
-                    "default": "kong",
                     "required": false,
+                    "default": "kong",
                     "type": "string"
                   }
                 },
                 {
                   "priority": {
-                    "type": "integer",
-                    "default": 4,
-                    "required": true,
                     "between": [
                       0,
                       255
-                    ]
+                    ],
+                    "required": true,
+                    "default": 4,
+                    "type": "integer"
                   }
                 },
                 {
                   "dmq_eligible": {
-                    "default": false,
                     "required": true,
+                    "default": false,
                     "type": "boolean"
                   }
                 },
                 {
                   "ttl": {
-                    "type": "integer",
-                    "default": 0,
+                    "gt": -1,
                     "required": true,
-                    "gt": -1
+                    "default": 0,
+                    "type": "integer"
                   }
                 },
                 {
                   "ack_timeout": {
+                    "required": true,
+                    "description": "An integer representing a timeout in milliseconds. Must be between 0 and 2^31-2.",
                     "between": [
                       1,
                       100000
                     ],
                     "default": 2000,
-                    "type": "integer",
-                    "required": true,
-                    "description": "An integer representing a timeout in milliseconds. Must be between 0 and 2^31-2."
+                    "type": "integer"
                   }
                 },
                 {
                   "tracing": {
-                    "default": false,
                     "required": true,
+                    "default": false,
                     "type": "boolean"
                   }
                 },
                 {
                   "tracing_sampled": {
-                    "default": false,
                     "required": true,
+                    "default": false,
                     "type": "boolean"
                   }
                 },
                 {
                   "forward_method": {
-                    "default": false,
                     "required": true,
+                    "default": false,
                     "type": "boolean"
                   }
                 },
                 {
                   "forward_uri": {
-                    "default": false,
                     "required": true,
+                    "default": false,
                     "type": "boolean"
                   }
                 },
                 {
                   "forward_headers": {
-                    "default": false,
                     "required": true,
+                    "default": false,
                     "type": "boolean"
                   }
                 },
                 {
                   "forward_body": {
-                    "default": false,
                     "required": true,
+                    "default": false,
                     "type": "boolean"
                   }
                 },
                 {
                   "default_content": {
-                    "required": false,
-                    "type": "string"
+                    "type": "string",
+                    "required": false
                   }
                 },
                 {
                   "functions": {
-                    "type": "array",
                     "required": false,
+                    "type": "array",
                     "elements": {
                       "type": "string"
                     }
                   }
                 }
               ],
-              "type": "record",
-              "required": true
+              "type": "record"
             }
           }
         ],
-        "type": "record",
-        "required": true
+        "type": "record"
       }
     }
   ],
