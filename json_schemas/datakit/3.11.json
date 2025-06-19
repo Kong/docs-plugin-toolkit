@@ -1,0 +1,461 @@
+{
+  "properties": {
+    "config": {
+      "properties": {
+        "debug": {
+          "default": false,
+          "type": "boolean"
+        },
+        "nodes": {
+          "items": {
+            "description": "datakit nodes",
+            "properties": {
+              "name": {
+                "description": "A label that uniquely identifies the node within the plugin configuration so that it can be used for input/output connections. Must be valid `snake_case` or `kebab-case`.",
+                "examples": {
+                  "value": "filter_02"
+                },
+                "match_all": {
+                  "pattern": "^[A-Za-z_][A-Za-z0-9_-]*$"
+                },
+                "maxLength": 255,
+                "minLength": 1,
+                "not_one_of": [
+                  "request",
+                  "response",
+                  "service_request",
+                  "service_response"
+                ],
+                "type": "string"
+              },
+              "type": {
+                "enum": [
+                  "call",
+                  "exit",
+                  "jq",
+                  "property",
+                  "static"
+                ],
+                "type": "string"
+              }
+            },
+            "required": [
+              "name",
+              "type"
+            ],
+            "subschema_definitions": {
+              "call": {
+                "description": "Make an external HTTP request",
+                "properties": {
+                  "input": {
+                    "description": "call node input",
+                    "match_any": {
+                      "patterns": [
+                        "^[A-Za-z_][A-Za-z0-9_-]*$",
+                        "^[A-Za-z_][A-Za-z0-9_-]*%..+$"
+                      ]
+                    },
+                    "maxLength": 255,
+                    "minLength": 1,
+                    "required": false,
+                    "type": "string"
+                  },
+                  "inputs": {
+                    "description": "call node inputs",
+                    "properties": {
+                      "body": {
+                        "description": "HTTP request body",
+                        "match_any": {
+                          "patterns": [
+                            "^[A-Za-z_][A-Za-z0-9_-]*$",
+                            "^[A-Za-z_][A-Za-z0-9_-]*%..+$"
+                          ]
+                        },
+                        "maxLength": 255,
+                        "minLength": 1,
+                        "required": false,
+                        "type": "string"
+                      },
+                      "headers": {
+                        "description": "HTTP request headers",
+                        "match_any": {
+                          "patterns": [
+                            "^[A-Za-z_][A-Za-z0-9_-]*$",
+                            "^[A-Za-z_][A-Za-z0-9_-]*%..+$"
+                          ]
+                        },
+                        "maxLength": 255,
+                        "minLength": 1,
+                        "required": false,
+                        "type": "string"
+                      },
+                      "query": {
+                        "description": "HTTP request query",
+                        "match_any": {
+                          "patterns": [
+                            "^[A-Za-z_][A-Za-z0-9_-]*$",
+                            "^[A-Za-z_][A-Za-z0-9_-]*%..+$"
+                          ]
+                        },
+                        "maxLength": 255,
+                        "minLength": 1,
+                        "required": false,
+                        "type": "string"
+                      }
+                    },
+                    "required": false,
+                    "type": "object"
+                  },
+                  "method": {
+                    "default": "GET",
+                    "description": "A string representing an HTTP method, such as GET, POST, PUT, or DELETE. The string must contain only uppercase letters.",
+                    "maxLength": 32,
+                    "minLength": 1,
+                    "pattern": "^%u+$",
+                    "type": "string"
+                  },
+                  "output": {
+                    "description": "call node output",
+                    "match_any": {
+                      "patterns": [
+                        "^[A-Za-z_][A-Za-z0-9_-]*$",
+                        "^[A-Za-z_][A-Za-z0-9_-]*%..+$"
+                      ]
+                    },
+                    "maxLength": 255,
+                    "minLength": 1,
+                    "required": false,
+                    "type": "string"
+                  },
+                  "outputs": {
+                    "description": "call node outputs",
+                    "properties": {
+                      "body": {
+                        "description": "HTTP response body",
+                        "match_any": {
+                          "patterns": [
+                            "^[A-Za-z_][A-Za-z0-9_-]*$",
+                            "^[A-Za-z_][A-Za-z0-9_-]*%..+$"
+                          ]
+                        },
+                        "maxLength": 255,
+                        "minLength": 1,
+                        "required": false,
+                        "type": "string"
+                      },
+                      "headers": {
+                        "description": "HTTP response headers",
+                        "match_any": {
+                          "patterns": [
+                            "^[A-Za-z_][A-Za-z0-9_-]*$",
+                            "^[A-Za-z_][A-Za-z0-9_-]*%..+$"
+                          ]
+                        },
+                        "maxLength": 255,
+                        "minLength": 1,
+                        "required": false,
+                        "type": "string"
+                      },
+                      "status": {
+                        "description": "HTTP response status code",
+                        "match_any": {
+                          "patterns": [
+                            "^[A-Za-z_][A-Za-z0-9_-]*$",
+                            "^[A-Za-z_][A-Za-z0-9_-]*%..+$"
+                          ]
+                        },
+                        "maxLength": 255,
+                        "minLength": 1,
+                        "required": false,
+                        "type": "string"
+                      }
+                    },
+                    "required": false,
+                    "type": "object"
+                  },
+                  "ssl_server_name": {
+                    "description": "A string representing an SNI (server name indication) value for TLS.",
+                    "type": "string"
+                  },
+                  "timeout": {
+                    "description": "An integer representing a timeout in milliseconds. Must be between 0 and 2^31-2.",
+                    "maximum": 2147483646,
+                    "minimum": 0,
+                    "type": "integer"
+                  },
+                  "url": {
+                    "description": "A string representing a URL, such as https://example.com/path/to/resource?q=search.",
+                    "required": true,
+                    "type": "string"
+                  }
+                },
+                "type": "object"
+              },
+              "exit": {
+                "description": "Terminate the request and send a response to the client",
+                "properties": {
+                  "input": {
+                    "description": "exit node input",
+                    "match_any": {
+                      "patterns": [
+                        "^[A-Za-z_][A-Za-z0-9_-]*$",
+                        "^[A-Za-z_][A-Za-z0-9_-]*%..+$"
+                      ]
+                    },
+                    "maxLength": 255,
+                    "minLength": 1,
+                    "required": false,
+                    "type": "string"
+                  },
+                  "inputs": {
+                    "description": "exit node inputs",
+                    "properties": {
+                      "body": {
+                        "description": "HTTP response body",
+                        "match_any": {
+                          "patterns": [
+                            "^[A-Za-z_][A-Za-z0-9_-]*$",
+                            "^[A-Za-z_][A-Za-z0-9_-]*%..+$"
+                          ]
+                        },
+                        "maxLength": 255,
+                        "minLength": 1,
+                        "required": false,
+                        "type": "string"
+                      },
+                      "headers": {
+                        "description": "HTTP response headers",
+                        "match_any": {
+                          "patterns": [
+                            "^[A-Za-z_][A-Za-z0-9_-]*$",
+                            "^[A-Za-z_][A-Za-z0-9_-]*%..+$"
+                          ]
+                        },
+                        "maxLength": 255,
+                        "minLength": 1,
+                        "required": false,
+                        "type": "string"
+                      }
+                    },
+                    "required": false,
+                    "type": "object"
+                  },
+                  "status": {
+                    "default": 200,
+                    "description": "HTTP status code",
+                    "maximum": 599,
+                    "minimum": 200,
+                    "type": "integer"
+                  },
+                  "warn_headers_sent": {
+                    "required": false,
+                    "type": "boolean"
+                  }
+                },
+                "type": "object"
+              },
+              "jq": {
+                "description": "Process data using `jq` syntax",
+                "properties": {
+                  "input": {
+                    "description": "filter input(s)",
+                    "match_any": {
+                      "patterns": [
+                        "^[A-Za-z_][A-Za-z0-9_-]*$",
+                        "^[A-Za-z_][A-Za-z0-9_-]*%..+$"
+                      ]
+                    },
+                    "maxLength": 255,
+                    "minLength": 1,
+                    "required": false,
+                    "type": "string"
+                  },
+                  "inputs": {
+                    "additionalProperties": true,
+                    "description": "filter input(s)",
+                    "required": false,
+                    "type": "object"
+                  },
+                  "jq": {
+                    "description": "The jq filter text. Refer to https://jqlang.org/manual/ for full documentation.",
+                    "maxLength": 10240,
+                    "minLength": 1,
+                    "required": true,
+                    "type": "string"
+                  },
+                  "output": {
+                    "description": "filter output(s)",
+                    "match_any": {
+                      "patterns": [
+                        "^[A-Za-z_][A-Za-z0-9_-]*$",
+                        "^[A-Za-z_][A-Za-z0-9_-]*%..+$"
+                      ]
+                    },
+                    "maxLength": 255,
+                    "minLength": 1,
+                    "required": false,
+                    "type": "string"
+                  }
+                },
+                "type": "object"
+              },
+              "property": {
+                "description": "Get or set a property",
+                "properties": {
+                  "content_type": {
+                    "description": "The expected mime type of the property value. When set to `application/json`, SET operations will JSON-encode input data before writing it, and GET operations will JSON-decode output data after reading it. Otherwise, this setting has no effect.",
+                    "enum": [
+                      "application/json",
+                      "application/octet-stream",
+                      "text/plain"
+                    ],
+                    "required": false,
+                    "type": "string"
+                  },
+                  "input": {
+                    "description": "Property input source. When connected, this node operates in SET mode and writes input data to the property. Otherwise, the node operates in GET mode and reads the property.",
+                    "match_any": {
+                      "patterns": [
+                        "^[A-Za-z_][A-Za-z0-9_-]*$",
+                        "^[A-Za-z_][A-Za-z0-9_-]*%..+$"
+                      ]
+                    },
+                    "maxLength": 255,
+                    "minLength": 1,
+                    "required": false,
+                    "type": "string"
+                  },
+                  "output": {
+                    "description": "Property output. This can be connected regardless of whether the node is operating in GET mode or SET mode.",
+                    "match_any": {
+                      "patterns": [
+                        "^[A-Za-z_][A-Za-z0-9_-]*$",
+                        "^[A-Za-z_][A-Za-z0-9_-]*%..+$"
+                      ]
+                    },
+                    "maxLength": 255,
+                    "minLength": 1,
+                    "required": false,
+                    "type": "string"
+                  },
+                  "property": {
+                    "description": "The property name to get/set",
+                    "maxLength": 255,
+                    "minLength": 1,
+                    "required": true,
+                    "type": "string"
+                  }
+                },
+                "type": "object"
+              },
+              "static": {
+                "description": "Produce reusable outputs from statically-configured values",
+                "properties": {
+                  "additionalProperties": true,
+                  "output": {
+                    "description": "The entire `.values` map",
+                    "match_any": {
+                      "patterns": [
+                        "^[A-Za-z_][A-Za-z0-9_-]*$",
+                        "^[A-Za-z_][A-Za-z0-9_-]*%..+$"
+                      ]
+                    },
+                    "maxLength": 255,
+                    "minLength": 1,
+                    "required": false,
+                    "type": "string"
+                  },
+                  "outputs": {
+                    "additionalProperties": true,
+                    "description": "Individual items from `.values`, referenced by key",
+                    "required": false,
+                    "type": "object"
+                  }
+                },
+                "type": "object"
+              }
+            },
+            "subschema_error": "unknown node type: %q, expected one of: call, exit, jq, property, static",
+            "subschema_key": "type",
+            "subschema_override_parent": true,
+            "type": "object"
+          },
+          "maxLength": 64,
+          "minLength": 1,
+          "type": "array"
+        }
+      },
+      "required": [
+        "nodes"
+      ],
+      "type": "object"
+    },
+    "consumer": {
+      "additionalProperties": false,
+      "description": "If set, the plugin will activate only for requests where the specified has been authenticated. (Note that some plugins can not be restricted to consumers this way.). Leave unset for the plugin to activate regardless of the authenticated Consumer.",
+      "properties": {
+        "id": {
+          "type": "string"
+        }
+      },
+      "required": [],
+      "type": "object"
+    },
+    "consumer_group": {
+      "additionalProperties": false,
+      "description": "If set, the plugin will activate only for requests where the specified consumer group has been authenticated. (Note that some plugins can not be restricted to consumers groups this way.). Leave unset for the plugin to activate regardless of the authenticated Consumer Groups",
+      "properties": {
+        "id": {
+          "type": "string"
+        }
+      },
+      "required": [],
+      "type": "object"
+    },
+    "protocols": {
+      "default": [
+        "grpc",
+        "grpcs",
+        "http",
+        "https"
+      ],
+      "description": "A set of strings representing HTTP protocols.",
+      "items": {
+        "enum": [
+          "grpc",
+          "grpcs",
+          "http",
+          "https"
+        ],
+        "required": [],
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "route": {
+      "additionalProperties": false,
+      "description": "If set, the plugin will only activate when receiving requests via the specified route. Leave unset for the plugin to activate regardless of the route being used.",
+      "properties": {
+        "id": {
+          "type": "string"
+        }
+      },
+      "required": [],
+      "type": "object"
+    },
+    "service": {
+      "additionalProperties": false,
+      "description": "If set, the plugin will only activate when receiving requests via one of the routes belonging to the specified Service. Leave unset for the plugin to activate regardless of the Service being matched.",
+      "properties": {
+        "id": {
+          "type": "string"
+        }
+      },
+      "required": [],
+      "type": "object"
+    }
+  },
+  "required": [
+    "config"
+  ]
+}
