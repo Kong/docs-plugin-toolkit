@@ -142,6 +142,10 @@ class ConvertJsonSchema
         v = convert_to_json_schema(v)
       end
 
+      if k == 'genai_category' && v['enum']
+        v['enum'].delete('video/generation')
+      end
+
       fields[k] = v
     end
 
