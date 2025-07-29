@@ -56,8 +56,15 @@ class ConvertJsonSchema
   end
 
   def convert_to_json_schema(props)
+    is_required = true
+
     # Remove required if default is set
-    props.delete("required") unless props["default"].nil?
+    is_required = false unless props['default'].nil?
+
+    # If there's an auto field, and we allow auto fields
+    is_required = false if @options[:allow_auto_fields] && !props['auto'].nil?
+
+    props.delete("required") unless is_required
 
     # Loop through each field
     props = props.each_with_object({}) do |(k, v), fields|
