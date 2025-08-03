@@ -29,7 +29,7 @@ class ConvertJsonSchema
       JSONSchema::ForeignKeys.run!(fields)
       JSONSchema::MissingDescriptions.run!(fields)
 
-      json_schema = convert_to_json_schema(fields)
+      json_schema = convert_to_json_schema(fields, {})
       json_schema = convert_required_list(json_schema)
 
       # If an entity is required, but no children are required
@@ -55,8 +55,18 @@ class ConvertJsonSchema
     }
   end
 
-  def convert_to_json_schema(props)
+  def convert_to_json_schema(props, parent)
     is_required = true
+
+    # The default value may be in the parent schema if this is
+    # a reusable schema with an overridden value
+    if parent["default"]&.is_a?(Hash)
+      parent['default'].each do |key, value|
+        if props[key]&.is_a?(Hash)
+          props[key]['default'] = value
+        end
+      end
+    end
 
     # Remove required if default is set
     is_required = false unless props['default'].nil?
@@ -146,7 +156,7 @@ class ConvertJsonSchema
       end
 
       if v.is_a?(Hash)
-        v = convert_to_json_schema(v)
+        v = convert_to_json_schema(v, props)
       end
 
       if k == 'genai_category' && v['enum']
