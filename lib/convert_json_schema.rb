@@ -144,7 +144,8 @@ class ConvertJsonSchema
         'match_none',
         'starts_with',
         'deprecation',
-        'description'
+        'description',
+        'shorthand_fields'
       ].include?(k)
 
       if k == 'type' && v == 'foreign'
@@ -163,6 +164,15 @@ class ConvertJsonSchema
         v['enum'].delete('video/generation')
       end
 
+      if k == 'items'
+        v.delete('match_any')
+        v.delete('match_all')
+      end
+
+      if ['minLength', 'minItems', 'minimum'].include?(k) && v < 1
+        next
+      end
+
       fields[k] = v
     end
 
@@ -178,19 +188,19 @@ class ConvertJsonSchema
 
   def convert_required_list(schema)
 
-    schema['required'] = [] if !schema['required'].is_a?(Array)
 
     if schema['properties']
 
       # Fix empty schema properties that should
       # be additionalProperties = true
       if schema['properties'].is_a?(Array)
-        schema['properties'] = {}
+        schema.delete('properties')
         schema['additionalProperties'] = true
       end
 
-      schema['properties'].each do |k, v|
+      schema['properties']&.each do |k, v|
         if v['required']
+          schema['required'] = [] if !schema['required'].is_a?(Array)
           schema['required'].push(k)
         end
 
@@ -206,6 +216,10 @@ class ConvertJsonSchema
         end
       end
 
+    end
+
+    if schema['required'] && schema['required'].is_a?(Array) && schema['required'].length == 0
+      schema.delete('required')
     end
 
 
@@ -225,6 +239,9 @@ class ConvertJsonSchema
       end
 
       schema['required'] -= unused
+    end
+    if schema['required']&.length == 0
+      schema.delete('required')
     end
     schema
   end
@@ -258,6 +275,9 @@ class ConvertJsonSchema
 
       # Escape forward slashes
       schema['pattern'] = schema['pattern'].gsub('%/', '\\/')
+
+      # TEMPORARY
+      schema.delete('pattern')
     end
 
     if schema['items']
