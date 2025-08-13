@@ -1,0 +1,84 @@
+{
+  "entity_checks": [],
+  "fields": [
+    {
+      "protocols": {
+        "type": "set",
+        "required": true,
+        "description": "A set of strings representing HTTP protocols.",
+        "default": [
+          "grpc",
+          "grpcs",
+          "http",
+          "https"
+        ],
+        "elements": {
+          "type": "string",
+          "one_of": [
+            "grpc",
+            "grpcs",
+            "http",
+            "https"
+          ]
+        }
+      }
+    },
+    {
+      "consumer_group": {
+        "type": "foreign",
+        "reference": "consumer_groups",
+        "eq": null,
+        "description": "Custom type for representing a foreign key with a null value allowed."
+      }
+    },
+    {
+      "consumer": {
+        "type": "foreign",
+        "reference": "consumers",
+        "description": "Custom type for representing a foreign key with a null value allowed.",
+        "eq": null
+      }
+    },
+    {
+      "config": {
+        "type": "record",
+        "fields": [
+          {
+            "lookup_header_name": {
+              "description": "The name of the header to look for the JWE token.",
+              "default": "Authorization",
+              "type": "string",
+              "required": true
+            }
+          },
+          {
+            "forward_header_name": {
+              "description": "The name of the header that is used to set the decrypted value.",
+              "default": "Authorization",
+              "type": "string",
+              "required": true
+            }
+          },
+          {
+            "key_sets": {
+              "description": "Denote the name or names of all Key Sets that should be inspected when trying to find a suitable key to decrypt the JWE token.",
+              "type": "array",
+              "elements": {
+                "type": "string"
+              },
+              "required": true
+            }
+          },
+          {
+            "strict": {
+              "description": "Defines how the plugin behaves in cases where no token was found in the request. When using `strict` mode, the request requires a token to be present and subsequently raise an error if none could be found.",
+              "default": true,
+              "type": "boolean"
+            }
+          }
+        ],
+        "required": true
+      }
+    }
+  ]
+}

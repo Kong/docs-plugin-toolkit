@@ -1,0 +1,81 @@
+{
+  "entity_checks": [],
+  "fields": [
+    {
+      "protocols": {
+        "type": "set",
+        "required": true,
+        "description": "A set of strings representing protocols.",
+        "default": [
+          "grpc",
+          "grpcs",
+          "http",
+          "https"
+        ],
+        "elements": {
+          "type": "string",
+          "one_of": [
+            "grpc",
+            "grpcs",
+            "http",
+            "https",
+            "tcp",
+            "tls",
+            "tls_passthrough",
+            "udp",
+            "ws",
+            "wss"
+          ],
+          "description": "A string representing a protocol, such as HTTP or HTTPS."
+        }
+      }
+    },
+    {
+      "consumer_group": {
+        "type": "foreign",
+        "reference": "consumer_groups",
+        "eq": null,
+        "description": "Custom type for representing a foreign key with a null value allowed."
+      }
+    },
+    {
+      "config": {
+        "type": "record",
+        "fields": [
+          {
+            "path": {
+              "type": "string",
+              "err": "not a valid filename",
+              "required": true,
+              "description": "The file path of the output log file. The plugin creates the log file if it doesn't exist yet.",
+              "match": "^[^%s*&%%\\`][^*&%%\\`]*[^%s*&%%\\`]$"
+            }
+          },
+          {
+            "reopen": {
+              "type": "boolean",
+              "default": false,
+              "description": "Determines whether the log file is closed and reopened on every request.",
+              "required": true
+            }
+          },
+          {
+            "custom_fields_by_lua": {
+              "type": "map",
+              "description": "Lua code as a key-value map",
+              "values": {
+                "type": "string",
+                "len_min": 1
+              },
+              "keys": {
+                "type": "string",
+                "len_min": 1
+              }
+            }
+          }
+        ],
+        "required": true
+      }
+    }
+  ]
+}

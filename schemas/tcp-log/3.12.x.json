@@ -1,0 +1,110 @@
+{
+  "entity_checks": [],
+  "fields": [
+    {
+      "protocols": {
+        "type": "set",
+        "required": true,
+        "description": "A set of strings representing protocols.",
+        "default": [
+          "grpc",
+          "grpcs",
+          "http",
+          "https"
+        ],
+        "elements": {
+          "type": "string",
+          "one_of": [
+            "grpc",
+            "grpcs",
+            "http",
+            "https",
+            "tcp",
+            "tls",
+            "tls_passthrough",
+            "udp",
+            "ws",
+            "wss"
+          ],
+          "description": "A string representing a protocol, such as HTTP or HTTPS."
+        }
+      }
+    },
+    {
+      "consumer_group": {
+        "type": "foreign",
+        "reference": "consumer_groups",
+        "eq": null,
+        "description": "Custom type for representing a foreign key with a null value allowed."
+      }
+    },
+    {
+      "config": {
+        "type": "record",
+        "fields": [
+          {
+            "host": {
+              "description": "The IP address or host name to send data to.",
+              "type": "string",
+              "required": true
+            }
+          },
+          {
+            "port": {
+              "description": "The port to send data to on the upstream server.",
+              "type": "integer",
+              "between": [
+                0,
+                65535
+              ],
+              "required": true
+            }
+          },
+          {
+            "timeout": {
+              "description": "An optional timeout in milliseconds when sending data to the upstream server.",
+              "default": 10000,
+              "type": "number"
+            }
+          },
+          {
+            "keepalive": {
+              "description": "An optional value in milliseconds that defines how long an idle connection lives before being closed.",
+              "default": 60000,
+              "type": "number"
+            }
+          },
+          {
+            "tls": {
+              "description": "Indicates whether to perform a TLS handshake against the remote server.",
+              "default": false,
+              "type": "boolean",
+              "required": true
+            }
+          },
+          {
+            "tls_sni": {
+              "description": "An optional string that defines the SNI (Server Name Indication) hostname to send in the TLS handshake.",
+              "type": "string"
+            }
+          },
+          {
+            "custom_fields_by_lua": {
+              "description": "A list of key-value pairs, where the key is the name of a log field and the value is a chunk of Lua code, whose return value sets or replaces the log field value.",
+              "type": "map",
+              "values": {
+                "type": "string",
+                "len_min": 1
+              },
+              "keys": {
+                "type": "string",
+                "len_min": 1
+              }
+            }
+          }
+        ],
+        "required": true
+      }
+    }
+  ]
+}
