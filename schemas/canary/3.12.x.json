@@ -35,31 +35,25 @@
   "fields": [
     {
       "consumer": {
-        "type": "foreign",
-        "reference": "consumers",
+        "eq": null,
         "description": "Custom type for representing a foreign key with a null value allowed.",
-        "eq": null
+        "type": "foreign",
+        "reference": "consumers"
       }
     },
     {
       "consumer_group": {
-        "type": "foreign",
-        "reference": "consumer_groups",
         "eq": null,
-        "description": "Custom type for representing a foreign key with a null value allowed."
+        "description": "Custom type for representing a foreign key with a null value allowed.",
+        "type": "foreign",
+        "reference": "consumer_groups"
       }
     },
     {
       "protocols": {
-        "type": "set",
         "required": true,
         "description": "A set of strings representing HTTP protocols.",
-        "default": [
-          "grpc",
-          "grpcs",
-          "http",
-          "https"
-        ],
+        "type": "set",
         "elements": {
           "type": "string",
           "one_of": [
@@ -68,20 +62,18 @@
             "http",
             "https"
           ]
-        }
+        },
+        "default": [
+          "grpc",
+          "grpcs",
+          "http",
+          "https"
+        ]
       }
     },
     {
       "config": {
-        "type": "record",
-        "shorthand_fields": [
-          {
-            "hash": {
-              "description": "Hash algorithm to be used for canary release. `whitelist` is deprecated. Use `allow` instead `blacklist` is deprecated. Use `deny` instead.",
-              "type": "string"
-            }
-          }
-        ],
+        "required": true,
         "fields": [
           {
             "start": {
@@ -91,8 +83,9 @@
           },
           {
             "hash": {
-              "type": "string",
               "default": "consumer",
+              "description": "Hash algorithm to be used for canary release.\n\n* `consumer`: The hash will be based on the consumer.\n* `ip`: The hash will be based on the client IP address.\n* `none`: No hash will be applied.\n* `allow`: Allows the specified groups to access the canary release.\n* `deny`: Denies the specified groups from accessing the canary release.\n* `header`: The hash will be based on the specified header value.",
+              "type": "string",
               "one_of": [
                 "consumer",
                 "ip",
@@ -100,8 +93,7 @@
                 "allow",
                 "deny",
                 "header"
-              ],
-              "description": "Hash algorithm to be used for canary release.\n\n* `consumer`: The hash will be based on the consumer.\n* `ip`: The hash will be based on the client IP address.\n* `none`: No hash will be applied.\n* `allow`: Allows the specified groups to access the canary release.\n* `deny`: Denies the specified groups from accessing the canary release.\n* `header`: The hash will be based on the specified header value."
+              ]
             }
           },
           {
@@ -112,28 +104,28 @@
           },
           {
             "duration": {
-              "type": "number",
               "default": 3600,
+              "description": "The duration of the canary release in seconds.",
               "gt": 0,
-              "description": "The duration of the canary release in seconds."
+              "type": "number"
             }
           },
           {
             "steps": {
-              "type": "number",
               "default": 1000,
+              "description": "The number of steps for the canary release.",
               "gt": 1,
-              "description": "The number of steps for the canary release."
+              "type": "number"
             }
           },
           {
             "percentage": {
-              "type": "number",
+              "description": "The percentage of traffic to be routed to the canary release.",
               "between": [
                 0,
                 100
               ],
-              "description": "The percentage of traffic to be routed to the canary release."
+              "type": "number"
             }
           },
           {
@@ -144,36 +136,36 @@
           },
           {
             "upstream_port": {
-              "type": "integer",
+              "description": "An integer representing a port number between 0 and 65535, inclusive.",
               "between": [
                 0,
                 65535
               ],
-              "description": "An integer representing a port number between 0 and 65535, inclusive."
+              "type": "integer"
             }
           },
           {
             "upstream_uri": {
-              "type": "string",
+              "description": "The URI of the upstream server to be used for the canary release.",
               "len_min": 1,
-              "description": "The URI of the upstream server to be used for the canary release."
+              "type": "string"
             }
           },
           {
             "upstream_fallback": {
-              "type": "boolean",
-              "default": false,
+              "required": true,
               "description": "Specifies whether to fallback to the upstream server if the canary release fails.",
-              "required": true
+              "type": "boolean",
+              "default": false
             }
           },
           {
             "groups": {
-              "type": "array",
               "elements": {
                 "type": "string"
               },
-              "description": "The groups allowed to access the canary release."
+              "description": "The groups allowed to access the canary release.",
+              "type": "array"
             }
           },
           {
@@ -183,7 +175,15 @@
             }
           }
         ],
-        "required": true
+        "type": "record",
+        "shorthand_fields": [
+          {
+            "hash": {
+              "type": "string",
+              "description": "Hash algorithm to be used for canary release. `whitelist` is deprecated. Use `allow` instead `blacklist` is deprecated. Use `deny` instead."
+            }
+          }
+        ]
       }
     }
   ]

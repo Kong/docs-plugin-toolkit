@@ -3,23 +3,17 @@
   "fields": [
     {
       "consumer": {
-        "type": "foreign",
-        "reference": "consumers",
+        "eq": null,
         "description": "Custom type for representing a foreign key with a null value allowed.",
-        "eq": null
+        "type": "foreign",
+        "reference": "consumers"
       }
     },
     {
       "protocols": {
-        "type": "set",
         "required": true,
         "description": "A set of strings representing HTTP protocols.",
-        "default": [
-          "grpc",
-          "grpcs",
-          "http",
-          "https"
-        ],
+        "type": "set",
         "elements": {
           "type": "string",
           "one_of": [
@@ -28,29 +22,32 @@
             "http",
             "https"
           ]
-        }
+        },
+        "default": [
+          "grpc",
+          "grpcs",
+          "http",
+          "https"
+        ]
       }
     },
     {
       "consumer_group": {
-        "type": "foreign",
-        "reference": "consumer_groups",
         "eq": null,
-        "description": "Custom type for representing a foreign key with a null value allowed."
+        "description": "Custom type for representing a foreign key with a null value allowed.",
+        "type": "foreign",
+        "reference": "consumer_groups"
       }
     },
     {
       "config": {
-        "type": "record",
+        "required": true,
         "fields": [
           {
             "injection_types": {
-              "type": "set",
               "required": true,
               "description": "The type of injections to check for.",
-              "default": [
-                "sql"
-              ],
+              "type": "set",
               "elements": {
                 "type": "string",
                 "one_of": [
@@ -61,17 +58,17 @@
                   "xpath_extended",
                   "java_exception"
                 ]
-              }
+              },
+              "default": [
+                "sql"
+              ]
             }
           },
           {
             "locations": {
-              "type": "set",
               "required": true,
               "description": "The locations to check for injection.",
-              "default": [
-                "path_and_query"
-              ],
+              "type": "set",
               "elements": {
                 "type": "string",
                 "one_of": [
@@ -79,66 +76,69 @@
                   "path_and_query",
                   "body"
                 ]
-              }
+              },
+              "default": [
+                "path_and_query"
+              ]
             }
           },
           {
             "custom_injections": {
-              "description": "Custom regexes to check for.",
-              "default": null,
               "elements": {
                 "type": "record",
                 "fields": [
                   {
                     "name": {
+                      "required": true,
                       "description": "A unique name for this injection.",
-                      "type": "string",
-                      "required": true
+                      "type": "string"
                     }
                   },
                   {
                     "regex": {
+                      "required": true,
                       "description": "The regex to match against.",
-                      "is_regex": true,
                       "type": "string",
-                      "required": true
+                      "is_regex": true
                     }
                   }
                 ]
               },
-              "type": "array"
+              "description": "Custom regexes to check for.",
+              "type": "array",
+              "default": null
             }
           },
           {
             "enforcement_mode": {
-              "type": "string",
               "required": true,
               "description": "Enforcement mode of the security policy.",
-              "default": "block",
               "one_of": [
                 "block",
                 "log_only"
-              ]
+              ],
+              "type": "string",
+              "default": "block"
             }
           },
           {
             "error_status_code": {
+              "required": true,
+              "description": "The response status code when validation fails.",
               "type": "integer",
               "between": [
                 400,
                 499
               ],
-              "required": true,
-              "description": "The response status code when validation fails.",
               "default": 400
             }
           },
           {
             "error_message": {
+              "required": true,
               "description": "The response message when validation fails",
-              "default": "Bad Request",
               "type": "string",
-              "required": true
+              "default": "Bad Request"
             }
           }
         ],
@@ -150,7 +150,7 @@
             ]
           }
         ],
-        "required": true
+        "type": "record"
       }
     }
   ]

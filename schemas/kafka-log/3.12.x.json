@@ -11,15 +11,8 @@
   "fields": [
     {
       "protocols": {
+        "required": true,
         "type": "set",
-        "default": [
-          "grpc",
-          "grpcs",
-          "http",
-          "https",
-          "ws",
-          "wss"
-        ],
         "elements": {
           "type": "string",
           "one_of": [
@@ -31,62 +24,69 @@
             "wss"
           ]
         },
-        "required": true
+        "default": [
+          "grpc",
+          "grpcs",
+          "http",
+          "https",
+          "ws",
+          "wss"
+        ]
       }
     },
     {
       "consumer_group": {
-        "type": "foreign",
-        "reference": "consumer_groups",
         "eq": null,
-        "description": "Custom type for representing a foreign key with a null value allowed."
+        "description": "Custom type for representing a foreign key with a null value allowed.",
+        "type": "foreign",
+        "reference": "consumer_groups"
       }
     },
     {
       "config": {
-        "type": "record",
+        "required": true,
         "fields": [
           {
             "bootstrap_servers": {
-              "description": "Set of bootstrap brokers in a `{host: host, port: port}` list format.",
-              "type": "set",
               "elements": {
                 "type": "record",
                 "fields": [
                   {
                     "host": {
-                      "type": "string",
+                      "required": true,
                       "description": "A string representing a host name, such as example.com.",
-                      "required": true
+                      "type": "string"
                     }
                   },
                   {
                     "port": {
-                      "type": "integer",
+                      "required": true,
                       "description": "An integer representing a port number between 0 and 65535, inclusive.",
                       "between": [
                         0,
                         65535
                       ],
-                      "required": true
+                      "type": "integer"
                     }
                   }
                 ]
-              }
+              },
+              "description": "Set of bootstrap brokers in a `{host: host, port: port}` list format.",
+              "type": "set"
             }
           },
           {
             "topic": {
+              "required": true,
               "description": "The Kafka topic to publish to.",
-              "type": "string",
-              "required": true
+              "type": "string"
             }
           },
           {
             "key_query_arg": {
+              "required": false,
               "description": "The request query parameter name that contains the Kafka message key. If specified, messages with the same key will be sent to the same Kafka partition, ensuring consistent ordering.",
-              "type": "string",
-              "required": false
+              "type": "string"
             }
           },
           {
@@ -98,84 +98,85 @@
           },
           {
             "keepalive": {
-              "type": "integer",
-              "default": 60000
+              "default": 60000,
+              "type": "integer"
             }
           },
           {
             "keepalive_enabled": {
-              "type": "boolean",
-              "default": false
+              "default": false,
+              "type": "boolean"
             }
           },
           {
             "authentication": {
-              "type": "record",
+              "required": true,
               "fields": [
                 {
                   "strategy": {
+                    "required": false,
                     "description": "The authentication strategy for the plugin, the only option for the value is `sasl`.",
                     "type": "string",
                     "one_of": [
                       "sasl"
-                    ],
-                    "required": false
+                    ]
                   }
                 },
                 {
                   "mechanism": {
+                    "required": false,
                     "description": "The SASL authentication mechanism.  Supported options: `PLAIN`, `SCRAM-SHA-256` or `SCRAM-SHA-512`.",
                     "type": "string",
                     "one_of": [
                       "PLAIN",
                       "SCRAM-SHA-256",
                       "SCRAM-SHA-512"
-                    ],
-                    "required": false
+                    ]
                   }
                 },
                 {
                   "tokenauth": {
+                    "required": false,
                     "description": "Enable this to indicate `DelegationToken` authentication",
-                    "type": "boolean",
-                    "required": false
+                    "type": "boolean"
                   }
                 },
                 {
                   "user": {
-                    "type": "string",
                     "required": false,
                     "description": "Username for SASL authentication.",
-                    "referenceable": true,
-                    "encrypted": true
+                    "type": "string",
+                    "encrypted": true,
+                    "referenceable": true
                   }
                 },
                 {
                   "password": {
-                    "type": "string",
                     "required": false,
                     "description": "Password for SASL authentication.",
-                    "referenceable": true,
-                    "encrypted": true
+                    "type": "string",
+                    "encrypted": true,
+                    "referenceable": true
                   }
                 }
               ],
-              "required": true
+              "type": "record"
             }
           },
           {
             "schema_registry": {
+              "required": true,
               "description": "The plugin-global schema registry configuration. This can be overwritten by the topic configuration.",
               "fields": [
                 {
                   "confluent": {
-                    "type": "record",
+                    "required": false,
                     "fields": [
                       {
                         "url": {
+                          "required": false,
                           "description": "The URL of the schema registry.",
-                          "type": "string",
-                          "required": false
+                          "type": "string"
                         }
                       },
                       {
@@ -191,48 +192,48 @@
                       {
                         "ssl_verify": {
                           "description": "Set to false to disable SSL certificate verification when connecting to the schema registry.",
-                          "default": true,
-                          "type": "boolean"
+                          "type": "boolean",
+                          "default": true
                         }
                       },
                       {
                         "authentication": {
-                          "type": "record",
+                          "required": true,
                           "fields": [
                             {
                               "mode": {
-                                "type": "string",
                                 "required": true,
                                 "description": "Authentication mode to use with the schema registry.",
-                                "default": "none",
                                 "one_of": [
                                   "none",
                                   "basic"
-                                ]
+                                ],
+                                "type": "string",
+                                "default": "none"
                               }
                             },
                             {
                               "basic": {
-                                "type": "record",
+                                "required": false,
                                 "fields": [
                                   {
                                     "username": {
                                       "encrypted": true,
-                                      "type": "string",
                                       "referenceable": true,
-                                      "required": true
+                                      "required": true,
+                                      "type": "string"
                                     }
                                   },
                                   {
                                     "password": {
                                       "encrypted": true,
-                                      "type": "string",
                                       "referenceable": true,
-                                      "required": true
+                                      "required": true,
+                                      "type": "string"
                                     }
                                   }
                                 ],
-                                "required": false
+                                "type": "record"
                               }
                             }
                           ],
@@ -246,23 +247,24 @@
                               }
                             }
                           ],
-                          "required": true
+                          "type": "record"
                         }
                       },
                       {
                         "value_schema": {
-                          "type": "record",
+                          "required": false,
                           "fields": [
                             {
                               "subject_name": {
-                                "type": "string",
+                                "required": false,
                                 "description": "The name of the subject",
-                                "required": false
+                                "type": "string"
                               }
                             },
                             {
                               "schema_version": {
-                                "type": "string",
+                                "required": false,
+                                "description": "The schema version to use for serialization/deserialization. Use 'latest' to always fetch the most recent version.",
                                 "match_any": {
                                   "patterns": [
                                     "^latest$",
@@ -270,28 +272,28 @@
                                   ],
                                   "err": "must be either 'latest' or a positive integer"
                                 },
-                                "description": "The schema version to use for serialization/deserialization. Use 'latest' to always fetch the most recent version.",
-                                "required": false
+                                "type": "string"
                               }
                             }
                           ],
-                          "required": false
+                          "type": "record"
                         }
                       },
                       {
                         "key_schema": {
-                          "type": "record",
+                          "required": false,
                           "fields": [
                             {
                               "subject_name": {
-                                "type": "string",
+                                "required": false,
                                 "description": "The name of the subject",
-                                "required": false
+                                "type": "string"
                               }
                             },
                             {
                               "schema_version": {
-                                "type": "string",
+                                "required": false,
+                                "description": "The schema version to use for serialization/deserialization. Use 'latest' to always fetch the most recent version.",
                                 "match_any": {
                                   "patterns": [
                                     "^latest$",
@@ -299,64 +301,62 @@
                                   ],
                                   "err": "must be either 'latest' or a positive integer"
                                 },
-                                "description": "The schema version to use for serialization/deserialization. Use 'latest' to always fetch the most recent version.",
-                                "required": false
+                                "type": "string"
                               }
                             }
                           ],
-                          "required": false
+                          "type": "record"
                         }
                       }
                     ],
-                    "required": false
+                    "type": "record"
                   }
                 }
               ],
-              "type": "record",
-              "required": true
+              "type": "record"
             }
           },
           {
             "security": {
-              "type": "record",
+              "required": true,
               "fields": [
                 {
                   "certificate_id": {
-                    "description": "UUID of certificate entity for mTLS authentication.",
-                    "type": "string",
                     "uuid": true,
-                    "required": false
+                    "description": "UUID of certificate entity for mTLS authentication.",
+                    "required": false,
+                    "type": "string"
                   }
                 },
                 {
                   "ssl": {
+                    "required": false,
                     "description": "Enables TLS.",
-                    "type": "boolean",
-                    "required": false
+                    "type": "boolean"
                   }
                 }
               ],
-              "required": true
+              "type": "record"
             }
           },
           {
             "cluster_name": {
-              "type": "string",
+              "required": false,
               "description": "An identifier for the Kafka cluster. By default, this field generates a random string. You can also set your own custom cluster identifier.  If more than one Kafka plugin is configured without a `cluster_name` (that is, if the default autogenerated value is removed), these plugins will use the same producer, and by extension, the same cluster. Logs will be sent to the leader of the cluster.",
               "auto": true,
-              "required": false
+              "type": "string"
             }
           },
           {
             "producer_request_acks": {
-              "description": "The number of acknowledgments the producer requires the leader to have received before considering a request complete. Allowed values: 0 for no acknowledgments; 1 for only the leader; and -1 for the full ISR (In-Sync Replica set).",
               "default": 1,
+              "description": "The number of acknowledgments the producer requires the leader to have received before considering a request complete. Allowed values: 0 for no acknowledgments; 1 for only the leader; and -1 for the full ISR (In-Sync Replica set).",
+              "type": "integer",
               "one_of": [
                 -1,
                 0,
                 1
-              ],
-              "type": "integer"
+              ]
             }
           },
           {
@@ -417,16 +417,16 @@
           },
           {
             "custom_fields_by_lua": {
-              "type": "map",
-              "description": "Lua code as a key-value map",
+              "keys": {
+                "type": "string",
+                "len_min": 1
+              },
               "values": {
                 "type": "string",
                 "len_min": 1
               },
-              "keys": {
-                "type": "string",
-                "len_min": 1
-              }
+              "description": "Lua code as a key-value map",
+              "type": "map"
             }
           }
         ],
@@ -439,7 +439,7 @@
             }
           }
         ],
-        "required": true
+        "type": "record"
       }
     }
   ]

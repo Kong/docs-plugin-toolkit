@@ -11,15 +11,9 @@
   "fields": [
     {
       "protocols": {
-        "type": "set",
         "required": true,
         "description": "A set of strings representing HTTP protocols.",
-        "default": [
-          "grpc",
-          "grpcs",
-          "http",
-          "https"
-        ],
+        "type": "set",
         "elements": {
           "type": "string",
           "one_of": [
@@ -28,78 +22,85 @@
             "http",
             "https"
           ]
-        }
+        },
+        "default": [
+          "grpc",
+          "grpcs",
+          "http",
+          "https"
+        ]
       }
     },
     {
       "consumer_group": {
-        "type": "foreign",
-        "reference": "consumer_groups",
         "eq": null,
-        "description": "Custom type for representing a foreign key with a null value allowed."
+        "description": "Custom type for representing a foreign key with a null value allowed.",
+        "type": "foreign",
+        "reference": "consumer_groups"
       }
     },
     {
       "config": {
-        "type": "record",
+        "required": true,
         "fields": [
           {
             "bootstrap_servers": {
-              "type": "set",
-              "description": "Set of bootstrap brokers in a `{host: host, port: port}` list format.",
               "elements": {
                 "type": "record",
                 "fields": [
                   {
                     "host": {
-                      "type": "string",
+                      "required": true,
                       "description": "A string representing a host name, such as example.com.",
-                      "required": true
+                      "type": "string"
                     }
                   },
                   {
                     "port": {
-                      "type": "integer",
+                      "required": true,
                       "description": "An integer representing a port number between 0 and 65535, inclusive.",
                       "between": [
                         0,
                         65535
                       ],
-                      "required": true
+                      "type": "integer"
                     }
                   }
                 ]
-              }
+              },
+              "description": "Set of bootstrap brokers in a `{host: host, port: port}` list format.",
+              "type": "set"
             }
           },
           {
             "topics": {
-              "type": "array",
-              "len_min": 1,
               "required": true,
               "description": "The Kafka topics and their configuration you want to consume from.",
+              "type": "array",
+              "len_min": 1,
               "elements": {
                 "type": "record",
                 "fields": [
                   {
                     "name": {
-                      "type": "string",
-                      "required": true
+                      "required": true,
+                      "type": "string"
                     }
                   },
                   {
                     "schema_registry": {
+                      "required": true,
                       "description": "The plugin-global schema registry configuration.",
                       "fields": [
                         {
                           "confluent": {
-                            "type": "record",
+                            "required": false,
                             "fields": [
                               {
                                 "url": {
+                                  "required": false,
                                   "description": "The URL of the schema registry.",
-                                  "type": "string",
-                                  "required": false
+                                  "type": "string"
                                 }
                               },
                               {
@@ -115,48 +116,48 @@
                               {
                                 "ssl_verify": {
                                   "description": "Set to false to disable SSL certificate verification when connecting to the schema registry.",
-                                  "default": true,
-                                  "type": "boolean"
+                                  "type": "boolean",
+                                  "default": true
                                 }
                               },
                               {
                                 "authentication": {
-                                  "type": "record",
+                                  "required": true,
                                   "fields": [
                                     {
                                       "mode": {
-                                        "type": "string",
                                         "required": true,
                                         "description": "Authentication mode to use with the schema registry.",
-                                        "default": "none",
                                         "one_of": [
                                           "none",
                                           "basic"
-                                        ]
+                                        ],
+                                        "type": "string",
+                                        "default": "none"
                                       }
                                     },
                                     {
                                       "basic": {
-                                        "type": "record",
+                                        "required": false,
                                         "fields": [
                                           {
                                             "username": {
                                               "encrypted": true,
-                                              "type": "string",
                                               "referenceable": true,
-                                              "required": true
+                                              "required": true,
+                                              "type": "string"
                                             }
                                           },
                                           {
                                             "password": {
                                               "encrypted": true,
-                                              "type": "string",
                                               "referenceable": true,
-                                              "required": true
+                                              "required": true,
+                                              "type": "string"
                                             }
                                           }
                                         ],
-                                        "required": false
+                                        "type": "record"
                                       }
                                     }
                                   ],
@@ -170,16 +171,15 @@
                                       }
                                     }
                                   ],
-                                  "required": true
+                                  "type": "record"
                                 }
                               }
                             ],
-                            "required": false
+                            "type": "record"
                           }
                         }
                       ],
-                      "type": "record",
-                      "required": true
+                      "type": "record"
                     }
                   }
                 ]
@@ -188,17 +188,18 @@
           },
           {
             "schema_registry": {
+              "required": true,
               "description": "The plugin-global schema registry configuration.",
               "fields": [
                 {
                   "confluent": {
-                    "type": "record",
+                    "required": false,
                     "fields": [
                       {
                         "url": {
+                          "required": false,
                           "description": "The URL of the schema registry.",
-                          "type": "string",
-                          "required": false
+                          "type": "string"
                         }
                       },
                       {
@@ -214,48 +215,48 @@
                       {
                         "ssl_verify": {
                           "description": "Set to false to disable SSL certificate verification when connecting to the schema registry.",
-                          "default": true,
-                          "type": "boolean"
+                          "type": "boolean",
+                          "default": true
                         }
                       },
                       {
                         "authentication": {
-                          "type": "record",
+                          "required": true,
                           "fields": [
                             {
                               "mode": {
-                                "type": "string",
                                 "required": true,
                                 "description": "Authentication mode to use with the schema registry.",
-                                "default": "none",
                                 "one_of": [
                                   "none",
                                   "basic"
-                                ]
+                                ],
+                                "type": "string",
+                                "default": "none"
                               }
                             },
                             {
                               "basic": {
-                                "type": "record",
+                                "required": false,
                                 "fields": [
                                   {
                                     "username": {
                                       "encrypted": true,
-                                      "type": "string",
                                       "referenceable": true,
-                                      "required": true
+                                      "required": true,
+                                      "type": "string"
                                     }
                                   },
                                   {
                                     "password": {
                                       "encrypted": true,
-                                      "type": "string",
                                       "referenceable": true,
-                                      "required": true
+                                      "required": true,
+                                      "type": "string"
                                     }
                                   }
                                 ],
-                                "required": false
+                                "type": "record"
                               }
                             }
                           ],
@@ -269,133 +270,132 @@
                               }
                             }
                           ],
-                          "required": true
+                          "type": "record"
                         }
                       }
                     ],
-                    "required": false
+                    "type": "record"
                   }
                 }
               ],
-              "type": "record",
-              "required": true
+              "type": "record"
             }
           },
           {
             "mode": {
-              "type": "string",
               "required": true,
               "description": "The mode of operation for the plugin.",
-              "default": "http-get",
               "one_of": [
                 "server-sent-events",
                 "http-get"
-              ]
+              ],
+              "type": "string",
+              "default": "http-get"
             }
           },
           {
             "message_deserializer": {
-              "type": "string",
               "required": true,
               "description": "The deserializer to use for the consumed messages.",
-              "default": "noop",
               "one_of": [
                 "json",
                 "noop"
-              ]
+              ],
+              "type": "string",
+              "default": "noop"
             }
           },
           {
             "auto_offset_reset": {
-              "type": "string",
               "required": true,
               "description": "The offset to start from when there is no initial offset in the consumer group.",
-              "default": "latest",
               "one_of": [
                 "earliest",
                 "latest"
-              ]
+              ],
+              "type": "string",
+              "default": "latest"
             }
           },
           {
             "commit_strategy": {
-              "type": "string",
               "required": true,
               "description": "The strategy to use for committing offsets.",
-              "default": "auto",
               "one_of": [
                 "auto",
                 "off"
-              ]
+              ],
+              "type": "string",
+              "default": "auto"
             }
           },
           {
             "timeout": {
-              "type": "integer",
+              "description": "Socket timeout in milliseconds.",
               "default": 10000,
-              "description": "Socket timeout in milliseconds."
+              "type": "integer"
             }
           },
           {
             "keepalive": {
-              "type": "integer",
+              "description": "Keepalive timeout in milliseconds.",
               "default": 60000,
-              "description": "Keepalive timeout in milliseconds."
+              "type": "integer"
             }
           },
           {
             "keepalive_enabled": {
-              "type": "boolean",
-              "default": false
+              "default": false,
+              "type": "boolean"
             }
           },
           {
             "cluster_api_key": {
-              "type": "string",
               "required": true,
+              "description": "Username/Apikey for SASL authentication.",
+              "type": "string",
               "encrypted": true,
-              "referenceable": true,
-              "description": "Username/Apikey for SASL authentication."
+              "referenceable": true
             }
           },
           {
             "cluster_api_secret": {
-              "type": "string",
               "required": true,
+              "description": "Password/ApiSecret for SASL authentication.",
+              "type": "string",
               "encrypted": true,
-              "referenceable": true,
-              "description": "Password/ApiSecret for SASL authentication."
+              "referenceable": true
             }
           },
           {
             "confluent_cloud_api_key": {
-              "type": "string",
               "required": false,
+              "description": "Apikey for authentication with Confluent Cloud. This allows for management tasks such as creating topics, ACLs, etc.",
+              "type": "string",
               "encrypted": true,
-              "referenceable": true,
-              "description": "Apikey for authentication with Confluent Cloud. This allows for management tasks such as creating topics, ACLs, etc."
+              "referenceable": true
             }
           },
           {
             "confluent_cloud_api_secret": {
-              "type": "string",
               "required": false,
+              "description": "The corresponding secret for the Confluent Cloud API key.",
+              "type": "string",
               "encrypted": true,
-              "referenceable": true,
-              "description": "The corresponding secret for the Confluent Cloud API key."
+              "referenceable": true
             }
           },
           {
             "cluster_name": {
-              "type": "string",
+              "required": false,
               "description": "An identifier for the Kafka cluster. By default, this field generates a random string. You can also set your own custom cluster identifier.  If more than one Kafka plugin is configured without a `cluster_name` (that is, if the default autogenerated value is removed), these plugins will use the same producer, and by extension, the same cluster. Logs will be sent to the leader of the cluster.",
               "auto": true,
-              "required": false
+              "type": "string"
             }
           }
         ],
         "entity_checks": [],
-        "required": true
+        "type": "record"
       }
     }
   ]

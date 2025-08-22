@@ -3,15 +3,9 @@
   "fields": [
     {
       "protocols": {
-        "type": "set",
         "required": true,
         "description": "A set of strings representing HTTP protocols.",
-        "default": [
-          "grpc",
-          "grpcs",
-          "http",
-          "https"
-        ],
+        "type": "set",
         "elements": {
           "type": "string",
           "one_of": [
@@ -20,51 +14,57 @@
             "http",
             "https"
           ]
-        }
+        },
+        "default": [
+          "grpc",
+          "grpcs",
+          "http",
+          "https"
+        ]
       }
     },
     {
       "consumer_group": {
-        "type": "foreign",
-        "reference": "consumer_groups",
         "eq": null,
-        "description": "Custom type for representing a foreign key with a null value allowed."
+        "description": "Custom type for representing a foreign key with a null value allowed.",
+        "type": "foreign",
+        "reference": "consumer_groups"
       }
     },
     {
       "config": {
-        "type": "record",
+        "required": true,
         "fields": [
           {
             "header_name": {
-              "type": "string",
+              "description": "The HTTP header name to use for the correlation ID.",
               "default": "Kong-Request-ID",
-              "description": "The HTTP header name to use for the correlation ID."
+              "type": "string"
             }
           },
           {
             "generator": {
-              "type": "string",
               "required": true,
               "description": "The generator to use for the correlation ID. Accepted values are `uuid`, `uuid#counter`, and `tracker`. See [Generators](#generators).",
-              "default": "uuid#counter",
               "one_of": [
                 "uuid",
                 "uuid#counter",
                 "tracker"
-              ]
+              ],
+              "type": "string",
+              "default": "uuid#counter"
             }
           },
           {
             "echo_downstream": {
-              "type": "boolean",
-              "default": false,
+              "required": true,
               "description": "Whether to echo the header back to downstream (the client).",
-              "required": true
+              "default": false,
+              "type": "boolean"
             }
           }
         ],
-        "required": true
+        "type": "record"
       }
     }
   ]

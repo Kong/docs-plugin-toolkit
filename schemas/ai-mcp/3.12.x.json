@@ -3,31 +3,25 @@
   "fields": [
     {
       "consumer": {
-        "type": "foreign",
-        "reference": "consumers",
+        "eq": null,
         "description": "Custom type for representing a foreign key with a null value allowed.",
-        "eq": null
+        "type": "foreign",
+        "reference": "consumers"
       }
     },
     {
       "consumer_group": {
-        "type": "foreign",
-        "reference": "consumer_groups",
         "eq": null,
-        "description": "Custom type for representing a foreign key with a null value allowed."
+        "description": "Custom type for representing a foreign key with a null value allowed.",
+        "type": "foreign",
+        "reference": "consumer_groups"
       }
     },
     {
       "protocols": {
-        "type": "set",
         "required": true,
         "description": "A set of strings representing HTTP protocols.",
-        "default": [
-          "grpc",
-          "grpcs",
-          "http",
-          "https"
-        ],
+        "type": "set",
         "elements": {
           "type": "string",
           "one_of": [
@@ -36,29 +30,34 @@
             "http",
             "https"
           ]
-        }
+        },
+        "default": [
+          "grpc",
+          "grpcs",
+          "http",
+          "https"
+        ]
       }
     },
     {
       "config": {
-        "type": "record",
+        "required": true,
         "fields": [
           {
             "tools": {
-              "type": "array",
+              "required": false,
               "elements": {
                 "type": "record",
                 "fields": [
                   {
                     "description": {
+                      "required": true,
                       "description": "The description of the MCP tool. This is used to provide information about the tool's functionality and usage.",
-                      "type": "string",
-                      "required": true
+                      "type": "string"
                     }
                   },
                   {
                     "parameters": {
-                      "type": "json",
                       "json_schema": {
                         "inline": {
                           "type": [
@@ -67,12 +66,12 @@
                           ]
                         }
                       },
-                      "description": "The API parameters specification defined in OpenAPI. For example, '[{\"name\": \"city\", \"in\": \"query\", \"description\": \"Name of the city to get the weather for\", \"required\": true, \"schema\": {\"type\": \"string\"}}]'.See https://swagger.io/docs/specification/v3_0/describing-parameters/ for more details."
+                      "description": "The API parameters specification defined in OpenAPI. For example, '[{\"name\": \"city\", \"in\": \"query\", \"description\": \"Name of the city to get the weather for\", \"required\": true, \"schema\": {\"type\": \"string\"}}]'.See https://swagger.io/docs/specification/v3_0/describing-parameters/ for more details.",
+                      "type": "json"
                     }
                   },
                   {
                     "request_body": {
-                      "type": "json",
                       "json_schema": {
                         "inline": {
                           "type": [
@@ -81,49 +80,82 @@
                           ]
                         }
                       },
-                      "description": "The API requestBody specification defined in OpenAPI. For example, '{\"content\":{\"application/x-www-form-urlencoded\":{\"schema\":{\"type\":\"object\",\"properties\":{\"color\":{\"type\":\"array\",\"items\":{\"type\":\"string\"}}}}}}'.See https://swagger.io/docs/specification/v3_0/describing-request-body/describing-request-body/ for more details."
+                      "description": "The API requestBody specification defined in OpenAPI. For example, '{\"content\":{\"application/x-www-form-urlencoded\":{\"schema\":{\"type\":\"object\",\"properties\":{\"color\":{\"type\":\"array\",\"items\":{\"type\":\"string\"}}}}}}'.See https://swagger.io/docs/specification/v3_0/describing-request-body/describing-request-body/ for more details.",
+                      "type": "json"
                     }
                   },
                   {
                     "host": {
-                      "description": "The host of the exported API. By default, Kong will extract the host from API configuration. If the configured host is wildcard, this field is required.",
-                      "type": "string"
+                      "type": "string",
+                      "description": "The host of the exported API. By default, Kong will extract the host from API configuration. If the configured host is wildcard, this field is required."
                     }
                   },
                   {
                     "path": {
-                      "type": "string",
                       "match_none": [
                         {
-                          "pattern": "//",
-                          "err": "must not have empty segments"
+                          "err": "must not have empty segments",
+                          "pattern": "//"
                         }
                       ],
+                      "description": "The path of the exported API. By default, Kong will extract the path from API configuration. If the configured path is not exactly matched, this field is required.",
                       "starts_with": "/",
-                      "description": "The path of the exported API. By default, Kong will extract the path from API configuration. If the configured path is not exactly matched, this field is required."
+                      "type": "string"
+                    }
+                  },
+                  {
+                    "headers": {
+                      "type": "map",
+                      "values": {
+                        "elements": {
+                          "type": "string"
+                        },
+                        "type": "array"
+                      },
+                      "description": "The headers of the exported API. By default, Kong will extract the headers from API configuration. If the configured headers are not exactly matched, this field is required.",
+                      "keys": {
+                        "type": "string",
+                        "description": "A string representing an HTTP header name."
+                      }
+                    }
+                  },
+                  {
+                    "query": {
+                      "type": "map",
+                      "values": {
+                        "elements": {
+                          "type": "string"
+                        },
+                        "type": "array"
+                      },
+                      "description": "The query arguments of the exported API. If the generated query arguments are not exactly matched, this field is required.",
+                      "keys": {
+                        "type": "string",
+                        "description": "A string representing an HTTP header name."
+                      }
                     }
                   },
                   {
                     "method": {
                       "description": "The method of the exported API. By default, Kong will extract the method from API configuration. If the configured method is not exactly matched, this field is required.",
+                      "type": "string",
                       "one_of": [
                         "GET",
                         "PUT",
                         "PATCH",
                         "POST",
                         "DELETE"
-                      ],
-                      "type": "string"
+                      ]
                     }
                   },
                   {
                     "scheme": {
                       "description": "The scheme of the exported API. By default, Kong will extract the scheme from API configuration. If the configured scheme is not expected, this field can be used to override it.",
+                      "type": "string",
                       "one_of": [
                         "http",
                         "https"
-                      ],
-                      "type": "string"
+                      ]
                     }
                   },
                   {
@@ -132,32 +164,32 @@
                       "fields": [
                         {
                           "title": {
-                            "description": "Human-readable title for the tool",
-                            "type": "string"
+                            "type": "string",
+                            "description": "Human-readable title for the tool"
                           }
                         },
                         {
                           "read_only_hint": {
-                            "description": "If true, the tool does not modify its environment",
-                            "type": "boolean"
+                            "type": "boolean",
+                            "description": "If true, the tool does not modify its environment"
                           }
                         },
                         {
                           "destructive_hint": {
-                            "description": "If true, the tool may perform destructive updates",
-                            "type": "boolean"
+                            "type": "boolean",
+                            "description": "If true, the tool may perform destructive updates"
                           }
                         },
                         {
                           "idempotent_hint": {
-                            "description": "If true, repeated calls with same args have no additional effect",
-                            "type": "boolean"
+                            "type": "boolean",
+                            "description": "If true, repeated calls with same args have no additional effect"
                           }
                         },
                         {
                           "open_world_hint": {
-                            "description": "If true, tool interacts with external entities",
-                            "type": "boolean"
+                            "type": "boolean",
+                            "description": "If true, tool interacts with external entities"
                           }
                         }
                       ]
@@ -165,55 +197,55 @@
                   }
                 ]
               },
-              "required": false
+              "type": "array"
             }
           },
           {
             "server": {
-              "type": "record",
+              "required": false,
               "fields": [
                 {
                   "enabled": {
                     "description": "Enable or disable the MCP server. If disabled, the server will not be exported.",
-                    "default": true,
-                    "type": "boolean"
+                    "type": "boolean",
+                    "default": true
                   }
                 },
                 {
                   "tag": {
-                    "description": "The tag of the MCP server. This is used to filter the exported MCP tools. The field should contain exactly one tag. ",
-                    "type": "string"
+                    "type": "string",
+                    "description": "The tag of the MCP server. This is used to filter the exported MCP tools. The field should contain exactly one tag. "
                   }
                 },
                 {
                   "timeout": {
                     "description": "The timeout for calling the tools in milliseconds.",
-                    "default": 10000,
-                    "type": "number"
+                    "type": "number",
+                    "default": 10000
                   }
                 }
               ],
-              "required": false
+              "type": "record"
             }
           },
           {
             "logging": {
-              "type": "record",
+              "required": true,
               "fields": [
                 {
                   "log_statistics": {
+                    "required": true,
                     "description": "If enabled, will add mcp metrics into the Kong log plugin(s) output.",
-                    "default": false,
                     "type": "boolean",
-                    "required": true
+                    "default": false
                   }
                 },
                 {
                   "log_payloads": {
+                    "required": true,
                     "description": "If enabled, will log the request and response body into the Kong log plugin(s) output.",
-                    "default": false,
                     "type": "boolean",
-                    "required": true
+                    "default": false
                   }
                 }
               ],
@@ -226,19 +258,19 @@
                   }
                 }
               ],
-              "required": true
+              "type": "record"
             }
           },
           {
             "max_request_body_size": {
               "type": "integer",
-              "default": 8192,
+              "description": "max allowed body size allowed to be handled as MCP request.",
               "gt": 0,
-              "description": "max allowed body size allowed to be handled as MCP request."
+              "default": 8192
             }
           }
         ],
-        "required": true
+        "type": "record"
       }
     }
   ]

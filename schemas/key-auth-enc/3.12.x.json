@@ -3,23 +3,16 @@
   "fields": [
     {
       "consumer": {
-        "type": "foreign",
-        "reference": "consumers",
+        "eq": null,
         "description": "Custom type for representing a foreign key with a null value allowed.",
-        "eq": null
+        "type": "foreign",
+        "reference": "consumers"
       }
     },
     {
       "protocols": {
+        "required": true,
         "type": "set",
-        "default": [
-          "grpc",
-          "grpcs",
-          "http",
-          "https",
-          "ws",
-          "wss"
-        ],
         "elements": {
           "type": "string",
           "one_of": [
@@ -31,33 +24,40 @@
             "wss"
           ]
         },
-        "required": true
+        "default": [
+          "grpc",
+          "grpcs",
+          "http",
+          "https",
+          "ws",
+          "wss"
+        ]
       }
     },
     {
       "consumer_group": {
-        "type": "foreign",
-        "reference": "consumer_groups",
         "eq": null,
-        "description": "Custom type for representing a foreign key with a null value allowed."
+        "description": "Custom type for representing a foreign key with a null value allowed.",
+        "type": "foreign",
+        "reference": "consumer_groups"
       }
     },
     {
       "config": {
-        "type": "record",
+        "required": true,
         "fields": [
           {
             "key_names": {
-              "type": "array",
               "required": true,
               "description": "Describes an array of parameter names where the plugin will look for a key. The client must send the authentication key in one of those key names, and the plugin will try to read the credential from a header, request body, or query string parameter with the same name.  Key names may only contain [a-z], [A-Z], [0-9], [_] underscore, and [-] hyphen.",
-              "default": [
-                "apikey"
-              ],
+              "type": "array",
               "elements": {
                 "type": "string",
                 "description": "A string representing an HTTP header name."
-              }
+              },
+              "default": [
+                "apikey"
+              ]
             }
           },
           {
@@ -69,8 +69,8 @@
           },
           {
             "anonymous": {
-              "description": "An optional string (consumer UUID or username) value to use as an “anonymous” consumer if authentication fails. If empty (default null), the request will fail with an authentication failure `4xx`. Note that this value must refer to the consumer `id` or `username` attribute, and **not** its `custom_id`.",
-              "type": "string"
+              "type": "string",
+              "description": "An optional string (consumer UUID or username) value to use as an “anonymous” consumer if authentication fails. If empty (default null), the request will fail with an authentication failure `4xx`. Note that this value must refer to the consumer `id` or `username` attribute, and **not** its `custom_id`."
             }
           },
           {
@@ -103,13 +103,13 @@
           },
           {
             "realm": {
+              "required": false,
               "description": "When authentication fails the plugin sends `WWW-Authenticate` header with `realm` attribute value.",
-              "type": "string",
-              "required": false
+              "type": "string"
             }
           }
         ],
-        "required": true
+        "type": "record"
       }
     }
   ]

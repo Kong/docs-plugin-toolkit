@@ -3,17 +3,11 @@
   "fields": [
     {
       "protocols": {
-        "type": "set",
         "required": true,
         "description": "A set of strings representing protocols.",
-        "default": [
-          "grpc",
-          "grpcs",
-          "http",
-          "https"
-        ],
+        "type": "set",
         "elements": {
-          "type": "string",
+          "description": "A string representing a protocol, such as HTTP or HTTPS.",
           "one_of": [
             "grpc",
             "grpcs",
@@ -26,55 +20,61 @@
             "ws",
             "wss"
           ],
-          "description": "A string representing a protocol, such as HTTP or HTTPS."
-        }
+          "type": "string"
+        },
+        "default": [
+          "grpc",
+          "grpcs",
+          "http",
+          "https"
+        ]
       }
     },
     {
       "consumer_group": {
-        "type": "foreign",
-        "reference": "consumer_groups",
         "eq": null,
-        "description": "Custom type for representing a foreign key with a null value allowed."
+        "description": "Custom type for representing a foreign key with a null value allowed.",
+        "type": "foreign",
+        "reference": "consumer_groups"
       }
     },
     {
       "config": {
-        "type": "record",
+        "required": true,
         "fields": [
           {
             "path": {
-              "type": "string",
-              "err": "not a valid filename",
               "required": true,
               "description": "The file path of the output log file. The plugin creates the log file if it doesn't exist yet.",
-              "match": "^[^%s*&%%\\`][^*&%%\\`]*[^%s*&%%\\`]$"
+              "type": "string",
+              "match": "^[^%s*&%%\\`][^*&%%\\`]*[^%s*&%%\\`]$",
+              "err": "not a valid filename"
             }
           },
           {
             "reopen": {
-              "type": "boolean",
-              "default": false,
+              "required": true,
               "description": "Determines whether the log file is closed and reopened on every request.",
-              "required": true
+              "type": "boolean",
+              "default": false
             }
           },
           {
             "custom_fields_by_lua": {
-              "type": "map",
-              "description": "Lua code as a key-value map",
+              "keys": {
+                "type": "string",
+                "len_min": 1
+              },
               "values": {
                 "type": "string",
                 "len_min": 1
               },
-              "keys": {
-                "type": "string",
-                "len_min": 1
-              }
+              "description": "Lua code as a key-value map",
+              "type": "map"
             }
           }
         ],
-        "required": true
+        "type": "record"
       }
     }
   ]
