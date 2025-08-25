@@ -1,0 +1,718 @@
+{
+  "fields": [
+    {
+      "protocols": {
+        "type": "set",
+        "required": true,
+        "description": "A set of strings representing HTTP protocols.",
+        "default": [
+          "grpc",
+          "grpcs",
+          "http",
+          "https"
+        ],
+        "elements": {
+          "type": "string",
+          "one_of": [
+            "grpc",
+            "grpcs",
+            "http",
+            "https"
+          ]
+        }
+      }
+    },
+    {
+      "config": {
+        "fields": [
+          {
+            "nodes": {
+              "len_min": 1,
+              "len_max": 64,
+              "required": true,
+              "type": "array",
+              "elements": {
+                "fields": [
+                  {
+                    "name": {
+                      "match_none": [
+                        {
+                          "err": "reserved node name",
+                          "pattern": "^_$"
+                        },
+                        {
+                          "err": "reserved node name",
+                          "pattern": "^context$"
+                        },
+                        {
+                          "err": "reserved node name",
+                          "pattern": "^ctx$"
+                        },
+                        {
+                          "err": "reserved node name",
+                          "pattern": "^error$"
+                        },
+                        {
+                          "err": "reserved node name",
+                          "pattern": "^globals$"
+                        },
+                        {
+                          "err": "reserved node name",
+                          "pattern": "^kong$"
+                        },
+                        {
+                          "err": "reserved node name",
+                          "pattern": "^ngx$"
+                        },
+                        {
+                          "err": "reserved node name",
+                          "pattern": "^node$"
+                        },
+                        {
+                          "err": "reserved node name",
+                          "pattern": "^plan$"
+                        },
+                        {
+                          "err": "reserved node name",
+                          "pattern": "^plugin$"
+                        },
+                        {
+                          "err": "reserved node name",
+                          "pattern": "^property$"
+                        },
+                        {
+                          "err": "reserved node name",
+                          "pattern": "^self$"
+                        },
+                        {
+                          "err": "reserved node name",
+                          "pattern": "^static$"
+                        },
+                        {
+                          "err": "reserved node name",
+                          "pattern": "^vars$"
+                        }
+                      ],
+                      "type": "string",
+                      "required": true,
+                      "description": "A label that uniquely identifies the node within the plugin configuration so that it can be used for input/output connections. Must be valid `snake_case` or `kebab-case`.",
+                      "len_min": 1,
+                      "len_max": 255,
+                      "examples": [
+                        {
+                          "value": "snake_case"
+                        },
+                        {
+                          "value": "SCREAMING_SNAKE_CASE"
+                        },
+                        {
+                          "value": "kebab-case"
+                        },
+                        {
+                          "value": "KEBAB-CASE"
+                        },
+                        {
+                          "value": "set-property"
+                        },
+                        {
+                          "value": "get-property"
+                        },
+                        {
+                          "value": "send_api_request"
+                        },
+                        {
+                          "value": "filter_01"
+                        },
+                        {
+                          "value": "filter_02"
+                        }
+                      ],
+                      "match_all": [
+                        {
+                          "err": "must be a valid identifier",
+                          "pattern": "^[A-Za-z_][A-Za-z0-9_-]*$"
+                        }
+                      ],
+                      "not_one_of": [
+                        "request",
+                        "response",
+                        "service_request",
+                        "service_response",
+                        "vault"
+                      ]
+                    }
+                  },
+                  {
+                    "type": {
+                      "one_of": [
+                        "call",
+                        "exit",
+                        "jq",
+                        "property",
+                        "static"
+                      ],
+                      "type": "string",
+                      "required": true
+                    }
+                  }
+                ],
+                "subschema_override_parent": true,
+                "type": "record",
+                "description": "datakit nodes",
+                "subschema_error": "unknown node type: %q, expected one of: call, exit, jq, property, static",
+                "subschema_definitions": {
+                  "property": {
+                    "description": "Get or set a property",
+                    "fields": [
+                      {
+                        "content_type": {
+                          "description": "The expected mime type of the property value. When set to `application/json`, SET operations will JSON-encode input data before writing it, and GET operations will JSON-decode output data after reading it. Otherwise, this setting has no effect.",
+                          "one_of": [
+                            "application/json",
+                            "text/plain",
+                            "application/octet-stream"
+                          ],
+                          "type": "string",
+                          "required": false
+                        }
+                      },
+                      {
+                        "property": {
+                          "len_min": 1,
+                          "type": "string",
+                          "required": true,
+                          "description": "The property name to get/set",
+                          "len_max": 255
+                        }
+                      },
+                      {
+                        "input": {
+                          "len_min": 1,
+                          "len_max": 255,
+                          "required": false,
+                          "description": "Property input source. When connected, this node operates in SET mode and writes input data to the property. Otherwise, the node operates in GET mode and reads the property.",
+                          "match_any": {
+                            "err": "must be one of NODE_NAME or NODE_NAME.FIELD",
+                            "patterns": [
+                              "^[A-Za-z_][A-Za-z0-9_-]*$",
+                              "^[A-Za-z_][A-Za-z0-9_-]*%..+$"
+                            ]
+                          },
+                          "type": "string"
+                        }
+                      },
+                      {
+                        "output": {
+                          "len_min": 1,
+                          "len_max": 255,
+                          "required": false,
+                          "description": "Property output. This can be connected regardless of whether the node is operating in GET mode or SET mode.",
+                          "type": "string",
+                          "match_any": {
+                            "err": "must be one of NODE_NAME or NODE_NAME.FIELD",
+                            "patterns": [
+                              "^[A-Za-z_][A-Za-z0-9_-]*$",
+                              "^[A-Za-z_][A-Za-z0-9_-]*%..+$"
+                            ]
+                          }
+                        }
+                      }
+                    ],
+                    "type": "record"
+                  },
+                  "call": {
+                    "description": "Make an external HTTP request",
+                    "fields": [
+                      {
+                        "method": {
+                          "len_min": 1,
+                          "len_max": 32,
+                          "default": "GET",
+                          "description": "A string representing an HTTP method, such as GET, POST, PUT, or DELETE. The string must contain only uppercase letters.",
+                          "type": "string",
+                          "match": "^%u+$"
+                        }
+                      },
+                      {
+                        "ssl_server_name": {
+                          "description": "A string representing an SNI (server name indication) value for TLS.",
+                          "type": "string"
+                        }
+                      },
+                      {
+                        "timeout": {
+                          "description": "An integer representing a timeout in milliseconds. Must be between 0 and 2^31-2.",
+                          "type": "integer",
+                          "between": [
+                            0,
+                            2147483646
+                          ]
+                        }
+                      },
+                      {
+                        "url": {
+                          "description": "A string representing a URL, such as https://example.com/path/to/resource?q=search.",
+                          "type": "string",
+                          "required": true
+                        }
+                      },
+                      {
+                        "input": {
+                          "len_min": 1,
+                          "len_max": 255,
+                          "required": false,
+                          "description": "call node input",
+                          "match_any": {
+                            "err": "must be one of NODE_NAME or NODE_NAME.FIELD",
+                            "patterns": [
+                              "^[A-Za-z_][A-Za-z0-9_-]*$",
+                              "^[A-Za-z_][A-Za-z0-9_-]*%..+$"
+                            ]
+                          },
+                          "type": "string"
+                        }
+                      },
+                      {
+                        "inputs": {
+                          "description": "call node inputs",
+                          "fields": [
+                            {
+                              "body": {
+                                "len_min": 1,
+                                "len_max": 255,
+                                "required": false,
+                                "description": "HTTP request body",
+                                "match_any": {
+                                  "err": "must be one of NODE_NAME or NODE_NAME.FIELD",
+                                  "patterns": [
+                                    "^[A-Za-z_][A-Za-z0-9_-]*$",
+                                    "^[A-Za-z_][A-Za-z0-9_-]*%..+$"
+                                  ]
+                                },
+                                "type": "string"
+                              }
+                            },
+                            {
+                              "headers": {
+                                "len_min": 1,
+                                "len_max": 255,
+                                "required": false,
+                                "description": "HTTP request headers",
+                                "match_any": {
+                                  "err": "must be one of NODE_NAME or NODE_NAME.FIELD",
+                                  "patterns": [
+                                    "^[A-Za-z_][A-Za-z0-9_-]*$",
+                                    "^[A-Za-z_][A-Za-z0-9_-]*%..+$"
+                                  ]
+                                },
+                                "type": "string"
+                              }
+                            },
+                            {
+                              "query": {
+                                "len_min": 1,
+                                "len_max": 255,
+                                "required": false,
+                                "description": "HTTP request query",
+                                "match_any": {
+                                  "err": "must be one of NODE_NAME or NODE_NAME.FIELD",
+                                  "patterns": [
+                                    "^[A-Za-z_][A-Za-z0-9_-]*$",
+                                    "^[A-Za-z_][A-Za-z0-9_-]*%..+$"
+                                  ]
+                                },
+                                "type": "string"
+                              }
+                            }
+                          ],
+                          "type": "record",
+                          "required": false
+                        }
+                      },
+                      {
+                        "output": {
+                          "len_min": 1,
+                          "len_max": 255,
+                          "required": false,
+                          "description": "call node output",
+                          "type": "string",
+                          "match_any": {
+                            "err": "must be one of NODE_NAME or NODE_NAME.FIELD",
+                            "patterns": [
+                              "^[A-Za-z_][A-Za-z0-9_-]*$",
+                              "^[A-Za-z_][A-Za-z0-9_-]*%..+$"
+                            ]
+                          }
+                        }
+                      },
+                      {
+                        "outputs": {
+                          "description": "call node outputs",
+                          "fields": [
+                            {
+                              "body": {
+                                "len_min": 1,
+                                "len_max": 255,
+                                "required": false,
+                                "description": "HTTP response body",
+                                "type": "string",
+                                "match_any": {
+                                  "err": "must be one of NODE_NAME or NODE_NAME.FIELD",
+                                  "patterns": [
+                                    "^[A-Za-z_][A-Za-z0-9_-]*$",
+                                    "^[A-Za-z_][A-Za-z0-9_-]*%..+$"
+                                  ]
+                                }
+                              }
+                            },
+                            {
+                              "headers": {
+                                "len_min": 1,
+                                "len_max": 255,
+                                "required": false,
+                                "description": "HTTP response headers",
+                                "type": "string",
+                                "match_any": {
+                                  "err": "must be one of NODE_NAME or NODE_NAME.FIELD",
+                                  "patterns": [
+                                    "^[A-Za-z_][A-Za-z0-9_-]*$",
+                                    "^[A-Za-z_][A-Za-z0-9_-]*%..+$"
+                                  ]
+                                }
+                              }
+                            },
+                            {
+                              "status": {
+                                "len_min": 1,
+                                "len_max": 255,
+                                "required": false,
+                                "description": "HTTP response status code",
+                                "type": "string",
+                                "match_any": {
+                                  "err": "must be one of NODE_NAME or NODE_NAME.FIELD",
+                                  "patterns": [
+                                    "^[A-Za-z_][A-Za-z0-9_-]*$",
+                                    "^[A-Za-z_][A-Za-z0-9_-]*%..+$"
+                                  ]
+                                }
+                              }
+                            }
+                          ],
+                          "type": "record",
+                          "required": false
+                        }
+                      }
+                    ],
+                    "type": "record",
+                    "entity_checks": [
+                      {
+                        "mutually_exclusive": [
+                          "input",
+                          "inputs"
+                        ]
+                      },
+                      {
+                        "mutually_exclusive": [
+                          "output",
+                          "outputs"
+                        ]
+                      }
+                    ]
+                  },
+                  "static": {
+                    "description": "Produce reusable outputs from statically-configured values",
+                    "fields": [
+                      {
+                        "values": {
+                          "description": "An object with string keys and freeform values",
+                          "type": "json",
+                          "json_schema": {
+                            "inline": {
+                              "type": "object"
+                            }
+                          },
+                          "required": true
+                        }
+                      },
+                      {
+                        "output": {
+                          "len_min": 1,
+                          "len_max": 255,
+                          "required": false,
+                          "description": "The entire `.values` map",
+                          "type": "string",
+                          "match_any": {
+                            "err": "must be one of NODE_NAME or NODE_NAME.FIELD",
+                            "patterns": [
+                              "^[A-Za-z_][A-Za-z0-9_-]*$",
+                              "^[A-Za-z_][A-Za-z0-9_-]*%..+$"
+                            ]
+                          }
+                        }
+                      },
+                      {
+                        "outputs": {
+                          "keys": {
+                            "len_min": 1,
+                            "len_max": 255,
+                            "type": "string"
+                          },
+                          "type": "map",
+                          "required": false,
+                          "description": "Individual items from `.values`, referenced by key",
+                          "values": {
+                            "type": "string",
+                            "len_min": 1,
+                            "len_max": 255,
+                            "match_any": {
+                              "err": "must be one of NODE_NAME or NODE_NAME.FIELD",
+                              "patterns": [
+                                "^[A-Za-z_][A-Za-z0-9_-]*$",
+                                "^[A-Za-z_][A-Za-z0-9_-]*%..+$"
+                              ]
+                            }
+                          }
+                        }
+                      }
+                    ],
+                    "type": "record",
+                    "entity_checks": [
+                      {
+                        "mutually_exclusive": [
+                          "output",
+                          "outputs"
+                        ]
+                      }
+                    ]
+                  },
+                  "jq": {
+                    "description": "Process data using `jq` syntax",
+                    "fields": [
+                      {
+                        "jq": {
+                          "len_min": 1,
+                          "len_max": 10240,
+                          "required": true,
+                          "description": "The jq filter text. Refer to https://jqlang.org/manual/ for full documentation.",
+                          "type": "string"
+                        }
+                      },
+                      {
+                        "input": {
+                          "len_min": 1,
+                          "len_max": 255,
+                          "required": false,
+                          "description": "filter input(s)",
+                          "match_any": {
+                            "err": "must be one of NODE_NAME or NODE_NAME.FIELD",
+                            "patterns": [
+                              "^[A-Za-z_][A-Za-z0-9_-]*$",
+                              "^[A-Za-z_][A-Za-z0-9_-]*%..+$"
+                            ]
+                          },
+                          "type": "string"
+                        }
+                      },
+                      {
+                        "inputs": {
+                          "keys": {
+                            "len_min": 1,
+                            "len_max": 255,
+                            "type": "string"
+                          },
+                          "type": "map",
+                          "required": false,
+                          "description": "filter input(s)",
+                          "values": {
+                            "type": "string",
+                            "len_min": 1,
+                            "len_max": 255,
+                            "match_any": {
+                              "err": "must be one of NODE_NAME or NODE_NAME.FIELD",
+                              "patterns": [
+                                "^[A-Za-z_][A-Za-z0-9_-]*$",
+                                "^[A-Za-z_][A-Za-z0-9_-]*%..+$"
+                              ]
+                            }
+                          }
+                        }
+                      },
+                      {
+                        "output": {
+                          "len_min": 1,
+                          "len_max": 255,
+                          "required": false,
+                          "description": "filter output(s)",
+                          "type": "string",
+                          "match_any": {
+                            "err": "must be one of NODE_NAME or NODE_NAME.FIELD",
+                            "patterns": [
+                              "^[A-Za-z_][A-Za-z0-9_-]*$",
+                              "^[A-Za-z_][A-Za-z0-9_-]*%..+$"
+                            ]
+                          }
+                        }
+                      }
+                    ],
+                    "type": "record",
+                    "entity_checks": [
+                      {
+                        "mutually_exclusive": [
+                          "input",
+                          "inputs"
+                        ]
+                      }
+                    ]
+                  },
+                  "exit": {
+                    "description": "Terminate the request and send a response to the client",
+                    "fields": [
+                      {
+                        "status": {
+                          "type": "integer",
+                          "required": false,
+                          "description": "HTTP status code",
+                          "between": [
+                            200,
+                            599
+                          ],
+                          "default": 200
+                        }
+                      },
+                      {
+                        "warn_headers_sent": {
+                          "type": "boolean",
+                          "required": false
+                        }
+                      },
+                      {
+                        "input": {
+                          "len_min": 1,
+                          "len_max": 255,
+                          "required": false,
+                          "description": "exit node input",
+                          "match_any": {
+                            "err": "must be one of NODE_NAME or NODE_NAME.FIELD",
+                            "patterns": [
+                              "^[A-Za-z_][A-Za-z0-9_-]*$",
+                              "^[A-Za-z_][A-Za-z0-9_-]*%..+$"
+                            ]
+                          },
+                          "type": "string"
+                        }
+                      },
+                      {
+                        "inputs": {
+                          "description": "exit node inputs",
+                          "fields": [
+                            {
+                              "body": {
+                                "len_min": 1,
+                                "len_max": 255,
+                                "required": false,
+                                "description": "HTTP response body",
+                                "match_any": {
+                                  "err": "must be one of NODE_NAME or NODE_NAME.FIELD",
+                                  "patterns": [
+                                    "^[A-Za-z_][A-Za-z0-9_-]*$",
+                                    "^[A-Za-z_][A-Za-z0-9_-]*%..+$"
+                                  ]
+                                },
+                                "type": "string"
+                              }
+                            },
+                            {
+                              "headers": {
+                                "len_min": 1,
+                                "len_max": 255,
+                                "required": false,
+                                "description": "HTTP response headers",
+                                "match_any": {
+                                  "err": "must be one of NODE_NAME or NODE_NAME.FIELD",
+                                  "patterns": [
+                                    "^[A-Za-z_][A-Za-z0-9_-]*$",
+                                    "^[A-Za-z_][A-Za-z0-9_-]*%..+$"
+                                  ]
+                                },
+                                "type": "string"
+                              }
+                            }
+                          ],
+                          "type": "record",
+                          "required": false
+                        }
+                      }
+                    ],
+                    "type": "record",
+                    "entity_checks": [
+                      {
+                        "mutually_exclusive": [
+                          "input",
+                          "inputs"
+                        ]
+                      }
+                    ]
+                  }
+                },
+                "subschema_key": "type"
+              }
+            }
+          },
+          {
+            "resources": {
+              "fields": [
+                {
+                  "vault": {
+                    "keys": {
+                      "len_max": 255,
+                      "len_min": 1,
+                      "match_all": [
+                        {
+                          "err": "must be a valid identifier",
+                          "pattern": "^[A-Za-z_][A-Za-z0-9_-]*$"
+                        }
+                      ],
+                      "type": "string"
+                    },
+                    "len_max": 64,
+                    "required": false,
+                    "type": "map",
+                    "values": {
+                      "len_min": 1,
+                      "len_max": 4095,
+                      "required": true,
+                      "referenceable": true,
+                      "type": "string"
+                    },
+                    "len_min": 1
+                  }
+                }
+              ],
+              "type": "record",
+              "required": false
+            }
+          },
+          {
+            "debug": {
+              "default": false,
+              "type": "boolean",
+              "required": false
+            }
+          }
+        ],
+        "type": "record",
+        "required": true
+      }
+    }
+  ],
+  "entity_checks": [
+    {
+      "custom_entity_check": {
+        "field_sources": [
+          "config"
+        ],
+        "pass_errors_to_checker": true
+      }
+    }
+  ]
+}
