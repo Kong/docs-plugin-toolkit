@@ -1,0 +1,141 @@
+{
+  "entity_checks": [
+    {
+      "at_least_one_of": [
+        "config.prompts.prepend",
+        "config.prompts.append"
+      ]
+    }
+  ],
+  "fields": [
+    {
+      "protocols": {
+        "elements": {
+          "type": "string",
+          "one_of": [
+            "grpc",
+            "grpcs",
+            "http",
+            "https"
+          ]
+        },
+        "default": [
+          "grpc",
+          "grpcs",
+          "http",
+          "https"
+        ],
+        "required": true,
+        "description": "A set of strings representing HTTP protocols.",
+        "type": "set"
+      }
+    },
+    {
+      "config": {
+        "type": "record",
+        "fields": [
+          {
+            "prompts": {
+              "type": "record",
+              "required": false,
+              "fields": [
+                {
+                  "prepend": {
+                    "len_max": 15,
+                    "type": "array",
+                    "required": false,
+                    "description": "Insert chat messages at the beginning of the chat message array. This array preserves exact order when adding messages.",
+                    "elements": {
+                      "type": "record",
+                      "required": false,
+                      "fields": [
+                        {
+                          "role": {
+                            "type": "string",
+                            "required": true,
+                            "default": "system",
+                            "one_of": [
+                              "system",
+                              "assistant",
+                              "user"
+                            ]
+                          }
+                        },
+                        {
+                          "content": {
+                            "type": "string",
+                            "required": true,
+                            "len_min": 1,
+                            "len_max": 100000
+                          }
+                        }
+                      ]
+                    }
+                  }
+                },
+                {
+                  "append": {
+                    "len_max": 15,
+                    "type": "array",
+                    "required": false,
+                    "description": "Insert chat messages at the end of the chat message array. This array preserves exact order when adding messages.",
+                    "elements": {
+                      "type": "record",
+                      "required": false,
+                      "fields": [
+                        {
+                          "role": {
+                            "type": "string",
+                            "required": true,
+                            "default": "system",
+                            "one_of": [
+                              "system",
+                              "assistant",
+                              "user"
+                            ]
+                          }
+                        },
+                        {
+                          "content": {
+                            "type": "string",
+                            "required": true,
+                            "len_min": 1,
+                            "len_max": 100000
+                          }
+                        }
+                      ]
+                    }
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "max_request_body_size": {
+              "type": "integer",
+              "default": 8192,
+              "description": "max allowed body size allowed to be introspected. 0 means unlimited, but the size of this body will still be limited by Nginx's client_max_body_size.",
+              "gt": 0
+            }
+          },
+          {
+            "llm_format": {
+              "one_of": [
+                "openai",
+                "bedrock",
+                "gemini",
+                "cohere",
+                "huggingface"
+              ],
+              "type": "string",
+              "required": false,
+              "description": "LLM input and output format and schema to use",
+              "default": "openai"
+            }
+          }
+        ],
+        "required": true
+      }
+    }
+  ]
+}

@@ -1,0 +1,202 @@
+{
+  "entity_checks": [],
+  "fields": [
+    {
+      "protocols": {
+        "elements": {
+          "type": "string",
+          "one_of": [
+            "grpc",
+            "grpcs",
+            "http",
+            "https"
+          ]
+        },
+        "default": [
+          "grpc",
+          "grpcs",
+          "http",
+          "https"
+        ],
+        "required": true,
+        "description": "A set of strings representing HTTP protocols.",
+        "type": "set"
+      }
+    },
+    {
+      "consumer": {
+        "eq": null,
+        "reference": "consumers",
+        "description": "Custom type for representing a foreign key with a null value allowed.",
+        "type": "foreign"
+      }
+    },
+    {
+      "consumer_group": {
+        "eq": null,
+        "reference": "consumer_groups",
+        "description": "Custom type for representing a foreign key with a null value allowed.",
+        "type": "foreign"
+      }
+    },
+    {
+      "config": {
+        "type": "record",
+        "fields": [
+          {
+            "content_safety_url": {
+              "referenceable": true,
+              "required": true,
+              "description": "Full URL, inc protocol, of the Azure Content Safety instance.",
+              "type": "string"
+            }
+          },
+          {
+            "azure_api_version": {
+              "len_min": 1,
+              "default": "2023-10-01",
+              "required": true,
+              "description": "Sets the ?api-version URL parameter, used for defining the Azure Content Services interchange format.",
+              "type": "string"
+            }
+          },
+          {
+            "azure_use_managed_identity": {
+              "default": false,
+              "description": "If checked, uses (if set) `azure_client_id`, `azure_client_secret`, and/or `azure_tenant_id` for Azure authentication, via Managed or User-assigned identity",
+              "type": "boolean"
+            }
+          },
+          {
+            "azure_client_id": {
+              "type": "string",
+              "required": false,
+              "description": "If `azure_use_managed_identity` is true, set the client ID if required."
+            }
+          },
+          {
+            "azure_client_secret": {
+              "type": "string",
+              "required": false,
+              "description": "If `azure_use_managed_identity` is true, set the client secret if required."
+            }
+          },
+          {
+            "azure_tenant_id": {
+              "type": "string",
+              "required": false,
+              "description": "If `azure_use_managed_identity` is true, set the tenant ID if required."
+            }
+          },
+          {
+            "content_safety_key": {
+              "encrypted": true,
+              "referenceable": true,
+              "required": false,
+              "description": "If `azure_use_managed_identity` is true, set the API key to call Content Safety.",
+              "type": "string"
+            }
+          },
+          {
+            "text_source": {
+              "default": "concatenate_all_content",
+              "one_of": [
+                "concatenate_all_content",
+                "concatenate_user_content"
+              ],
+              "description": "Select where to pick the 'text' for the Azure Content Services request.",
+              "type": "string"
+            }
+          },
+          {
+            "categories": {
+              "type": "array",
+              "elements": {
+                "type": "record",
+                "required": true,
+                "fields": [
+                  {
+                    "name": {
+                      "type": "string",
+                      "required": true
+                    }
+                  },
+                  {
+                    "rejection_level": {
+                      "type": "integer",
+                      "required": true
+                    }
+                  }
+                ]
+              },
+              "description": "Array of categories, and their thresholds, to measure on."
+            }
+          },
+          {
+            "reveal_failure_reason": {
+              "default": true,
+              "description": "Set true to tell the caller why their request was rejected, if so.",
+              "type": "boolean"
+            }
+          },
+          {
+            "output_type": {
+              "default": "FourSeverityLevels",
+              "one_of": [
+                "FourSeverityLevels",
+                "EightSeverityLevels"
+              ],
+              "description": "See https://learn.microsoft.com/en-us/azure/ai-services/openai/concepts/content-filter#content-filtering-categories",
+              "type": "string"
+            }
+          },
+          {
+            "blocklist_names": {
+              "type": "array",
+              "elements": {
+                "type": "string"
+              },
+              "description": "Use these configured blocklists (in Azure Content Services) when inspecting content."
+            }
+          },
+          {
+            "halt_on_blocklist_hit": {
+              "default": true,
+              "description": "Tells Azure to reject the request if any blocklist filter is hit.",
+              "type": "boolean"
+            }
+          },
+          {
+            "guarding_mode": {
+              "one_of": [
+                "INPUT",
+                "OUTPUT",
+                "BOTH"
+              ],
+              "default": "INPUT",
+              "required": true,
+              "description": "The guard mode to use for the request",
+              "type": "string"
+            }
+          },
+          {
+            "stop_on_error": {
+              "default": true,
+              "description": "Stop processing if an error occurs",
+              "type": "boolean"
+            }
+          },
+          {
+            "response_buffer_size": {
+              "default": 100,
+              "required": true,
+              "description": "The amount of bytes receiving from upstream to be buffered before sending to the guardrails service. This only applies to the response content guard.",
+              "type": "number"
+            }
+          }
+        ],
+        "required": true
+      }
+    }
+  ]
+}

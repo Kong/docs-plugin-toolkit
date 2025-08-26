@@ -1,0 +1,197 @@
+{
+  "entity_checks": [
+    {
+      "custom_entity_check": {
+        "field_sources": [
+          "config"
+        ]
+      }
+    }
+  ],
+  "fields": [
+    {
+      "protocols": {
+        "elements": {
+          "type": "string",
+          "one_of": [
+            "grpc",
+            "grpcs",
+            "http",
+            "https"
+          ]
+        },
+        "default": [
+          "grpc",
+          "grpcs",
+          "http",
+          "https"
+        ],
+        "required": true,
+        "description": "A set of strings representing HTTP protocols.",
+        "type": "set"
+      }
+    },
+    {
+      "config": {
+        "type": "record",
+        "fields": [
+          {
+            "host": {
+              "type": "string",
+              "required": true,
+              "description": "The host of the sanitizer",
+              "default": "localhost"
+            }
+          },
+          {
+            "port": {
+              "type": "number",
+              "required": true,
+              "description": "The port of the sanitizer",
+              "default": 8080
+            }
+          },
+          {
+            "scheme": {
+              "type": "string",
+              "required": true,
+              "description": "The protocol can be http and https",
+              "default": "http"
+            }
+          },
+          {
+            "timeout": {
+              "type": "number",
+              "description": "Connection timeout with the sanitizer",
+              "default": 10000
+            }
+          },
+          {
+            "keepalive_timeout": {
+              "type": "number",
+              "description": "The keepalive timeout for the established http connnection",
+              "default": 60000
+            }
+          },
+          {
+            "sanitization_mode": {
+              "one_of": [
+                "INPUT",
+                "OUTPUT",
+                "BOTH"
+              ],
+              "default": "INPUT",
+              "required": true,
+              "description": "The sanitization mode to use for the request",
+              "type": "string"
+            }
+          },
+          {
+            "stop_on_error": {
+              "type": "boolean",
+              "description": "Stop processing if an error occurs.",
+              "default": true
+            }
+          },
+          {
+            "anonymize": {
+              "elements": {
+                "type": "string",
+                "one_of": [
+                  "general",
+                  "phone",
+                  "email",
+                  "creditcard",
+                  "crypto",
+                  "date",
+                  "ssn",
+                  "ip",
+                  "nrp",
+                  "domain",
+                  "credentials",
+                  "url",
+                  "medical",
+                  "driverlicense",
+                  "passport",
+                  "bank",
+                  "nationalid",
+                  "custom",
+                  "all",
+                  "all_and_credentials"
+                ]
+              },
+              "default": [
+                "all_and_credentials"
+              ],
+              "required": true,
+              "description": "List of types to be anonymized",
+              "type": "array"
+            }
+          },
+          {
+            "recover_redacted": {
+              "type": "boolean",
+              "description": "Whether to recover redacted data. This doesn't apply to the redacted output.",
+              "default": true
+            }
+          },
+          {
+            "block_if_detected": {
+              "type": "boolean",
+              "description": "Whether to block requests containing PII data",
+              "default": false
+            }
+          },
+          {
+            "redact_type": {
+              "type": "string",
+              "default": "placeholder",
+              "description": "What value to be used to redacted to",
+              "one_of": [
+                "placeholder",
+                "synthetic"
+              ]
+            }
+          },
+          {
+            "custom_patterns": {
+              "len_min": 1,
+              "type": "array",
+              "required": false,
+              "description": "List of custom patterns to be used for anonymization",
+              "elements": {
+                "type": "record",
+                "fields": [
+                  {
+                    "name": {
+                      "type": "string",
+                      "required": true
+                    }
+                  },
+                  {
+                    "regex": {
+                      "type": "string",
+                      "required": true
+                    }
+                  },
+                  {
+                    "score": {
+                      "default": 0.5,
+                      "required": true,
+                      "type": "number",
+                      "between": [
+                        0,
+                        1
+                      ]
+                    }
+                  }
+                ]
+              }
+            }
+          }
+        ],
+        "required": true
+      }
+    }
+  ]
+}

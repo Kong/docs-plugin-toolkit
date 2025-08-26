@@ -1,0 +1,138 @@
+{
+  "entity_checks": [
+    {
+      "custom_entity_check": {
+        "field_sources": [
+          "config"
+        ]
+      }
+    }
+  ],
+  "fields": [
+    {
+      "protocols": {
+        "elements": {
+          "type": "string",
+          "one_of": [
+            "grpc",
+            "grpcs",
+            "http",
+            "https"
+          ]
+        },
+        "default": [
+          "grpc",
+          "grpcs",
+          "http",
+          "https"
+        ],
+        "required": true,
+        "description": "A set of strings representing HTTP protocols.",
+        "type": "set"
+      }
+    },
+    {
+      "config": {
+        "type": "record",
+        "fields": [
+          {
+            "compressor_url": {
+              "default": "http://localhost:8080",
+              "required": true,
+              "description": "The url of the compressor",
+              "type": "string"
+            }
+          },
+          {
+            "timeout": {
+              "type": "number",
+              "description": "Connection timeout with the compressor",
+              "default": 10000
+            }
+          },
+          {
+            "keepalive_timeout": {
+              "type": "number",
+              "description": "The keepalive timeout for the established http connnection",
+              "default": 60000
+            }
+          },
+          {
+            "stop_on_error": {
+              "type": "boolean",
+              "description": "Stop processing if an error occurs",
+              "default": true
+            }
+          },
+          {
+            "log_text_data": {
+              "type": "boolean",
+              "description": "Log the text data",
+              "default": false
+            }
+          },
+          {
+            "message_type": {
+              "type": "set",
+              "required": true,
+              "elements": {
+                "type": "string",
+                "one_of": [
+                  "system",
+                  "assistant",
+                  "user"
+                ]
+              },
+              "default": [
+                "user"
+              ]
+            }
+          },
+          {
+            "compressor_type": {
+              "one_of": [
+                "rate",
+                "target_token"
+              ],
+              "type": "string",
+              "required": true,
+              "description": "What compression type to use to compress with",
+              "default": "rate"
+            }
+          },
+          {
+            "compression_ranges": {
+              "type": "array",
+              "required": true,
+              "description": "What value to be used to compress with. The 'value' is interpreted as rate or target_token depending on compressor_type.",
+              "elements": {
+                "type": "record",
+                "fields": [
+                  {
+                    "min_tokens": {
+                      "type": "integer",
+                      "required": true
+                    }
+                  },
+                  {
+                    "max_tokens": {
+                      "type": "integer",
+                      "required": true
+                    }
+                  },
+                  {
+                    "value": {
+                      "type": "number",
+                      "required": true
+                    }
+                  }
+                ]
+              }
+            }
+          }
+        ],
+        "required": true
+      }
+    }
+  ]
+}
