@@ -1,0 +1,141 @@
+{
+  "entity_checks": [
+    {
+      "at_least_one_of": [
+        "config.prompts.prepend",
+        "config.prompts.append"
+      ]
+    }
+  ],
+  "fields": [
+    {
+      "protocols": {
+        "description": "A set of strings representing HTTP protocols.",
+        "type": "set",
+        "default": [
+          "grpc",
+          "grpcs",
+          "http",
+          "https"
+        ],
+        "elements": {
+          "one_of": [
+            "grpc",
+            "grpcs",
+            "http",
+            "https"
+          ],
+          "type": "string"
+        },
+        "required": true
+      }
+    },
+    {
+      "config": {
+        "type": "record",
+        "fields": [
+          {
+            "prompts": {
+              "type": "record",
+              "fields": [
+                {
+                  "prepend": {
+                    "description": "Insert chat messages at the beginning of the chat message array. This array preserves exact order when adding messages.",
+                    "type": "array",
+                    "len_max": 15,
+                    "elements": {
+                      "type": "record",
+                      "fields": [
+                        {
+                          "role": {
+                            "default": "system",
+                            "type": "string",
+                            "one_of": [
+                              "system",
+                              "assistant",
+                              "user"
+                            ],
+                            "required": true
+                          }
+                        },
+                        {
+                          "content": {
+                            "type": "string",
+                            "len_min": 1,
+                            "len_max": 100000,
+                            "required": true
+                          }
+                        }
+                      ],
+                      "required": false
+                    },
+                    "required": false
+                  }
+                },
+                {
+                  "append": {
+                    "description": "Insert chat messages at the end of the chat message array. This array preserves exact order when adding messages.",
+                    "type": "array",
+                    "len_max": 15,
+                    "elements": {
+                      "type": "record",
+                      "fields": [
+                        {
+                          "role": {
+                            "default": "system",
+                            "type": "string",
+                            "one_of": [
+                              "system",
+                              "assistant",
+                              "user"
+                            ],
+                            "required": true
+                          }
+                        },
+                        {
+                          "content": {
+                            "type": "string",
+                            "len_min": 1,
+                            "len_max": 100000,
+                            "required": true
+                          }
+                        }
+                      ],
+                      "required": false
+                    },
+                    "required": false
+                  }
+                }
+              ],
+              "required": false
+            }
+          },
+          {
+            "max_request_body_size": {
+              "description": "max allowed body size allowed to be introspected. 0 means unlimited, but the size of this body will still be limited by Nginx's client_max_body_size.",
+              "type": "integer",
+              "gt": 0,
+              "default": 8192
+            }
+          },
+          {
+            "llm_format": {
+              "description": "LLM input and output format and schema to use",
+              "type": "string",
+              "one_of": [
+                "openai",
+                "bedrock",
+                "gemini",
+                "cohere",
+                "huggingface"
+              ],
+              "required": false,
+              "default": "openai"
+            }
+          }
+        ],
+        "required": true
+      }
+    }
+  ]
+}
