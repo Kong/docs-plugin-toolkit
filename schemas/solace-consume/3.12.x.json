@@ -1,0 +1,483 @@
+{
+  "entity_checks": [],
+  "fields": [
+    {
+      "consumer": {
+        "eq": null,
+        "description": "Custom type for representing a foreign key with a null value allowed.",
+        "type": "foreign",
+        "reference": "consumers"
+      }
+    },
+    {
+      "consumer_group": {
+        "eq": null,
+        "description": "Custom type for representing a foreign key with a null value allowed.",
+        "type": "foreign",
+        "reference": "consumer_groups"
+      }
+    },
+    {
+      "protocols": {
+        "type": "set",
+        "required": true,
+        "description": "A set of strings representing HTTP protocols.",
+        "default": [
+          "grpc",
+          "grpcs",
+          "http",
+          "https"
+        ],
+        "elements": {
+          "type": "string",
+          "one_of": [
+            "grpc",
+            "grpcs",
+            "http",
+            "https"
+          ]
+        }
+      }
+    },
+    {
+      "config": {
+        "type": "record",
+        "fields": [
+          {
+            "session": {
+              "description": "Session related configuration.",
+              "type": "record",
+              "fields": [
+                {
+                  "host": {
+                    "description": "The IPv4 or IPv6 address or host name to connect to (see: https://docs.solace.com/API-Developer-Online-Ref-Documentation/c/index.html#host-entry).",
+                    "referenceable": true,
+                    "type": "string",
+                    "required": true
+                  }
+                },
+                {
+                  "vpn_name": {
+                    "description": "The name of the Message VPN to attempt to join when connecting to an event broker.",
+                    "type": "string",
+                    "len_max": 32,
+                    "required": false
+                  }
+                },
+                {
+                  "authentication": {
+                    "type": "record",
+                    "required": true,
+                    "description": "Session authentication related configuration.",
+                    "entity_checks": [
+                      {
+                        "conditional": {
+                          "then_match": {
+                            "required": true
+                          },
+                          "if_match": {
+                            "eq": "BASIC"
+                          },
+                          "then_field": "username",
+                          "if_field": "scheme"
+                        }
+                      },
+                      {
+                        "conditional": {
+                          "then_match": {
+                            "required": true
+                          },
+                          "if_match": {
+                            "eq": "BASIC"
+                          },
+                          "then_field": "password",
+                          "if_field": "scheme"
+                        }
+                      },
+                      {
+                        "conditional_at_least_one_of": {
+                          "then_at_least_one_of": [
+                            "access_token",
+                            "access_token_header",
+                            "id_token",
+                            "id_token_header"
+                          ],
+                          "if_match": {
+                            "eq": "OAUTH2"
+                          },
+                          "then_err": "must set one of %s when 'scheme' is 'OAUTH2'",
+                          "if_field": "scheme"
+                        }
+                      }
+                    ],
+                    "fields": [
+                      {
+                        "scheme": {
+                          "type": "string",
+                          "required": true,
+                          "description": "The client authentication scheme used when connection to an event broker.",
+                          "default": "BASIC",
+                          "one_of": [
+                            "NONE",
+                            "BASIC",
+                            "OAUTH2"
+                          ]
+                        }
+                      },
+                      {
+                        "username": {
+                          "type": "string",
+                          "required": false,
+                          "description": "The username used with `BASIC` authentication scheme when connecting to an event broker.",
+                          "len_max": 189,
+                          "referenceable": true
+                        }
+                      },
+                      {
+                        "password": {
+                          "type": "string",
+                          "encrypted": true,
+                          "description": "The password used with `BASIC` authentication scheme when connecting to an event broker.",
+                          "required": false,
+                          "len_max": 128,
+                          "referenceable": true
+                        }
+                      },
+                      {
+                        "access_token": {
+                          "type": "string",
+                          "required": false,
+                          "description": "The OAuth2 access token used with `OAUTH2` authentication scheme when connecting to an event broker.",
+                          "encrypted": true,
+                          "referenceable": true
+                        }
+                      },
+                      {
+                        "access_token_header": {
+                          "type": "string",
+                          "required": false
+                        }
+                      },
+                      {
+                        "id_token": {
+                          "type": "string",
+                          "required": false,
+                          "description": "The OpenID Connect ID token used with `OAUTH2` authentication scheme when connecting to an event broker.",
+                          "encrypted": true,
+                          "referenceable": true
+                        }
+                      },
+                      {
+                        "id_token_header": {
+                          "type": "string",
+                          "required": false
+                        }
+                      }
+                    ]
+                  }
+                },
+                {
+                  "connect_timeout": {
+                    "type": "integer",
+                    "required": true,
+                    "description": "The timeout period (in milliseconds) for a connect operation to a given host (per host).",
+                    "default": 3000,
+                    "between": [
+                      100,
+                      100000
+                    ]
+                  }
+                },
+                {
+                  "ssl_validate_certificate": {
+                    "description": "Indicates whether the API should validate server certificates with the trusted certificates.",
+                    "type": "boolean",
+                    "default": false,
+                    "required": true
+                  }
+                },
+                {
+                  "calculate_message_expiry": {
+                    "type": "boolean",
+                    "default": true,
+                    "required": true
+                  }
+                },
+                {
+                  "generate_rcv_timestamps": {
+                    "type": "boolean",
+                    "default": true,
+                    "required": true
+                  }
+                },
+                {
+                  "generate_send_timestamps": {
+                    "type": "boolean",
+                    "default": true,
+                    "required": true
+                  }
+                },
+                {
+                  "generate_sender_id": {
+                    "type": "boolean",
+                    "default": true,
+                    "required": true
+                  }
+                },
+                {
+                  "generate_sequence_number": {
+                    "type": "boolean",
+                    "default": true,
+                    "required": true
+                  }
+                },
+                {
+                  "properties": {
+                    "values": {
+                      "required": true,
+                      "type": "string",
+                      "referenceable": true
+                    },
+                    "type": "map",
+                    "required": false,
+                    "description": "Additional Solace session properties (each setting needs to have `SESSION_` prefix).",
+                    "keys": {
+                      "match": "^SESSION_",
+                      "required": true,
+                      "type": "string",
+                      "not_one_of": [
+                        "SESSION_HOST",
+                        "SESSION_CONNECT_BLOCKING",
+                        "SESSION_CONNECT_TIMEOUT_MS",
+                        "SESSION_SEND_BLOCKING",
+                        "SESSION_SUBSCRIBE_BLOCKING",
+                        "SESSION_BLOCK_WHILE_CONNECTING",
+                        "SESSION_SSL_VALIDATE_CERTIFICATE",
+                        "SESSION_SEND_TIMESTAMP",
+                        "SESSION_ASYNC_DNS",
+                        "SESSION_CALCULATE_MESSAGE_EXPIRATION",
+                        "SESSION_RCV_TIMESTAMP",
+                        "SESSION_SEND_TIMESTAMP",
+                        "SESSION_SEND_SENDER_ID",
+                        "SESSION_SEND_SEQUENCE_NUMBER",
+                        "SESSION_SSL_TRUST_STORE_DIR",
+                        "SESSION_GUARANTEED_WITH_WEB_TRANSPORT",
+                        "SESSION_VPN_NAME",
+                        "SESSION_ACK_EVENT_MODE",
+                        "SESSION_AUTHENTICATION_SCHEME",
+                        "SESSION_USERNAME",
+                        "SESSION_PASSWORD",
+                        "SESSION_OAUTH2_ACCESS_TOKEN",
+                        "SESSION_OIDC_ID_TOKEN"
+                      ]
+                    }
+                  }
+                }
+              ],
+              "required": true
+            }
+          },
+          {
+            "flow": {
+              "description": "The flow related configuration.",
+              "type": "record",
+              "fields": [
+                {
+                  "binds": {
+                    "required": true,
+                    "len_min": 1,
+                    "type": "array",
+                    "elements": {
+                      "type": "record",
+                      "fields": [
+                        {
+                          "name": {
+                            "description": "You can use $(uri_captures['<capture-identifier>'] in this field (replace `<capture-identifier>` with a real value, for example `$uri_captures[’queue’]` when the matched route has a path `~/(?<queue>[a-z]+)`)",
+                            "type": "string",
+                            "required": true
+                          }
+                        },
+                        {
+                          "type": {
+                            "default": "QUEUE",
+                            "type": "string",
+                            "one_of": [
+                              "QUEUE"
+                            ],
+                            "required": true
+                          }
+                        }
+                      ]
+                    }
+                  }
+                },
+                {
+                  "selector": {
+                    "type": "string",
+                    "required": false
+                  }
+                },
+                {
+                  "ack_mode": {
+                    "default": "CLIENT",
+                    "type": "string",
+                    "one_of": [
+                      "AUTO",
+                      "CLIENT"
+                    ],
+                    "required": true
+                  }
+                },
+                {
+                  "max_unacked_messages": {
+                    "ne": 0,
+                    "type": "integer",
+                    "required": true,
+                    "default": -1,
+                    "gt": -2
+                  }
+                },
+                {
+                  "window_size": {
+                    "between": [
+                      1,
+                      255
+                    ],
+                    "type": "integer",
+                    "default": 255,
+                    "required": true
+                  }
+                },
+                {
+                  "wait_timeout": {
+                    "between": [
+                      1,
+                      5000
+                    ],
+                    "type": "integer",
+                    "default": 50,
+                    "required": true
+                  }
+                },
+                {
+                  "functions": {
+                    "description": "The Lua functions that manipulates the message being received from Solace. The `message` variable can be used to access the current message content, and the function can return a new content.",
+                    "required": false,
+                    "type": "array",
+                    "elements": {
+                      "type": "string"
+                    }
+                  }
+                },
+                {
+                  "properties": {
+                    "values": {
+                      "referenceable": true,
+                      "type": "string",
+                      "required": true
+                    },
+                    "type": "map",
+                    "required": false,
+                    "description": "Additional Solace flow properties (each setting needs to have `FLOW_` prefix).",
+                    "keys": {
+                      "match": "^FLOW_",
+                      "required": true,
+                      "type": "string",
+                      "not_one_of": [
+                        "FLOW_BIND_ENTITY_ID",
+                        "FLOW_BIND_NAME",
+                        "FLOW_ACKMODE",
+                        "FLOW_BIND_BLOCKING",
+                        "FLOW_ACTIVE_FLOW_IND",
+                        "FLOW_REQUIRED_OUTCOME_FAILED",
+                        "FLOW_REQUIRED_OUTCOME_REJECTED",
+                        "FLOW_WINDOWSIZE",
+                        "FLOW_START_STATE",
+                        "FLOW_MAX_UNACKED_MESSAGES",
+                        "FLOW_SELECTOR",
+                        "FLOW_AUTOACK",
+                        "FLOW_TOPIC"
+                      ]
+                    }
+                  }
+                }
+              ],
+              "required": true
+            }
+          },
+          {
+            "mode": {
+              "type": "string",
+              "required": true,
+              "description": "The mode of operation for the plugin.",
+              "default": "polling",
+              "one_of": [
+                "auto",
+                "polling",
+                "server-sent-events",
+                "websocket"
+              ]
+            }
+          },
+          {
+            "polling": {
+              "description": "The flow related configuration.",
+              "type": "record",
+              "fields": [
+                {
+                  "timeout": {
+                    "between": [
+                      0,
+                      300000
+                    ],
+                    "type": "integer",
+                    "default": 0,
+                    "required": true
+                  }
+                }
+              ],
+              "required": true
+            }
+          },
+          {
+            "websocket": {
+              "description": "The flow related configuration.",
+              "type": "record",
+              "fields": [
+                {
+                  "timeout": {
+                    "between": [
+                      1,
+                      60000
+                    ],
+                    "type": "integer",
+                    "default": 1000,
+                    "required": true
+                  }
+                },
+                {
+                  "max_recv_len": {
+                    "gt": 0,
+                    "type": "integer",
+                    "default": 65536,
+                    "required": true
+                  }
+                },
+                {
+                  "max_send_len": {
+                    "gt": 0,
+                    "type": "integer",
+                    "default": 65536,
+                    "required": true
+                  }
+                }
+              ],
+              "required": true
+            }
+          }
+        ],
+        "required": true
+      }
+    }
+  ]
+}

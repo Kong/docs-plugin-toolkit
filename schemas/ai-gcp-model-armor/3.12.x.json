@@ -1,0 +1,137 @@
+{
+  "fields": [
+    {
+      "protocols": {
+        "default": [
+          "grpc",
+          "grpcs",
+          "http",
+          "https"
+        ],
+        "type": "set",
+        "required": true,
+        "description": "A set of strings representing HTTP protocols.",
+        "elements": {
+          "type": "string",
+          "one_of": [
+            "grpc",
+            "grpcs",
+            "http",
+            "https"
+          ]
+        }
+      }
+    },
+    {
+      "config": {
+        "type": "record",
+        "required": true,
+        "fields": [
+          {
+            "project_id": {
+              "type": "string",
+              "required": true,
+              "description": "GCP Project ID for the GCP Model Armor subscription."
+            }
+          },
+          {
+            "location_id": {
+              "type": "string",
+              "required": true,
+              "description": "GCP Location ID for the GCP Model Armor subscription."
+            }
+          },
+          {
+            "template_id": {
+              "type": "string",
+              "required": true,
+              "description": "GCP Model Armor Template ID to enforce."
+            }
+          },
+          {
+            "enable_multi_language_detection": {
+              "type": "boolean",
+              "default": false,
+              "description": "Enables multi-language detection mode. Must be used with 'source_language'."
+            }
+          },
+          {
+            "source_language": {
+              "type": "string",
+              "required": false,
+              "description": "Source language (ISO code) to use when 'enable_multi_language_detection' is enabled."
+            }
+          },
+          {
+            "stop_on_error": {
+              "type": "boolean",
+              "default": true,
+              "description": "Stop processing if an error occurs."
+            }
+          },
+          {
+            "timeout": {
+              "type": "number",
+              "required": true,
+              "description": "Connection timeout with the GCP Model Armor service",
+              "default": 10000
+            }
+          },
+          {
+            "guarding_mode": {
+              "one_of": [
+                "INPUT",
+                "OUTPUT",
+                "BOTH"
+              ],
+              "default": "INPUT",
+              "type": "string",
+              "required": true,
+              "description": "The guardrail mode to use for the request"
+            }
+          },
+          {
+            "response_buffer_size": {
+              "type": "number",
+              "required": true,
+              "description": "The size in bytes to receive from upstream to be buffered before sending to the guardrails service. This only applies to the response content guard.",
+              "default": 100
+            }
+          },
+          {
+            "gcp_use_service_account": {
+              "type": "boolean",
+              "required": false,
+              "description": "Use service account auth for GCP-based providers and models.",
+              "default": false
+            }
+          },
+          {
+            "gcp_service_account_json": {
+              "encrypted": true,
+              "referenceable": true,
+              "type": "string",
+              "required": false,
+              "description": "Set this field to the full JSON of the GCP service account to authenticate, if required. If null (and gcp_use_service_account is true), Kong will attempt to read from environment variable `GCP_SERVICE_ACCOUNT` or from the instance/container metadata service."
+            }
+          }
+        ],
+        "entity_checks": [
+          {
+            "conditional": {
+              "if_field": "enable_multi_language_detection",
+              "then_match": {
+                "required": true
+              },
+              "if_match": {
+                "eq": true
+              },
+              "then_field": "config.source_language"
+            }
+          }
+        ]
+      }
+    }
+  ],
+  "entity_checks": []
+}
