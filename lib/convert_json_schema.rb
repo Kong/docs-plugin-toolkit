@@ -39,6 +39,7 @@ class ConvertJsonSchema
       # Fix any broken defaults
       json_schema = fix_broken_defaults(json_schema)
       json_schema = fix_regex(json_schema)
+      json_schema = fix_non_array_elements(json_schema)
 
       # Write the schema to the destination
       FileUtils.mkdir_p("#{@options[:destination]}/#{plugin_name}")
@@ -304,6 +305,20 @@ class ConvertJsonSchema
 
     if schema['items']
       schema['items'] = fix_broken_defaults(schema['items'])
+    end
+
+    return schema
+  end
+
+  def fix_non_array_elements(schema)
+    if schema['items'] && schema['type'] != 'array'
+      schema.delete('items')
+    end
+
+    if schema['properties']
+      schema['properties'].each do |k, v|
+        schema['properties'][k] = fix_non_array_elements(v)
+      end
     end
 
     return schema
