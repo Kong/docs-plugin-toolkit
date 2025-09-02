@@ -188,8 +188,6 @@ class ConvertJsonSchema
   end
 
   def convert_required_list(schema)
-
-
     if schema['properties']
 
       # Fix empty schema properties that should
@@ -214,6 +212,9 @@ class ConvertJsonSchema
 
         if v['items']
           v['items'] = convert_required_list(v['items'])
+          if !v['items']['required'].nil? && (v['items']['required'].is_a?(TrueClass) || v['items']['required'].is_a?(FalseClass))
+            v['items'].delete('required')
+          end
         end
       end
 
