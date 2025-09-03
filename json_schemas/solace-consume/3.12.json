@@ -7,6 +7,7 @@
           "properties": {
             "ack_mode": {
               "default": "CLIENT",
+              "description": "Controls how acknowledgments are generated for received Guaranteed messages. When set to `AUTO`, the messages are positively acknowledged upon receiving them. When set to 'CLIENT', the messages are positively or negatively acknowledged by Kong regarding to client delivery status.",
               "enum": [
                 "AUTO",
                 "CLIENT"
@@ -17,11 +18,12 @@
               "items": {
                 "properties": {
                   "name": {
-                    "description": "You can use $(uri_captures['<capture-identifier>'] in this field (replace `<capture-identifier>` with a real value, for example `$uri_captures[’queue’]` when the matched route has a path `~/(?<queue>[a-z]+)`)",
+                    "description": "The name of the Queue that is the target of the bind. You can use $(uri_captures['<capture-identifier>']) in this field (replace `<capture-identifier>` with a real value, for example `$uri_captures['queue']` when the matched route has a path `~/(?<queue>[a-z]+)`)",
                     "type": "string"
                   },
                   "type": {
                     "default": "QUEUE",
+                    "description": "The type of object to which this Flow is bound.",
                     "enum": [
                       "QUEUE"
                     ],
@@ -45,6 +47,7 @@
             },
             "max_unacked_messages": {
               "default": -1,
+              "description": "This property controls the maximum number of messages that may be unacknowledged on the Flow.",
               "ne": 0,
               "type": "integer"
             },
@@ -54,16 +57,19 @@
               "type": "object"
             },
             "selector": {
+              "description": "The selector when binding to an endpoint.",
               "type": "string"
             },
             "wait_timeout": {
               "default": 50,
+              "description": "Specifies in milliseconds how long to wait for messages to appear on each poll before giving up or retrying.",
               "maximum": 5000,
               "minimum": 1,
               "type": "integer"
             },
             "window_size": {
               "default": 255,
+              "description": "The Guaranteed message window size for the Flow.",
               "maximum": 255,
               "minimum": 1,
               "type": "integer"
@@ -75,21 +81,22 @@
           "type": "object"
         },
         "mode": {
-          "default": "polling",
-          "description": "The mode of operation for the plugin.",
+          "default": "POLLING",
+          "description": "The mode of operation for the plugin. The `AUTO` determines the mode automatically from the client request.",
           "enum": [
-            "auto",
-            "polling",
-            "server-sent-events",
-            "websocket"
+            "AUTO",
+            "POLLING",
+            "SERVER-SENT-EVENTS",
+            "WEBSOCKET"
           ],
           "type": "string"
         },
         "polling": {
-          "description": "The flow related configuration.",
+          "description": "The `POLLING` mode related configuration settings.",
           "properties": {
             "timeout": {
               "default": 0,
+              "description": "Polling timeout in milliseconds. When set to `0`, the polling works like short-polling and waits at maximum the Flow `wait_timeout` amount of time for the new messages (short-polling). When set to larger than `0`, the connection is kept open and only closed after the timeout or in case messages appear earlier (long-polling).",
               "maximum": 300000,
               "minimum": 0,
               "type": "integer"
@@ -133,7 +140,7 @@
                   "type": "string"
                 },
                 "username": {
-                  "description": "The username used with `BASIC` authentication scheme when connecting to an event broker.\nThis field is [referenceable](/gateway/entities/vault/#how-do-i-reference-secrets-stored-in-a-vault).",
+                  "description": "The username used with `BASIC` authentication scheme when connecting to an event broker.\nThis field is [encrypted](/gateway/keyring/).\nThis field is [referenceable](/gateway/entities/vault/#how-do-i-reference-secrets-stored-in-a-vault).",
                   "maxLength": 189,
                   "type": "string"
                 }
@@ -142,6 +149,7 @@
             },
             "calculate_message_expiry": {
               "default": true,
+              "description": "If this property is true and time-to-live has a positive value in a message, the expiration time is calculated when the message is sent or received",
               "type": "boolean"
             },
             "connect_timeout": {
@@ -153,18 +161,22 @@
             },
             "generate_rcv_timestamps": {
               "default": true,
+              "description": "When enabled, a receive timestamp is recorded for each message.",
               "type": "boolean"
             },
             "generate_send_timestamps": {
               "default": true,
+              "description": "When enabled, a send timestamp is automatically included (if not already present) in the Solace-defined fields for each message sent.",
               "type": "boolean"
             },
             "generate_sender_id": {
               "default": true,
+              "description": "When enabled, a sender id is automatically included (if not already present) in the Solace-defined fields for each message sent.",
               "type": "boolean"
             },
             "generate_sequence_number": {
               "default": true,
+              "description": "When enabled, a sequence number is automatically included (if not already present) in the Solace-defined fields for each message sent.",
               "type": "boolean"
             },
             "host": {
@@ -193,18 +205,21 @@
           "type": "object"
         },
         "websocket": {
-          "description": "The flow related configuration.",
+          "description": "The `WEBSOCKET` mode related configuration settings.",
           "properties": {
             "max_recv_len": {
               "default": 65536,
+              "description": "Specifies the maximal length of payload allowed when receiving WebSocket frames.",
               "type": "integer"
             },
             "max_send_len": {
               "default": 65536,
+              "description": "Specifies the maximal length of payload allowed when sending WebSocket frames.",
               "type": "integer"
             },
             "timeout": {
               "default": 1000,
+              "description": "Specifies the network timeout threshold in milliseconds.",
               "maximum": 60000,
               "minimum": 1,
               "type": "integer"
