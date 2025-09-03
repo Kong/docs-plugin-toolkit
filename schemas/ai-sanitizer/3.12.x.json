@@ -1,25 +1,7 @@
 {
-  "entity_checks": [
-    {
-      "custom_entity_check": {
-        "field_sources": [
-          "config"
-        ]
-      }
-    }
-  ],
   "fields": [
     {
       "protocols": {
-        "type": "set",
-        "required": true,
-        "description": "A set of strings representing HTTP protocols.",
-        "default": [
-          "grpc",
-          "grpcs",
-          "http",
-          "https"
-        ],
         "elements": {
           "type": "string",
           "one_of": [
@@ -28,66 +10,81 @@
             "http",
             "https"
           ]
-        }
+        },
+        "default": [
+          "grpc",
+          "grpcs",
+          "http",
+          "https"
+        ],
+        "type": "set",
+        "required": true,
+        "description": "A set of strings representing HTTP protocols."
       }
     },
     {
       "config": {
-        "type": "record",
         "fields": [
           {
             "host": {
-              "type": "string",
-              "default": "localhost",
               "description": "The host of the sanitizer",
-              "required": true
+              "type": "string",
+              "required": true,
+              "default": "localhost"
             }
           },
           {
             "port": {
-              "type": "number",
-              "default": 8080,
               "description": "The port of the sanitizer",
-              "required": true
+              "type": "number",
+              "required": true,
+              "default": 8080
             }
           },
           {
             "scheme": {
-              "type": "string",
-              "default": "http",
               "description": "The protocol can be http and https",
-              "required": true
+              "type": "string",
+              "required": true,
+              "default": "http"
             }
           },
           {
             "timeout": {
+              "description": "Connection timeout with the sanitizer",
               "type": "number",
-              "default": 10000,
-              "description": "Connection timeout with the sanitizer"
+              "default": 10000
             }
           },
           {
             "keepalive_timeout": {
+              "description": "The keepalive timeout for the established http connnection",
               "type": "number",
-              "default": 60000,
-              "description": "The keepalive timeout for the established http connnection"
+              "default": 60000
+            }
+          },
+          {
+            "sanitization_mode": {
+              "one_of": [
+                "INPUT",
+                "OUTPUT",
+                "BOTH"
+              ],
+              "default": "INPUT",
+              "required": true,
+              "type": "string",
+              "description": "The sanitization mode to use for the request"
             }
           },
           {
             "stop_on_error": {
+              "description": "Stop processing if an error occurs.",
               "type": "boolean",
-              "default": true,
-              "description": "Stop processing if an error occurs"
+              "default": true
             }
           },
           {
             "anonymize": {
-              "type": "array",
-              "required": true,
-              "description": "List of types to be anonymized",
-              "default": [
-                "all_and_credentials"
-              ],
               "elements": {
                 "type": "string",
                 "one_of": [
@@ -112,40 +109,42 @@
                   "all",
                   "all_and_credentials"
                 ]
-              }
+              },
+              "description": "List of types to be anonymized",
+              "required": true,
+              "type": "array",
+              "default": [
+                "all_and_credentials"
+              ]
             }
           },
           {
             "recover_redacted": {
+              "description": "Whether to recover redacted data. This doesn't apply to the redacted output.",
               "type": "boolean",
-              "default": true,
-              "description": "Whether to recover redacted data"
+              "default": true
             }
           },
           {
             "block_if_detected": {
+              "description": "Whether to block requests containing PII data",
               "type": "boolean",
-              "default": false,
-              "description": "Whether to block requests containing PII data"
+              "default": false
             }
           },
           {
             "redact_type": {
-              "type": "string",
-              "default": "placeholder",
+              "description": "What value to be used to redacted to",
               "one_of": [
                 "placeholder",
                 "synthetic"
               ],
-              "description": "What value to be used to redacted to"
+              "type": "string",
+              "default": "placeholder"
             }
           },
           {
             "custom_patterns": {
-              "type": "array",
-              "len_min": 1,
-              "required": false,
-              "description": "List of custom patterns to be used for anonymization",
               "elements": {
                 "type": "record",
                 "fields": [
@@ -163,21 +162,35 @@
                   },
                   {
                     "score": {
+                      "required": true,
                       "type": "number",
-                      "default": 0.5,
                       "between": [
                         0,
                         1
                       ],
-                      "required": true
+                      "default": 0.5
                     }
                   }
                 ]
-              }
+              },
+              "required": false,
+              "len_min": 1,
+              "type": "array",
+              "description": "List of custom patterns to be used for anonymization"
             }
           }
         ],
+        "type": "record",
         "required": true
+      }
+    }
+  ],
+  "entity_checks": [
+    {
+      "custom_entity_check": {
+        "field_sources": [
+          "config"
+        ]
       }
     }
   ]

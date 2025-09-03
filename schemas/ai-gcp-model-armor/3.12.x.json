@@ -2,15 +2,6 @@
   "fields": [
     {
       "protocols": {
-        "default": [
-          "grpc",
-          "grpcs",
-          "http",
-          "https"
-        ],
-        "type": "set",
-        "required": true,
-        "description": "A set of strings representing HTTP protocols.",
         "elements": {
           "type": "string",
           "one_of": [
@@ -19,62 +10,70 @@
             "http",
             "https"
           ]
-        }
+        },
+        "default": [
+          "grpc",
+          "grpcs",
+          "http",
+          "https"
+        ],
+        "type": "set",
+        "required": true,
+        "description": "A set of strings representing HTTP protocols."
       }
     },
     {
       "config": {
         "type": "record",
-        "required": true,
         "fields": [
           {
             "project_id": {
-              "type": "string",
               "required": true,
+              "type": "string",
               "description": "GCP Project ID for the GCP Model Armor subscription."
             }
           },
           {
             "location_id": {
-              "type": "string",
               "required": true,
+              "type": "string",
               "description": "GCP Location ID for the GCP Model Armor subscription."
             }
           },
           {
             "template_id": {
-              "type": "string",
               "required": true,
+              "type": "string",
               "description": "GCP Model Armor Template ID to enforce."
             }
           },
           {
             "enable_multi_language_detection": {
-              "type": "boolean",
               "default": false,
+              "type": "boolean",
               "description": "Enables multi-language detection mode. Must be used with 'source_language'."
             }
           },
           {
             "source_language": {
-              "type": "string",
               "required": false,
+              "type": "string",
               "description": "Source language (ISO code) to use when 'enable_multi_language_detection' is enabled."
             }
           },
           {
             "stop_on_error": {
-              "type": "boolean",
               "default": true,
+              "type": "boolean",
               "description": "Stop processing if an error occurs."
             }
           },
           {
             "timeout": {
-              "type": "number",
+              "default": 10000,
               "required": true,
-              "description": "Connection timeout with the GCP Model Armor service",
-              "default": 10000
+              "type": "number",
+              "description": "Connection timeout with the GCP Model Armor service"
             }
           },
           {
@@ -91,42 +90,77 @@
             }
           },
           {
+            "reveal_failure_categories": {
+              "default": false,
+              "type": "boolean",
+              "description": "Whether to reveal failure categories in the response to the caller."
+            }
+          },
+          {
+            "request_failure_message": {
+              "default": "Request was filtered by GCP Model Armor",
+              "type": "string",
+              "description": "The message to return when a failure occurs on the request phase."
+            }
+          },
+          {
+            "response_failure_message": {
+              "default": "Response was filtered by GCP Model Armor",
+              "type": "string",
+              "description": "The message to return when a failure occurs on the response phase."
+            }
+          },
+          {
             "response_buffer_size": {
-              "type": "number",
+              "default": 100,
               "required": true,
-              "description": "The size in bytes to receive from upstream to be buffered before sending to the guardrails service. This only applies to the response content guard.",
-              "default": 100
+              "type": "number",
+              "description": "The amount of bytes receiving from upstream to be buffered before sending to the model armor service. This only applies to the response content guard."
+            }
+          },
+          {
+            "text_source": {
+              "one_of": [
+                "concatenate_all_content",
+                "concatenate_user_content",
+                "last_message"
+              ],
+              "default": "last_message",
+              "type": "string",
+              "required": true,
+              "description": "Select where to pick the 'text' for the GCP Model Armor Services request."
             }
           },
           {
             "gcp_use_service_account": {
-              "type": "boolean",
+              "default": false,
               "required": false,
-              "description": "Use service account auth for GCP-based providers and models.",
-              "default": false
+              "type": "boolean",
+              "description": "Use service account auth for GCP-based providers and models."
             }
           },
           {
             "gcp_service_account_json": {
+              "required": false,
               "encrypted": true,
               "referenceable": true,
               "type": "string",
-              "required": false,
               "description": "Set this field to the full JSON of the GCP service account to authenticate, if required. If null (and gcp_use_service_account is true), Kong will attempt to read from environment variable `GCP_SERVICE_ACCOUNT` or from the instance/container metadata service."
             }
           }
         ],
+        "required": true,
         "entity_checks": [
           {
             "conditional": {
+              "then_field": "source_language",
               "if_field": "enable_multi_language_detection",
               "then_match": {
                 "required": true
               },
               "if_match": {
                 "eq": true
-              },
-              "then_field": "config.source_language"
+              }
             }
           }
         ]
