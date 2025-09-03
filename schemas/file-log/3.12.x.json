@@ -1,19 +1,8 @@
 {
-  "entity_checks": [],
   "fields": [
     {
       "protocols": {
-        "type": "set",
-        "required": true,
-        "description": "A set of strings representing protocols.",
-        "default": [
-          "grpc",
-          "grpcs",
-          "http",
-          "https"
-        ],
         "elements": {
-          "type": "string",
           "one_of": [
             "grpc",
             "grpcs",
@@ -26,56 +15,67 @@
             "ws",
             "wss"
           ],
+          "type": "string",
           "description": "A string representing a protocol, such as HTTP or HTTPS."
-        }
+        },
+        "default": [
+          "grpc",
+          "grpcs",
+          "http",
+          "https"
+        ],
+        "type": "set",
+        "required": true,
+        "description": "A set of strings representing protocols."
       }
     },
     {
       "consumer_group": {
-        "type": "foreign",
-        "reference": "consumer_groups",
         "eq": null,
+        "reference": "consumer_groups",
+        "type": "foreign",
         "description": "Custom type for representing a foreign key with a null value allowed."
       }
     },
     {
       "config": {
-        "type": "record",
         "fields": [
           {
             "path": {
-              "type": "string",
               "err": "not a valid filename",
+              "match": "^[^%s*&%%\\`][^*&%%\\`]*[^%s*&%%\\`]$",
+              "type": "string",
               "required": true,
-              "description": "The file path of the output log file. The plugin creates the log file if it doesn't exist yet.",
-              "match": "^[^%s*&%%\\`][^*&%%\\`]*[^%s*&%%\\`]$"
+              "description": "The file path of the output log file. The plugin creates the log file if it doesn't exist yet."
             }
           },
           {
             "reopen": {
-              "type": "boolean",
               "default": false,
-              "description": "Determines whether the log file is closed and reopened on every request.",
-              "required": true
+              "required": true,
+              "type": "boolean",
+              "description": "Determines whether the log file is closed and reopened on every request."
             }
           },
           {
             "custom_fields_by_lua": {
-              "type": "map",
-              "description": "Lua code as a key-value map",
               "values": {
                 "type": "string",
                 "len_min": 1
               },
+              "type": "map",
               "keys": {
                 "type": "string",
                 "len_min": 1
-              }
+              },
+              "description": "Lua code as a key-value map"
             }
           }
         ],
+        "type": "record",
         "required": true
       }
     }
-  ]
+  ],
+  "entity_checks": []
 }

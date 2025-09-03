@@ -1,65 +1,23 @@
 {
-  "entity_checks": [
-    {
-      "at_least_one_of": [
-        "config.upstream_uri",
-        "config.upstream_host",
-        "config.upstream_port"
-      ]
-    },
-    {
-      "conditional": {
-        "then_match": {
-          "required": true
-        },
-        "if_match": {
-          "eq": "header"
-        },
-        "then_field": "config.hash_header",
-        "if_field": "config.hash"
-      }
-    },
-    {
-      "conditional": {
-        "then_match": {
-          "required": true
-        },
-        "if_match": {
-          "eq": true
-        },
-        "then_field": "config.upstream_host",
-        "if_field": "config.upstream_fallback"
-      }
-    }
-  ],
   "fields": [
     {
       "consumer": {
-        "type": "foreign",
+        "eq": null,
         "reference": "consumers",
-        "description": "Custom type for representing a foreign key with a null value allowed.",
-        "eq": null
+        "type": "foreign",
+        "description": "Custom type for representing a foreign key with a null value allowed."
       }
     },
     {
       "consumer_group": {
-        "type": "foreign",
-        "reference": "consumer_groups",
         "eq": null,
+        "reference": "consumer_groups",
+        "type": "foreign",
         "description": "Custom type for representing a foreign key with a null value allowed."
       }
     },
     {
       "protocols": {
-        "type": "set",
-        "required": true,
-        "description": "A set of strings representing HTTP protocols.",
-        "default": [
-          "grpc",
-          "grpcs",
-          "http",
-          "https"
-        ],
         "elements": {
           "type": "string",
           "one_of": [
@@ -68,17 +26,25 @@
             "http",
             "https"
           ]
-        }
+        },
+        "default": [
+          "grpc",
+          "grpcs",
+          "http",
+          "https"
+        ],
+        "type": "set",
+        "required": true,
+        "description": "A set of strings representing HTTP protocols."
       }
     },
     {
       "config": {
-        "type": "record",
         "shorthand_fields": [
           {
             "hash": {
-              "description": "Hash algorithm to be used for canary release. `whitelist` is deprecated. Use `allow` instead `blacklist` is deprecated. Use `deny` instead.",
-              "type": "string"
+              "type": "string",
+              "description": "Hash algorithm to be used for canary release. `whitelist` is deprecated. Use `allow` instead `blacklist` is deprecated. Use `deny` instead."
             }
           }
         ],
@@ -91,8 +57,7 @@
           },
           {
             "hash": {
-              "type": "string",
-              "default": "consumer",
+              "description": "Hash algorithm to be used for canary release.\n\n* `consumer`: The hash will be based on the consumer.\n* `ip`: The hash will be based on the client IP address.\n* `none`: No hash will be applied.\n* `allow`: Allows the specified groups to access the canary release.\n* `deny`: Denies the specified groups from accessing the canary release.\n* `header`: The hash will be based on the specified header value.",
               "one_of": [
                 "consumer",
                 "ip",
@@ -101,7 +66,8 @@
                 "deny",
                 "header"
               ],
-              "description": "Hash algorithm to be used for canary release.\n\n* `consumer`: The hash will be based on the consumer.\n* `ip`: The hash will be based on the client IP address.\n* `none`: No hash will be applied.\n* `allow`: Allows the specified groups to access the canary release.\n* `deny`: Denies the specified groups from accessing the canary release.\n* `header`: The hash will be based on the specified header value."
+              "type": "string",
+              "default": "consumer"
             }
           },
           {
@@ -112,18 +78,18 @@
           },
           {
             "duration": {
+              "description": "The duration of the canary release in seconds.",
               "type": "number",
-              "default": 3600,
               "gt": 0,
-              "description": "The duration of the canary release in seconds."
+              "default": 3600
             }
           },
           {
             "steps": {
+              "description": "The number of steps for the canary release.",
               "type": "number",
-              "default": 1000,
               "gt": 1,
-              "description": "The number of steps for the canary release."
+              "default": 1000
             }
           },
           {
@@ -154,25 +120,25 @@
           },
           {
             "upstream_uri": {
-              "type": "string",
               "len_min": 1,
+              "type": "string",
               "description": "The URI of the upstream server to be used for the canary release."
             }
           },
           {
             "upstream_fallback": {
-              "type": "boolean",
-              "default": false,
               "description": "Specifies whether to fallback to the upstream server if the canary release fails.",
-              "required": true
+              "type": "boolean",
+              "required": true,
+              "default": false
             }
           },
           {
             "groups": {
-              "type": "array",
               "elements": {
                 "type": "string"
               },
+              "type": "array",
               "description": "The groups allowed to access the canary release."
             }
           },
@@ -183,7 +149,41 @@
             }
           }
         ],
-        "required": true
+        "required": true,
+        "type": "record"
+      }
+    }
+  ],
+  "entity_checks": [
+    {
+      "at_least_one_of": [
+        "config.upstream_uri",
+        "config.upstream_host",
+        "config.upstream_port"
+      ]
+    },
+    {
+      "conditional": {
+        "then_field": "config.hash_header",
+        "if_field": "config.hash",
+        "then_match": {
+          "required": true
+        },
+        "if_match": {
+          "eq": "header"
+        }
+      }
+    },
+    {
+      "conditional": {
+        "then_field": "config.upstream_host",
+        "if_field": "config.upstream_fallback",
+        "then_match": {
+          "required": true
+        },
+        "if_match": {
+          "eq": true
+        }
       }
     }
   ]
