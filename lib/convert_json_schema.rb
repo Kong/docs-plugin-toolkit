@@ -305,6 +305,10 @@ class ConvertJsonSchema
       end
     end
 
+    if schema['default'].nil?
+      schema.delete('default')
+    end
+
     if schema['items']
       schema['items'] = fix_broken_defaults(schema['items'])
     end
