@@ -232,7 +232,7 @@ class ConvertJsonSchema
   def remove_object_required_optional_children(schema)
     if schema['required'] && schema['properties']
       unused = []
-      schema['required'].each do |k|
+      schema['properties'].each do |k, v|
         next unless schema['properties'][k]['type'] == 'object'
 
         schema['properties'][k] = remove_object_required_optional_children(schema['properties'][k])
