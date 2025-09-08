@@ -231,24 +231,40 @@ class ConvertJsonSchema
   end
 
   def remove_object_required_optional_children(schema, path)
-    if schema['properties']
-      unused = []
-      schema['properties'].each do |k, v|
-        next unless schema['properties'][k]['type'] == 'object'
 
-        schema['properties'][k] = remove_object_required_optional_children(schema['properties'][k], "#{path}.#{k}")
-        if !schema['properties'][k]['required'] || schema['properties'][k]['required'].size == 0
-          unused.push(k)
-        end
+    unused = []
+
+    schema['properties']&.each do |k, v|
+      schema['properties'][k] = remove_object_required_optional_children(schema['properties'][k], "#{path}.#{k}")
+
+      if schema['properties'][k]['items']
+        schema['properties'][k]['items'] = remove_object_required_optional_children(schema['properties'][k] ['items'], "#{path}.#{k}.items")
       end
 
-      if schema['required']
-        schema['required'] -= unused
+      next unless schema['properties'][k]['type'] == 'object'
+
+      if !schema['properties'][k]['required'] || schema['properties'][k]['required'].size == 0
+        unused.push(k)
+      end
+
+      if schema['properties'][k]['additionalProperties'] && !schema['properties'][k]['properties']
+        unused.push(k)
       end
     end
+
+
+    if schema['items']
+      schema['items'] = remove_object_required_optional_children(schema['items'], "#{path}.items")
+    end
+
+    if schema['required']
+      schema['required'] -= unused
+    end
+
     if schema['required']&.length == 0
       schema.delete('required')
     end
+
     schema
   end
 
