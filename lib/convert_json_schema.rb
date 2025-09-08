@@ -34,7 +34,7 @@ class ConvertJsonSchema
 
       # If an entity is required, but no children are required
       # it's not actually required
-      json_schema = remove_object_required_optional_children(json_schema)
+      json_schema = remove_object_required_optional_children(json_schema, plugin_name)
 
       # Fix any broken defaults
       json_schema = fix_broken_defaults(json_schema)
@@ -229,19 +229,21 @@ class ConvertJsonSchema
     schema
   end
 
-  def remove_object_required_optional_children(schema)
-    if schema['required'] && schema['properties']
+  def remove_object_required_optional_children(schema, path)
+    if schema['properties']
       unused = []
       schema['properties'].each do |k, v|
         next unless schema['properties'][k]['type'] == 'object'
 
-        schema['properties'][k] = remove_object_required_optional_children(schema['properties'][k])
+        schema['properties'][k] = remove_object_required_optional_children(schema['properties'][k], "#{path}.#{k}")
         if !schema['properties'][k]['required'] || schema['properties'][k]['required'].size == 0
           unused.push(k)
         end
       end
 
-      schema['required'] -= unused
+      if schema['required']
+        schema['required'] -= unused
+      end
     end
     if schema['required']&.length == 0
       schema.delete('required')
