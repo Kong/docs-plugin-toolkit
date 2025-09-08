@@ -57,7 +57,7 @@ class ConvertJsonSchema
   end
 
   def convert_to_json_schema(props, parent)
-    is_required = true
+    is_required = props['required'] || false
 
     # The default value may be in the parent schema if this is
     # a reusable schema with an overridden value
