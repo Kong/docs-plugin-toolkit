@@ -152,7 +152,8 @@ class ConvertJsonSchema
         'match_all',
         'examples',
         'not_one_of',
-        'uuid'
+        'uuid',
+        'pattern'
       ].include?(k)
 
       if k == 'type' && v == 'foreign'
