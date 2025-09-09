@@ -153,7 +153,11 @@ class ConvertJsonSchema
         'examples',
         'not_one_of',
         'uuid',
-        'pattern'
+        'pattern',
+        'subschema_definitions',
+        'subschema_error',
+        'subschema_key',
+        'subschema_override_parent'
       ].include?(k)
 
       if k == 'type' && v == 'foreign'
