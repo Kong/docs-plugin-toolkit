@@ -34,7 +34,7 @@ class ConvertJsonSchema
 
       # If an entity is required, but no children are required
       # it's not actually required
-      json_schema = remove_object_required_optional_children(json_schema)
+      json_schema = remove_object_required_optional_children(json_schema, plugin_name)
 
       # Fix any broken defaults
       json_schema = fix_broken_defaults(json_schema)
@@ -57,7 +57,7 @@ class ConvertJsonSchema
   end
 
   def convert_to_json_schema(props, parent)
-    is_required = true
+    is_required = props['required'] || false
 
     # The default value may be in the parent schema if this is
     # a reusable schema with an overridden value
@@ -152,7 +152,8 @@ class ConvertJsonSchema
         'match_all',
         'examples',
         'not_one_of',
-        'uuid'
+        'uuid',
+        'pattern'
       ].include?(k)
 
       if k == 'type' && v == 'foreign'
@@ -229,23 +230,41 @@ class ConvertJsonSchema
     schema
   end
 
-  def remove_object_required_optional_children(schema)
-    if schema['required'] && schema['properties']
-      unused = []
-      schema['required'].each do |k|
-        next unless schema['properties'][k]['type'] == 'object'
+  def remove_object_required_optional_children(schema, path)
 
-        schema['properties'][k] = remove_object_required_optional_children(schema['properties'][k])
-        if !schema['properties'][k]['required'] || schema['properties'][k]['required'].size == 0
-          unused.push(k)
-        end
+    unused = []
+
+    schema['properties']&.each do |k, v|
+      schema['properties'][k] = remove_object_required_optional_children(schema['properties'][k], "#{path}.#{k}")
+
+      if schema['properties'][k]['items']
+        schema['properties'][k]['items'] = remove_object_required_optional_children(schema['properties'][k] ['items'], "#{path}.#{k}.items")
       end
 
+      next unless schema['properties'][k]['type'] == 'object'
+
+      if !schema['properties'][k]['required'] || schema['properties'][k]['required'].size == 0
+        unused.push(k)
+      end
+
+      if schema['properties'][k]['additionalProperties'] && !schema['properties'][k]['properties']
+        unused.push(k)
+      end
+    end
+
+
+    if schema['items']
+      schema['items'] = remove_object_required_optional_children(schema['items'], "#{path}.items")
+    end
+
+    if schema['required']
       schema['required'] -= unused
     end
+
     if schema['required']&.length == 0
       schema.delete('required')
     end
+
     schema
   end
 
@@ -301,6 +320,10 @@ class ConvertJsonSchema
         schema['properties'][k] = fix_broken_defaults(v)
         schema['properties'][k] = fix_regex(schema['properties'][k])
       end
+    end
+
+    if schema['default'].nil?
+      schema.delete('default')
     end
 
     if schema['items']
