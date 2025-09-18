@@ -69,6 +69,13 @@ class ConvertJsonSchema
       end
     end
 
+    if props['type'] == 'map'
+      if props['values']['referenceable'] && props.key?('description')
+        values_desc = 'The values are [referenceable](/gateway/entities/vault/#how-do-i-reference-secrets-stored-in-a-vault).'
+        props['description'] = "#{props['description']} #{values_desc}"
+      end
+    end
+
     # Remove required if default is set
     is_required = false unless props['default'].nil?
 
@@ -103,7 +110,6 @@ class ConvertJsonSchema
       if k == 'uuid' && fields[k]
         fields['format'] = 'uuid'
       end
-
 
       if !@options[:skip_custom_annotations]
         if k == 'encrypted'
