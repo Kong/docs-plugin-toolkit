@@ -1,23 +1,26 @@
 {
+  "entity_checks": [],
   "fields": [
     {
       "consumer": {
-        "eq": null,
-        "reference": "consumers",
         "type": "foreign",
-        "description": "Custom type for representing a foreign key with a null value allowed."
+        "reference": "consumers",
+        "description": "Custom type for representing a foreign key with a null value allowed.",
+        "eq": null
       }
     },
     {
       "consumer_group": {
-        "eq": null,
-        "reference": "consumer_groups",
         "type": "foreign",
-        "description": "Custom type for representing a foreign key with a null value allowed."
+        "reference": "consumer_groups",
+        "description": "Custom type for representing a foreign key with a null value allowed.",
+        "eq": null
       }
     },
     {
       "protocols": {
+        "required": true,
+        "type": "set",
         "elements": {
           "type": "string",
           "one_of": [
@@ -33,66 +36,69 @@
           "http",
           "https"
         ],
-        "type": "set",
-        "required": true,
         "description": "A set of strings representing HTTP protocols."
       }
     },
     {
       "config": {
+        "required": false,
+        "description": "The configuration for MCP authorization in OAuth2. If this is enabled, make sure the configured metadata_endpoint is also covered by the same route so the authorization can be applied correctly.",
         "fields": [
           {
             "max_request_body_size": {
-              "description": "max allowed body size allowed to be handled as MCP request.",
+              "default": 8192,
               "gt": 0,
               "type": "integer",
-              "default": 8192
+              "description": "max allowed body size allowed to be handled as MCP request."
             }
           },
           {
             "metadata_endpoint": {
+              "description": "The path for OAuth 2.0 Protected Resource Metadata. Default to $resource/.well-known/oauth-protected-resource. For example, if the configured resource is https://api.example.com/mcp, the metadata endpoint is /mcp/.well-known/oauth-protected-resource.",
               "starts_with": "/",
               "type": "string",
               "match_none": [
                 {
-                  "pattern": "//",
-                  "err": "must not have empty segments"
+                  "err": "must not have empty segments",
+                  "pattern": "//"
                 }
-              ],
-              "description": "The path for OAuth 2.0 Protected Resource Metadata. Default to $resource/.well-known/oauth-protected-resource. For example, if the configured resource is https://api.example.com/mcp, the metadata endpoint is /mcp/.well-known/oauth-protected-resource."
+              ]
             }
           },
           {
             "resource": {
-              "type": "string",
               "required": true,
+              "type": "string",
               "description": "The resource identifier."
             }
           },
           {
             "authorization_servers": {
+              "len_min": 1,
+              "required": true,
+              "type": "array",
               "elements": {
                 "type": "string",
                 "description": "The authorization server identifier."
-              },
-              "len_min": 1,
-              "type": "array",
-              "required": true
+              }
             }
           },
           {
             "scopes_supported": {
+              "len_min": 1,
+              "required": false,
+              "type": "array",
               "elements": {
                 "type": "string",
                 "description": "Recommended scopes that are used in authorization requests to request access to this protected resource."
-              },
-              "len_min": 1,
-              "type": "array",
-              "required": false
+              }
             }
           },
           {
             "claim_to_header": {
+              "len_min": 1,
+              "required": false,
+              "type": "array",
               "elements": {
                 "type": "record",
                 "fields": [
@@ -111,10 +117,7 @@
                     }
                   }
                 ]
-              },
-              "len_min": 1,
-              "type": "array",
-              "required": false
+              }
             }
           },
           {
@@ -134,37 +137,36 @@
           {
             "introspection_endpoint": {
               "required": true,
-              "type": "string",
-              "description": "The introspection endpoint URL."
+              "description": "The introspection endpoint URL.",
+              "type": "string"
             }
           },
           {
             "mtls_introspection_endpoint": {
               "required": false,
-              "type": "string",
-              "description": "The mTLS alias for the introspection endpoint."
+              "description": "The mTLS alias for the introspection endpoint.",
+              "type": "string"
             }
           },
           {
             "client_id": {
-              "required": true,
-              "referenceable": true,
               "type": "string",
-              "description": "The client ID for authentication."
+              "required": true,
+              "description": "The client ID for authentication.",
+              "referenceable": true
             }
           },
           {
             "client_secret": {
               "required": false,
+              "description": "The client secret for authentication.",
               "encrypted": true,
-              "referenceable": true,
               "type": "string",
-              "description": "The client secret for authentication."
+              "referenceable": true
             }
           },
           {
             "client_auth": {
-              "required": false,
               "one_of": [
                 "client_secret_basic",
                 "client_secret_post",
@@ -174,6 +176,7 @@
                 "self_signed_tls_client_auth",
                 "none"
               ],
+              "required": false,
               "type": "string",
               "description": "The client authentication method."
             }
@@ -181,15 +184,14 @@
           {
             "client_jwk": {
               "required": false,
+              "description": "The client JWK for private_key_jwt authentication.",
               "encrypted": true,
-              "referenceable": true,
               "type": "string",
-              "description": "The client JWK for private_key_jwt authentication."
+              "referenceable": true
             }
           },
           {
             "client_alg": {
-              "required": false,
               "one_of": [
                 "HS256",
                 "HS384",
@@ -205,6 +207,7 @@
                 "PS512",
                 "EdDSA"
               ],
+              "required": false,
               "type": "string",
               "description": "The client JWT signing algorithm."
             }
@@ -225,52 +228,52 @@
           },
           {
             "tls_client_auth_ssl_verify": {
-              "description": "Verify server certificate in mTLS.",
+              "default": true,
               "required": false,
-              "type": "boolean",
-              "default": true
+              "description": "Verify server certificate in mTLS.",
+              "type": "boolean"
             }
           },
           {
             "args": {
-              "keys": {
-                "type": "string"
-              },
-              "type": "map",
+              "required": false,
+              "description": "Additional arguments to send in the POST body.",
               "values": {
                 "type": "string"
               },
-              "required": false,
-              "description": "Additional arguments to send in the POST body."
+              "keys": {
+                "type": "string"
+              },
+              "type": "map"
             }
           },
           {
             "headers": {
-              "keys": {
-                "type": "string"
-              },
-              "type": "map",
+              "required": false,
+              "description": "Additional headers for the introspection request.",
               "values": {
                 "type": "string"
               },
-              "required": false,
-              "description": "Additional headers for the introspection request."
+              "keys": {
+                "type": "string"
+              },
+              "type": "map"
             }
           },
           {
             "keepalive": {
-              "description": "Enable HTTP keepalive for requests.",
+              "default": true,
               "required": false,
-              "type": "boolean",
-              "default": true
+              "description": "Enable HTTP keepalive for requests.",
+              "type": "boolean"
             }
           },
           {
             "ssl_verify": {
-              "description": "Verify the SSL certificate.",
+              "default": true,
               "required": false,
-              "type": "boolean",
-              "default": true
+              "description": "Verify the SSL certificate.",
+              "type": "boolean"
             }
           },
           {
@@ -283,17 +286,17 @@
           },
           {
             "timeout": {
-              "description": "Network I/O timeout in milliseconds.",
+              "default": 10000,
               "required": false,
-              "type": "number",
-              "default": 10000
+              "description": "Network I/O timeout in milliseconds.",
+              "type": "number"
             }
           },
           {
             "http_proxy": {
               "required": false,
-              "type": "string",
-              "description": "HTTP proxy to use."
+              "description": "HTTP proxy to use.",
+              "type": "string"
             }
           },
           {
@@ -306,8 +309,8 @@
           {
             "https_proxy": {
               "required": false,
-              "type": "string",
-              "description": "HTTPS proxy to use."
+              "description": "HTTPS proxy to use.",
+              "type": "string"
             }
           },
           {
@@ -326,12 +329,12 @@
           },
           {
             "introspection_format": {
-              "required": false,
               "one_of": [
                 "string",
                 "base64",
                 "base64url"
               ],
+              "required": false,
               "type": "string",
               "description": "Controls introspection response format."
             }
@@ -340,47 +343,44 @@
         "entity_checks": [
           {
             "conditional_at_least_one_of": {
+              "if_match": {
+                "required": true
+              },
               "if_field": "client_id",
               "then_at_least_one_of": [
                 "client_secret",
                 "client_jwk",
                 "tls_client_auth_cert"
-              ],
-              "if_match": {
-                "required": true
-              }
+              ]
             }
           },
           {
             "conditional": {
+              "if_match": {
+                "required": true
+              },
               "then_field": "tls_client_auth_key",
               "if_field": "tls_client_auth_cert",
               "then_match": {
                 "required": true
-              },
-              "if_match": {
-                "required": true
               }
             }
           },
           {
             "conditional": {
+              "if_match": {
+                "required": true
+              },
               "then_field": "tls_client_auth_cert",
               "if_field": "tls_client_auth_key",
               "then_match": {
-                "required": true
-              },
-              "if_match": {
                 "required": true
               }
             }
           }
         ],
-        "required": false,
-        "type": "record",
-        "description": "The configuration for MCP authorization in OAuth2. If this is enabled, make sure the configured metadata_endpoint is also covered by the same route so the authorization can be applied correctly."
+        "type": "record"
       }
     }
-  ],
-  "entity_checks": []
+  ]
 }

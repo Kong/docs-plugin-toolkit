@@ -1,7 +1,18 @@
 {
+  "entity_checks": [
+    {
+      "custom_entity_check": {
+        "field_sources": [
+          "config"
+        ]
+      }
+    }
+  ],
   "fields": [
     {
       "protocols": {
+        "required": true,
+        "type": "set",
         "elements": {
           "type": "string",
           "one_of": [
@@ -17,52 +28,57 @@
           "http",
           "https"
         ],
-        "type": "set",
-        "required": true,
         "description": "A set of strings representing HTTP protocols."
       }
     },
     {
       "config": {
+        "required": true,
+        "type": "record",
         "fields": [
           {
             "compressor_url": {
-              "default": "http://localhost:8080",
+              "description": "The url of the compressor",
               "required": true,
               "type": "string",
-              "description": "The url of the compressor"
+              "default": "http://localhost:8080"
             }
           },
           {
             "timeout": {
+              "default": 10000,
               "description": "Connection timeout with the compressor",
-              "type": "number",
-              "default": 10000
+              "type": "number"
             }
           },
           {
             "keepalive_timeout": {
+              "default": 60000,
               "description": "The keepalive timeout for the established http connnection",
-              "type": "number",
-              "default": 60000
+              "type": "number"
             }
           },
           {
             "stop_on_error": {
+              "default": true,
               "description": "Stop processing if an error occurs",
-              "type": "boolean",
-              "default": true
+              "type": "boolean"
             }
           },
           {
             "log_text_data": {
+              "default": false,
               "description": "Log the text data",
-              "type": "boolean",
-              "default": false
+              "type": "boolean"
             }
           },
           {
             "message_type": {
+              "type": "set",
+              "required": true,
+              "default": [
+                "user"
+              ],
               "elements": {
                 "type": "string",
                 "one_of": [
@@ -70,67 +86,51 @@
                   "assistant",
                   "user"
                 ]
-              },
-              "required": true,
-              "type": "set",
-              "default": [
-                "user"
-              ]
+              }
             }
           },
           {
             "compressor_type": {
+              "required": true,
+              "type": "string",
               "one_of": [
                 "rate",
                 "target_token"
               ],
               "default": "rate",
-              "type": "string",
-              "required": true,
               "description": "What compression type to use to compress with"
             }
           },
           {
             "compression_ranges": {
+              "type": "array",
+              "required": true,
+              "description": "What value to be used to compress with. The 'value' is interpreted as rate or target_token depending on compressor_type.",
               "elements": {
                 "type": "record",
                 "fields": [
                   {
                     "min_tokens": {
-                      "required": true,
-                      "type": "integer"
+                      "type": "integer",
+                      "required": true
                     }
                   },
                   {
                     "max_tokens": {
-                      "required": true,
-                      "type": "integer"
+                      "type": "integer",
+                      "required": true
                     }
                   },
                   {
                     "value": {
-                      "required": true,
-                      "type": "number"
+                      "type": "number",
+                      "required": true
                     }
                   }
                 ]
-              },
-              "required": true,
-              "type": "array",
-              "description": "What value to be used to compress with. The 'value' is interpreted as rate or target_token depending on compressor_type."
+              }
             }
           }
-        ],
-        "type": "record",
-        "required": true
-      }
-    }
-  ],
-  "entity_checks": [
-    {
-      "custom_entity_check": {
-        "field_sources": [
-          "config"
         ]
       }
     }

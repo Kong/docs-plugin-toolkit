@@ -1,7 +1,18 @@
 {
+  "entity_checks": [
+    {
+      "custom_entity_check": {
+        "field_sources": [
+          "config"
+        ]
+      }
+    }
+  ],
   "fields": [
     {
       "protocols": {
+        "required": true,
+        "type": "set",
         "elements": {
           "type": "string",
           "one_of": [
@@ -17,74 +28,76 @@
           "http",
           "https"
         ],
-        "type": "set",
-        "required": true,
         "description": "A set of strings representing HTTP protocols."
       }
     },
     {
       "config": {
+        "required": true,
+        "type": "record",
         "fields": [
           {
             "host": {
               "description": "The host of the sanitizer",
-              "type": "string",
               "required": true,
-              "default": "localhost"
+              "default": "localhost",
+              "type": "string"
             }
           },
           {
             "port": {
               "description": "The port of the sanitizer",
-              "type": "number",
               "required": true,
-              "default": 8080
+              "default": 8080,
+              "type": "number"
             }
           },
           {
             "scheme": {
               "description": "The protocol can be http and https",
-              "type": "string",
               "required": true,
-              "default": "http"
+              "default": "http",
+              "type": "string"
             }
           },
           {
             "timeout": {
               "description": "Connection timeout with the sanitizer",
-              "type": "number",
-              "default": 10000
+              "default": 10000,
+              "type": "number"
             }
           },
           {
             "keepalive_timeout": {
               "description": "The keepalive timeout for the established http connnection",
-              "type": "number",
-              "default": 60000
+              "default": 60000,
+              "type": "number"
             }
           },
           {
             "sanitization_mode": {
+              "required": true,
+              "type": "string",
               "one_of": [
                 "INPUT",
                 "OUTPUT",
                 "BOTH"
               ],
               "default": "INPUT",
-              "required": true,
-              "type": "string",
               "description": "The sanitization mode to use for the request"
             }
           },
           {
             "stop_on_error": {
               "description": "Stop processing if an error occurs.",
-              "type": "boolean",
-              "default": true
+              "default": true,
+              "type": "boolean"
             }
           },
           {
             "anonymize": {
+              "required": true,
+              "type": "array",
               "elements": {
                 "type": "string",
                 "one_of": [
@@ -110,41 +123,41 @@
                   "all_and_credentials"
                 ]
               },
-              "description": "List of types to be anonymized",
-              "required": true,
-              "type": "array",
               "default": [
                 "all_and_credentials"
-              ]
+              ],
+              "description": "List of types to be anonymized"
             }
           },
           {
             "recover_redacted": {
               "description": "Whether to recover redacted data. This doesn't apply to the redacted output.",
-              "type": "boolean",
-              "default": true
+              "default": true,
+              "type": "boolean"
             }
           },
           {
             "block_if_detected": {
               "description": "Whether to block requests containing PII data",
-              "type": "boolean",
-              "default": false
+              "default": false,
+              "type": "boolean"
             }
           },
           {
             "redact_type": {
-              "description": "What value to be used to redacted to",
               "one_of": [
                 "placeholder",
                 "synthetic"
               ],
-              "type": "string",
-              "default": "placeholder"
+              "description": "What value to be used to redacted to",
+              "default": "placeholder",
+              "type": "string"
             }
           },
           {
             "custom_patterns": {
+              "required": false,
+              "description": "List of custom patterns to be used for anonymization",
               "elements": {
                 "type": "record",
                 "fields": [
@@ -162,34 +175,21 @@
                   },
                   {
                     "score": {
+                      "default": 0.5,
                       "required": true,
                       "type": "number",
                       "between": [
                         0,
                         1
-                      ],
-                      "default": 0.5
+                      ]
                     }
                   }
                 ]
               },
-              "required": false,
               "len_min": 1,
-              "type": "array",
-              "description": "List of custom patterns to be used for anonymization"
+              "type": "array"
             }
           }
-        ],
-        "type": "record",
-        "required": true
-      }
-    }
-  ],
-  "entity_checks": [
-    {
-      "custom_entity_check": {
-        "field_sources": [
-          "config"
         ]
       }
     }
