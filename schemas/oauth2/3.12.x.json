@@ -1,15 +1,26 @@
 {
+  "entity_checks": [],
   "fields": [
     {
       "consumer": {
-        "eq": null,
-        "reference": "consumers",
         "type": "foreign",
-        "description": "Custom type for representing a foreign key with a null value allowed."
+        "reference": "consumers",
+        "description": "Custom type for representing a foreign key with a null value allowed.",
+        "eq": null
       }
     },
     {
       "protocols": {
+        "type": "set",
+        "required": true,
+        "default": [
+          "grpc",
+          "grpcs",
+          "http",
+          "https",
+          "ws",
+          "wss"
+        ],
         "elements": {
           "type": "string",
           "one_of": [
@@ -20,38 +31,43 @@
             "ws",
             "wss"
           ]
-        },
-        "type": "set",
-        "required": true,
-        "default": [
-          "grpc",
-          "grpcs",
-          "http",
-          "https",
-          "ws",
-          "wss"
-        ]
+        }
       }
     },
     {
       "consumer_group": {
-        "eq": null,
-        "reference": "consumer_groups",
         "type": "foreign",
-        "description": "Custom type for representing a foreign key with a null value allowed."
+        "reference": "consumer_groups",
+        "description": "Custom type for representing a foreign key with a null value allowed.",
+        "eq": null
       }
     },
     {
       "config": {
+        "entity_checks": [
+          {
+            "conditional": {
+              "if_match": {
+                "eq": true
+              },
+              "then_field": "scopes",
+              "if_field": "mandatory_scope",
+              "then_match": {
+                "required": true
+              }
+            }
+          }
+        ],
         "required": true,
+        "type": "record",
         "fields": [
           {
             "scopes": {
+              "description": "Describes an array of scope names that will be available to the end user. If `mandatory_scope` is set to `true`, then `scopes` are required.",
+              "type": "array",
               "elements": {
                 "type": "string"
-              },
-              "type": "array",
-              "description": "Describes an array of scope names that will be available to the end user. If `mandatory_scope` is set to `true`, then `scopes` are required."
+              }
             }
           },
           {
@@ -64,12 +80,12 @@
           },
           {
             "provision_key": {
-              "auto": true,
-              "unique": true,
-              "encrypted": true,
               "required": true,
+              "auto": true,
+              "encrypted": true,
               "type": "string",
-              "description": "The unique key the plugin has generated when it has been added to the Service."
+              "description": "The unique key the plugin has generated when it has been added to the Service.",
+              "unique": true
             }
           },
           {
@@ -130,8 +146,8 @@
           },
           {
             "anonymous": {
-              "type": "string",
-              "description": "An optional string (consumer UUID or username) value to use as an “anonymous” consumer if authentication fails."
+              "description": "An optional string (consumer UUID or username) value to use as an “anonymous” consumer if authentication fails.",
+              "type": "string"
             }
           },
           {
@@ -151,13 +167,13 @@
           },
           {
             "refresh_token_ttl": {
-              "default": 1209600,
               "required": true,
+              "type": "number",
               "between": [
                 0,
                 100000000
               ],
-              "type": "number",
+              "default": 1209600,
               "description": "Time-to-live value for data"
             }
           },
@@ -172,48 +188,32 @@
           {
             "persistent_refresh_token": {
               "required": true,
-              "type": "boolean",
-              "default": false
+              "default": false,
+              "type": "boolean"
             }
           },
           {
             "pkce": {
+              "required": false,
+              "description": "Specifies a mode of how the Proof Key for Code Exchange (PKCE) should be handled by the plugin.",
               "one_of": [
                 "none",
                 "lax",
                 "strict"
               ],
-              "description": "Specifies a mode of how the Proof Key for Code Exchange (PKCE) should be handled by the plugin.",
-              "type": "string",
-              "required": false,
-              "default": "lax"
+              "default": "lax",
+              "type": "string"
             }
           },
           {
             "realm": {
               "required": false,
-              "type": "string",
-              "description": "When authentication fails the plugin sends `WWW-Authenticate` header with `realm` attribute value."
-            }
-          }
-        ],
-        "type": "record",
-        "entity_checks": [
-          {
-            "conditional": {
-              "then_field": "scopes",
-              "if_field": "mandatory_scope",
-              "then_match": {
-                "required": true
-              },
-              "if_match": {
-                "eq": true
-              }
+              "description": "When authentication fails the plugin sends `WWW-Authenticate` header with `realm` attribute value.",
+              "type": "string"
             }
           }
         ]
       }
     }
-  ],
-  "entity_checks": []
+  ]
 }

@@ -1,7 +1,17 @@
 {
+  "entity_checks": [
+    {
+      "at_least_one_of": [
+        "config.prompts.prepend",
+        "config.prompts.append"
+      ]
+    }
+  ],
   "fields": [
     {
       "protocols": {
+        "required": true,
+        "type": "set",
         "elements": {
           "type": "string",
           "one_of": [
@@ -17,100 +27,102 @@
           "http",
           "https"
         ],
-        "type": "set",
-        "required": true,
         "description": "A set of strings representing HTTP protocols."
       }
     },
     {
       "config": {
+        "required": true,
+        "type": "record",
         "fields": [
           {
             "prompts": {
+              "required": false,
+              "type": "record",
               "fields": [
                 {
                   "prepend": {
+                    "required": false,
+                    "type": "array",
                     "elements": {
+                      "required": false,
+                      "type": "record",
                       "fields": [
                         {
                           "role": {
-                            "type": "string",
                             "one_of": [
                               "system",
                               "assistant",
                               "user"
                             ],
                             "required": true,
+                            "type": "string",
                             "default": "system"
                           }
                         },
                         {
                           "content": {
-                            "len_max": 100000,
                             "len_min": 1,
-                            "required": true,
-                            "type": "string"
+                            "len_max": 100000,
+                            "type": "string",
+                            "required": true
                           }
                         }
-                      ],
-                      "type": "record",
-                      "required": false
+                      ]
                     },
                     "len_max": 15,
-                    "required": false,
-                    "type": "array",
                     "description": "Insert chat messages at the beginning of the chat message array. This array preserves exact order when adding messages."
                   }
                 },
                 {
                   "append": {
+                    "required": false,
+                    "type": "array",
                     "elements": {
+                      "required": false,
+                      "type": "record",
                       "fields": [
                         {
                           "role": {
-                            "type": "string",
                             "one_of": [
                               "system",
                               "assistant",
                               "user"
                             ],
                             "required": true,
+                            "type": "string",
                             "default": "system"
                           }
                         },
                         {
                           "content": {
-                            "len_max": 100000,
                             "len_min": 1,
-                            "required": true,
-                            "type": "string"
+                            "len_max": 100000,
+                            "type": "string",
+                            "required": true
                           }
                         }
-                      ],
-                      "type": "record",
-                      "required": false
+                      ]
                     },
                     "len_max": 15,
-                    "required": false,
-                    "type": "array",
                     "description": "Insert chat messages at the end of the chat message array. This array preserves exact order when adding messages."
                   }
                 }
-              ],
-              "type": "record",
-              "required": false
+              ]
             }
           },
           {
             "max_request_body_size": {
-              "default": 8192,
-              "gt": 0,
               "type": "integer",
+              "gt": 0,
+              "default": 8192,
               "description": "max allowed body size allowed to be introspected. 0 means unlimited, but the size of this body will still be limited by Nginx's client_max_body_size."
             }
           },
           {
             "llm_format": {
+              "required": false,
+              "description": "LLM input and output format and schema to use",
               "one_of": [
                 "openai",
                 "bedrock",
@@ -118,24 +130,12 @@
                 "cohere",
                 "huggingface"
               ],
-              "description": "LLM input and output format and schema to use",
-              "type": "string",
-              "required": false,
-              "default": "openai"
+              "default": "openai",
+              "type": "string"
             }
           }
-        ],
-        "type": "record",
-        "required": true
+        ]
       }
-    }
-  ],
-  "entity_checks": [
-    {
-      "at_least_one_of": [
-        "config.prompts.prepend",
-        "config.prompts.append"
-      ]
     }
   ]
 }

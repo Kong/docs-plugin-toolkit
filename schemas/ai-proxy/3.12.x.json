@@ -1,7 +1,169 @@
 {
+  "entity_checks": [
+    {
+      "conditional": {
+        "then_err": "native llm_format 'bedrock' can only be used with the 'bedrock' model.provider",
+        "if_match": {
+          "eq": "bedrock"
+        },
+        "then_field": "config.model.provider",
+        "if_field": "config.llm_format",
+        "then_match": {
+          "eq": "bedrock"
+        }
+      }
+    },
+    {
+      "conditional": {
+        "then_err": "native llm_format 'gemini' can only be used with the 'gemini' model.provider",
+        "if_match": {
+          "eq": "gemini"
+        },
+        "then_field": "config.model.provider",
+        "if_field": "config.llm_format",
+        "then_match": {
+          "eq": "gemini"
+        }
+      }
+    },
+    {
+      "conditional": {
+        "then_err": "native llm_format 'cohere' can only be used with the 'cohere' model.provider",
+        "if_match": {
+          "eq": "cohere"
+        },
+        "then_field": "config.model.provider",
+        "if_field": "config.llm_format",
+        "then_match": {
+          "eq": "cohere"
+        }
+      }
+    },
+    {
+      "conditional": {
+        "then_err": "native llm_format 'huggingface' can only be used with the 'huggingface' model.provider",
+        "if_match": {
+          "eq": "huggingface"
+        },
+        "then_field": "config.model.provider",
+        "if_field": "config.llm_format",
+        "then_match": {
+          "eq": "huggingface"
+        }
+      }
+    },
+    {
+      "conditional": {
+        "then_err": "current route type doesn't have model name thus can't return model_name_header",
+        "if_match": {
+          "one_of": [
+            "llm/v1/assistants",
+            "llm/v1/files",
+            "llm/v1/batches"
+          ]
+        },
+        "then_field": "config.model_name_header",
+        "if_field": "config.route_type",
+        "then_match": {
+          "eq": false
+        }
+      }
+    },
+    {
+      "conditional": {
+        "then_err": "category 'text/generation' cannot be used with this route_type",
+        "if_match": {
+          "eq": "text/generation"
+        },
+        "then_field": "config.route_type",
+        "if_field": "config.genai_category",
+        "then_match": {
+          "one_of": [
+            "llm/v1/chat",
+            "llm/v1/completions",
+            "llm/v1/responses",
+            "llm/v1/assistants",
+            "llm/v1/files",
+            "llm/v1/batches",
+            "preserve"
+          ]
+        }
+      }
+    },
+    {
+      "conditional": {
+        "then_err": "category 'text/embeddings' cannot be used with this route_type",
+        "if_match": {
+          "eq": "text/embeddings"
+        },
+        "then_field": "config.route_type",
+        "if_field": "config.genai_category",
+        "then_match": {
+          "eq": "llm/v1/embeddings"
+        }
+      }
+    },
+    {
+      "conditional": {
+        "then_err": "category 'image/generation' cannot be used with this route_type",
+        "if_match": {
+          "eq": "image/generation"
+        },
+        "then_field": "config.route_type",
+        "if_field": "config.genai_category",
+        "then_match": {
+          "one_of": [
+            "image/v1/images/generations",
+            "image/v1/images/edits"
+          ]
+        }
+      }
+    },
+    {
+      "conditional": {
+        "then_err": "category 'audio/speech' cannot be used with this route_type",
+        "if_match": {
+          "eq": "audio/speech"
+        },
+        "then_field": "config.route_type",
+        "if_field": "config.genai_category",
+        "then_match": {
+          "one_of": [
+            "audio/v1/audio/speech"
+          ]
+        }
+      }
+    },
+    {
+      "conditional": {
+        "then_err": "category 'audio/transcription' cannot be used with this route_type",
+        "if_match": {
+          "eq": "audio/transcription"
+        },
+        "then_field": "config.route_type",
+        "if_field": "config.genai_category",
+        "then_match": {
+          "one_of": [
+            "audio/v1/audio/transcriptions",
+            "audio/v1/audio/translations"
+          ]
+        }
+      }
+    }
+  ],
   "fields": [
     {
       "protocols": {
+        "type": "set",
+        "required": true,
+        "default": [
+          "grpc",
+          "grpcs",
+          "http",
+          "https",
+          "ws",
+          "wss"
+        ],
         "elements": {
           "type": "string",
           "one_of": [
@@ -12,26 +174,16 @@
             "ws",
             "wss"
           ]
-        },
-        "type": "set",
-        "required": true,
-        "default": [
-          "grpc",
-          "grpcs",
-          "http",
-          "https",
-          "ws",
-          "wss"
-        ]
+        }
       }
     },
     {
       "config": {
         "type": "record",
+        "required": true,
         "fields": [
           {
             "route_type": {
-              "required": true,
               "one_of": [
                 "llm/v1/chat",
                 "llm/v1/completions",
@@ -48,145 +200,147 @@
                 "realtime/v1/realtime",
                 "preserve"
               ],
+              "required": true,
               "type": "string",
               "description": "The model's operation implementation, for this provider. "
             }
           },
           {
             "auth": {
+              "required": false,
+              "type": "record",
               "fields": [
                 {
                   "header_name": {
+                    "description": "If AI model requires authentication via Authorization or API key header, specify its name here.",
                     "required": false,
-                    "referenceable": true,
                     "type": "string",
-                    "description": "If AI model requires authentication via Authorization or API key header, specify its name here."
+                    "referenceable": true
                   }
                 },
                 {
                   "header_value": {
-                    "type": "string",
-                    "encrypted": true,
-                    "referenceable": true,
                     "required": false,
-                    "description": "Specify the full auth header value for 'header_name', for example 'Bearer key' or just 'key'."
+                    "description": "Specify the full auth header value for 'header_name', for example 'Bearer key' or just 'key'.",
+                    "referenceable": true,
+                    "type": "string",
+                    "encrypted": true
                   }
                 },
                 {
                   "param_name": {
+                    "description": "If AI model requires authentication via query parameter, specify its name here.",
                     "required": false,
-                    "referenceable": true,
                     "type": "string",
-                    "description": "If AI model requires authentication via query parameter, specify its name here."
+                    "referenceable": true
                   }
                 },
                 {
                   "param_value": {
-                    "type": "string",
-                    "encrypted": true,
-                    "referenceable": true,
                     "required": false,
-                    "description": "Specify the full parameter value for 'param_name'."
+                    "description": "Specify the full parameter value for 'param_name'.",
+                    "referenceable": true,
+                    "type": "string",
+                    "encrypted": true
                   }
                 },
                 {
                   "param_location": {
-                    "required": false,
                     "one_of": [
                       "query",
                       "body"
                     ],
+                    "required": false,
                     "type": "string",
                     "description": "Specify whether the 'param_name' and 'param_value' options go in a query string, or the POST form/JSON body."
                   }
                 },
                 {
                   "azure_use_managed_identity": {
-                    "default": false,
-                    "required": false,
                     "type": "boolean",
-                    "description": "Set true to use the Azure Cloud Managed Identity (or user-assigned identity) to authenticate with Azure-provider models."
+                    "required": false,
+                    "description": "Set true to use the Azure Cloud Managed Identity (or user-assigned identity) to authenticate with Azure-provider models.",
+                    "default": false
                   }
                 },
                 {
                   "azure_client_id": {
+                    "description": "If azure_use_managed_identity is set to true, and you need to use a different user-assigned identity for this LLM instance, set the client ID.",
                     "required": false,
-                    "referenceable": true,
                     "type": "string",
-                    "description": "If azure_use_managed_identity is set to true, and you need to use a different user-assigned identity for this LLM instance, set the client ID."
+                    "referenceable": true
                   }
                 },
                 {
                   "azure_client_secret": {
-                    "type": "string",
-                    "encrypted": true,
-                    "referenceable": true,
                     "required": false,
-                    "description": "If azure_use_managed_identity is set to true, and you need to use a different user-assigned identity for this LLM instance, set the client secret."
+                    "description": "If azure_use_managed_identity is set to true, and you need to use a different user-assigned identity for this LLM instance, set the client secret.",
+                    "referenceable": true,
+                    "type": "string",
+                    "encrypted": true
                   }
                 },
                 {
                   "azure_tenant_id": {
+                    "description": "If azure_use_managed_identity is set to true, and you need to use a different user-assigned identity for this LLM instance, set the tenant ID.",
                     "required": false,
-                    "referenceable": true,
                     "type": "string",
-                    "description": "If azure_use_managed_identity is set to true, and you need to use a different user-assigned identity for this LLM instance, set the tenant ID."
+                    "referenceable": true
                   }
                 },
                 {
                   "gcp_use_service_account": {
-                    "default": false,
-                    "required": false,
                     "type": "boolean",
-                    "description": "Use service account auth for GCP-based providers and models."
+                    "required": false,
+                    "description": "Use service account auth for GCP-based providers and models.",
+                    "default": false
                   }
                 },
                 {
                   "gcp_service_account_json": {
-                    "type": "string",
-                    "encrypted": true,
-                    "referenceable": true,
                     "required": false,
-                    "description": "Set this field to the full JSON of the GCP service account to authenticate, if required. If null (and gcp_use_service_account is true), Kong will attempt to read from environment variable `GCP_SERVICE_ACCOUNT`."
+                    "description": "Set this field to the full JSON of the GCP service account to authenticate, if required. If null (and gcp_use_service_account is true), Kong will attempt to read from environment variable `GCP_SERVICE_ACCOUNT`.",
+                    "referenceable": true,
+                    "type": "string",
+                    "encrypted": true
                   }
                 },
                 {
                   "aws_access_key_id": {
-                    "type": "string",
-                    "encrypted": true,
-                    "referenceable": true,
                     "required": false,
-                    "description": "Set this if you are using an AWS provider (Bedrock) and you are authenticating using static IAM User credentials. Setting this will override the AWS_ACCESS_KEY_ID environment variable for this plugin instance."
+                    "description": "Set this if you are using an AWS provider (Bedrock) and you are authenticating using static IAM User credentials. Setting this will override the AWS_ACCESS_KEY_ID environment variable for this plugin instance.",
+                    "referenceable": true,
+                    "type": "string",
+                    "encrypted": true
                   }
                 },
                 {
                   "aws_secret_access_key": {
-                    "type": "string",
-                    "encrypted": true,
-                    "referenceable": true,
                     "required": false,
-                    "description": "Set this if you are using an AWS provider (Bedrock) and you are authenticating using static IAM User credentials. Setting this will override the AWS_SECRET_ACCESS_KEY environment variable for this plugin instance."
+                    "description": "Set this if you are using an AWS provider (Bedrock) and you are authenticating using static IAM User credentials. Setting this will override the AWS_SECRET_ACCESS_KEY environment variable for this plugin instance.",
+                    "referenceable": true,
+                    "type": "string",
+                    "encrypted": true
                   }
                 },
                 {
                   "allow_override": {
-                    "default": false,
-                    "required": false,
                     "type": "boolean",
-                    "description": "If enabled, the authorization header or parameter can be overridden in the request by the value configured in the plugin."
+                    "required": false,
+                    "description": "If enabled, the authorization header or parameter can be overridden in the request by the value configured in the plugin.",
+                    "default": false
                   }
                 }
-              ],
-              "type": "record",
-              "required": false
+              ]
             }
           },
           {
             "model": {
+              "required": true,
+              "type": "record",
               "fields": [
                 {
                   "provider": {
-                    "required": true,
                     "one_of": [
                       "openai",
                       "azure",
@@ -198,6 +352,7 @@
                       "bedrock",
                       "huggingface"
                     ],
+                    "required": true,
                     "type": "string",
                     "description": "AI provider request format - Kong translates requests to and from the specified backend compatible formats."
                   }
@@ -211,7 +366,9 @@
                 },
                 {
                   "options": {
+                    "description": "Key/value settings for the model",
                     "required": false,
+                    "type": "record",
                     "fields": [
                       {
                         "max_tokens": {
@@ -222,51 +379,51 @@
                       },
                       {
                         "input_cost": {
-                          "type": "number",
                           "gt": 0,
                           "required": false,
-                          "description": "Defines the cost per 1M tokens in your prompt."
+                          "description": "Defines the cost per 1M tokens in your prompt.",
+                          "type": "number"
                         }
                       },
                       {
                         "output_cost": {
-                          "type": "number",
                           "gt": 0,
                           "required": false,
-                          "description": "Defines the cost per 1M tokens in the output of the AI."
+                          "description": "Defines the cost per 1M tokens in the output of the AI.",
+                          "type": "number"
                         }
                       },
                       {
                         "temperature": {
-                          "type": "number",
                           "between": [
                             0,
                             5
                           ],
                           "required": false,
-                          "description": "Defines the matching temperature, if using chat or completion models."
+                          "description": "Defines the matching temperature, if using chat or completion models.",
+                          "type": "number"
                         }
                       },
                       {
                         "top_p": {
-                          "type": "number",
                           "between": [
                             0,
                             1
                           ],
                           "required": false,
-                          "description": "Defines the top-p probability mass, if supported."
+                          "description": "Defines the top-p probability mass, if supported.",
+                          "type": "number"
                         }
                       },
                       {
                         "top_k": {
-                          "type": "integer",
                           "between": [
                             0,
                             500
                           ],
                           "required": false,
-                          "description": "Defines the top-k most likely tokens, if supported."
+                          "description": "Defines the top-k most likely tokens, if supported.",
+                          "type": "integer"
                         }
                       },
                       {
@@ -285,10 +442,10 @@
                       },
                       {
                         "azure_api_version": {
-                          "default": "2023-05-15",
-                          "required": false,
                           "type": "string",
-                          "description": "'api-version' for Azure OpenAI instances."
+                          "required": false,
+                          "description": "'api-version' for Azure OpenAI instances.",
+                          "default": "2023-05-15"
                         }
                       },
                       {
@@ -300,87 +457,55 @@
                       },
                       {
                         "llama2_format": {
-                          "required": false,
                           "one_of": [
                             "raw",
                             "openai",
                             "ollama"
                           ],
+                          "required": false,
                           "type": "string",
                           "description": "If using llama2 provider, select the upstream message format."
                         }
                       },
                       {
                         "mistral_format": {
-                          "required": false,
                           "one_of": [
                             "openai",
                             "ollama"
                           ],
+                          "required": false,
                           "type": "string",
                           "description": "If using mistral provider, select the upstream message format."
                         }
                       },
                       {
                         "upstream_url": {
-                          "type": "string",
                           "required": false,
+                          "type": "string",
                           "description": "Manually specify or override the full URL to the AI operation endpoints, when calling (self-)hosted models, or for running via a private endpoint."
                         }
                       },
                       {
                         "upstream_path": {
-                          "deprecation": {
-                            "message": "llm: config.model.options.upstream_path is deprecated, please use config.model.options.upstream_url instead",
-                            "removal_in_version": "4.0"
-                          },
-                          "required": false,
                           "type": "string",
-                          "description": "Manually specify or override the AI operation path, used when e.g. using the 'preserve' route_type."
+                          "required": false,
+                          "description": "Manually specify or override the AI operation path, used when e.g. using the 'preserve' route_type.",
+                          "deprecation": {
+                            "removal_in_version": "4.0",
+                            "message": "llm: config.model.options.upstream_path is deprecated, please use config.model.options.upstream_url instead"
+                          }
                         }
                       },
                       {
                         "embeddings_dimensions": {
-                          "type": "integer",
                           "gt": 0,
                           "required": false,
-                          "description": "If using embeddings models, set the number of dimensions to generate."
+                          "description": "If using embeddings models, set the number of dimensions to generate.",
+                          "type": "integer"
                         }
                       },
                       {
                         "gemini": {
-                          "type": "record",
-                          "fields": [
-                            {
-                              "api_endpoint": {
-                                "type": "string",
-                                "required": false,
-                                "description": "If running Gemini on Vertex, specify the regional API endpoint (hostname only)."
-                              }
-                            },
-                            {
-                              "project_id": {
-                                "type": "string",
-                                "required": false,
-                                "description": "If running Gemini on Vertex, specify the project ID."
-                              }
-                            },
-                            {
-                              "location_id": {
-                                "type": "string",
-                                "required": false,
-                                "description": "If running Gemini on Vertex, specify the location ID."
-                              }
-                            },
-                            {
-                              "endpoint_id": {
-                                "required": false,
-                                "type": "string",
-                                "description": "If running Gemini on Vertex Model Garden, specify the endpoint ID."
-                              }
-                            }
-                          ],
-                          "required": false,
                           "entity_checks": [
                             {
                               "mutually_required": [
@@ -399,31 +524,64 @@
                                 ]
                               }
                             }
+                          ],
+                          "required": false,
+                          "type": "record",
+                          "fields": [
+                            {
+                              "api_endpoint": {
+                                "required": false,
+                                "type": "string",
+                                "description": "If running Gemini on Vertex, specify the regional API endpoint (hostname only)."
+                              }
+                            },
+                            {
+                              "project_id": {
+                                "required": false,
+                                "type": "string",
+                                "description": "If running Gemini on Vertex, specify the project ID."
+                              }
+                            },
+                            {
+                              "location_id": {
+                                "required": false,
+                                "type": "string",
+                                "description": "If running Gemini on Vertex, specify the location ID."
+                              }
+                            },
+                            {
+                              "endpoint_id": {
+                                "required": false,
+                                "type": "string",
+                                "description": "If running Gemini on Vertex Model Garden, specify the endpoint ID."
+                              }
+                            }
                           ]
                         }
                       },
                       {
                         "bedrock": {
+                          "type": "record",
                           "required": false,
                           "fields": [
                             {
                               "aws_region": {
                                 "required": false,
-                                "type": "string",
-                                "description": "If using AWS providers (Bedrock) you can override the `AWS_REGION` environment variable by setting this option."
+                                "description": "If using AWS providers (Bedrock) you can override the `AWS_REGION` environment variable by setting this option.",
+                                "type": "string"
                               }
                             },
                             {
                               "aws_assume_role_arn": {
                                 "required": false,
-                                "type": "string",
-                                "description": "If using AWS providers (Bedrock) you can assume a different role after authentication with the current IAM context is successful."
+                                "description": "If using AWS providers (Bedrock) you can assume a different role after authentication with the current IAM context is successful.",
+                                "type": "string"
                               }
                             },
                             {
                               "aws_role_session_name": {
-                                "type": "string",
-                                "description": "If using AWS providers (Bedrock), set the identifier of the assumed role session."
+                                "description": "If using AWS providers (Bedrock), set the identifier of the assumed role session.",
+                                "type": "string"
                               }
                             },
                             {
@@ -434,20 +592,19 @@
                             },
                             {
                               "embeddings_normalize": {
-                                "default": false,
+                                "description": "If using AWS providers (Bedrock), set to true to normalize the embeddings.",
                                 "type": "boolean",
-                                "description": "If using AWS providers (Bedrock), set to true to normalize the embeddings."
+                                "default": false
                               }
                             },
                             {
                               "performance_config_latency": {
                                 "required": false,
-                                "type": "string",
-                                "description": "Force the client's performance configuration 'latency' for all requests. Leave empty to let the consumer select the performance configuration."
+                                "description": "Force the client's performance configuration 'latency' for all requests. Leave empty to let the consumer select the performance configuration.",
+                                "type": "string"
                               }
                             }
                           ],
-                          "type": "record",
                           "entity_checks": [
                             {
                               "mutually_required": [
@@ -460,6 +617,8 @@
                       },
                       {
                         "huggingface": {
+                          "required": false,
+                          "type": "record",
                           "fields": [
                             {
                               "use_cache": {
@@ -475,16 +634,18 @@
                                 "description": "Wait for the model if it is not ready"
                               }
                             }
-                          ],
-                          "type": "record",
-                          "required": false
+                          ]
                         }
                       },
                       {
                         "cohere": {
+                          "required": false,
+                          "type": "record",
                           "fields": [
                             {
                               "embedding_input_type": {
+                                "required": false,
+                                "description": "The purpose of the input text to calculate embedding vectors.",
                                 "one_of": [
                                   "search_document",
                                   "search_query",
@@ -493,9 +654,7 @@
                                   "image"
                                 ],
                                 "default": "classification",
-                                "required": false,
-                                "type": "string",
-                                "description": "The purpose of the input text to calculate embedding vectors."
+                                "type": "string"
                               }
                             },
                             {
@@ -505,75 +664,71 @@
                                 "description": "Wait for the model if it is not ready"
                               }
                             }
-                          ],
-                          "type": "record",
-                          "required": false
+                          ]
                         }
                       }
-                    ],
-                    "type": "record",
-                    "description": "Key/value settings for the model"
+                    ]
                   }
                 }
-              ],
-              "type": "record",
-              "required": true
+              ]
             }
           },
           {
             "logging": {
+              "required": true,
+              "type": "record",
               "fields": [
                 {
                   "log_statistics": {
-                    "default": false,
-                    "required": true,
                     "type": "boolean",
-                    "description": "If enabled and supported by the driver, will add model usage and token metrics into the Kong log plugin(s) output."
+                    "required": true,
+                    "description": "If enabled and supported by the driver, will add model usage and token metrics into the Kong log plugin(s) output.",
+                    "default": false
                   }
                 },
                 {
                   "log_payloads": {
-                    "default": false,
-                    "required": true,
                     "type": "boolean",
-                    "description": "If enabled, will log the request and response body into the Kong log plugin(s) output."
+                    "required": true,
+                    "description": "If enabled, will log the request and response body into the Kong log plugin(s) output.",
+                    "default": false
                   }
                 }
-              ],
-              "type": "record",
-              "required": true
+              ]
             }
           },
           {
             "response_streaming": {
+              "required": false,
+              "type": "string",
               "one_of": [
                 "allow",
                 "deny",
                 "always"
               ],
-              "description": "Whether to 'optionally allow', 'deny', or 'always' (force) the streaming of answers via server sent events.",
-              "required": false,
-              "type": "string",
-              "default": "allow"
+              "default": "allow",
+              "description": "Whether to 'optionally allow', 'deny', or 'always' (force) the streaming of answers via server sent events."
             }
           },
           {
             "max_request_body_size": {
-              "description": "max allowed body size allowed to be introspected. 0 means unlimited, but the size of this body will still be limited by Nginx's client_max_body_size.",
               "type": "integer",
               "gt": 0,
+              "description": "max allowed body size allowed to be introspected. 0 means unlimited, but the size of this body will still be limited by Nginx's client_max_body_size.",
               "default": 8192
             }
           },
           {
             "model_name_header": {
-              "description": "Display the model name selected in the X-Kong-LLM-Model response header",
               "type": "boolean",
+              "description": "Display the model name selected in the X-Kong-LLM-Model response header",
               "default": true
             }
           },
           {
             "llm_format": {
+              "required": false,
+              "description": "LLM input and output format and schema to use",
               "one_of": [
                 "openai",
                 "bedrock",
@@ -581,14 +736,14 @@
                 "cohere",
                 "huggingface"
               ],
-              "description": "LLM input and output format and schema to use",
-              "type": "string",
-              "required": false,
-              "default": "openai"
+              "default": "openai",
+              "type": "string"
             }
           },
           {
             "genai_category": {
+              "required": false,
+              "description": "Generative AI category of the request",
               "one_of": [
                 "text/generation",
                 "text/embeddings",
@@ -598,16 +753,14 @@
                 "video/generation"
               ],
               "default": "text/generation",
-              "type": "string",
-              "required": false,
-              "description": "Generative AI category of the request"
+              "type": "string"
             }
           }
         ],
-        "required": true,
         "entity_checks": [
           {
             "conditional": {
+              "then_err": "bedrock and gemini only support auth.allow_override = false",
               "if_match": {
                 "one_of": [
                   "bedrock",
@@ -618,8 +771,7 @@
               "if_field": "model.provider",
               "then_match": {
                 "eq": false
-              },
-              "then_err": "bedrock and gemini only support auth.allow_override = false"
+              }
             }
           },
           {
@@ -637,100 +789,100 @@
           },
           {
             "conditional_at_least_one_of": {
+              "if_match": {
+                "one_of": [
+                  "llama2"
+                ]
+              },
               "then_err": "must set %s for llama2 provider",
               "if_field": "model.provider",
               "then_at_least_one_of": [
                 "model.options.llama2_format"
-              ],
-              "if_match": {
-                "one_of": [
-                  "llama2"
-                ]
-              }
+              ]
             }
           },
           {
             "conditional_at_least_one_of": {
-              "then_err": "must set %s for mistral provider",
-              "if_field": "model.provider",
-              "then_at_least_one_of": [
-                "model.options.mistral_format"
-              ],
               "if_match": {
                 "one_of": [
                   "mistral"
                 ]
-              }
+              },
+              "then_err": "must set %s for mistral provider",
+              "if_field": "model.provider",
+              "then_at_least_one_of": [
+                "model.options.mistral_format"
+              ]
             }
           },
           {
             "conditional_at_least_one_of": {
-              "then_err": "must set %s for anthropic provider",
-              "if_field": "model.provider",
-              "then_at_least_one_of": [
-                "model.options.anthropic_version"
-              ],
               "if_match": {
                 "one_of": [
                   "anthropic"
                 ]
-              }
+              },
+              "then_err": "must set %s for anthropic provider",
+              "if_field": "model.provider",
+              "then_at_least_one_of": [
+                "model.options.anthropic_version"
+              ]
             }
           },
           {
             "conditional_at_least_one_of": {
+              "if_match": {
+                "one_of": [
+                  "azure"
+                ]
+              },
               "then_err": "must set %s for azure provider",
               "if_field": "model.provider",
               "then_at_least_one_of": [
                 "model.options.azure_instance"
-              ],
-              "if_match": {
-                "one_of": [
-                  "azure"
-                ]
-              }
+              ]
             }
           },
           {
             "conditional_at_least_one_of": {
+              "if_match": {
+                "one_of": [
+                  "azure"
+                ]
+              },
               "then_err": "must set %s for azure provider",
               "if_field": "model.provider",
               "then_at_least_one_of": [
                 "model.options.azure_api_version"
-              ],
-              "if_match": {
-                "one_of": [
-                  "azure"
-                ]
-              }
+              ]
             }
           },
           {
             "conditional_at_least_one_of": {
+              "if_match": {
+                "one_of": [
+                  "azure"
+                ]
+              },
               "then_err": "must set %s for azure provider",
               "if_field": "model.provider",
               "then_at_least_one_of": [
                 "model.options.azure_deployment_id"
-              ],
-              "if_match": {
-                "one_of": [
-                  "azure"
-                ]
-              }
+              ]
             }
           },
           {
             "conditional_at_least_one_of": {
-              "then_err": "must set %s for self-hosted providers/models",
-              "if_field": "model.provider",
-              "then_at_least_one_of": [
-                "model.options.upstream_url"
-              ],
               "if_match": {
                 "one_of": [
                   "llama2"
                 ]
-              }
+              },
+              "then_err": "must set %s for self-hosted providers/models",
+              "if_field": "model.provider",
+              "then_at_least_one_of": [
+                "model.options.upstream_url"
+              ]
             }
           },
           {
@@ -766,158 +918,6 @@
             }
           }
         ]
-      }
-    }
-  ],
-  "entity_checks": [
-    {
-      "conditional": {
-        "if_match": {
-          "eq": "bedrock"
-        },
-        "then_field": "config.model.provider",
-        "if_field": "config.llm_format",
-        "then_match": {
-          "eq": "bedrock"
-        },
-        "then_err": "native llm_format 'bedrock' can only be used with the 'bedrock' model.provider"
-      }
-    },
-    {
-      "conditional": {
-        "if_match": {
-          "eq": "gemini"
-        },
-        "then_field": "config.model.provider",
-        "if_field": "config.llm_format",
-        "then_match": {
-          "eq": "gemini"
-        },
-        "then_err": "native llm_format 'gemini' can only be used with the 'gemini' model.provider"
-      }
-    },
-    {
-      "conditional": {
-        "if_match": {
-          "eq": "cohere"
-        },
-        "then_field": "config.model.provider",
-        "if_field": "config.llm_format",
-        "then_match": {
-          "eq": "cohere"
-        },
-        "then_err": "native llm_format 'cohere' can only be used with the 'cohere' model.provider"
-      }
-    },
-    {
-      "conditional": {
-        "if_match": {
-          "eq": "huggingface"
-        },
-        "then_field": "config.model.provider",
-        "if_field": "config.llm_format",
-        "then_match": {
-          "eq": "huggingface"
-        },
-        "then_err": "native llm_format 'huggingface' can only be used with the 'huggingface' model.provider"
-      }
-    },
-    {
-      "conditional": {
-        "if_match": {
-          "one_of": [
-            "llm/v1/assistants",
-            "llm/v1/files",
-            "llm/v1/batches"
-          ]
-        },
-        "then_field": "config.model_name_header",
-        "if_field": "config.route_type",
-        "then_match": {
-          "eq": false
-        },
-        "then_err": "current route type doesn't have model name thus can't return model_name_header"
-      }
-    },
-    {
-      "conditional": {
-        "if_match": {
-          "eq": "text/generation"
-        },
-        "then_field": "config.route_type",
-        "if_field": "config.genai_category",
-        "then_match": {
-          "one_of": [
-            "llm/v1/chat",
-            "llm/v1/completions",
-            "llm/v1/responses",
-            "llm/v1/assistants",
-            "llm/v1/files",
-            "llm/v1/batches",
-            "preserve"
-          ]
-        },
-        "then_err": "category 'text/generation' cannot be used with this route_type"
-      }
-    },
-    {
-      "conditional": {
-        "if_match": {
-          "eq": "text/embeddings"
-        },
-        "then_field": "config.route_type",
-        "if_field": "config.genai_category",
-        "then_match": {
-          "eq": "llm/v1/embeddings"
-        },
-        "then_err": "category 'text/embeddings' cannot be used with this route_type"
-      }
-    },
-    {
-      "conditional": {
-        "if_match": {
-          "eq": "image/generation"
-        },
-        "then_field": "config.route_type",
-        "if_field": "config.genai_category",
-        "then_match": {
-          "one_of": [
-            "image/v1/images/generations",
-            "image/v1/images/edits"
-          ]
-        },
-        "then_err": "category 'image/generation' cannot be used with this route_type"
-      }
-    },
-    {
-      "conditional": {
-        "if_match": {
-          "eq": "audio/speech"
-        },
-        "then_field": "config.route_type",
-        "if_field": "config.genai_category",
-        "then_match": {
-          "one_of": [
-            "audio/v1/audio/speech"
-          ]
-        },
-        "then_err": "category 'audio/speech' cannot be used with this route_type"
-      }
-    },
-    {
-      "conditional": {
-        "if_match": {
-          "eq": "audio/transcription"
-        },
-        "then_field": "config.route_type",
-        "if_field": "config.genai_category",
-        "then_match": {
-          "one_of": [
-            "audio/v1/audio/transcriptions",
-            "audio/v1/audio/translations"
-          ]
-        },
-        "then_err": "category 'audio/transcription' cannot be used with this route_type"
       }
     }
   ]

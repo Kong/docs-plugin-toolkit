@@ -1,23 +1,26 @@
 {
+  "entity_checks": [],
   "fields": [
     {
       "consumer": {
-        "eq": null,
-        "reference": "consumers",
         "type": "foreign",
-        "description": "Custom type for representing a foreign key with a null value allowed."
+        "reference": "consumers",
+        "description": "Custom type for representing a foreign key with a null value allowed.",
+        "eq": null
       }
     },
     {
       "protocols": {
+        "required": true,
+        "type": "set",
         "elements": {
-          "required": true,
           "one_of": [
             "grpc",
             "grpcs",
             "http",
             "https"
           ],
+          "required": true,
           "type": "string",
           "len_min": 1
         },
@@ -27,51 +30,64 @@
           "http",
           "https"
         ],
-        "type": "set",
-        "required": true,
         "description": "A set of strings representing HTTP protocols."
       }
     },
     {
       "consumer_group": {
-        "eq": null,
-        "reference": "consumer_groups",
         "type": "foreign",
-        "description": "Custom type for representing a foreign key with a null value allowed."
+        "reference": "consumer_groups",
+        "description": "Custom type for representing a foreign key with a null value allowed.",
+        "eq": null
       }
     },
     {
       "config": {
+        "required": true,
+        "type": "record",
         "fields": [
           {
             "origins": {
+              "description": "List of allowed domains for the `Access-Control-Allow-Origin` header. If you want to allow all origins, add `*` as a single value to this configuration field. The accepted values can either be flat strings or PCRE regexes. NOTE: If you don't specify any allowed domains, all origins are allowed.",
+              "type": "array",
               "elements": {
                 "type": "string"
-              },
-              "type": "array",
-              "description": "List of allowed domains for the `Access-Control-Allow-Origin` header. If you want to allow all origins, add `*` as a single value to this configuration field. The accepted values can either be flat strings or PCRE regexes. NOTE: If you don't specify any allowed domains, all origins are allowed."
+              }
             }
           },
           {
             "headers": {
+              "description": "Value for the `Access-Control-Allow-Headers` header.",
+              "type": "array",
               "elements": {
                 "type": "string"
-              },
-              "type": "array",
-              "description": "Value for the `Access-Control-Allow-Headers` header."
+              }
             }
           },
           {
             "exposed_headers": {
+              "description": "Value for the `Access-Control-Expose-Headers` header. If not specified, no custom headers are exposed.",
+              "type": "array",
               "elements": {
                 "type": "string"
-              },
-              "type": "array",
-              "description": "Value for the `Access-Control-Expose-Headers` header. If not specified, no custom headers are exposed."
+              }
             }
           },
           {
             "methods": {
+              "type": "array",
+              "description": "'Value for the `Access-Control-Allow-Methods` header. Available options include `GET`, `HEAD`, `PUT`, `PATCH`, `POST`, `DELETE`, `OPTIONS`, `TRACE`, `CONNECT`. By default, all options are allowed.'",
+              "default": [
+                "GET",
+                "HEAD",
+                "PUT",
+                "PATCH",
+                "POST",
+                "DELETE",
+                "OPTIONS",
+                "TRACE",
+                "CONNECT"
+              ],
               "elements": {
                 "type": "string",
                 "one_of": [
@@ -85,65 +101,49 @@
                   "TRACE",
                   "CONNECT"
                 ]
-              },
-              "description": "'Value for the `Access-Control-Allow-Methods` header. Available options include `GET`, `HEAD`, `PUT`, `PATCH`, `POST`, `DELETE`, `OPTIONS`, `TRACE`, `CONNECT`. By default, all options are allowed.'",
-              "type": "array",
-              "default": [
-                "GET",
-                "HEAD",
-                "PUT",
-                "PATCH",
-                "POST",
-                "DELETE",
-                "OPTIONS",
-                "TRACE",
-                "CONNECT"
-              ]
+              }
             }
           },
           {
             "max_age": {
-              "type": "number",
-              "description": "Indicates how long the results of the preflight request can be cached, in `seconds`."
+              "description": "Indicates how long the results of the preflight request can be cached, in `seconds`.",
+              "type": "number"
             }
           },
           {
             "credentials": {
-              "default": false,
               "type": "boolean",
               "required": true,
+              "default": false,
               "description": "Flag to determine whether the `Access-Control-Allow-Credentials` header should be sent with `true` as the value."
             }
           },
           {
             "private_network": {
-              "default": false,
               "type": "boolean",
               "required": true,
+              "default": false,
               "description": "Flag to determine whether the `Access-Control-Allow-Private-Network` header should be sent with `true` as the value."
             }
           },
           {
             "preflight_continue": {
-              "default": false,
               "type": "boolean",
               "required": true,
+              "default": false,
               "description": "A boolean value that instructs the plugin to proxy the `OPTIONS` preflight request to the Upstream service."
             }
           },
           {
             "allow_origin_absent": {
-              "default": true,
               "type": "boolean",
               "required": true,
+              "default": true,
               "description": "A boolean value that skip cors response headers when origin header of request is empty"
             }
           }
-        ],
-        "type": "record",
-        "required": true
+        ]
       }
     }
-  ],
-  "entity_checks": []
+  ]
 }
