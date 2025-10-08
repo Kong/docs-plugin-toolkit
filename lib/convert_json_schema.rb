@@ -69,10 +69,12 @@ class ConvertJsonSchema
       end
     end
 
-    if props['type'] == 'map'
-      if props['values']['referenceable'] && props.key?('description')
-        values_desc = 'The values are [referenceable](/gateway/entities/vault/#how-do-i-reference-secrets-stored-in-a-vault).'
-        props['description'] = "#{props['description']} #{values_desc}"
+    if !@options[:skip_custom_annotations]
+      if props['type'] == 'map'
+        if props['values']['referenceable'] && props.key?('description')
+          values_desc = 'The values are [referenceable](/gateway/entities/vault/#how-do-i-reference-secrets-stored-in-a-vault).'
+          props['description'] = "#{props['description']} #{values_desc}"
+        end
       end
     end
 
@@ -163,10 +165,12 @@ class ConvertJsonSchema
         'subschema_definitions',
         'subschema_error',
         'subschema_key',
-        'subschema_override_parent'
+        'subschema_override_parent',
+        'ne',
+        'json_schema'
       ].include?(k)
 
-      if k == 'type' && v == 'foreign'
+      if k == 'type' && (v == 'foreign' || v == 'json')
         v = 'string'
       end
 
